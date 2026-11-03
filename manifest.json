@@ -1,0 +1,26 @@
+{
+  "name": "Círculo Cinemático",
+  "short_name": "Cinemático",
+  "description": "Consulta de composición para bandas sonoras: círculo de quintas, emociones, compositores de cine, puentes y modulaciones.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#14141c",
+  "theme_color": "#14141c",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

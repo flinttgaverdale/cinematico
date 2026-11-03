@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#14141c">
+<title>Círculo Cinemático</title>
+<link rel="manifest" href="manifest.json">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Círculo Cinemático">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  :root{
+    --bg:#14141c; --panel:#1e1e28; --panel2:#262633; --line:#3a3a4a;
+    --txt:#e8e8f0; --dim:#9a9ab0; --accent:#f59a2e; --accent2:#4aa3ff;
+    --good:#6fd08c; --warn:#e0b34a;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    height:100%;}
+  body{display:flex;flex-direction:column;min-height:100dvh;}
+  header{padding:14px 16px 8px;text-align:center;}
+  header h1{font-size:1.15rem;margin:0;font-weight:700;letter-spacing:.3px;}
+  header p{margin:4px 0 0;font-size:.78rem;color:var(--dim);}
+
+  main{flex:1;padding:0 12px 16px;display:flex;flex-direction:column;gap:12px;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;}
+
+  /* CÍRCULO */
+  #circleWrap{display:flex;justify-content:center;align-items:center;}
+  #circle{width:100%;max-width:340px;aspect-ratio:1/1;touch-action:manipulation;}
+
+  /* SELECTORES */
+  .row{display:flex;gap:8px;flex-wrap:wrap;}
+  .field{flex:1;min-width:120px;}
+  .field label{display:block;font-size:.7rem;color:var(--dim);margin-bottom:4px;
+    text-transform:uppercase;letter-spacing:.5px;}
+  select{width:100%;background:var(--panel2);color:var(--txt);border:1px solid var(--line);
+    border-radius:9px;padding:9px 8px;font-size:.9rem;appearance:none;
+    -webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%239a9ab0' stroke-width='2' fill='none'/></svg>");
+    background-repeat:no-repeat;background-position:right 10px center;}
+
+  /* RESULTADO */
+  #result{font-size:.9rem;line-height:1.5;}
+  .sec{margin-bottom:12px;}
+  .sec:last-child{margin-bottom:0;}
+  .sec h3{margin:0 0 6px;font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--accent);}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .chip{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
+    padding:5px 9px;font-size:.85rem;font-weight:600;}
+  .chip.arrow{background:none;border:none;color:var(--dim);padding:5px 2px;font-weight:400;}
+  .chip.hl{border-color:var(--accent);color:var(--accent);}
+  .muted{color:var(--dim);font-size:.82rem;}
+  .mods{display:flex;flex-direction:column;gap:5px;}
+  .mod{background:var(--panel2);border-radius:8px;padding:7px 9px;font-size:.82rem;}
+  .mod b{color:var(--accent2);}
+  .mod .feel{color:var(--dim);font-size:.76rem;}
+
+  /* BOTONES */
+  .btns{display:flex;gap:8px;}
+  button{flex:1;background:var(--accent);color:#1a1206;border:none;border-radius:10px;
+    padding:12px;font-size:.95rem;font-weight:700;cursor:pointer;}
+  button.secondary{background:var(--panel2);color:var(--txt);border:1px solid var(--line);}
+  button:active{opacity:.8;}
+
+  footer{padding:10px 16px 16px;text-align:center;color:var(--dim);font-size:.7rem;}
+</style>
+</head>
+<body>
+<header>
+  <h1>Círculo Cinemático</h1>
+  <p>Toca un tono · elige emoción y compositor · consulta acordes y modulaciones</p>
+</header>
+
+<main>
+  <div class="card" id="circleWrap">
+    <canvas id="circle" width="680" height="680"></canvas>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div class="field">
+        <label>Emoción</label>
+        <select id="emotion"></select>
+      </div>
+      <div class="field">
+        <label>Compositor</label>
+        <select id="composer"></select>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px;">
+      <div class="field">
+        <label>Modo (opcional, anula el de la emoción)</label>
+        <select id="mode">
+          <option value="">— automático —</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="btns">
+    <button id="genBtn">Generar</button>
+  </div>
+
+  <div class="card" id="result">
+    <div class="muted">Elige un tono y pulsa <b>Generar</b>.</div>
+  </div>
+</main>
+
+<footer>Círculo Cinemático · funciona sin conexión · añádela a tu pantalla de inicio</footer>
+
+<script>
+"use strict";
+/* ================= DATOS ================= */
+const NOTE_SHARP=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const NOTE_FLAT =["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
+const PC={"C":0,"C#":1,"Db":1,"D":2,"D#":3,"Eb":3,"E":4,"F":5,"F#":6,"Gb":6,
+  "G":7,"G#":8,"Ab":8,"A":9,"A#":10,"Bb":10,"B":11};
+const KEYS=["C","G","D","A","E","B","F#","Db","Ab","Eb","Bb","F"];
+const KEYS_SHARP={C:1,G:1,D:1,A:1,E:1,B:1,"F#":1,Db:0,Ab:0,Eb:0,Bb:0,F:0};
+
+const MODES={
+  ionian:{name:"Mayor (Jónico)",int:[0,2,4,5,7,9,11],family:"major"},
+  dorian:{name:"Dórico",int:[0,2,3,5,7,9,10],family:"minor"},
+  phrygian:{name:"Frigio",int:[0,1,3,5,7,8,10],family:"minor"},
+  lydian:{name:"Lidio",int:[0,2,4,6,7,9,11],family:"major"},
+  mixolydian:{name:"Mixolidio",int:[0,2,4,5,7,9,10],family:"major"},
+  aeolian:{name:"Menor (Eólico)",int:[0,2,3,5,7,8,10],family:"minor"},
+  locrian:{name:"Locrio",int:[0,1,3,5,6,8,10],family:"dim"}
+};
+
+const CHORD_TYPES={
+  "":{int:[0,4,7],label:""},"m":{int:[0,3,7],label:"m"},"dim":{int:[0,3,6],label:"dim"},
+  "aug":{int:[0,4,8],label:"aug"},"7":{int:[0,4,7,10],label:"7"},"maj7":{int:[0,4,7,11],label:"maj7"},
+  "m7":{int:[0,3,7,10],label:"m7"},"mMaj7":{int:[0,3,7,11],label:"mMaj7"},
+  "m9":{int:[0,3,7,10,2],label:"m9"},"maj9":{int:[0,4,7,11,2],label:"maj9"},
+  "9":{int:[0,4,7,10,2],label:"9"},"add9":{int:[0,4,7,2],label:"add9"},
+  "sus4":{int:[0,5,7],label:"sus4"},"sus2":{int:[0,2,7],label:"sus2"},
+  "6":{int:[0,4,7,9],label:"6"},"m6":{int:[0,3,7,9],label:"m6"},
+  "dim7":{int:[0,3,6,9],label:"dim7"},"m7b5":{int:[0,3,6,10],label:"m7b5"},
+  "5":{int:[0,7],label:"5"},"maj7#11":{int:[0,4,7,11,6],label:"maj7#11"}
+};
+
+const ROMAN_MAJOR=["I","ii","iii","IV","V","vi","vii"];
+const ROMAN_MINOR=["i","ii","III","iv","v","VI","VII"];
+
+const EMOTIONS={
+  alegria:{name:"Alegría",mode:"ionian",desc:"Brillante, luminosa, estable",
+    steps:[{d:0,a:0,q:"major",e:"add9"},{d:3,a:0,q:"major",e:""},{d:4,a:0,q:"major",e:""},{d:0,a:0,q:"major",e:""}],
+    hints:"registro alto · tempo vivo · mayor"},
+  tristeza:{name:"Tristeza",mode:"aeolian",desc:"Dolor, pérdida, introspección",
+    steps:[{d:0,a:0,q:"minor",e:"m9"},{d:5,a:0,q:"major",e:""},{d:2,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    hints:"lento · registro grave · m9"},
+  nostalgia:{name:"Nostalgia",mode:"ionian",desc:"Agridulce, recuerdo, anhelo",
+    steps:[{d:0,a:0,q:"major",e:"maj7"},{d:3,a:0,q:"minor",e:"6"},{d:0,a:0,q:"major",e:"maj7"}],
+    hints:"iv prestado (iv6) · maj7 · tempo medio"},
+  maravilla:{name:"Maravilla / Magia",mode:"lydian",desc:"Asombro, vuelo, lo fantástico",
+    steps:[{d:0,a:0,q:"major",e:"maj7#11"},{d:1,a:0,q:"major",e:""},{d:0,a:0,q:"major",e:""}],
+    hints:"lidio · #11 · II mayor · arpegios"},
+  heroismo:{name:"Heroísmo",mode:"mixolydian",desc:"Épico, valiente, triunfal",
+    steps:[{d:0,a:0,q:"major",e:"5"},{d:6,a:-1,q:"major",e:""},{d:3,a:0,q:"major",e:""},{d:0,a:0,q:"major",e:""}],
+    hints:"bVII (mixolidio) · cuartas/quintas abiertas · metales"},
+  tension:{name:"Tensión / Suspense",mode:"aeolian",desc:"Inquietud, peligro inminente",
+    steps:[{d:0,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    hints:"bII (napolitana) · disminuidos · semitonos · pedal"},
+  oscuridad:{name:"Oscuridad / Peligro",mode:"phrygian",desc:"Siniestro, amenaza",
+    steps:[{d:0,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    hints:"frigio · bII · registro grave · drones"},
+  esperanza:{name:"Esperanza / Anhelo",mode:"dorian",desc:"Optimismo contenido, superación",
+    steps:[{d:3,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""},{d:1,a:0,q:"minor",e:""},{d:4,a:0,q:"major",e:""}],
+    hints:"dórico · sus · movimiento ascendente"},
+  paz:{name:"Paz / Serenidad",mode:"ionian",desc:"Calma, consuelo, quietud",
+    steps:[{d:0,a:0,q:"major",e:"add9"},{d:5,a:0,q:"minor",e:""},{d:3,a:0,q:"major",e:""},{d:4,a:0,q:"major",e:""}],
+    hints:"add9 · lento · texturas suaves"},
+  misterio:{name:"Misterio",mode:"aeolian",desc:"Enigma, lo oculto, ambigüedad",
+    steps:[{d:0,a:0,q:"minor",e:""},{d:5,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    hints:"bVI · aumentados · tónica ambigua"},
+  romance:{name:"Romance / Amor",mode:"ionian",desc:"Ternura, pasión, calidez",
+    steps:[{d:1,a:0,q:"minor",e:"7"},{d:4,a:0,q:"major",e:"7"},{d:0,a:0,q:"major",e:"maj9"}],
+    hints:"ii-V-I · maj7/9 · exuberante"},
+  epica:{name:"Épica",mode:"aeolian",desc:"Grandeza, destino, monumental",
+    steps:[{d:0,a:0,q:"minor",e:""},{d:5,a:0,q:"major",e:""},{d:2,a:0,q:"major",e:""},{d:6,a:0,q:"major",e:""}],
+    hints:"i-VI-III-VII · ostinato · coros · power"}
+};
+
+const MODULATIONS={
+  relative:{name:"Relativa (mayor↔menor)",int:f=>f==="major"?-3:3,feel:"cambio suave de color"},
+  parallel:{name:"Paralela (mayor↔menor)",int:0,feel:"mismo centro, otro modo"},
+  up_semitone:{name:"Sube un semitono",int:1,feel:"elevación, brillo, clímax"},
+  down_semitone:{name:"Baja un semitono",int:-1,feel:"oscurecimiento"},
+  up_major3:{name:"Mediante cromática ↑ (3ªM)",int:4,feel:"heroico, expansivo (motion 'Hero')"},
+  down_major3:{name:"Mediante cromática ↓ (3ªM)",int:-4,feel:"mágico, misterioso (motion 'Magic')"},
+  up_minor3:{name:"Mediante cromática ↑ (3ªm)",int:3,feel:"color, sorpresa"},
+  down_minor3:{name:"Mediante cromática ↓ (3ªm)",int:-3,feel:"color, sorpresa"},
+  up_fifth:{name:"Quinta arriba (dominante)",int:7,feel:"energía, brillo"},
+  down_fifth:{name:"Quinta abajo (subdominante)",int:-7,feel:"relajación, amplitud"},
+  neapolitan:{name:"Napolitana (bII)",int:1,feel:"dramático, oscuro"},
+  tritone:{name:"Tritono",int:6,feel:"tensión, inestabilidad"}
+};
+
+const COMPOSERS={
+  giacchino:{name:"Michael Giacchino",tags:"pluralismo/pastiche · jazz · John Barry/Korngold · contrastes",
+    signature:[{d:0,a:0,q:"major",e:"maj7"},{d:2,a:-1,q:"major",e:""},{d:0,a:0,q:"major",e:"maj7"}],
+    sigLabel:"I(maj7) → bIII → I  (G→Eb en 'The Incredibles')",
+    mods:["up_major3","neapolitan","up_semitone","relative"],
+    devices:"leitmotiv simple que varía · repite la melodía cambiando orquestación y tonalidad · cuartas/quintas abiertas · acordes de jazz extendidos"},
+  williams:{name:"John Williams",tags:"romántico tardío · intercambio modal · leitmotiv",
+    signature:[{d:0,a:0,q:"major",e:""},{d:3,a:0,q:"minor",e:"6"},{d:0,a:0,q:"major",e:""}],
+    sigLabel:"I → iv6 → I  (agridulce, 'Princess Leia')",
+    mods:["up_major3","down_major3","neapolitan","up_semitone","relative"],
+    devices:"intercambio modal (bVII mixolidio = heroico · II lidio = magia/vuelo) · mediante cromática · tríadas menores por semitonos"},
+  zimmer:{name:"Hans Zimmer",tags:"minimalismo · ostinato catártico · rock · ciclos",
+    signature:[{d:0,a:0,q:"minor",e:""},{d:5,a:-1,q:"major",e:""},{d:2,a:0,q:"major",e:""},{d:6,a:-1,q:"major",e:""}],
+    sigLabel:"i → bVI → III → bVII  (Dm/Bb/F/C)",
+    mods:["up_minor3","down_minor3","parallel","up_semitone"],
+    devices:"ostinato repetido con intensificación · progresiones cíclicas · tónica ambigua · power chords · coro masculino"},
+  elfman:{name:"Danny Elfman",tags:"oscuro · carnaval · vals · cromático",
+    signature:[{d:0,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    sigLabel:"i → bII → i  (carnaval oscuro)",
+    mods:["down_semitone","tritone","parallel"],
+    devices:"disminuidos · cromatismo · vals · coros infantiles · carnaval siniestro"},
+  silvestri:{name:"Alan Silvestri",tags:"heroico · mayor · metales",
+    signature:[{d:0,a:0,q:"major",e:""},{d:3,a:0,q:"major",e:""},{d:4,a:0,q:"major",e:""},{d:0,a:0,q:"major",e:""}],
+    sigLabel:"I → IV → V → I  (fanfarria)",
+    mods:["up_fifth","up_semitone","relative"],
+    devices:"metales grandes · fanfarrias · mayor · heroico directo"},
+  horner:{name:"James Horner",tags:"modal · celta · cuartas/quintas",
+    signature:[{d:0,a:0,q:"minor",e:""},{d:6,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    sigLabel:"i → VII → i  (modal)",
+    mods:["up_major3","relative","up_fifth"],
+    devices:"intervalos de 4ª/5ª · 'danger motif' · modal · color celta"},
+  herrmann:{name:"Bernard Herrmann",tags:"modernista · policordios · politonalidad · celular",
+    signature:[{d:0,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    sigLabel:"i → bII → i  (ostinato)",
+    mods:["tritone","down_semitone"],
+    devices:"policordios · politonalidad · células repetidas · ostinato"},
+  shore:{name:"Howard Shore",tags:"cromático · wagneriano · leitmotiv",
+    signature:[{d:0,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    sigLabel:"i → bII → i  (cromático)",
+    mods:["down_semitone","tritone","relative"],
+    devices:"leitmotiv wagneriano · cromatismo · coros · texturas densas"},
+  morricone:{name:"Ennio Morricone",tags:"modal · espartano · instrumentos inusuales",
+    signature:[{d:0,a:0,q:"minor",e:""},{d:6,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    sigLabel:"i → VII → i  (modal)",
+    mods:["relative","up_fifth"],
+    devices:"modal · espartano · silbido · guitarra · instrumentos inusuales"},
+  newman:{name:"Thomas Newman",tags:"impresionista · espartano · modal",
+    signature:[{d:0,a:0,q:"major",e:"add9"},{d:3,a:0,q:"major",e:""},{d:0,a:0,q:"major",e:"add9"}],
+    sigLabel:"I(add9) → IV → I  (espartano)",
+    mods:["relative","parallel"],
+    devices:"espartano · voicings inusuales · piano · texturas impresionistas"},
+  goransson:{name:"Ludwig Göransson",tags:"minimalismo rítmico · ostinatos · percusión · orquestal+electrónica+world",
+    signature:[{d:0,a:0,q:"minor",e:""},{d:5,a:-1,q:"major",e:""},{d:6,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    sigLabel:"i → bVI → bVII → i  (épica modal, 'Black Panther')",
+    mods:["up_minor3","down_minor3","parallel","up_semitone"],
+    devices:"ostinatos rítmicos · percusión africana/mundial · texturas disonantes (Tenet/Oppenheimer) · mezcla orquestal y electrónica"}
+};
+
+/* ================= ESTADO ================= */
+let state={key:0,keyName:"C",emotion:"alegria",composer:"giacchino",modeOverride:null};
+let lastScale=null, lastSharp=true, lastFamily="major";
+
+/* ================= UTILIDADES ================= */
+function spell(pc,sharp){const t=((pc%12)+12)%12;return sharp?NOTE_SHARP[t]:NOTE_FLAT[t];}
+function keyNameForPc(pc){for(const k of KEYS)if(PC[k]===pc)return k;return NOTE_SHARP[pc];}
+function keyIsSharp(pc){return KEYS_SHARP[keyNameForPc(pc)]===1;}
+function buildScale(tonic,int){return int.map(i=>(tonic+i)%12);}
+function diatonicQuality(d,f){if(f==="major")return["major","minor","minor","major","major","minor","dim"][d];
+  if(f==="minor")return["minor","dim","major","minor","minor","major","major"][d];
+  return["dim","minor","minor","major","minor","dim","major"][d];}
+function diatonicSeventh(d,f){if(f==="major")return["maj7","m7","m7","maj7","7","m7","m7b5"][d];
+  if(f==="minor")return["m7","m7b5","maj7","m7","m7","maj7","7"][d];
+  return["m7b5","m7","m7","maj7","m7","maj7","m7"][d];}
+function chordFromRoot(tonic,off,type,sharp){
+  const root=((tonic+off)%12+12)%12;const ints=CHORD_TYPES[type].int;
+  const notes=ints.map(i=>(root+i)%12);
+  return{root,notes,type,label:spell(root,sharp)+CHORD_TYPES[type].label};}
+function qualExtToType(q,e){
+  if(e){if(q==="major"&&e==="7")return"7";if(q==="major"&&e==="maj7")return"maj7";
+    if(q==="major"&&e==="add9")return"add9";if(q==="major"&&e==="6")return"6";
+    if(q==="major"&&e==="9")return"9";if(q==="major"&&e==="maj9")return"maj9";
+    if(q==="major"&&e==="maj7#11")return"maj7#11";if(q==="major"&&e==="5")return"5";
+    if(q==="minor"&&e==="7")return"m7";if(q==="minor"&&e==="9")return"m9";
+    if(q==="minor"&&e==="m9")return"m9";if(q==="minor"&&e==="6")return"m6";
+    if(q==="minor"&&e==="maj7")return"mMaj7";if(q==="dim"&&e==="7")return"dim7";
+    if(q==="dim"&&e==="")return"dim";if(q==="aug"&&e==="")return"aug";}
+  if(q==="major")return"";if(q==="minor")return"m";if(q==="dim")return"dim";if(q==="aug")return"aug";return"";}
+function stepLabel(d,a,q,e,f){
+  const base=f==="major"?ROMAN_MAJOR[d]:ROMAN_MINOR[d];
+  const acc=a<0?"b":a>0?"#":"";
+  const diat=diatonicQuality(d,f);let roman;
+  if(q===diat)roman=base;
+  else if(q==="major"||q==="aug")roman=base.toUpperCase();
+  else if(q==="minor"||q==="dim")roman=base.toLowerCase();
+  else roman=base;
+  if(q==="dim"&&!roman.includes("°"))roman+="°";
+  if(q==="aug"&&!roman.includes("+"))roman+="+";
+  return acc+roman+e;}
+function buildProgression(steps,tonic,scale,family,sharp){
+  const names=[],romans=[],chords=[];
+  for(const s of steps){
+    const off=((scale[s.d]+s.a-tonic)%12+12)%12;
+    const type=qualExtToType(s.q,s.e);
+    const ch=chordFromRoot(tonic,off,type,sharp);
+    names.push(ch.label);romans.push(stepLabel(s.d,s.a,s.q,s.e,family));chords.push(ch);}
+  return{names,romans,chords};}
+
+/* ================= GENERAR ================= */
+function generate(){
+  const tonic=state.key, sharp=keyIsSharp(tonic);
+  const emo=EMOTIONS[state.emotion], comp=COMPOSERS[state.composer];
+  const modeKey=state.modeOverride||emo.mode;
+  const mode=MODES[modeKey], family=mode.family;
+  const scale=buildScale(tonic,mode.int);
+
+  lastScale=scale;lastSharp=sharp;lastFamily=family;
+
+  const scaleNames=scale.map(p=>spell(p,sharp));
+  const palette=[];
+  for(let d=0;d<7;d++){
+    const type=diatonicSeventh(d,family);
+    const ch=chordFromRoot(tonic,(scale[d]-tonic+12)%12,type,sharp);
+    const roman=family==="major"?ROMAN_MAJOR[d]:ROMAN_MINOR[d];
+    palette.push({roman,label:ch.label});}
+
+  const prog=buildProgression(emo.steps,tonic,scale,family,sharp);
+  const sig=buildProgression(comp.signature,tonic,scale,family,sharp);
+
+  const mods=comp.mods.map(m=>{
+    const mod=MODULATIONS[m];
+    const interval=typeof mod.int==="function"?mod.int(family):mod.int;
+    const target=keyNameForPc(((tonic+interval)%12+12)%12);
+    return{name:mod.name,target,feel:mod.feel};});
+
+  render(emo,comp,mode,scaleNames,palette,prog,sig,mods);
+}
+
+function render(emo,comp,mode,scaleNames,palette,prog,sig,mods){
+  const r=document.getElementById("result");
+  const chips=(arr,hl=false)=>arr.map(x=>`<span class="chip${hl?' hl':''}">${x}</span>`).join('<span class="chip arrow">→</span>');
+  r.innerHTML=`
+    <div class="sec">
+      <h3>${state.keyName} · ${mode.name}</h3>
+      <div class="chips">${scaleNames.map(n=>`<span class="chip">${n}</span>`).join('')}</div>
+    </div>
+    <div class="sec">
+      <h3>Acordes diatónicos</h3>
+      <div class="chips">${palette.map(p=>`<span class="chip">${p.roman} <span class="muted">${p.label}</span></span>`).join('')}</div>
+    </div>
+    <div class="sec">
+      <h3>Progresión · ${emo.name}</h3>
+      <div class="chips">${chips(prog.names,true)}</div>
+      <div class="muted" style="margin-top:4px;">${prog.romans.join(' → ')}</div>
+      <div class="muted">${emo.hints}</div>
+    </div>
+    <div class="sec">
+      <h3>Firma · ${comp.name}</h3>
+      <div class="chips">${chips(sig.names)}</div>
+      <div class="muted" style="margin-top:4px;">${sig.romans.join(' → ')} · ${comp.sigLabel}</div>
+    </div>
+    <div class="sec">
+      <h3>Modulaciones sugeridas</h3>
+      <div class="mods">${mods.map(m=>`<div class="mod"><b>${m.name}</b> → ${m.target} <span class="feel">· ${m.feel}</span></div>`).join('')}</div>
+    </div>
+    <div class="sec">
+      <h3>Dispositivos</h3>
+      <div class="muted">${comp.devices}</div>
+    </div>`;
+}
+
+/* ================= CÍRCULO (canvas) ================= */
+const cv=document.getElementById("circle");
+const ctx=cv.getContext("2d");
+let selected=0;
+function drawCircle(){
+  const w=cv.width,h=cv.height,cx=w/2,cy=h/2,r=Math.min(w,h)/2-30,rr=34;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle="#3a3a4a";ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+  for(let i=0;i<12;i++){
+    const ang=-Math.PI/2+i*(Math.PI*2/12);
+    const x=cx+Math.cos(ang)*r,y=cy+Math.sin(ang)*r;
+    ctx.beginPath();ctx.arc(x,y,rr,0,Math.PI*2);
+    ctx.fillStyle=i===selected?"#f59a2e":"#262633";ctx.fill();
+    ctx.strokeStyle=i===selected?"#f59a2e":"#3a3a4a";ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle="#fff";ctx.font="bold 26px -apple-system,Segoe UI,Roboto,sans-serif";
+    ctx.textAlign="center";ctx.textBaseline="middle";
+    ctx.fillText(KEYS[i],x,y);
+  }
+}
+function hitTest(x,y){
+  const w=cv.width,h=cv.height,cx=w/2,cy=h/2,r=Math.min(w,h)/2-30;
+  for(let i=0;i<12;i++){
+    const ang=-Math.PI/2+i*(Math.PI*2/12);
+    const bx=cx+Math.cos(ang)*r,by=cy+Math.sin(ang)*r;
+    if((x-bx)**2+(y-by)**2<40*40)return i;}
+  return -1;
+}
+cv.addEventListener("pointerdown",e=>{
+  const rect=cv.getBoundingClientRect();
+  const x=(e.clientX-rect.left)*(cv.width/rect.width);
+  const y=(e.clientY-rect.top)*(cv.height/rect.height);
+  const i=hitTest(x,y);
+  if(i>=0){selected=i;state.key=PC[KEYS[i]];state.keyName=KEYS[i];drawCircle();}
+});
+
+/* ================= UI ================= */
+function fillSelect(el,obj,extra){
+  el.innerHTML="";
+  if(extra)el.innerHTML=extra;
+  for(const k in obj){const o=document.createElement("option");o.value=k;o.textContent=obj[k].name;el.appendChild(o);}
+}
+fillSelect(document.getElementById("emotion"),EMOTIONS);
+fillSelect(document.getElementById("composer"),COMPOSERS);
+const modeSel=document.getElementById("mode");
+for(const k in MODES){const o=document.createElement("option");o.value=k;o.textContent=MODES[k].name;modeSel.appendChild(o);}
+
+document.getElementById("emotion").addEventListener("change",e=>{state.emotion=e.target.value;});
+document.getElementById("composer").addEventListener("change",e=>{state.composer=e.target.value;});
+document.getElementById("mode").addEventListener("change",e=>{state.modeOverride=e.target.value||null;});
+document.getElementById("genBtn").addEventListener("click",generate);
+
+drawCircle();
+generate();
+</script>
+
+<script>
+/* Registro del service worker (offline + instalación completa) */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js')
+      .then(() => console.log('SW registrado'))
+      .catch(err => console.log('SW error', err));
+  });
+}
+</script>
+</body>
+</html>
