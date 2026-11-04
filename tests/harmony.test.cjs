@@ -216,5 +216,5 @@ test("progression analysis exposes chord tones, default bass and shared pitch cl
   assert.equal(chords[0].bass,0);
   assert.equal(chords[0].inversion,0);
   assert.ok(chords[0].notes.includes(0));
-  assert.deepEqual(chords[0].commonWithNext,[0]);
+  assert.deepEqual(Array.from(chords[0].commonWithNext),[0]);
 });
