@@ -311,6 +311,31 @@ function voiceLead(progression,style="cinematic",locks={}){
  const transitions=voicings.slice(1).map((v,i)=>transitionCost(voicings[i],v,valid,progression[i],progression[i+1]));
  return {style:valid,voicings,transitions,cost:Math.min(...costs),names:voicings.map(v=>v.map(midiName)),voiceOrder:["Bajo","Tenor","Alto","Soprano"],warning:"Realización orientativa: la función, la instrumentación y las resoluciones deben revisarse musicalmente."};
 }
+
+/* Explainable composition assistance: observations and optional experiments, never edits. */
+const COMPOSER_TECHNIQUES={
+ williams:[{id:"sequence",name:"Secuencia motívica",domain:"Desarrollo",reason:"Traslada un motivo por grados sucesivos para construir dirección, conservando su identidad rítmica.",action:"Prueba una secuencia ascendente o descendente de tu motivo; decide tú dónde interrumpirla.",source:"Lenguaje sinfónico y desarrollo temático; recurso compartido con la tradición romántica."},{id:"dominant",name:"Preparación de dominante",domain:"Armonía",reason:"Una dominante preparada puede reforzar la llegada sin reemplazar tu tema.",action:"Examina si el penúltimo acorde admite una dominante secundaria o una cadencia más dirigida.",source:"Sintaxis tonal sinfónica; no exclusiva de Williams."},{id:"counterpoint",name:"Contramelodía",domain:"Textura",reason:"Una segunda línea puede intensificar el desarrollo sin modificar la melodía principal.",action:"Busca notas comunes y movimiento contrario en una voz secundaria.",source:"Escritura contrapuntística sinfónica."}],
+ herrmann:[{id:"chromatic",name:"Desplazamiento cromático",domain:"Armonía",reason:"Pequeños cambios de una voz pueden alterar la percepción de estabilidad.",action:"Mantén dos notas y prueba un desplazamiento cromático de la tercera en una tríada.",source:"Cromatismo y células armónicas; procedimiento compartido por múltiples autores."},{id:"cell",name:"Célula reiterada",domain:"Motivo",reason:"La repetición con cambios mínimos permite sostener tensión sin una gran progresión.",action:"Aísla dos o tres notas de tu motivo y experimenta con su reiteración y registro.",source:"Economía motívica y repetición en música dramática."},{id:"delay",name:"Resolución aplazada",domain:"Tensión",reason:"Retener una disonancia puede prolongar la expectativa.",action:"Localiza una nota de tendencia y compara resolverla ahora o prolongarla un compás.",source:"Suspensión y ambigüedad armónica."}],
+ zimmer:[{id:"pedal",name:"Pedal armónico",domain:"Textura",reason:"Una nota grave sostenida unifica acordes cambiantes y concentra la tensión.",action:"Prueba mantener la tónica o dominante en el bajo mientras evolucionan las voces superiores.",source:"Pedales y construcción por capas; no exclusivos de Zimmer."},{id:"ostinato",name:"Ostinato gradual",domain:"Ritmo",reason:"La repetición rítmica permite aumentar energía sin aumentar el ritmo de cambio armónico.",action:"Extrae una célula rítmica y cambia su registro, acentuación o densidad gradualmente.",source:"Recursos minimalistas y postminimalistas."},{id:"density",name:"Acumulación de capas",domain:"Orquestación",reason:"El crecimiento de densidad puede producir un clímax sin reharmonizar.",action:"Mantén tus acordes y añade capas por etapas, escuchando el cambio de tensión.",source:"Desarrollo textural y orquestal."}]
+};
+function composerAssistance(composerId,progression=[]){
+ const techniques=COMPOSER_TECHNIQUES[composerId]||[];
+ const chords=Array.isArray(progression)?progression:[];
+ return techniques.map(t=>{
+  let observation="Aplica esta técnica a un fragmento de tu propia idea.";
+  if(t.id==="chromatic"&&chords.length){
+   const c=chords.find(c=>c.type===""||c.type==="m");
+   if(c)observation="La tríada "+c.label+" admite operaciones P, L y R: compara notas comunes antes de escoger.";
+  }else if(t.id==="dominant"&&chords.length>1){
+   observation="Revisa la llegada de "+chords[chords.length-2].label+" a "+chords[chords.length-1].label+" y escucha si pide una preparación más dirigida.";
+  }else if(t.id==="pedal"&&chords.length){
+   observation="Puedes probar un pedal sobre "+spell(chords[0].root)+" mientras comparas la progresión sin cambiar sus acordes.";
+  }else if(t.id==="counterpoint"&&chords.length){
+   observation="Observa las notas compartidas entre los primeros acordes y prueba una voz que se mueva en dirección contraria.";
+  }
+  return {...t,observation,changesOriginal:false};
+ });
+}
 function analyze(tonic,emotion,composer,modeOverride,DATA){
  const modeKey=modeOverride||emotion.mode,mode=DATA.MODES[modeKey],keyName=DATA.keyNameForPc(tonic);
  const sharp=DATA.KEYS_SHARP[keyName]===1,pcs=scale(tonic,mode),scaleNames=spellScale(tonic,mode,keyName);
@@ -323,5 +348,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
