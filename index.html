@@ -183,7 +183,7 @@ function render(){
  $("emotionNote").textContent=e.desc+". Pista: "+e.hints+". Úsalo como material de partida, no como secuencia obligatoria.";
  $("composerName").textContent=c.name;
  $("signature").innerHTML=progMarkup(d.signature);
- $("signatureNote").textContent=c.tags+". Referencia estilística orientativa, no una transcripción literal. Gesto: "+c.sigLabel+".";
+ $("signatureNote").textContent=c.tags+". Firma calculada en "+MODES[c.signatureMode||"ionian"].name+". Referencia estilística orientativa, no una transcripción literal. Gesto: "+c.sigLabel+".";
  $("devices").textContent=c.devices+".";
  $("mods").innerHTML=d.mods.map(x=>{
   let heading=esc(x.target)+(x.targetMode?" · "+esc(x.targetMode):"");
