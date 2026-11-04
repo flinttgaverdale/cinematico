@@ -557,3 +557,23 @@ test("held pitch classifications respect slash bass and preserve inputs",()=>{
  assert.equal(JSON.stringify(chords),original);
  assert.equal(E.sustainedToneAnalysis([]).length,0);
 });
+
+test("harmonic continuity distinguishes common notes and held tensions",()=>{
+ const chords=E.parseUserProgression("Cm Ab Fm G7").chords;
+ const ideas=E.harmonicContinuityIdeas(chords);
+ assert.equal(ideas.length,3);
+ assert.equal(ideas[0].from,"Cm");
+ assert.equal(ideas[0].to,"Ab");
+ assert.ok(ideas[0].ideas.some(x=>x.kind==="common-tone"));
+ assert.ok(ideas[0].ideas.some(x=>x.kind==="held-tension"));
+ assert.ok(ideas[0].ideas.every(x=>x.certainty==="posibilidad"));
+ assert.ok(ideas[0].caveat.includes("sin melodía"));
+});
+test("continuity analysis handles repeated chords and empty progressions",()=>{
+ assert.equal(E.harmonicContinuityIdeas([]).length,0);
+ assert.equal(E.harmonicContinuityIdeas(E.parseUserProgression("C").chords).length,0);
+ const repeated=E.harmonicContinuityIdeas(E.parseUserProgression("C C").chords);
+ assert.equal(repeated.length,1);
+ assert.equal(repeated[0].ideas.filter(x=>x.kind==="held-tension").length,0);
+ assert.equal(repeated[0].ideas.filter(x=>x.kind==="common-tone").length,3);
+});
