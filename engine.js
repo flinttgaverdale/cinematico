@@ -313,13 +313,61 @@ function voiceLead(progression,style="cinematic",locks={}){
 }
 
 
+function threeVoiceCandidates(chord,style="cinematic"){
+ const pcs=[...new Set(chord.notes.map(mod))],bass=mod(chord.bass??chord.root);
+ const ranges=[[36,60],[52,76],[60,84]];
+ const choices=ranges.map(([lo,hi])=>Array.from({length:hi-lo+1},(_,i)=>lo+i).filter(n=>pcs.includes(n%12)));
+ const out=[];
+ // For four-tone seventh chords, omit the fifth before the third or seventh.
+ const structural=pcs.length<=3?pcs:[bass,mod(chord.root+3),mod(chord.root+4),mod(chord.root+10),mod(chord.root+11)].filter(p=>pcs.includes(p));
+ for(const low of choices[0]){
+  if(low%12!==bass)continue;
+  for(const middle of choices[1]){
+   if(middle<=low||middle-low>24)continue;
+   for(const high of choices[2]){
+    if(high<=middle||high-middle>(style==="classical"?12:19))continue;
+    const notes=[low,middle,high],represented=new Set(notes.map(n=>n%12));
+    if(pcs.length<=3&&!pcs.every(p=>represented.has(p)))continue;
+    if(pcs.length>3&&!structural.slice(0,3).every(p=>represented.has(p)))continue;
+    out.push(notes);
+   }
+  }
+ }
+ return out;
+}
+function threeVoiceLead(chords,style="cinematic",locks={}){
+ if(!chords?.length)return {voicings:[],transitions:[],cost:0};
+ const layers=chords.map((ch,i)=>threeVoiceCandidates(ch,style).filter(v=>Object.entries(locks[i]||{}).every(([voice,pitch])=>v[Number(voice)]===Number(pitch))));
+ if(layers.some(layer=>!layer.length))return {voicings:[],transitions:[],cost:null,warning:"No hay disposición a tres voces compatible con los acordes y notas fijadas."};
+ const score=(a,b)=>{
+  const d=a.map((n,i)=>b[i]-n);
+  let parallel=0;
+  for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)
+   if(d[i]*d[j]>0&&mod(a[j]-a[i])===mod(b[j]-b[i])&&[0,7].includes(mod(a[j]-a[i])))parallel++;
+  return d.reduce((sum,n,i)=>sum+Math.abs(n)*(i===0?.55:1)+Math.max(0,Math.abs(n)-(i===0?7:5))**2*(style==="classical"?2:.8),0)+parallel*(style==="classical"?12:1.5);
+ };
+ let costs=layers[0].map(v=>v.reduce((sum,n,i)=>sum+Math.abs(n-[48,64,72][i])*.15,0)),links=[];
+ for(let k=1;k<layers.length;k++){
+  const next=layers[k].map(()=>Infinity),back=layers[k].map(()=>-1);
+  for(let j=0;j<layers[k].length;j++)for(let i=0;i<layers[k-1].length;i++){
+   const cost=costs[i]+score(layers[k-1][i],layers[k][j]);
+   if(cost<next[j]){next[j]=cost;back[j]=i;}
+  }
+  links.push(back);costs=next;
+ }
+ let best=costs.indexOf(Math.min(...costs));const voicings=Array(layers.length);
+ for(let k=layers.length-1;k>=0;k--){voicings[k]=layers[k][best];if(k)best=links[k-1][best];}
+ return {voicings,cost:Math.min(...costs),transitions:voicings.slice(1).map((v,i)=>({diffs:v.map((n,j)=>n-voicings[i][j])}))};
+}
 function laboratoryVoices(chords,options={}){
  const style=options.style==="classical"?"classical":"cinematic";
- const count=[3,4,5].includes(Number(options.count))?Number(options.count):4;
- const base=voiceLead(chords,style,options.locks||{});
+ const count=Number(options.count)===3?3:4;
+ // In three voices, locks use indices 0 (bass) and 2 (upper voice) in the UI.
+ const locks=count===3?Object.fromEntries(Object.entries(options.locks||{}).map(([i,voices])=>[i,Object.fromEntries(Object.entries(voices).map(([v,n])=>[v==="3"?"2":v,n]))])):options.locks||{};
+ const base=count===3?threeVoiceLead(chords,style,locks):voiceLead(chords,style,locks);
  if(!base.voicings.length)return {...base,count};
- const voicings=base.voicings.map(v=>count===3?[v[0],v[2],v[3]]:count===5?[...v,v[3]+12]:v.slice());
- const voiceOrder=count===3?["Bajo","Voz intermedia","Superior"]:count===5?["Bajo","Tenor","Alto","Soprano","Duplicación aguda"]:base.voiceOrder;
+ const voicings=base.voicings;
+ const voiceOrder=count===3?["Bajo","Voz intermedia","Superior"]:base.voiceOrder;
  const transitions=voicings.slice(1).map((v,i)=>({diffs:v.map((n,j)=>n-voicings[i][j])}));
  const warnings=[];
  for(let i=0;i<voicings.length-1;i++){
@@ -333,7 +381,7 @@ function laboratoryVoices(chords,options={}){
   }
  }
  return {...base,count,voicings,voiceOrder,transitions,warnings,
-  warning:"Realización exploratoria. Tres voces omiten el tenor; cinco añaden una duplicación aguda. No es optimización independiente para cada plantilla."};
+  warning:count===3?"Realización independiente a tres voces; en acordes de séptima puede omitirse la quinta. Revisa las resoluciones en contexto.":"Realización orientativa a cuatro voces; revisa las resoluciones en contexto."};
 }
 
 function parseUserProgression(input){const tokens=String(input||"").trim().split(/[\s,;|]+/).filter(Boolean);if(!tokens.length)return {chords:[],errors:[]};if(tokens.length>16)return {chords:[],errors:["Máximo 16 acordes por análisis."]};const names={"C":0,"D":2,"E":4,"F":5,"G":7,"A":9,"B":11};const shapes={"":{intervals:[0,4,7],type:""},"m":{intervals:[0,3,7],type:"m"},"dim":{intervals:[0,3,6],type:"dim"},"aug":{intervals:[0,4,8],type:"aug"},"7":{intervals:[0,4,7,10],type:"7"},"maj7":{intervals:[0,4,7,11],type:"maj7"},"m7":{intervals:[0,3,7,10],type:"m7"},"sus4":{intervals:[0,5,7],type:"sus4"},"add9":{intervals:[0,4,7,14],type:"add9"},"madd9":{intervals:[0,3,7,14],type:"madd9"}};const chords=[],errors=[];for(const token of tokens){const match=/^([A-Ga-g])([#♯b♭]?)(maj7|madd9|add9|sus4|dim|aug|m7|m|7)?(?:\/([A-Ga-g])([#♯b♭]?))?$/.exec(token);if(!match){errors.push("Acorde no reconocido: "+token);continue;}const pc=(letter,acc)=>((names[letter.toUpperCase()]+(acc==="#"||acc==="♯"?1:acc==="b"||acc==="♭"?-1:0))%12+12)%12;const root=pc(match[1],match[2]),shape=shapes[match[3]||""],bass=match[4]?pc(match[4],match[5]):root;const notes=[...new Set(shape.intervals.map(i=>(root+i)%12))];if(!notes.includes(bass)){errors.push("El bajo de "+token+" no pertenece al acorde; usa una inversión.");continue;}chords.push({root,bass,notes,type:shape.type,quality:shape.type==="m"?"minor":shape.type===""?"major":"other",intervals:shape.intervals,label:token,roman:"—"});}return {chords:errors.length?[]:chords,errors};}
