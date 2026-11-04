@@ -92,7 +92,7 @@ function classifyProgressionChord(chord,tonic,mode,nextChord){
  const allowed=new Set(scale(tonic,mode)),pcs=chord.notes.map(mod);
  if(pcs.every(p=>allowed.has(p)))return {classification:"diatonic",harmonicRole:"diatonic",borrowed:false,chromatic:false,explanation:"Todas sus notas pertenecen al modo seleccionado."};
  const majorPcs=new Set(MAJOR.map(n=>mod(tonic+n))),minorPcs=new Set([0,2,3,5,7,8,10].map(n=>mod(tonic+n)));
- const dominant=["7","9"].includes(chord.type)&&nextChord&&mod(chord.root+7)===mod(nextChord.root);
+ const dominant=["7","9"].includes(chord.type)&&nextChord&&mod(chord.root+5)===mod(nextChord.root);
  if(dominant)return {classification:"secondaryDominant",harmonicRole:"secondaryDominant",borrowed:false,chromatic:true,explanation:"Dominante dirigida al acorde siguiente por relación de quinta; verifica sensible y resolución de la séptima."};
  if(pcs.every(p=>majorPcs.has(p))||pcs.every(p=>minorPcs.has(p)))return {classification:"modalInterchange",harmonicRole:"modalInterchange",borrowed:true,chromatic:true,explanation:"Compatible con el modo paralelo mayor o menor: posible intercambio modal."};
  return {classification:"chromatic",harmonicRole:"chromatic",borrowed:false,chromatic:true,explanation:"Contiene notas ajenas al modo; no se atribuye función sin contexto adicional."};
@@ -124,7 +124,7 @@ function modulationIdeas(tonic,mode,composer,keyName,DATA){
  return composer.mods.map(id=>{
   if(id==="neapolitan"){
    const rootPc=mod(tonic+1),rootName=spellDegree(tonic,1,DATA.MODES.ionian,keyName,-1);
-   const pcs=[mod(rootPc+4),mod(rootPc+7),rootPc],chord={label:rootName+"(6)",root:rootPc,type:"",roman:"♭II6",notes:pcs,bass:pcs[0],inversion:1};
+   const pcs=[mod(rootPc+4),mod(rootPc+7),rootPc],chord={label:rootName+"/"+spell(pcs[0]),root:rootPc,type:"",roman:"♭II6",notes:pcs,bass:pcs[0],inversion:1};
    const vr=mod(tonic+7),dominant={label:spell(vr)+"7",root:vr,type:"7",roman:"V7",notes:[0,4,7,10].map(n=>mod(vr+n)),bass:vr};
    const tonicChord={label:spell(tonic)+"m",root:tonic,type:"m",roman:"i",notes:[0,3,7].map(n=>mod(tonic+n)),bass:tonic};
    const phrygian=DATA.modeKey==="phrygian";
