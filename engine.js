@@ -278,6 +278,24 @@ function tendencyResolution(a,b,fromChord,toChord){
  }
  return {penalty,leadingTone,seventh:seventhCount,details};
 }
+function voiceMotionDiagnostics(a,b){
+ const diffs=a.map((n,i)=>b[i]-n),observations=[];
+ let parallelFifths=0,parallelOctaves=0,contraryPairs=0,obliquePairs=0;
+ for(let i=0;i<a.length;i++)for(let j=i+1;j<a.length;j++){
+  const x=diffs[i],y=diffs[j];
+  if(x*y<0)contraryPairs++;
+  if((x===0)!==(y===0))obliquePairs++;
+  if(x*y<=0)continue;
+  const from=mod(a[j]-a[i]),to=mod(b[j]-b[i]);
+  if(from===7&&to===7)parallelFifths++;
+  if(from===0&&to===0)parallelOctaves++;
+ }
+ const largeLeaps=diffs.flatMap((d,i)=>Math.abs(d)>12?[{voice:i,semitones:d}]:[]);
+ if(parallelFifths)observations.push({kind:"parallel-fifths",count:parallelFifths,level:"classical-warning",text:"Quintas paralelas entre voces móviles"});
+ if(parallelOctaves)observations.push({kind:"parallel-octaves",count:parallelOctaves,level:"classical-warning",text:"Octavas o unísonos paralelos entre voces móviles"});
+ if(largeLeaps.length)observations.push({kind:"large-leaps",count:largeLeaps.length,level:"review",text:"Saltos superiores a una octava: revisar registro y función expresiva"});
+ return {diffs,parallelFifths,parallelOctaves,contraryPairs,obliquePairs,largeLeaps,observations};
+}
 function transitionCost(a,b,style,fromChord=null,toChord=null){
  const diffs=a.map((n,i)=>b[i]-n);
  const motion=diffs.reduce((sum,d,i)=>sum+Math.abs(d)*(i===0?.55:1),0);
@@ -369,19 +387,13 @@ function laboratoryVoices(chords,options={}){
  const voicings=base.voicings;
  const voiceOrder=count===3?["Bajo","Voz intermedia","Superior"]:base.voiceOrder;
  const transitions=voicings.slice(1).map((v,i)=>({diffs:v.map((n,j)=>n-voicings[i][j])}));
- const warnings=[];
- for(let i=0;i<voicings.length-1;i++){
-  const a=voicings[i],b=voicings[i+1];
-  for(let x=0;x<a.length;x++)for(let y=x+1;y<a.length;y++){
-   const da=b[x]-a[x],db=b[y]-a[y];
-   if(!da||!db||Math.sign(da)!==Math.sign(db))continue;
-   const interval1=mod(a[y]-a[x]),interval2=mod(b[y]-b[x]);
-   if(interval1===interval2&&(interval1===0||interval1===7))
-    warnings.push({index:i,voices:[voiceOrder[x],voiceOrder[y]],kind:interval1===7?"quintas paralelas":"octavas/unísonos paralelos"});
-  }
- }
- return {...base,count,voicings,voiceOrder,transitions,warnings,
-  warning:count===3?"Realización independiente a tres voces; en acordes de séptima puede omitirse la quinta. Revisa las resoluciones en contexto.":"Realización orientativa a cuatro voces; revisa las resoluciones en contexto."};
+ const diagnostics=voicings.slice(1).map((v,i)=>voiceMotionDiagnostics(voicings[i],v));
+ const warnings=diagnostics.flatMap((d,i)=>d.observations.map(o=>({
+  index:i,kind:o.text,level:o.level,count:o.count,
+  severity:style==="classical"&&o.level==="classical-warning"?"warning":"review"
+ })));
+ return {...base,count,voicings,voiceOrder,transitions,diagnostics,warnings,
+  warning:style==="classical"?"Las quintas y octavas paralelas se señalan según criterios contrapuntísticos tradicionales; el contexto puede justificar excepciones.":"Las observaciones no son errores automáticos: comprueba su efecto expresivo, textura e instrumentación."};
 }
 
 function parseUserProgression(input){const tokens=String(input||"").trim().split(/[\s,;|]+/).filter(Boolean);if(!tokens.length)return {chords:[],errors:[]};if(tokens.length>16)return {chords:[],errors:["Máximo 16 acordes por análisis."]};const names={"C":0,"D":2,"E":4,"F":5,"G":7,"A":9,"B":11};const shapes={"":{intervals:[0,4,7],type:""},"m":{intervals:[0,3,7],type:"m"},"dim":{intervals:[0,3,6],type:"dim"},"aug":{intervals:[0,4,8],type:"aug"},"7":{intervals:[0,4,7,10],type:"7"},"maj7":{intervals:[0,4,7,11],type:"maj7"},"m7":{intervals:[0,3,7,10],type:"m7"},"sus4":{intervals:[0,5,7],type:"sus4"},"add9":{intervals:[0,4,7,14],type:"add9"},"madd9":{intervals:[0,3,7,14],type:"madd9"}};const chords=[],errors=[];for(const token of tokens){const match=/^([A-Ga-g])([#♯b♭]?)(maj7|madd9|add9|sus4|dim|aug|m7|m|7)?(?:\/([A-Ga-g])([#♯b♭]?))?$/.exec(token);if(!match){errors.push("Acorde no reconocido: "+token);continue;}const pc=(letter,acc)=>((names[letter.toUpperCase()]+(acc==="#"||acc==="♯"?1:acc==="b"||acc==="♭"?-1:0))%12+12)%12;const root=pc(match[1],match[2]),shape=shapes[match[3]||""],bass=match[4]?pc(match[4],match[5]):root;const notes=[...new Set(shape.intervals.map(i=>(root+i)%12))];if(!notes.includes(bass)){errors.push("El bajo de "+token+" no pertenece al acorde; usa una inversión.");continue;}chords.push({root,bass,notes,type:shape.type,quality:shape.type==="m"?"minor":shape.type===""?"major":"other",intervals:shape.intervals,label:token,roman:"—"});}return {chords:errors.length?[]:chords,errors};}
@@ -448,5 +460,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
