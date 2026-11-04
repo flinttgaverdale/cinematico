@@ -83,7 +83,7 @@ test("the Dorian major V chord is marked as a parallel-Ionian interchange when n
   assert.equal(dominant.label,"G");
   assert.equal(dominant.roman,"V");
   assert.equal(dominant.classification,"modalInterchange");
-  assert.equal(dominant.borrowed,true);
+  assert.equal(dominant.borrowed,false);
   assert.equal(dominant.borrowedFrom,"ionian");
   assert.ok(!E.scale(0,DATA.MODES.dorian).includes(11));
   assert.ok(dominant.notes.includes(11));
@@ -222,4 +222,29 @@ test("progression analysis exposes chord tones, default bass and shared pitch cl
   assert.equal(chords[0].inversion,0);
   assert.ok(chords[0].notes.includes(0));
   assert.deepEqual(Array.from(chords[0].commonWithNext),[0]);
+});
+
+test("extended chords are identified independently of note order", () => {
+ for(const type of ["add9","m9","maj9","9","maj7#11","6","m6"]){
+  const notes=E.extensionIntervals(type).map(x=>x%12);
+  assert.equal(E.identifyType(notes).id,type);
+  assert.equal(E.identifyType([...notes].reverse()).id,type);
+ }
+});
+test("roman numerals retain extensions and altered sonorities", () => {
+ assert.equal(E.romanFor(1,0,"m7"),"ii7");
+ assert.equal(E.romanFor(4,0,"7"),"V7");
+ assert.equal(E.romanFor(0,0,"maj9"),"Imaj9");
+ assert.equal(E.romanFor(0,0,"add9"),"I(add9)");
+ assert.equal(E.romanFor(1,-1,"m7b5"),"♭iiø7");
+});
+test("parallel-mode compatibility is a hypothesis, not proven borrowing", () => {
+ const chord=E.buildProfileProgression([{d:1,a:-1,q:"major",e:""}],0,DATA.MODES.aeolian,"C")[0];
+ assert.equal(chord.classification,"modalInterchange");
+ assert.equal(chord.borrowed,false);
+ assert.match(chord.explanation,/hipótesis/);
+});
+test("a major chord without target leading tone is not automatically a dominant", () => {
+ const progression=E.buildProfileProgression([{d:4,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],0,DATA.MODES.dorian,"C");
+ assert.equal(progression[0].classification,"modalDominant");
 });
