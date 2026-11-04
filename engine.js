@@ -235,6 +235,30 @@ function voicingCandidates(chord,style="cinematic"){
  // When a five-note chord cannot fit all tones, prioritize its structural notes.
  return out.slice(0,300);
 }
+
+// Neo-Riemannian P/L/R apply to major/minor triads only (pitch-class sets).
+function neoTriad(root,quality){
+ const r=mod(root);
+ if(quality!=="major"&&quality!=="minor")return null;
+ return [r,mod(r+(quality==="major"?4:3)),mod(r+7)];
+}
+function neoTransform(root,quality,operation){
+ const source=neoTriad(root,quality);
+ if(!source||!["P","L","R"].includes(operation))return null;
+ const major=quality==="major";
+ const targetRoot=mod(root+(operation==="P"?0:operation==="L"?(major?4:8):(major?9:3)));
+ const targetQuality=major?"minor":"major";
+ const target=neoTriad(targetRoot,targetQuality);
+ const common=source.filter(p=>target.includes(p));
+ const removed=source.filter(p=>!target.includes(p));
+ const added=target.filter(p=>!source.includes(p));
+ let movement=null;
+ if(removed.length===1&&added.length===1){
+  let delta=mod(added[0]-removed[0]);if(delta>6)delta-=12;
+  movement={from:removed[0],to:added[0],semitones:delta};
+ }
+ return {operation,source:{root:mod(root),quality,notes:source},target:{root:targetRoot,quality:targetQuality,notes:target},common,movement,description:{P:"Paralela: conserva fundamental y quinta; cambia la tercera.",L:"Leittonwechsel: conserva dos notas y desplaza la tercera voz un semitono.",R:"Relativa: conserva dos notas y desplaza la tercera voz un tono."}[operation]};
+}
 function tendencyResolution(a,b,fromChord,toChord){
  // Only score an actual dominant-to-tonic root motion; avoid assuming function from chord color alone.
  if(!fromChord||!toChord||mod(fromChord.root+5)!==mod(toChord.root))return {penalty:0,leadingTone:0,seventh:0,details:[]};
@@ -299,5 +323,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
