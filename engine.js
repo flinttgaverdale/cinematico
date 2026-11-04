@@ -378,7 +378,7 @@ function threeVoiceLead(chords,style="cinematic",locks={}){
  if(!chords?.length)return {voicings:[],transitions:[],cost:0};
  const layers=chords.map((ch,i)=>threeVoiceCandidates(ch,style).filter(v=>Object.entries(locks[i]||{}).every(([voice,pitch])=>v[Number(voice)]===Number(pitch))));
  if(layers.some(layer=>!layer.length))return {voicings:[],transitions:[],cost:null,warning:"No hay disposición a tres voces compatible con los acordes y notas fijadas."};
- const score=(a,b)=>{
+ const score=(a,b,fromChord,toChord)=>{
   const d=a.map((n,i)=>b[i]-n);
   let parallel=0;
   for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)
