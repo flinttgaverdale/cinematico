@@ -1,0 +1,15 @@
+name: Harmony engine tests
+on:
+  push:
+    branches: [main, feature/cinematico-studio-v1]
+  pull_request:
+    branches: [main]
+jobs:
+  harmony:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node --test tests/harmony.test.cjs
