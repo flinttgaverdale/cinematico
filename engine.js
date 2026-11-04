@@ -247,11 +247,11 @@ function transitionCost(a,b,style){
  const weights=style==="classical"?{motion:1,leap:2,parallel:12}:style==="minimal"?{motion:2,leap:1.5,parallel:1}:{motion:1,leap:.8,parallel:1.5};
  return {total:motion*weights.motion+leap*weights.leap+parallels*weights.parallel,motion,leap,parallels,diffs};
 }
-function voiceLead(progression,style="cinematic"){
+function voiceLead(progression,style="cinematic",locks={}){
  const valid=["classical","cinematic","minimal"].includes(style)?style:"cinematic";
  if(!progression?.length)return {style:valid,voicings:[],transitions:[],cost:0};
- const layers=progression.map(chord=>voicingCandidates(chord,valid));
- if(layers.some(x=>!x.length))return {style:valid,voicings:[],transitions:[],cost:null,warning:"No se encontró una disposición a cuatro voces en los registros actuales."};
+ const layers=progression.map((chord,i)=>voicingCandidates(chord,valid).filter(v=>Object.entries(locks[i]||{}).every(([voice,pitch])=>v[Number(voice)]===Number(pitch))));
+ if(layers.some(x=>!x.length))return {style:valid,voicings:[],transitions:[],cost:null,warning:"No hay una disposición válida con esas notas fijadas. Libera alguna voz o prueba otro acorde."};
  let costs=layers[0].map((v)=>v.reduce((sum,n,i)=>sum+Math.abs(n-[48,57,64,72][i])*.15,0));
  const links=[];
  for(let k=1;k<layers.length;k++){
