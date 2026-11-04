@@ -516,3 +516,18 @@ test("add9 chord reductions retain the ninth instead of silently losing their co
   }
  }
 });
+
+test("maximum supported 16-chord progression completes for both voice templates",()=>{
+ const input="Cm Abmaj7 Fm7 G7 Cm Eb Bb7 Eb Cm Abmaj7 Fm7 G7 Cm Eb Bb7 Eb";
+ const chords=E.parseUserProgression(input).chords;
+ assert.equal(chords.length,16);
+ for(const count of [3,4]){
+  const start=process.hrtime.bigint();
+  const result=E.laboratoryVoices(chords,{count,style:"classical"});
+  const elapsedMs=Number(process.hrtime.bigint()-start)/1e6;
+  assert.equal(result.voicings.length,16);
+  assert.equal(result.diagnostics.length,15);
+  assert.ok(Number.isFinite(result.cost));
+  console.log("Laboratorio "+count+" voces, 16 acordes: "+elapsedMs.toFixed(1)+" ms (CI; no es medición de navegador)");
+ }
+});
