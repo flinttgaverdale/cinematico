@@ -427,3 +427,40 @@ test("three-voice laboratory exposes harmonic resolution diagnostics",()=>{
  assert.equal(result.diagnostics.length,1);
  assert.ok(Array.isArray(result.diagnostics[0].harmonic.observations));
 });
+
+test("inverted seventh chords retain bass, third and seventh in three voices",()=>{
+ for(const symbol of ["G7/B","G7/F","Cmaj7/E","Cm7/Bb"]){
+  const chord=E.parseUserProgression(symbol).chords[0];
+  const choices=E.threeVoiceCandidates(chord,"classical");
+  assert.ok(choices.length>0,symbol+" must have candidates");
+  const root=chord.root,third=chord.notes.find(p=>[3,4].includes((p-root+12)%12));
+  const seventh=chord.notes.find(p=>[10,11].includes((p-root+12)%12));
+  for(const notes of choices){
+   const pcs=notes.map(n=>n%12);
+   assert.equal(pcs[0],chord.bass);
+   assert.ok(pcs.includes(third),symbol+" third");
+   assert.ok(pcs.includes(seventh),symbol+" seventh");
+  }
+ }
+});
+test("all supported user chord types yield bounded laboratory candidates",()=>{
+ for(const symbol of ["C","Cm","C7","Cmaj7","Cm7","Cdim","Caug","Csus4","Cadd9","Cmadd9","C/E"]){
+  const chord=E.parseUserProgression(symbol).chords[0];
+  assert.ok(chord,symbol);
+  for(const style of ["classical","cinematic"]){
+   const candidates=E.threeVoiceCandidates(chord,style);
+   assert.ok(candidates.length<5000,symbol+" "+style);
+   assert.ok(candidates.every(v=>v.length===3&&v[0]<v[1]&&v[1]<v[2]));
+  }
+ }
+});
+test("laboratory repeated short progressions are deterministic and do not mutate source",()=>{
+ const chords=E.parseUserProgression("Cm Abmaj7 Fm7 G7 Cm").chords;
+ const snapshot=JSON.stringify(chords);
+ for(const count of [3,4]){
+  const first=E.laboratoryVoices(chords,{count,style:"cinematic"});
+  const second=E.laboratoryVoices(chords,{count,style:"cinematic"});
+  assert.equal(JSON.stringify(first.voicings),JSON.stringify(second.voicings));
+ }
+ assert.equal(JSON.stringify(chords),snapshot);
+});
