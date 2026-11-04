@@ -375,10 +375,15 @@ function threeVoiceCandidates(chord,style="cinematic"){
  // Retain the specified bass and prioritize third and seventh; the fifth is optional.
  const third=pcs.find(p=>[3,4].includes(mod(p-chord.root)));
  const seventh=pcs.find(p=>[10,11].includes(mod(p-chord.root)));
+ const ninth=pcs.find(p=>mod(p-chord.root)===2);
  const required=new Set([bass]);
  if(pcs.length<=3)pcs.forEach(p=>required.add(p));
- else for(const p of [third,seventh,mod(chord.root)]){
-  if(p!==undefined&&pcs.includes(p)&&required.size<3)required.add(p);
+ else {
+  // Keep the chord-defining color: seventh in seventh chords, ninth in add9 chords.
+  const color=seventh===undefined?ninth:seventh;
+  for(const p of [third,color,mod(chord.root)]){
+   if(p!==undefined&&pcs.includes(p)&&required.size<3)required.add(p);
+  }
  }
  for(const low of choices[0]){
   if(low%12!==bass)continue;
