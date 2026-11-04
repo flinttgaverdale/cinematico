@@ -31,3 +31,16 @@ Las pruebas de 12 acordes muestran tiempos de ejecución en GitHub Actions; no e
 - Añadir pruebas de inversión, conducción de voces, resoluciones contextuales, entradas inválidas y actualización de caché.
 
 Los cambios deben permanecer en `feature/cinematico-studio-v1` hasta aprobación expresa para integrarlos en la rama principal.
+
+
+## Fase de contraste contextual (web, sin MIDI)
+
+El criterio optativo «Buscar contraste» compara alternativas con tres niveles explicables:
+
+1. **Cambio armónico estructural**: diferencia simétrica de clases de altura, cambio de fundamental y cualidad de tercera.
+2. **Contexto armónico local**: diferencia entre el número de alturas ajenas al conjunto de los acordes vecinos, sin inferir ni imponer tonalidad.
+3. **Conducción potencial**: emparejamiento mínimo de clases de altura hacia los acordes vecinos, con penalización acotada; no es una realización de voces en registro.
+
+La puntuación contextual suma el contraste estructural y dos ajustes acotados de ±2 por color local y movimiento mínimo. Sirve para ordenar experimentos, no para medir calidad, emoción o sorpresa real. Las tarjetas muestran tanto la puntuación base como el contexto y sus razones. El modo libre conserva el orden de exploración y ningún modo modifica la progresión. Los modelos de tres y cuatro voces permanecen independientes; el análisis de clips MIDI se reserva a Max for Live.
+
+Validación: pruebas de clasificación, ordenación, casos extremos, no mutación, simetría del estimador y sintaxis JavaScript del frontend.
