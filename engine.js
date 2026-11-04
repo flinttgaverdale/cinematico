@@ -113,7 +113,10 @@ function buildProfileProgression(steps,tonic,mode,keyName){
   const chord=chordFromPcs(pcs,rootName),actualAlter=accidentalForPc(pc,degree,tonic);
   return {...chord,label:rootName+type,roman:romanFor(degree,actualAlter,type),degree,root:pc,extension:type,bass:pc};
  });
- return raw.map((chord,i)=>({...chord,...classifyProgressionChord(chord,tonic,mode,raw[i+1])}));
+ return raw.map((chord,i)=>{
+  const next=raw[i+1],commonWithNext=next?chord.notes.filter(pc=>next.notes.includes(pc)):[];
+  return {...chord,...classifyProgressionChord(chord,tonic,mode,next),bass:chord.root,inversion:0,commonWithNext};
+ });
 }
 function relativeTarget(tonic,modeKey){
  const names=["ionian","dorian","phrygian","lydian","mixolydian","aeolian","locrian"],idx=names.indexOf(modeKey);
