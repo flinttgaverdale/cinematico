@@ -6,6 +6,7 @@ const PC={"C":0,"C#":1,"Db":1,"D":2,"D#":3,"Eb":3,"E":4,"F":5,"F#":6,"Gb":6,"G":
 const NATURAL={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
 const LETTERS=["C","D","E","F","G","A","B"];
 const MAJOR=[0,2,4,5,7,9,11];
+const MODAL_INTERVALS={ionian:[0,2,4,5,7,9,11],dorian:[0,2,3,5,7,9,10],phrygian:[0,1,3,5,7,8,10],lydian:[0,2,4,6,7,9,11],mixolydian:[0,2,4,5,7,9,10],aeolian:[0,2,3,5,7,8,10],locrian:[0,1,3,5,6,8,10]};
 const TYPE_DEFS=[
  {id:"",label:"",int:[0,4,7]},{id:"m",label:"m",int:[0,3,7]},
  {id:"dim",label:"°",int:[0,3,6]},{id:"aug",label:"+",int:[0,4,8]},
@@ -91,10 +92,11 @@ function extensionIntervals(type){
 function classifyProgressionChord(chord,tonic,mode,nextChord){
  const allowed=new Set(scale(tonic,mode)),pcs=chord.notes.map(mod);
  if(pcs.every(p=>allowed.has(p)))return {classification:"diatonic",harmonicRole:"diatonic",borrowed:false,chromatic:false,explanation:"Todas sus notas pertenecen al modo seleccionado."};
- const majorPcs=new Set(MAJOR.map(n=>mod(tonic+n))),minorPcs=new Set([0,2,3,5,7,8,10].map(n=>mod(tonic+n)));
+ const currentMode=Object.entries(MODAL_INTERVALS).find(([,ints])=>ints.join(",")===mode.int.join(","))?.[0];
  const dominant=["major","dominant seventh"].includes(chord.quality)&&nextChord&&mod(chord.root+5)===mod(nextChord.root);
  if(dominant){const primary=mod(nextChord.root)===mod(tonic);return {classification:primary?"modalDominant":"secondaryDominant",harmonicRole:primary?"modalDominant":"secondaryDominant",borrowed:false,chromatic:true,explanation:primary?"Dominante mayor que introduce la sensible del centro modal; su resolución al acorde de tónica debe confirmarse.":"Dominante secundaria dirigida al acorde siguiente por relación de quinta; verifica sensible y resolución de la séptima."};}
- if(pcs.every(p=>majorPcs.has(p))||pcs.every(p=>minorPcs.has(p)))return {classification:"modalInterchange",harmonicRole:"modalInterchange",borrowed:true,chromatic:true,explanation:"Compatible con el modo paralelo mayor o menor: posible intercambio modal."};
+ const borrowedMode=Object.entries(MODAL_INTERVALS).find(([name,ints])=>name!==currentMode&&pcs.every(p=>ints.map(n=>mod(tonic+n)).includes(p)))?.[0];
+ if(borrowedMode)return {classification:"modalInterchange",harmonicRole:"modalInterchange",borrowed:true,chromatic:true,borrowedFrom:borrowedMode,explanation:"El acorde encaja en el modo paralelo "+borrowedMode+": posible intercambio modal."};
  return {classification:"chromatic",harmonicRole:"chromatic",borrowed:false,chromatic:true,explanation:"Contiene notas ajenas al modo; no se atribuye función sin contexto adicional."};
 }
 function buildProfileProgression(steps,tonic,mode,keyName){
