@@ -584,3 +584,32 @@ test("contextual guidance is rendered in the existing analysis without MIDI cont
  assert.ok(html.includes("motions.map((m,i)=>"));
  assert.ok(!html.includes('type="file"'));
 });
+
+test("harmonic alternative comparison gives explainable metrics without claiming a best choice",()=>{
+ const chords=E.parseUserProgression("Cm Ab Fm G7").chords;
+ const original=JSON.stringify(chords);
+ const alternatives=E.chordAlternatives(chords,1);
+ const compared=E.compareHarmonicAlternatives(chords,1,alternatives);
+ assert.equal(compared.length,alternatives.length);
+ assert.ok(compared.length>0);
+ for(const proposal of compared){
+  const m=proposal.comparison;
+  assert.ok(m.sharedOriginal>=0&&m.changed>=0&&m.continuity>=0);
+  assert.ok(m.continuityRank>=1&&m.contrastRank>=1);
+  assert.ok(m.caveat.includes("no miden tensión percibida"));
+  assert.equal(proposal.changesOriginal,false);
+ }
+ assert.equal(JSON.stringify(chords),original);
+});
+test("comparison handles edge chords and empty alternatives",()=>{
+ const chords=E.parseUserProgression("C G7 C").chords;
+ assert.equal(E.compareHarmonicAlternatives(chords,0,[]).length,0);
+ assert.equal(E.compareHarmonicAlternatives(chords,999,[{notes:[0,4,7]}]).length,0);
+ const proposals=E.compareHarmonicAlternatives(chords,0,[{notes:[0,4,7]},{notes:[0,3,7]}]);
+ assert.equal(proposals[0].comparison.sharedPrevious,null);
+ assert.ok(proposals.every(p=>p.comparison.sharedNext!==null));
+});
+test("web interface renders transparent alternative comparisons",()=>{
+ assert.ok(html.includes("CinematicoEngine.compareHarmonicAlternatives("));
+ assert.ok(html.includes("p.comparison.changed"));
+});
