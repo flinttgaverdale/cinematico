@@ -411,3 +411,19 @@ test("cinematic mode reports contrapuntal parallels as review, not errors",()=>{
   assert.ok(result.warnings.every(w=>w.severity==="review"||style==="classical"&&w.severity==="warning"));
  }
 });
+
+test("harmonic resolution diagnostics require a dominant-to-tonic context",()=>{
+ const V={root:7,notes:[7,11,2,5]},I={root:0,notes:[0,4,7]};
+ const a=[43,53,59],resolved=[48,52,60],unresolved=[48,53,59];
+ assert.equal(E.harmonicResolutionDiagnostics(a,resolved,V,I).penalty,0);
+ const flagged=E.harmonicResolutionDiagnostics(a,unresolved,V,I);
+ assert.ok(flagged.penalty>0);
+ assert.ok(flagged.observations.some(x=>x.kind==="leading-tone"));
+ assert.equal(E.harmonicResolutionDiagnostics(a,unresolved,V,{root:2,notes:[2,5,9]}).penalty,0);
+});
+test("three-voice laboratory exposes harmonic resolution diagnostics",()=>{
+ const chords=E.parseUserProgression("G7 C").chords;
+ const result=E.laboratoryVoices(chords,{count:3,style:"classical"});
+ assert.equal(result.diagnostics.length,1);
+ assert.ok(Array.isArray(result.diagnostics[0].harmonic.observations));
+});
