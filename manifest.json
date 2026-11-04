@@ -1,13 +1,13 @@
 {
-  "name": "Círculo Cinemático",
+  "name": "Cinemático — Estudio de composición",
   "short_name": "Cinemático",
-  "description": "Consulta de composición para bandas sonoras: círculo de quintas, emociones, compositores de cine, puentes y modulaciones.",
+  "description": "Un espacio de exploración armónica para composición cinematográfica.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#14141c",
-  "theme_color": "#14141c",
+  "background_color": "#111310",
+  "theme_color": "#111310",
   "lang": "es",
   "icons": [
     {
