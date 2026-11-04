@@ -474,3 +474,29 @@ test("laboratory interface retains progressive disclosure and only 3 or 4 voices
   assert.ok(html.includes('id="'+id+'"'),id+" missing");
  }
 });
+
+test("longer laboratory progressions preserve voicing count and finite cost",()=>{
+ const chords=E.parseUserProgression("Cm Abmaj7 Fm7 G7 Cm Eb Bb7 Eb Cm Abmaj7 Fm7 G7").chords;
+ assert.equal(chords.length,12);
+ for(const count of [3,4]){
+  const start=process.hrtime.bigint();
+  const result=E.laboratoryVoices(chords,{count,style:"cinematic"});
+  const elapsedMs=Number(process.hrtime.bigint()-start)/1e6;
+  assert.equal(result.voicings.length,chords.length);
+  assert.ok(Number.isFinite(result.cost));
+  assert.ok(result.voicings.every(v=>v.length===count));
+  console.log("Laboratorio "+count+" voces, 12 acordes: "+elapsedMs.toFixed(1)+" ms (CI; no es medición de navegador)");
+ }
+});
+test("single chord, empty progression and impossible locks are stable",()=>{
+ const chord=E.parseUserProgression("Cm").chords[0];
+ for(const count of [3,4]){
+  const one=E.laboratoryVoices([chord],{count});
+  assert.equal(one.voicings.length,1);
+  assert.equal(one.transitions.length,0);
+  const empty=E.laboratoryVoices([],{count});
+  assert.equal(empty.voicings.length,0);
+  const impossible=E.laboratoryVoices([chord],{count,locks:{0:{0:0}}});
+  assert.equal(impossible.voicings.length,0);
+ }
+});
