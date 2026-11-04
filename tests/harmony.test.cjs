@@ -392,3 +392,22 @@ test("sustained tones and adjacent pitch-class comparisons are non-destructive",
  assert.equal(links.length,3);
  assert.equal(JSON.stringify(chords),original);
 });
+
+test("motion diagnostics distinguish parallels, contrary and oblique motion",()=>{
+ const fifths=E.voiceMotionDiagnostics([48,55,64],[50,57,65]);
+ assert.equal(fifths.parallelFifths,1);
+ assert.equal(fifths.parallelOctaves,0);
+ const contrary=E.voiceMotionDiagnostics([48,60,67],[50,59,67]);
+ assert.ok(contrary.contraryPairs>=1);
+ assert.ok(contrary.obliquePairs>=1);
+ const stationary=E.voiceMotionDiagnostics([48,55],[48,55]);
+ assert.equal(stationary.parallelFifths,0);
+});
+test("cinematic mode reports contrapuntal parallels as review, not errors",()=>{
+ const chords=E.parseUserProgression("Cm Fm G7 Cm").chords;
+ for(const style of ["classical","cinematic"]){
+  const result=E.laboratoryVoices(chords,{count:3,style});
+  assert.equal(result.diagnostics.length,3);
+  assert.ok(result.warnings.every(w=>w.severity==="review"||style==="classical"&&w.severity==="warning"));
+ }
+});
