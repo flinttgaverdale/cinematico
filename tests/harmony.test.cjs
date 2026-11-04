@@ -304,3 +304,13 @@ test("pinned note remains fixed across global voice-leading optimization", () =>
  assert.equal(impossible.voicings.length,0);
  assert.match(impossible.warning,/nota|voz|disposición/i);
 });
+
+test("dominant tendency tones are evaluated only for authentic root resolution", () => {
+ const dominant={root:7,notes:[7,11,2,5]};
+ const tonic={root:0,notes:[0,3,7]};
+ const good=E.tendencyResolution([43,53,59,65],[48,52,60,63],dominant,tonic);
+ const bad=E.tendencyResolution([43,53,59,65],[48,53,59,65],dominant,tonic);
+ assert.equal(good.penalty,0);
+ assert.ok(bad.penalty>good.penalty);
+ assert.equal(E.tendencyResolution([43,53,59,65],[48,53,59,65],dominant,{root:2,notes:[2,5,9]}).penalty,0);
+});
