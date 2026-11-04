@@ -130,14 +130,19 @@ function targetModeFor(id,tonic,modeKey){
 function noteNameForPc(pc,sharp){return spell(pc,sharp);}
 function modulationIdeas(tonic,mode,composer,keyName,DATA){
  const sourcePcs=scale(tonic,mode),sourceTriads=sourcePcs.map((_,i)=>diatonicChord(tonic,mode,i,keyName,false));
- return composer.mods.map(id=>{
+ const candidateIds=["relative","parallel","up_semitone","down_semitone","up_major3","down_major3","up_minor3","down_minor3","up_fifth","down_fifth","tritone","neapolitan"];
+ candidateIds.sort((a,b)=>{const ai=composer.mods.indexOf(a),bi=composer.mods.indexOf(b);return (ai<0?999:ai)-(bi<0?999:bi);});
+ return candidateIds.map(id=>{
   if(id==="neapolitan"){
    const rootPc=mod(tonic+1),rootName=spellDegree(tonic,1,DATA.MODES.ionian,keyName,-1);
    const pcs=[mod(rootPc+4),mod(rootPc+7),rootPc],chord={label:rootName+"/"+spell(pcs[0]),root:rootPc,type:"",roman:"♭II6",notes:pcs,bass:pcs[0],inversion:1};
    const vr=mod(tonic+7),dominant={label:spell(vr)+"7",root:vr,type:"7",roman:"V7",notes:[0,4,7,10].map(n=>mod(vr+n)),bass:vr};
-   const tonicChord={label:spell(tonic)+"m",root:tonic,type:"m",roman:"i",notes:[0,3,7].map(n=>mod(tonic+n)),bass:tonic};
-   const phrygian=DATA.modeKey==="phrygian",aeolian=DATA.modeKey==="aeolian";
-   return {id,kind:"color",name:phrygian?"♭II frigio (diatónico)":aeolian?"Napolitana N6 (contexto menor)":"♭II cromático (sin función napolitana asumida)",target:"♭II6 → V7 → i",feel:phrygian?"En frigio, ♭II es diatónico y no equivale automáticamente a una napolitana funcional.":aeolian?"La napolitana tradicional está en primera inversión y actúa como predominante hacia V7, que resuelve a i.":"Este ♭II es un color cromático. Solo debe llamarse napolitana funcional si se usa en contexto tonal menor y resuelve como N6 hacia V(7).",common:null,shared:[],pivots:[],chord,resolution:[chord,dominant,tonicChord],transition:phrygian?"Explora ♭II → i como color frigio; si quieres función tonal, añade una dominante claramente dirigida.":aeolian?"N6 en primera inversión (tercera en el bajo) → V7 con sensible elevada → i. Comprueba la conducción de voces y la cadencia.":"Úsalo como ♭II cromático; no se presupone función napolitana ni resolución tonal."};
+   const tonicChord=diatonicChord(tonic,mode,0,keyName,false),phrygian=DATA.modeKey==="phrygian";
+   const name=phrygian?"♭II frigio (diatónico)":DATA.modeKey==="aeolian"?"Napolitana N6 (menor)":"Napolitana N6 (color cromático)";
+   const target=phrygian?"♭II frigio":("♭II6 → V7 → "+tonicChord.roman);
+   const feel=phrygian?"En frigio, ♭II pertenece a la escala: úsalo como color modal, no como napolitana funcional automática.":"Acorde mayor sobre ♭II en primera inversión; puede actuar como predominante hacia V7 y la tónica, si la conducción de voces confirma esa función.";
+   const transition=phrygian?"♭II es diatónico en frigio. Prueba su color contra i o un pedal, sin dar por supuesta una cadencia tonal.":"N6 en primera inversión (tercera en el bajo) → V7 con sensible elevada → "+tonicChord.roman+". Comprueba la conducción de voces y la cadencia.";
+   return {id,kind:"color",name,target,feel,common:null,shared:[],pivots:[],chord,resolution:[chord,dominant,tonicChord],transition};
   }
   const target=targetModeFor(id,tonic,DATA.modeKey),targetName=DATA.keyNameForPc(target.tonic),targetMode=DATA.MODES[target.mode]||DATA.MODES.ionian,targetPcs=scale(target.tonic,targetMode);
   const sharedPcs=sourcePcs.filter(p=>targetPcs.includes(p)),targetTriads=targetPcs.map((_,i)=>diatonicChord(target.tonic,targetMode,i,targetName,false)),pivots=[];
