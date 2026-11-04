@@ -484,6 +484,47 @@ function contextualContrastDiagnostics(chords,index,proposal){
  return {originalDeparture,proposedDeparture,chromaticDifference,motionDelta,fromOriginal,incoming,outgoing,dominantToNext,reasons,
   caveat:"Contexto local, no tonalidad inferida. La conducción se aproxima por clases de altura sin registro, ritmo ni voces asignadas."};
 }
+// Three distinct hypotheses; local evidence only, never an inferred global key.
+function harmonicContrastCharacter(chords,index,proposal){
+ if(!Array.isArray(chords)||!chords[index]||!proposal)return null;
+ const current=chords[index],next=chords[index+1]||null;
+ const pcs=ch=>new Set(ch.notes.map(mod));
+ const quality=ch=>{
+  const p=pcs(ch),r=mod(ch.root);
+  if(p.has(mod(r+3))&&!p.has(mod(r+4)))return "minor";
+  if(p.has(mod(r+4))&&!p.has(mod(r+3)))return "major";
+  return "other";
+ };
+ const currentQuality=quality(current),candidateQuality=quality(proposal);
+ const sameRoot=mod(current.root)===mod(proposal.root);
+ const modalColor=sameRoot&&currentQuality!==candidateQuality&&
+  currentQuality!=="other"&&candidateQuality!=="other";
+ const candidatePcs=pcs(proposal);
+ const dominant=!!next&&mod(proposal.root+5)===mod(next.root)&&
+  candidatePcs.has(mod(proposal.root+4))&&candidatePcs.has(mod(proposal.root+7));
+ const leading=next?mod(next.root-1):null;
+ const leadingPresent=next!==null&&candidatePcs.has(leading);
+ const seventh=mod(proposal.root+10);
+ const seventhPresent=dominant&&candidatePcs.has(seventh);
+ const tonal=dominant?{
+  kind:"tonal",evidence:"Posible dominante hacia "+next.label+
+   (leadingPresent?"; contiene la sensible del objetivo":"")+
+   (seventhPresent?"; contiene séptima de dominante":"")+
+   ". La función requiere confirmación tonal y conducción de voces.",
+  confidence:"hipótesis local"}:null;
+ const modal=modalColor?{
+  kind:"modal",evidence:"Cambio mayor/menor sobre la misma fundamental ("+
+   currentQuality+" → "+candidateQuality+"); posible intercambio modal, sin tonalidad establecida.",
+  confidence:"hipótesis local"}:null;
+ const currentPcs=pcs(current);
+ const introduced=[...candidatePcs].filter(pc=>!currentPcs.has(pc));
+ const chromatic= introduced.length?{
+  kind:"chromatic",evidence:introduced.length+" clase(s) de altura nueva(s) respecto al acorde original; el cromatismo respecto a una escala exige una tonalidad explícita.",
+  confidence:"diferencia verificable, interpretación abierta"}:null;
+ const hypotheses=[tonal,modal,chromatic].filter(Boolean);
+ return {hypotheses,tonal,modal,chromatic,dominant,modalColor,introduced:introduced.map(spell),
+  caveat:"Tonal, modal y cromático son lecturas potenciales y pueden coexistir; no se deduce una tonalidad ni se afirma resolución real."};
+}
 function compareHarmonicAlternatives(chords,index,alternatives,intention="neutral"){
  if(!Array.isArray(chords)||!chords[index]||!Array.isArray(alternatives))return [];
  const current=chords[index],prev=chords[index-1],next=chords[index+1];
@@ -507,6 +548,7 @@ function compareHarmonicAlternatives(chords,index,alternatives,intention="neutra
   // Descriptive additive score; no timing, voicing, dynamics or tonal function.
   const contrastScore=changed*2+(rootShift?1:0)+(qualityChange?1:0);
   const context=contextualContrastDiagnostics(chords,index,proposal);
+  const character=harmonicContrastCharacter(chords,index,proposal);
   const contextualContrastScore=contrastScore+Math.max(-2,Math.min(2,context.chromaticDifference))+
    Math.max(-2,Math.min(2,context.motionDelta));
   const contrastReasons=[
@@ -515,7 +557,7 @@ function compareHarmonicAlternatives(chords,index,alternatives,intention="neutra
    qualityChange?"Cambio de cualidad de tercera":"Cualidad de tercera conservada"
   ];
   return {...proposal,comparison:{sharedOriginal,sharedPrevious,sharedNext,changed,
-   continuity,contrast:changed,contrastScore,contextualContrastScore,rootShift,qualityChange,contrastReasons,context,
+   continuity,contrast:changed,contrastScore,contextualContrastScore,rootShift,qualityChange,contrastReasons,context,character,
    reasons:[sharedOriginal+" nota(s) conservada(s) respecto al acorde original",
     ...(prev?[sharedPrevious+" nota(s) compartida(s) con el anterior"]:[]),
     ...(next?[sharedNext+" nota(s) compartida(s) con el siguiente"]:[])],
@@ -632,5 +674,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
