@@ -95,7 +95,10 @@ function classifyProgressionChord(chord,tonic,mode,nextChord){
  const currentMode=Object.entries(MODAL_INTERVALS).find(([,ints])=>ints.join(",")===mode.int.join(","))?.[0];
  const dominant=["major","dominant seventh"].includes(chord.quality)&&nextChord&&mod(chord.root+5)===mod(nextChord.root);
  if(dominant){const primary=mod(nextChord.root)===mod(tonic);return {classification:primary?"modalDominant":"secondaryDominant",harmonicRole:primary?"modalDominant":"secondaryDominant",borrowed:false,chromatic:true,explanation:primary?"Dominante mayor que introduce la sensible del centro modal; su resolución al acorde de tónica debe confirmarse.":"Dominante secundaria dirigida al acorde siguiente por relación de quinta; verifica sensible y resolución de la séptima."};}
- const borrowedMode=Object.entries(MODAL_INTERVALS).find(([name,ints])=>name!==currentMode&&pcs.every(p=>ints.map(n=>mod(tonic+n)).includes(p)))?.[0];
+ const currentPcs=new Set((MODAL_INTERVALS[currentMode]||mode.int).map(n=>mod(tonic+n)));
+ const borrowedCandidates=Object.entries(MODAL_INTERVALS).filter(([name,ints])=>name!==currentMode&&pcs.every(p=>ints.map(n=>mod(tonic+n)).includes(p))).map(([name,ints])=>({name,score:[...new Set(ints.map(n=>mod(tonic+n)))].filter(p=>!currentPcs.has(p)).length+[...currentPcs].filter(p=>!ints.map(n=>mod(tonic+n)).includes(p)).length}));
+ borrowedCandidates.sort((a,b)=>a.score-b.score);
+ const borrowedMode=borrowedCandidates[0]?.name;
  if(borrowedMode)return {classification:"modalInterchange",harmonicRole:"modalInterchange",borrowed:true,chromatic:true,borrowedFrom:borrowedMode,explanation:"El acorde encaja en el modo paralelo "+borrowedMode+": posible intercambio modal."};
  return {classification:"chromatic",harmonicRole:"chromatic",borrowed:false,chromatic:true,explanation:"Contiene notas ajenas al modo; no se atribuye función sin contexto adicional."};
 }
