@@ -198,14 +198,17 @@ test("modal and secondary dominant labels require a chord that leads by fifth", 
   assert.equal(primary[0].classification,"dominant");
 });
 
-test("modulation candidates come from the harmonic context, while composer profiles only rank them", () => {
-  const a=E.analyze(0,DATA.EMOTIONS.alegria,DATA.COMPOSERS.giacchino,"ionian",DATA);
-  const b=E.analyze(0,DATA.EMOTIONS.alegria,DATA.COMPOSERS.zimmer,"ionian",DATA);
-  const idsA=Array.from(a.mods,x=>x.id),idsB=Array.from(b.mods,x=>x.id);
-  assert.deepEqual([...idsA].sort(),[...idsB].sort());
-  assert.equal(idsA.length,12);
-  assert.equal(idsA[0],"up_major3");
-  assert.equal(idsB[0],"up_minor3");
+test("modulation recommendations are ranked by emotion and progression context", () => {
+  const joy=E.analyze(0,DATA.EMOTIONS.alegria,DATA.COMPOSERS.giacchino,"ionian",DATA);
+  const suspense=E.analyze(0,DATA.EMOTIONS.tension,DATA.COMPOSERS.giacchino,"aeolian",DATA);
+  const wonder=E.analyze(0,DATA.EMOTIONS.maravilla,DATA.COMPOSERS.giacchino,"lydian",DATA);
+  assert.equal(joy.mods.length,7);
+  assert.notDeepEqual(Array.from(joy.mods,x=>x.id),Array.from(suspense.mods,x=>x.id));
+  assert.notDeepEqual(Array.from(joy.mods,x=>x.id),Array.from(wonder.mods,x=>x.id));
+  assert.ok(joy.mods.some(x=>x.id==="neapolitan"));
+  assert.ok(joy.mods[0].fitReason.length>0);
+  assert.ok(joy.mods.every(x=>x.cadence && x.cadence.dominant && x.cadence.tonic));
+  assert.ok(joy.mods.every(x=>typeof x.score==="number"));
 });
 
 test("progression analysis exposes chord tones, default bass and shared pitch classes", () => {

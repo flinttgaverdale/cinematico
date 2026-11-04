@@ -187,7 +187,9 @@ function modulationIdeas(tonic,mode,composer,keyName,DATA,progression,emotion){
   return {id,kind:same?"mode":"region",name:names[id]||"Cambio de región",target:targetName,targetMode:targetMode.name,targetPc:target.tonic,feel:DATA.MODULATIONS?.[id]?.feel||"Posibilidad de cambio de región; el nuevo centro debe confirmarse musicalmente.",common:sharedPcs.length,shared:sharedPcs.map(p=>noteNameForPc(p,DATA.KEYS_SHARP[targetName]===1)),pivots:unique,transition,confirmation:"Modulación no confirmada: requiere evidencia cadencial o funcional en el destino.",score,fitReason:reasonBits.join("; ")+".",cadence:{dominant:dominant.label,tonic:tonicLabel,label:"V7 → "+tonicLabel}};
  });
  candidates.sort((a,b)=>b.score-a.score);
- return candidates.slice(0,7);
+ const color=candidates.find(candidate=>candidate.id==="neapolitan");
+ const regions=candidates.filter(candidate=>candidate.id!=="neapolitan").slice(0,6);
+ return color?[...regions,color]:regions;
 }
 function analyze(tonic,emotion,composer,modeOverride,DATA){
  const modeKey=modeOverride||emotion.mode,mode=DATA.MODES[modeKey],keyName=DATA.keyNameForPc(tonic);
