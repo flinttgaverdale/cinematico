@@ -97,7 +97,7 @@ test("relative and parallel changes identify the correct target mode", () => {
   assert.equal(parallelMajor.targetMode,"Menor (Eólico)");
   const dorian=E.analyze(0,DATA.EMOTIONS.esperanza,DATA.COMPOSERS.williams,"dorian",DATA);
   const relativeDorian=dorian.mods.find(x=>x.id==="relative");
-  assert.equal(relativeDorian.target,"B♭");
+  assert.equal(relativeDorian.target,"Bb");
   assert.equal(relativeDorian.targetMode,"Mayor (Jónico)");
   assert.ok(relativeDorian.pivots.length>0);
 });
