@@ -316,7 +316,7 @@ test("dominant tendency tones are evaluated only for authentic root resolution",
 });
 
 test("P L R transformations preserve two notes and one chromatic or whole-tone move", () => {
- const expected={P:[0,"minor",-1],L:[4,"minor",-1],R:[9,"minor",-2]};
+ const expected={P:[0,"minor",-1],L:[4,"minor",-1],R:[9,"minor",2]};
  for(const [op,[root,quality,delta]] of Object.entries(expected)){
   const t=E.neoTransform(0,"major",op);
   assert.equal(t.target.root,root);
