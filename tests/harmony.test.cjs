@@ -90,7 +90,7 @@ test("the Dorian cadence explicitly identifies its borrowed major dominant", () 
 test("relative and parallel changes identify the correct target mode", () => {
   const major=E.analyze(0,DATA.EMOTIONS.alegria,DATA.COMPOSERS.giacchino,"ionian",DATA);
   const relativeMajor=major.mods.find(x=>x.id==="relative");
-  const parallelMajor=major.mods.find(x=>x.id==="parallel");
+  const parallelMajor=E.analyze(0,DATA.EMOTIONS.alegria,DATA.COMPOSERS.zimmer,"ionian",DATA).mods.find(x=>x.id==="parallel");
   assert.equal(relativeMajor.target,"A");
   assert.equal(relativeMajor.targetMode,"Menor (Eólico)");
   assert.equal(parallelMajor.target,"C");
