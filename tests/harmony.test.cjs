@@ -120,3 +120,18 @@ test("the inline application script parses", () => {
   assert.ok(scripts.length>0);
   for (const script of scripts) new vm.Script(script);
 });
+
+test("composer signatures remain independent from the selected emotional mode", () => {
+  const emotion=DATA.EMOTIONS.alegria;
+  const zimmer=DATA.COMPOSERS.zimmer;
+  const zIonian=E.analyze(0,emotion,zimmer,"ionian",DATA);
+  const zLydian=E.analyze(0,emotion,zimmer,"lydian",DATA);
+  assert.equal(zLydian.signatureModeKey,"aeolian");
+  assert.deepEqual(Array.from(zLydian.signature,x=>x.label),Array.from(zIonian.signature,x=>x.label));
+  assert.deepEqual(Array.from(zLydian.signature,x=>x.roman),Array.from(zIonian.signature,x=>x.roman));
+  assert.deepEqual(Array.from(zLydian.signature,x=>x.label),["Cm","A♭","E♭","B♭"]);
+  const williams=E.analyze(0,emotion,DATA.COMPOSERS.williams,"lydian",DATA);
+  assert.equal(williams.signatureModeKey,"ionian");
+  assert.equal(williams.signature[1].label,"Fm6");
+  assert.equal(Object.values(DATA.COMPOSERS).filter(c=>c.signatureMode).length,11);
+});
