@@ -339,6 +339,31 @@ function composerAssistance(composerId,progression=[]){
   return {...t,observation,changesOriginal:false};
  });
 }
+
+// Pitch-class observations are independent of composer style and do not modify input.
+function sustainedToneAnalysis(chords){
+ if(!Array.isArray(chords)||!chords.length)return [];
+ const roles={0:"fundamental",1:"segunda menor / novena bemol",2:"segunda / novena",3:"tercera menor",4:"tercera mayor",5:"cuarta / oncena",6:"quinta disminuida / oncena aumentada",7:"quinta justa",8:"quinta aumentada / sexta menor",9:"sexta / trecena",10:"séptima menor",11:"séptima mayor"};
+ return Array.from({length:12},(_,pc)=>{
+  const steps=chords.map(ch=>{const interval=mod(pc-ch.root);return {chord:ch.label,interval,role:roles[interval],chordTone:ch.notes.includes(pc)};});
+  return {pc,note:spell(pc),steps,chordToneCount:steps.filter(x=>x.chordTone).length,distinctRoles:new Set(steps.map(x=>x.interval)).size};
+ }).sort((a,b)=>b.chordToneCount-a.chordToneCount||b.distinctRoles-a.distinctRoles||a.pc-b.pc);
+}
+function adjacentVoiceMotion(chords){
+ if(!Array.isArray(chords))return [];
+ return chords.slice(0,-1).map((ch,i)=>{
+  const next=chords[i+1],common=ch.notes.filter(pc=>next.notes.includes(pc));
+  const leaving=ch.notes.filter(pc=>!next.notes.includes(pc));
+  const arriving=next.notes.filter(pc=>!ch.notes.includes(pc));
+  const motions=leaving.map(pc=>{
+   const candidates=arriving.map(to=>({from:spell(pc),to:spell(to),semitones:((to-pc+18)%12)-6}));
+   return candidates.sort((a,b)=>Math.abs(a.semitones)-Math.abs(b.semitones))[0]||null;
+  }).filter(Boolean);
+  return {from:ch.label,to:next.label,common:common.map(spell),leaving:leaving.map(spell),arriving:arriving.map(spell),possibleMotions:motions,
+   caveat:"Movimientos posibles entre clases de altura, no una conducción de voces real sin registro y asignación de voces."};
+ });
+}
+
 function analyze(tonic,emotion,composer,modeOverride,DATA){
  const modeKey=modeOverride||emotion.mode,mode=DATA.MODES[modeKey],keyName=DATA.keyNameForPc(tonic);
  const sharp=DATA.KEYS_SHARP[keyName]===1,pcs=scale(tonic,mode),scaleNames=spellScale(tonic,mode,keyName);
@@ -351,5 +376,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
