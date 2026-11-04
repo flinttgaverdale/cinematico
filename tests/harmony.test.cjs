@@ -197,3 +197,13 @@ test("modal and secondary dominant labels require a chord that leads by fifth", 
   const primary=E.buildProfileProgression([{d:4,a:0,q:"major",e:"7"},{d:0,a:0,q:"major",e:""}],0,DATA.MODES.ionian,"C");
   assert.equal(primary[0].classification,"dominant");
 });
+
+test("modulation candidates come from the harmonic context, while composer profiles only rank them", () => {
+  const a=E.analyze(0,DATA.EMOTIONS.alegria,DATA.COMPOSERS.giacchino,"ionian",DATA);
+  const b=E.analyze(0,DATA.EMOTIONS.alegria,DATA.COMPOSERS.zimmer,"ionian",DATA);
+  const idsA=Array.from(a.mods,x=>x.id),idsB=Array.from(b.mods,x=>x.id);
+  assert.deepEqual([...idsA].sort(),[...idsB].sort());
+  assert.equal(idsA.length,12);
+  assert.equal(idsA[0],"up_major3");
+  assert.equal(idsB[0],"up_minor3");
+});
