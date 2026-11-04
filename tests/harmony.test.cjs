@@ -82,7 +82,8 @@ test("the Dorian cadence explicitly identifies its borrowed major dominant", () 
   const dominant=result.progression.at(-1);
   assert.equal(dominant.label,"G");
   assert.equal(dominant.roman,"V");
-  assert.equal(dominant.borrowed,true);
+  assert.equal(dominant.classification,"modalDominant");
+  assert.equal(dominant.borrowed,false);
   assert.ok(!E.scale(0,DATA.MODES.dorian).includes(11));
   assert.ok(dominant.notes.includes(11));
 });
@@ -106,8 +107,10 @@ test("the Neapolitan is represented as a harmonic colour, not a key modulation",
   const result=E.analyze(0,DATA.EMOTIONS.tension,DATA.COMPOSERS.williams,"aeolian",DATA);
   const nap=result.mods.find(x=>x.id==="neapolitan");
   assert.equal(nap.kind,"color");
-  assert.equal(nap.target,"♭II (D♭)");
+  assert.equal(nap.target,"♭II6 → V7 → i");
   assert.equal(nap.chord.notes.length,3);
+  assert.equal(nap.chord.bass,5);
+  assert.deepEqual(Array.from(nap.resolution,x=>x.root),[1,7,0]);
 });
 
 test("scale spelling preserves diatonic letter names in difficult keys", () => {
@@ -176,4 +179,18 @@ test("all composer reference gestures keep their intended formula in C", () => {
     const result=E.analyze(0,DATA.EMOTIONS.alegria,DATA.COMPOSERS[id],"ionian",DATA);
     assert.deepEqual(Array.from(result.signature,x=>x.label),labels,id);
   }
+});
+
+test("the ♭II differs between Aeolian chromaticism and Phrygian diatonic harmony", () => {
+  const aeolian=E.buildProfileProgression([{d:1,a:-1,q:"major",e:""}],0,DATA.MODES.aeolian,"C")[0];
+  const phrygian=E.buildProfileProgression([{d:1,a:-1,q:"major",e:""}],0,DATA.MODES.phrygian,"C")[0];
+  assert.equal(aeolian.classification,"modalInterchange");
+  assert.equal(aeolian.borrowedFrom,"phrygian");
+  assert.equal(phrygian.classification,"diatonic");
+});
+test("modal and secondary dominant labels require a chord that leads by fifth", () => {
+  const dorian=E.buildProfileProgression([{d:4,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],0,DATA.MODES.dorian,"C");
+  assert.equal(dorian[0].classification,"modalDominant");
+  const secondary=E.buildProfileProgression([{d:5,a:0,q:"major",e:"7"},{d:1,a:0,q:"minor",e:""}],0,DATA.MODES.dorian,"C");
+  assert.equal(secondary[0].classification,"secondaryDominant");
 });
