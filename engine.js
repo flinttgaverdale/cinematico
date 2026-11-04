@@ -448,5 +448,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
