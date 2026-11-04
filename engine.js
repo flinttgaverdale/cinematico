@@ -50,13 +50,17 @@ function romanFor(degree,alter,type){
  let numeral=minor||dim||half?base.toLowerCase():base;
  if(alter===-2)numeral="𝄫"+numeral;else if(alter===-1)numeral="♭"+numeral;
  else if(alter===1)numeral="♯"+numeral;else if(alter===2)numeral="𝄪"+numeral;
- if(half)numeral+="ø";else if(dim)numeral+="°";else if(type==="aug")numeral+="+";if(type==="mMaj7")numeral+="(maj7)";
- return numeral;
+ if(half)numeral+="ø";else if(dim)numeral+="°";else if(type==="aug")numeral+="+";
+ const suffix={"7":"7","maj7":"maj7","m7":"7","m9":"9","maj9":"maj9","9":"9","add9":"(add9)","6":"6","m6":"6","dim7":"7","m7b5":"7","mMaj7":"(maj7)","maj7#11":"maj7(♯11)","sus2":"(sus2)","sus4":"(sus4)","5":"5"}[type]||"";
+ return numeral+suffix;
 }
 function identifyType(ints){
- const k=ints.join(",");
- const def=TYPE_DEFS.concat([{id:"sus2",label:"sus2",int:[0,2,7]},{id:"sus4",label:"sus4",int:[0,5,7]},{id:"5",label:"5",int:[0,7]}]).find(x=>x.int.join(",")===k);
- return def||{id:"custom",label:"",int:ints};
+ const normalized=[...new Set(ints.map(mod))].sort((a,b)=>a-b);
+ const defs=TYPE_DEFS.concat([
+  {id:"sus2",label:"sus2",int:[0,2,7]},{id:"sus4",label:"sus4",int:[0,5,7]},{id:"5",label:"5",int:[0,7]},
+  ...["m9","maj9","9","add9","6","m6","maj7#11"].map(id=>({id,label:id,int:extensionIntervals(id)}))
+ ]);
+ return defs.find(x=>x.int.length===normalized.length&&x.int.every(n=>normalized.includes(n)))||{id:"custom",label:"",int:normalized};
 }
 function chordFromPcs(pcs,rootName){
  const root=pcs[0],ints=pcs.map(p=>mod(p-root)),type=identifyType(ints);
@@ -92,7 +96,7 @@ function extensionIntervals(type){
 function classifyProgressionChord(chord,tonic,mode,nextChord){
  const allowed=new Set(scale(tonic,mode)),pcs=chord.notes.map(mod),inMode=pcs.every(p=>allowed.has(p));
  const currentMode=Object.entries(MODAL_INTERVALS).find(([,ints])=>ints.join(",")===mode.int.join(","))?.[0];
- const dominant=["major","dominant seventh"].includes(chord.quality)&&nextChord&&mod(chord.root+5)===mod(nextChord.root);
+ const dominant=["major","dominant seventh"].includes(chord.quality)&&nextChord&&mod(chord.root+5)===mod(nextChord.root)&&pcs.includes(mod(nextChord.root+11));
  if(dominant){
   const primary=mod(nextChord.root)===mod(tonic);
   const classification=primary?(inMode?"dominant":"modalDominant"):"secondaryDominant";
@@ -103,7 +107,7 @@ function classifyProgressionChord(chord,tonic,mode,nextChord){
  const borrowedCandidates=Object.entries(MODAL_INTERVALS).filter(([name,ints])=>name!==currentMode&&pcs.every(p=>ints.map(n=>mod(tonic+n)).includes(p))).map(([name,ints])=>({name,score:[...new Set(ints.map(n=>mod(tonic+n)))].filter(p=>!currentPcs.has(p)).length+[...currentPcs].filter(p=>!ints.map(n=>mod(tonic+n)).includes(p)).length}));
  borrowedCandidates.sort((a,b)=>a.score-b.score);
  const borrowedMode=borrowedCandidates[0]?.name;
- if(borrowedMode)return {classification:"modalInterchange",harmonicRole:"modalInterchange",borrowed:true,chromatic:true,borrowedFrom:borrowedMode,explanation:"El acorde encaja en el modo paralelo "+borrowedMode+": posible intercambio modal."};
+ if(borrowedMode)return {classification:"modalInterchange",harmonicRole:"modalInterchange",borrowed:false,chromatic:true,borrowedFrom:borrowedMode,explanation:"Compatible con el modo paralelo "+borrowedMode+"; el intercambio modal es una hipótesis, no una función demostrada."};
  return {classification:"chromatic",harmonicRole:"chromatic",borrowed:false,chromatic:true,explanation:"Contiene notas ajenas al modo; no se atribuye función sin contexto adicional."};
 }
 function buildProfileProgression(steps,tonic,mode,keyName){
