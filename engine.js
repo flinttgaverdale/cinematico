@@ -131,11 +131,27 @@ function targetModeFor(id,tonic,modeKey){
  return {tonic:mod(tonic+(offsets[id]||0)),mode:modeKey};
 }
 function noteNameForPc(pc,sharp){return spell(pc,sharp);}
-function modulationIdeas(tonic,mode,composer,keyName,DATA){
+function modulationIdeas(tonic,mode,composer,keyName,DATA,progression,emotion){
  const sourcePcs=scale(tonic,mode),sourceTriads=sourcePcs.map((_,i)=>diatonicChord(tonic,mode,i,keyName,false));
+ const emotionId=Object.entries(DATA.EMOTIONS||{}).find(([,value])=>value===emotion)?.[0]||"";
+ const preferences={
+  alegria:["up_fifth","up_major3","relative","up_semitone"],
+  tristeza:["down_minor3","relative","down_fifth","parallel"],
+  nostalgia:["parallel","down_major3","relative","down_fifth"],
+  maravilla:["up_major3","up_fifth","tritone","parallel"],
+  heroismo:["up_fifth","up_major3","up_semitone","relative"],
+  tension:["up_semitone","tritone","down_semitone","neapolitan"],
+  oscuridad:["down_semitone","tritone","down_minor3","neapolitan"],
+  esperanza:["up_fifth","relative","up_major3","parallel"],
+  paz:["relative","down_fifth","parallel","up_fifth"],
+  misterio:["tritone","down_minor3","parallel","down_semitone"],
+  romance:["relative","up_fifth","parallel","up_major3"],
+  epica:["up_fifth","up_minor3","up_major3","tritone"]
+ };
+ const pref=preferences[emotionId]||["relative","up_fifth","parallel","up_major3"];
+ const progress=progression||[],roots=progress.map(chord=>chord.root),last=progress.at(-1);
  const candidateIds=["relative","parallel","up_semitone","down_semitone","up_major3","down_major3","up_minor3","down_minor3","up_fifth","down_fifth","tritone","neapolitan"];
- candidateIds.sort((a,b)=>{const ai=composer.mods.indexOf(a),bi=composer.mods.indexOf(b);return (ai<0?999:ai)-(bi<0?999:bi);});
- return candidateIds.map(id=>{
+ const candidates=candidateIds.map(id=>{
   if(id==="neapolitan"){
    const rootPc=mod(tonic+1),rootName=spellDegree(tonic,1,DATA.MODES.ionian,keyName,-1);
    const pcs=[mod(rootPc+4),mod(rootPc+7),rootPc],chord={label:rootName+"/"+spell(pcs[0]),root:rootPc,type:"",roman:"♭II6",notes:pcs,bass:pcs[0],inversion:1};
@@ -145,16 +161,33 @@ function modulationIdeas(tonic,mode,composer,keyName,DATA){
    const target=phrygian?"♭II frigio":("♭II6 → V7 → "+tonicChord.roman);
    const feel=phrygian?"En frigio, ♭II pertenece a la escala: úsalo como color modal, no como napolitana funcional automática.":"Acorde mayor sobre ♭II en primera inversión; puede actuar como predominante hacia V7 y la tónica, si la conducción de voces confirma esa función.";
    const transition=phrygian?"♭II es diatónico en frigio. Prueba su color contra i o un pedal, sin dar por supuesta una cadencia tonal.":"N6 en primera inversión (tercera en el bajo) → V7 con sensible elevada → "+tonicChord.roman+". Comprueba la conducción de voces y la cadencia.";
-   return {id,kind:"color",name,target,feel,common:null,shared:[],pivots:[],chord,resolution:[chord,dominant,tonicChord],transition};
+   const rank=pref.indexOf(id),score=(rank<0?0:3.2-rank*.65)+(last&&last.root===tonic?0.3:0);
+   return {id,kind:"color",name,target,feel,common:null,shared:[],pivots:[],chord,resolution:[chord,dominant,tonicChord],transition,score,fitReason:"Color cromático/modal asociado a "+(emotion?.name||"la intención elegida")+". No cambia por sí solo el centro tonal.",cadence:{dominant:dominant.label,tonic:tonicChord.label,label:phrygian?"color modal sobre ♭II":"N6 → V7 → "+tonicChord.label}};
   }
   const target=targetModeFor(id,tonic,DATA.modeKey),targetName=DATA.keyNameForPc(target.tonic),targetMode=DATA.MODES[target.mode]||DATA.MODES.ionian,targetPcs=scale(target.tonic,targetMode);
   const sharedPcs=sourcePcs.filter(p=>targetPcs.includes(p)),targetTriads=targetPcs.map((_,i)=>diatonicChord(target.tonic,targetMode,i,targetName,false)),pivots=[];
   for(const x of sourceTriads)for(const y of targetTriads)if(x.notes.slice().sort((p,q)=>p-q).join(",")===y.notes.slice().sort((p,q)=>p-q).join(","))pivots.push({source:x.label,target:y.label,sourceRoman:x.roman,targetRoman:y.roman,status:"candidate"});
   const unique=pivots.filter((p,i)=>pivots.findIndex(q=>q.source===p.source&&q.target===p.target)===i).slice(0,3),same=target.tonic===tonic;
-  const names={relative:"Campo jónico relacionado",parallel:"Cambio de marco modal",up_semitone:"Desplazamiento cromático ascendente (semitono)",down_semitone:"Desplazamiento cromático descendente (semitono)",up_major3:"Mediante cromática ascendente (3ª mayor)",down_major3:"Mediante cromática descendente (3ª mayor)",up_minor3:"Mediante cromática ascendente (3ª menor)",down_minor3:"Mediante cromática descendente (3ª menor)",up_fifth:"Región de quinta ascendente",down_fifth:"Región de quinta descendente",tritone:"Región a distancia de tritono"};
-  const transition=unique.length?"Candidatos a acorde pivote (no prueban modulación): "+unique.map(p=>p.source+" ("+p.sourceRoman+") puede reinterpretarse como "+p.target+" ("+p.targetRoman+")").join("; ")+". Confirma el destino con dominante, sensible, cadencia y conducción de voces.":sharedPcs.length?"No hay tríada pivote clara. Notas comunes: "+sharedPcs.map(p=>noteNameForPc(p,DATA.KEYS_SHARP[targetName]===1)).join(", ")+". Puedes conservar una nota y después afirmar el nuevo centro.":"No hay notas comunes entre ambos campos. El salto puede ser directo, pero prepara melodía, bajo o dominante del destino.";
-  return {id,kind:same?"mode":"region",name:names[id]||"Cambio de región",target:targetName,targetMode:targetMode.name,targetPc:target.tonic,feel:DATA.MODULATIONS?.[id]?.feel||"Posibilidad de cambio de región; el nuevo centro debe confirmarse musicalmente.",common:sharedPcs.length,shared:sharedPcs.map(p=>noteNameForPc(p,DATA.KEYS_SHARP[targetName]===1)),pivots:unique,transition,confirmation:"Modulación no confirmada: requiere evidencia cadencial o funcional en el destino."};
+  const names={relative:"Campo relativo",parallel:"Cambio de modo paralelo",up_semitone:"Región cromática ascendente (semitono)",down_semitone:"Región cromática descendente (semitono)",up_major3:"Mediante cromática ascendente (3ª mayor)",down_major3:"Mediante cromática descendente (3ª mayor)",up_minor3:"Mediante cromática ascendente (3ª menor)",down_minor3:"Mediante cromática descendente (3ª menor)",up_fifth:"Región de quinta ascendente",down_fifth:"Región de quinta descendente",tritone:"Región a distancia de tritono"};
+  const dominantRoot=mod(target.tonic+7),dominant={label:spell(dominantRoot)+"7",root:dominantRoot,type:"7",roman:"V7",notes:[0,4,7,10].map(n=>mod(dominantRoot+n)),bass:dominantRoot};
+  const tonicTriad=diatonicChord(target.tonic,targetMode,0,targetName,false),tonicLabel=tonicTriad.label;
+  const rank=pref.indexOf(id),preferenceScore=rank<0?0:3.1-rank*.62;
+  const pivotScore=Math.min(unique.length,2)*1.25,sharedScore=Math.min(sharedPcs.length,7)*.55;
+  const dominantEvidence=last&&mod(last.root-target.tonic)===7?2.4:0;
+  const tonicEvidence=roots.includes(target.tonic)?1.1:0;
+  const composerRank=Array.isArray(composer.mods)?composer.mods.indexOf(id):-1;
+  const composerScore=composerRank<0?0:Math.max(0,.32-composerRank*.04);
+  const score=preferenceScore+pivotScore+sharedScore+dominantEvidence+tonicEvidence+composerScore;
+  const reasonBits=[];
+  if(rank>=0)reasonBits.push("Encaja con "+(emotion?.name||"la intención elegida")+" por su carácter "+(DATA.MODULATIONS?.[id]?.feel||"contrastante"));
+  if(unique.length)reasonBits.push("ofrece "+unique.length+" posible(s) acorde(s) pivote");
+  if(dominantEvidence)reasonBits.push("el último acorde puede reinterpretarse como dominante del destino");
+  else if(sharedPcs.length)reasonBits.push("conserva "+sharedPcs.length+" nota(s) del campo de origen");
+  const transition=unique.length?"Candidatos a acorde pivote (no prueban modulación): "+unique.map(p=>p.source+" ("+p.sourceRoman+") puede reinterpretarse como "+p.target+" ("+p.targetRoman+")").join("; ")+". Después, prepara "+dominant.label+" → "+tonicLabel+" para afirmar el destino.":sharedPcs.length?"No hay tríada pivote clara. Notas comunes: "+sharedPcs.map(p=>noteNameForPc(p,DATA.KEYS_SHARP[targetName]===1)).join(", ")+". Conserva una de ellas y prepara "+dominant.label+" → "+tonicLabel+".":"No hay notas comunes entre ambos campos. Haz perceptible el salto mediante el bajo o una melodía puente y prepara "+dominant.label+" → "+tonicLabel+".";
+  return {id,kind:same?"mode":"region",name:names[id]||"Cambio de región",target:targetName,targetMode:targetMode.name,targetPc:target.tonic,feel:DATA.MODULATIONS?.[id]?.feel||"Posibilidad de cambio de región; el nuevo centro debe confirmarse musicalmente.",common:sharedPcs.length,shared:sharedPcs.map(p=>noteNameForPc(p,DATA.KEYS_SHARP[targetName]===1)),pivots:unique,transition,confirmation:"Modulación no confirmada: requiere evidencia cadencial o funcional en el destino.",score,fitReason:reasonBits.join("; ")+".",cadence:{dominant:dominant.label,tonic:tonicLabel,label:"V7 → "+tonicLabel}};
  });
+ candidates.sort((a,b)=>b.score-a.score);
+ return candidates.slice(0,7);
 }
 function analyze(tonic,emotion,composer,modeOverride,DATA){
  const modeKey=modeOverride||emotion.mode,mode=DATA.MODES[modeKey],keyName=DATA.keyNameForPc(tonic);
@@ -165,7 +198,7 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const signatureModeKey=composer.signatureMode||"ionian";
  const signatureMode=DATA.MODES[signatureModeKey]||DATA.MODES.ionian;
  const signature=buildProfileProgression(composer.signature,tonic,signatureMode,keyName);
- const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey});
+ const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
 root.CinematicoEngine={PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
