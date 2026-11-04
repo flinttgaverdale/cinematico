@@ -332,3 +332,15 @@ test("P L R transformations preserve two notes and one chromatic or whole-tone m
  }
  assert.equal(E.neoTransform(0,"diminished","P"),null);
 });
+
+test("composer assistance offers explainable options without mutating original material", () => {
+ const chords=[{root:0,type:"m",label:"Cm"},{root:7,type:"7",label:"G7"}];
+ const original=JSON.stringify(chords);
+ for(const id of ["williams","herrmann","zimmer"]){
+  const ideas=E.composerAssistance(id,chords);
+  assert.equal(ideas.length,3);
+  assert.ok(ideas.every(x=>x.action&&x.reason&&x.observation&&x.changesOriginal===false));
+ }
+ assert.equal(JSON.stringify(chords),original);
+ assert.deepEqual(E.composerAssistance("unknown",chords),[]);
+});
