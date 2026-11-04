@@ -116,7 +116,7 @@ test("scale spelling preserves diatonic letter names in difficult keys", () => {
 });
 
 test("the inline application script parses", () => {
-  const scripts=[...html.matchAll(/<script(?:\\s[^>]*)?>([\\s\\S]*?)<\\/script>/g)].map(x=>x[1]).filter(x=>x.trim());
+  const scripts=[...html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/g)].map(x=>x[1]).filter(x=>x.trim());
   assert.ok(scripts.length>0);
   for (const script of scripts) new vm.Script(script);
 });
