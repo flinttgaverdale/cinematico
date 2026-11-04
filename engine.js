@@ -357,8 +357,15 @@ function threeVoiceCandidates(chord,style="cinematic"){
  const ranges=[[36,60],[52,76],[60,84]];
  const choices=ranges.map(([lo,hi])=>Array.from({length:hi-lo+1},(_,i)=>lo+i).filter(n=>pcs.includes(n%12)));
  const out=[];
- // For four-tone seventh chords, omit the fifth before the third or seventh.
- const structural=pcs.length<=3?pcs:[bass,mod(chord.root+3),mod(chord.root+4),mod(chord.root+10),mod(chord.root+11)].filter(p=>pcs.includes(p));
+ // Three voices cannot contain all four distinct notes of a seventh chord.
+ // Retain the specified bass and prioritize third and seventh; the fifth is optional.
+ const third=pcs.find(p=>[3,4].includes(mod(p-chord.root)));
+ const seventh=pcs.find(p=>[10,11].includes(mod(p-chord.root)));
+ const required=new Set([bass]);
+ if(pcs.length<=3)pcs.forEach(p=>required.add(p));
+ else for(const p of [third,seventh,mod(chord.root)]){
+  if(p!==undefined&&pcs.includes(p)&&required.size<3)required.add(p);
+ }
  for(const low of choices[0]){
   if(low%12!==bass)continue;
   for(const middle of choices[1]){
@@ -366,8 +373,7 @@ function threeVoiceCandidates(chord,style="cinematic"){
    for(const high of choices[2]){
     if(high<=middle||high-middle>(style==="classical"?12:19))continue;
     const notes=[low,middle,high],represented=new Set(notes.map(n=>n%12));
-    if(pcs.length<=3&&!pcs.every(p=>represented.has(p)))continue;
-    if(pcs.length>3&&!structural.slice(0,3).every(p=>represented.has(p)))continue;
+    if([...required].some(p=>!represented.has(p)))continue;
     out.push(notes);
    }
   }
