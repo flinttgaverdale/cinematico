@@ -17,11 +17,19 @@ const mod=n=>((n%12)+12)%12;
 function spell(pc,sharp=true){return (sharp?SHARP:FLAT)[mod(pc)];}
 function keyLetter(keyName){return (keyName||"C")[0].toUpperCase();}
 function accidentalText(n){return n===2?"𝄪":n===1?"♯":n===-1?"♭":n===-2?"𝄫":n>2?"+"+n:n< -2?String(n):"";}
-function spellDegree(tonic,degree,mode,keyName,alter=0){
+function spellDegreePc(tonic,degree,pc,keyName){
  const root=keyLetter(keyName),ri=LETTERS.indexOf(root),letter=LETTERS[(ri+degree)%7];
- const target=mod(tonic+mode.int[degree]+alter),natural=NATURAL[letter];
- let diff=mod(target-natural);if(diff>6)diff-=12;
+ const natural=NATURAL[letter];let diff=mod(pc-natural);if(diff>6)diff-=12;
  return letter+accidentalText(diff);
+}
+function spellDegree(tonic,degree,mode,keyName,alter=0){
+ return spellDegreePc(tonic,degree,mod(tonic+mode.int[degree]+alter),keyName);
+}
+function profileDegreePc(tonic,mode,degree,alter){
+ const modal=mod(tonic+mode.int[degree]);
+ if(!alter)return modal;
+ const major=mod(tonic+MAJOR[degree]),delta=mod(modal-major),desired=alter<0?11:1;
+ return delta===desired?modal:mod(modal+alter);
 }
 function spellScale(tonic,mode,keyName){return mode.int.map((_,i)=>spellDegree(tonic,i,mode,keyName));}
 function scale(tonic,mode){return mode.int.map(n=>mod(tonic+n));}
@@ -82,13 +90,13 @@ function extensionIntervals(type){
 }
 function buildProfileProgression(steps,tonic,mode,keyName){
  return steps.map(s=>{
-  const degree=s.d,alter=s.a||0,pc=mod(tonic+mode.int[degree]+alter);
-  const rootName=spellDegree(tonic,degree,mode,keyName,alter);
+  const degree=s.d,alter=s.a||0,pc=profileDegreePc(tonic,mode,degree,alter);
+  const rootName=spellDegreePc(tonic,degree,pc,keyName);
   const type=extensionType(s.q,s.e),intervals=extensionIntervals(type),pcs=intervals.map(i=>mod(pc+i));
   const chord=chordFromPcs(pcs,rootName);
   const actualAlter=accidentalForPc(pc,degree,tonic);
   const roman=romanFor(degree,actualAlter,type);
-  const diatonic=mod(pc-(tonic+mode.int[degree]))===0;
+  const diatonic=pc===mod(tonic+mode.int[degree]);
   return {...chord,label:rootName+(type==="m"?"m":type==="dim"?"°":type==="aug"?"+":type),roman,degree,root:pc,
    diatonic,borrowed:!diatonic||!isQualityDiatonic(type,tonic,mode,degree),extension:type};
  });
