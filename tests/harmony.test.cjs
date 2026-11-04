@@ -577,3 +577,10 @@ test("continuity analysis handles repeated chords and empty progressions",()=>{
  assert.equal(repeated[0].ideas.filter(x=>x.kind==="held-tension").length,0);
  assert.equal(repeated[0].ideas.filter(x=>x.kind==="common-tone").length,3);
 });
+
+test("contextual guidance is rendered in the existing analysis without MIDI controls",()=>{
+ assert.ok(html.includes("CinematicoEngine.harmonicContinuityIdeas(userMaterial)"));
+ assert.ok(html.includes("continuity[i].ideas[0].description"));
+ assert.ok(html.includes("motions.map((m,i)=>"));
+ assert.ok(!html.includes('type="file"'));
+});
