@@ -31,7 +31,7 @@ function diatonicChord(tonic,mode,degree,sharp,seventh){
 }
 function roman(degree,type,alteration){
  const base=["I","II","III","IV","V","VI","VII"][degree];
- const minor=["m","m7","m7b5","mMaj7"].includes(type);
+ const minor=["m","m6","m7","m9","m7b5","mMaj7"].includes(type);
  const diminished=["dim","dim7","m7b5"].includes(type);
  let numeral=minor?base.toLowerCase():base;
  if(diminished)numeral+="°";
