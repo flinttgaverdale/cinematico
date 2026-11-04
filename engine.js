@@ -493,6 +493,29 @@ function sustainedToneAnalysis(chords){
    caveat:"Función vertical estimada: sin duración, octava, acento ni voces reales no puede distinguirse una suspensión, apoyatura o pedal ejecutado."};
  }).sort((a,b)=>b.chordToneCount-a.chordToneCount||b.distinctRoles-a.distinctRoles||a.pc-b.pc);
 }
+// Harmonic context only: proposals describe possible held pitch classes,
+// never claim that a melody or MIDI performance actually contains them.
+function harmonicContinuityIdeas(chords){
+ if(!Array.isArray(chords))return [];
+ return chords.slice(0,-1).map((from,index)=>{
+  const to=chords[index+1],fromPcs=new Set(from.notes.map(mod)),toPcs=new Set(to.notes.map(mod));
+  const common=[...fromPcs].filter(pc=>toPcs.has(pc));
+  const changed=[...fromPcs].filter(pc=>!toPcs.has(pc));
+  const ideas=[];
+  for(const pc of common.slice(0,3)){
+   ideas.push({kind:"common-tone",pc,note:spell(pc),title:"Conservar nota común",description:"Mantener "+spell(pc)+" puede conectar "+from.label+" con "+to.label+" sin cambiar de altura.",certainty:"posibilidad"});
+  }
+  for(const pc of changed.slice(0,3)){
+   const interval=mod(pc-to.root);
+   const role=interval===2?"novena":interval===5?"oncena":interval===9?"trecena":interval===11?"séptima mayor":interval===10?"séptima menor":interval===1?"novena bemol":interval===6?"oncena aumentada / quinta disminuida":"color externo";
+   ideas.push({kind:"held-tension",pc,note:spell(pc),interval,title:"Explorar tensión mantenida",description:"Si se mantiene "+spell(pc)+" sobre "+to.label+", funcionaría verticalmente como "+role+"; comprobar su sonoridad y eventual resolución.",certainty:"posibilidad"});
+  }
+  const nearest=changed.flatMap(pc=>[...toPcs].map(dest=>({pc,dest,delta:((dest-pc+18)%12)-6}))).filter(x=>x.delta!==0).sort((a,b)=>Math.abs(a.delta)-Math.abs(b.delta)||a.pc-b.pc||a.dest-b.dest)[0];
+  if(nearest)ideas.push({kind:"stepwise-option",pc:nearest.pc,note:spell(nearest.pc),target:spell(nearest.dest),semitones:nearest.delta,title:"Explorar movimiento cercano",description:"Una voz podría pasar de "+spell(nearest.pc)+" a "+spell(nearest.dest)+" ("+(nearest.delta>0?"+":"")+nearest.delta+" semitonos); no se presupone registro ni voz real.",certainty:"posibilidad"});
+  return {index,from:from.label,to:to.label,common:common.map(spell),ideas,
+   caveat:"Sugerencias entre clases de altura: sin melodía, ritmo ni registro no describen notas realmente ejecutadas."};
+ });
+}
 function adjacentVoiceMotion(chords){
  if(!Array.isArray(chords))return [];
  return chords.slice(0,-1).map((ch,i)=>{
@@ -520,5 +543,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
