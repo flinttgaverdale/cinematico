@@ -613,3 +613,31 @@ test("web interface renders transparent alternative comparisons",()=>{
  assert.ok(html.includes("CinematicoEngine.compareHarmonicAlternatives("));
  assert.ok(html.includes("p.comparison.changed"));
 });
+
+test("contrast intention ranks alternatives by explainable structural changes",()=>{
+ const chords=E.parseUserProgression("Cm Ab Fm G7").chords;
+ const proposals=E.chordAlternatives(chords,1);
+ const neutral=E.compareHarmonicAlternatives(chords,1,proposals);
+ const contrast=E.compareHarmonicAlternatives(chords,1,proposals,"contrast");
+ assert.equal(contrast.length,neutral.length);
+ assert.ok(contrast.every((p,i)=>i===0||contrast[i-1].comparison.contrastScore>=p.comparison.contrastScore));
+ assert.ok(contrast.every(p=>p.comparison.contrastReasons.length===3));
+ assert.ok(contrast.every(p=>p.changesOriginal===false));
+ assert.deepEqual([...contrast.map(p=>p.label)].sort(),[...neutral.map(p=>p.label)].sort());
+});
+test("contrast lens handles equal scores and retains original exploration order",()=>{
+ const chords=E.parseUserProgression("C F G").chords;
+ const proposals=[{label:"X",root:1,notes:[1,5,8]},{label:"Y",root:2,notes:[2,6,9]}];
+ const neutral=E.compareHarmonicAlternatives(chords,1,proposals);
+ assert.deepEqual(neutral.map(x=>x.label),["X","Y"]);
+ const contrast=E.compareHarmonicAlternatives(chords,1,proposals,"contrast");
+ assert.equal(contrast.length,2);
+ assert.ok(contrast.every(x=>x.comparison.contrastRank>=1));
+ assert.equal(E.compareHarmonicAlternatives(chords,1,proposals,"other")[0].label,"X");
+});
+test("contrast intention stays in the web harmonic UI without MIDI input",()=>{
+ assert.ok(html.includes('id="contrastLens"'));
+ assert.ok(html.includes('alternativeIntention'));
+ assert.ok(html.includes('p.comparison.contrastReasons'));
+ assert.ok(!html.includes('type="file"'));
+});
