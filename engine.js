@@ -330,27 +330,41 @@ function transitionCost(a,b,style,fromChord=null,toChord=null){
  const weights=style==="classical"?{motion:1,leap:2,parallel:12}:style==="minimal"?{motion:2,leap:1.5,parallel:1}:{motion:1,leap:.8,parallel:1.5};
  return {total:motion*weights.motion+leap*weights.leap+parallels*weights.parallel+tendency.penalty*(style==="minimal"?.2:style==="cinematic"?.6:1),motion,leap,parallels,diffs,tendency};
 }
-function voiceLead(progression,style="cinematic",locks={}){
- const valid=["classical","cinematic","minimal"].includes(style)?style:"cinematic";
- if(!progression?.length)return {style:valid,voicings:[],transitions:[],cost:0};
- const layers=progression.map((chord,i)=>voicingCandidates(chord,valid).filter(v=>Object.entries(locks[i]||{}).every(([voice,pitch])=>v[Number(voice)]===Number(pitch))));
- if(layers.some(x=>!x.length))return {style:valid,voicings:[],transitions:[],cost:null,warning:"No hay una disposición válida con esas notas fijadas. Libera alguna voz o prueba otro acorde."};
- let costs=layers[0].map((v)=>v.reduce((sum,n,i)=>sum+Math.abs(n-[48,57,64,72][i])*.15,0));
+// Shared dynamic-programming solver for independent three- and four-voice models.
+// Keeps scoring musical-style-specific while centralizing path reconstruction.
+function optimizeVoiceLayers(layers,chords,initialScore,transitionScore){
+ if(!layers.length)return {voicings:[],cost:0};
+ if(layers.some(layer=>!layer.length))return {voicings:[],cost:null};
+ let costs=layers[0].map(initialScore);
  const links=[];
  for(let k=1;k<layers.length;k++){
   const next=layers[k].map(()=>Infinity),back=layers[k].map(()=>-1);
   for(let j=0;j<layers[k].length;j++)for(let i=0;i<layers[k-1].length;i++){
-   const score=costs[i]+transitionCost(layers[k-1][i],layers[k][j],valid,progression[k-1],progression[k]).total;
-   if(score<next[j]){next[j]=score;back[j]=i;}
+   const cost=costs[i]+transitionScore(layers[k-1][i],layers[k][j],chords[k-1],chords[k]);
+   if(cost<next[j]){next[j]=cost;back[j]=i;}
   }
   links.push(back);costs=next;
  }
- let best=costs.indexOf(Math.min(...costs)),voicings=Array(layers.length);
- for(let k=layers.length-1;k>=0;k--){voicings[k]=layers[k][best];if(k)best=links[k-1][best];}
- const transitions=voicings.slice(1).map((v,i)=>transitionCost(voicings[i],v,valid,progression[i],progression[i+1]));
- return {style:valid,voicings,transitions,cost:Math.min(...costs),names:voicings.map(v=>v.map(midiName)),voiceOrder:["Bajo","Tenor","Alto","Soprano"],warning:"Realización orientativa: la función, la instrumentación y las resoluciones deben revisarse musicalmente."};
+ let best=costs.indexOf(Math.min(...costs));
+ const voicings=Array(layers.length);
+ for(let k=layers.length-1;k>=0;k--){
+  voicings[k]=layers[k][best];
+  if(k)best=links[k-1][best];
+ }
+ return {voicings,cost:Math.min(...costs)};
 }
-
+function voiceLead(progression,style="cinematic",locks={}){
+ const valid=["classical","cinematic","minimal"].includes(style)?style:"cinematic";
+ if(!progression?.length)return {style:valid,voicings:[],transitions:[],cost:0};
+ const layers=progression.map((chord,i)=>voicingCandidates(chord,valid).filter(v=>Object.entries(locks[i]||{}).every(([voice,pitch])=>v[Number(voice)]===Number(pitch))));
+ const solution=optimizeVoiceLayers(layers,progression,
+  v=>v.reduce((sum,n,i)=>sum+Math.abs(n-[48,57,64,72][i])*.15,0),
+  (a,b,from,to)=>transitionCost(a,b,valid,from,to).total);
+ if(!solution.voicings.length)return {style:valid,...solution,transitions:[],warning:"No hay una disposición válida con esas notas fijadas. Libera alguna voz o prueba otro acorde."};
+ const voicings=solution.voicings;
+ const transitions=voicings.slice(1).map((v,i)=>transitionCost(voicings[i],v,valid,progression[i],progression[i+1]));
+ return {style:valid,...solution,transitions,names:voicings.map(v=>v.map(midiName)),voiceOrder:["Bajo","Tenor","Alto","Soprano"],warning:"Realización orientativa: la función, la instrumentación y las resoluciones deben revisarse musicalmente."};
+}
 
 function threeVoiceCandidates(chord,style="cinematic"){
  const pcs=[...new Set(chord.notes.map(mod))],bass=mod(chord.bass??chord.root);
@@ -391,18 +405,10 @@ function threeVoiceLead(chords,style="cinematic",locks={}){
    if(d[i]*d[j]>0&&mod(a[j]-a[i])===mod(b[j]-b[i])&&[0,7].includes(mod(a[j]-a[i])))parallel++;
   return d.reduce((sum,n,i)=>sum+Math.abs(n)*(i===0?.55:1)+Math.max(0,Math.abs(n)-(i===0?7:5))**2*(style==="classical"?2:.8),0)+parallel*(style==="classical"?12:1.5)+harmonicResolutionDiagnostics(a,b,fromChord,toChord).penalty*(style==="classical"?1:.6);
  };
- let costs=layers[0].map(v=>v.reduce((sum,n,i)=>sum+Math.abs(n-[48,64,72][i])*.15,0)),links=[];
- for(let k=1;k<layers.length;k++){
-  const next=layers[k].map(()=>Infinity),back=layers[k].map(()=>-1);
-  for(let j=0;j<layers[k].length;j++)for(let i=0;i<layers[k-1].length;i++){
-   const cost=costs[i]+score(layers[k-1][i],layers[k][j],chords[k-1],chords[k]);
-   if(cost<next[j]){next[j]=cost;back[j]=i;}
-  }
-  links.push(back);costs=next;
- }
- let best=costs.indexOf(Math.min(...costs));const voicings=Array(layers.length);
- for(let k=layers.length-1;k>=0;k--){voicings[k]=layers[k][best];if(k)best=links[k-1][best];}
- return {voicings,cost:Math.min(...costs),transitions:voicings.slice(1).map((v,i)=>({diffs:v.map((n,j)=>n-voicings[i][j])}))};
+ const solution=optimizeVoiceLayers(layers,chords,
+  v=>v.reduce((sum,n,i)=>sum+Math.abs(n-[48,64,72][i])*.15,0),score);
+ const voicings=solution.voicings;
+ return {...solution,transitions:voicings.slice(1).map((v,i)=>({diffs:v.map((n,j)=>n-voicings[i][j])}))};
 }
 function laboratoryVoices(chords,options={}){
  const style=options.style==="classical"?"classical":"cinematic";
