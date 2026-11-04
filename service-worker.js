@@ -1,5 +1,5 @@
 // Service Worker — Cinemático Studio
-const CACHE = "cinematico-studio-v2";
+const CACHE = "cinematico-studio-v3";
 const ASSETS = ["./", "./index.html", "./engine.js", "./manifest.json"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE)
