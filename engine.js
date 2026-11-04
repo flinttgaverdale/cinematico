@@ -90,11 +90,15 @@ function extensionIntervals(type){
  return map[type]||[0,4,7];
 }
 function classifyProgressionChord(chord,tonic,mode,nextChord){
- const allowed=new Set(scale(tonic,mode)),pcs=chord.notes.map(mod);
- if(pcs.every(p=>allowed.has(p)))return {classification:"diatonic",harmonicRole:"diatonic",borrowed:false,chromatic:false,explanation:"Todas sus notas pertenecen al modo seleccionado."};
+ const allowed=new Set(scale(tonic,mode)),pcs=chord.notes.map(mod),inMode=pcs.every(p=>allowed.has(p));
  const currentMode=Object.entries(MODAL_INTERVALS).find(([,ints])=>ints.join(",")===mode.int.join(","))?.[0];
  const dominant=["major","dominant seventh"].includes(chord.quality)&&nextChord&&mod(chord.root+5)===mod(nextChord.root);
- if(dominant){const primary=mod(nextChord.root)===mod(tonic);return {classification:primary?"modalDominant":"secondaryDominant",harmonicRole:primary?"modalDominant":"secondaryDominant",borrowed:false,chromatic:true,explanation:primary?"Dominante mayor que introduce la sensible del centro modal; su resolución al acorde de tónica debe confirmarse.":"Dominante secundaria dirigida al acorde siguiente por relación de quinta; verifica sensible y resolución de la séptima."};}
+ if(dominant){
+  const primary=mod(nextChord.root)===mod(tonic);
+  const classification=primary?(inMode?"dominant":"modalDominant"):"secondaryDominant";
+  return {classification,harmonicRole:classification,borrowed:false,chromatic:!inMode,explanation:classification==="dominant"?"Dominante diatónica que conduce a la tónica por quinta descendente.":classification==="modalDominant"?"Dominante mayor que introduce una sensible ajena al modo y conduce al centro modal.":"Dominante secundaria dirigida al acorde siguiente por relación de quinta; verifica sensible y resolución de la séptima."};
+ }
+ if(inMode)return {classification:"diatonic",harmonicRole:"diatonic",borrowed:false,chromatic:false,explanation:"Todas sus notas pertenecen al modo seleccionado."};
  const currentPcs=new Set((MODAL_INTERVALS[currentMode]||mode.int).map(n=>mod(tonic+n)));
  const borrowedCandidates=Object.entries(MODAL_INTERVALS).filter(([name,ints])=>name!==currentMode&&pcs.every(p=>ints.map(n=>mod(tonic+n)).includes(p))).map(([name,ints])=>({name,score:[...new Set(ints.map(n=>mod(tonic+n)))].filter(p=>!currentPcs.has(p)).length+[...currentPcs].filter(p=>!ints.map(n=>mod(tonic+n)).includes(p)).length}));
  borrowedCandidates.sort((a,b)=>a.score-b.score);
