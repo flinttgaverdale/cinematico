@@ -314,3 +314,21 @@ test("dominant tendency tones are evaluated only for authentic root resolution",
  assert.ok(bad.penalty>good.penalty);
  assert.equal(E.tendencyResolution([43,53,59,65],[48,53,59,65],dominant,{root:2,notes:[2,5,9]}).penalty,0);
 });
+
+test("P L R transformations preserve two notes and one chromatic or whole-tone move", () => {
+ const expected={P:[0,"minor",-1],L:[4,"minor",-1],R:[9,"minor",-2]};
+ for(const [op,[root,quality,delta]] of Object.entries(expected)){
+  const t=E.neoTransform(0,"major",op);
+  assert.equal(t.target.root,root);
+  assert.equal(t.target.quality,quality);
+  assert.equal(t.common.length,2);
+  assert.equal(t.movement.semitones,delta);
+ }
+ for(let root=0;root<12;root++)for(const quality of ["major","minor"])for(const op of ["P","L","R"]){
+  const t=E.neoTransform(root,quality,op);
+  const reverse=E.neoTransform(t.target.root,t.target.quality,op);
+  assert.deepEqual(new Set(reverse.target.notes),new Set(t.source.notes));
+  assert.equal(t.common.length,2);
+ }
+ assert.equal(E.neoTransform(0,"diminished","P"),null);
+});
