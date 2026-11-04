@@ -464,3 +464,13 @@ test("laboratory repeated short progressions are deterministic and do not mutate
  }
  assert.equal(JSON.stringify(chords),snapshot);
 });
+
+test("laboratory interface retains progressive disclosure and only 3 or 4 voices",()=>{
+ assert.ok(html.includes('id="labLockDetails"'));
+ assert.ok(html.includes('<option value="3">Tres voces'));
+ assert.ok(html.includes('<option value="4">Cuatro voces SATB'));
+ assert.ok(!html.includes('<option value="5">Cinco voces'));
+ for(const id of ["labVoiceCount","labVoiceStyle","labLockChord","labLockVoice","labLockPitch","labVoiceOutput"]){
+  assert.ok(html.includes('id="'+id+'"'),id+" missing");
+ }
+});
