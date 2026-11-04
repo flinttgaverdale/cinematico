@@ -672,3 +672,14 @@ test("contextual diagnostics work at both ends and do not edit chords",()=>{
  assert.ok(last.incoming);
  assert.equal(JSON.stringify(chords),original);
 });
+
+test("inline web application JavaScript parses after contextual contrast integration",()=>{
+ const inline=html.match(/<script>([\\s\\S]*?)<\\/script>/);
+ assert.ok(inline,"inline application script");
+ assert.doesNotThrow(()=>new vm.Script(inline[1]));
+});
+test("contextual contrast is explained in the user-facing cards",()=>{
+ assert.ok(html.includes("p.comparison.contextualContrastScore"));
+ assert.ok(html.includes("p.comparison.context.reasons"));
+ assert.ok(html.includes("no se presupone tonalidad"));
+});
