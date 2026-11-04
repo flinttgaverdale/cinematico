@@ -237,7 +237,7 @@ Object.entries(MODES).forEach(([k,v])=>$("mode").add(new Option(v.name,k)));
 function draw(){let out='<circle cx="210" cy="210" r="168" fill="none" stroke="#3b4336"/><circle cx="210" cy="210" r="112" fill="none" stroke="#30372d" stroke-dasharray="2 6"/>';KEYS.forEach((k,i)=>{let a=-Math.PI/2+i*Math.PI/6,x=210+Math.cos(a)*168,y=210+Math.sin(a)*168,active=PC[k]===S.key;out+=`<g class="node ${active?"selected":""}" data-key="${k}" tabindex="0" role="button" aria-label="Seleccionar ${k}"><circle cx="${x}" cy="${y}" r="24"/><text x="${x}" y="${y}">${k}</text></g>`;});out+='<circle class="core" cx="210" cy="210" r="73"/><text class="corelabel" x="210" y="195">TONALIDAD</text><text class="corekey" x="210" y="228">'+esc(S.keyName)+'</text>'; $("circle").innerHTML=out;$("circle").querySelectorAll("[data-key]").forEach(n=>{let pick=()=>{S.keyName=n.dataset.key;S.key=PC[S.keyName];draw();render();};n.onclick=pick;n.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}};});}
 function progMarkup(a,sharp){
  return a.map((c,i)=>{
-  const role=c.classification==="modalInterchange"?" · intercambio modal"+(c.borrowedFrom?" ("+c.borrowedFrom+")":""):c.classification==="secondaryDominant"?" · dominante secundaria":c.classification==="modalDominant"?" · dominante modal":c.classification==="dominant"?" · dominante":c.classification==="chromatic"?" · cromático":"";
+  const role=c.classification==="modalInterchange"?" · posible intercambio modal"+(c.borrowedFrom?" ("+c.borrowedFrom+")":""):c.classification==="secondaryDominant"?" · dominante secundaria":c.classification==="modalDominant"?" · dominante modal":c.classification==="dominant"?" · dominante":c.classification==="chromatic"?" · cromático":"";
   const tones=(c.notes||[]).map(pc=>CinematicoEngine.spell(pc,sharp)).join(" · ");
   const bass=CinematicoEngine.spell(c.bass??c.root,sharp);
   const common=(c.commonWithNext||[]).map(pc=>CinematicoEngine.spell(pc,sharp)).join(" · ");
@@ -254,7 +254,7 @@ function render(){
  $("description").textContent=e.desc+". "+e.hints+".";
  $("scale").innerHTML=d.scale.map(x=>'<span class="pill">'+esc(x)+'</span>').join("");
  $("chords").innerHTML=d.chords.map(x=>'<div class="tile"><small>'+esc(x.roman)+'</small><strong>'+esc(x.label)+'</strong><em>'+typeName(x.type)+'</em></div>').join("");
- $("chordNote").textContent="Acordes construidos por terceras dentro del modo seleccionado. Las progresiones distinguen armonía diatónica, intercambio modal, dominantes modales o secundarias y cromatismo no clasificado funcionalmente.";
+ $("chordNote").textContent="Acordes construidos por terceras dentro del modo seleccionado. Las progresiones distinguen armonía diatónica, posibles intercambios modales, dominantes y cromatismo. La pertenencia de un acorde a otro modo no confirma por sí sola su función.";
  $("emotionName").textContent=e.name;
  $("emotionProgress").innerHTML=progMarkup(d.progression,d.sharp);
  $("emotionNote").textContent=e.desc+". Pista: "+e.hints+". Úsalo como material de partida, no como secuencia obligatoria.";
