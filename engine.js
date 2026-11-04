@@ -125,7 +125,7 @@ function modulationIdeas(tonic,mode,composer,keyName,DATA){
   if(id==="neapolitan"){
    const rootPc=mod(tonic+1),rootName=spellDegree(tonic,1,DATA.MODES.ionian,keyName,-1);
    const chord={label:rootName,type:"",roman:"♭II",notes:[rootPc,mod(rootPc+4),mod(rootPc+7)].map(x=>x)};
-   return {id,kind:"color",name:"Acorde napolitano",target:"♭II",feel:"No es una modulación: es un acorde mayor sobre el segundo grado rebajado. En menor suele actuar como predominante y pide una resolución convincente.",common:0,shared:[],pivots:[],transition:"Prueba ♭II6 → V → i, o mantén una nota común en la melodía.",chord};
+   const native=mode.int[1]===1; return {id,kind:"color",name:"Acorde napolitano / ♭II",target:"♭II ("+rootName+")",feel:native?"En este modo frigio el ♭II es diatónico, no prestado. Su sonoridad mayor define buena parte del color modal.":"No es una modulación: es un acorde mayor sobre el segundo grado rebajado. En menor suele actuar como predominante y pide una resolución convincente.",common:0,shared:[],pivots:[],transition:native?"Prueba alternarlo con i o mantener la nota del ♭II como tensión melódica.":"Prueba ♭II6 → V → i, o mantén una nota común en la melodía.",chord};
   }
   const target=targetModeFor(id,tonic,DATA.modeKey),targetName=DATA.keyNameForPc(target.tonic);
   const targetMode=DATA.MODES[target.mode]||DATA.MODES.ionian;
@@ -145,7 +145,7 @@ function modulationIdeas(tonic,mode,composer,keyName,DATA){
    :sharedPcs.length
     ?"No aparece una tríada común clara. Conserva una nota compartida ("+sharedPcs.map(p=>noteNameForPc(p,DATA.KEYS_SHARP[targetName]===1)).slice(0,3).join(", ")+") y cambia después la armonía."
     :"No hay notas comunes entre las escalas. Prepara el salto con una secuencia cromática, pedal o dominante del destino.";
-  return {id,kind:isModeShift?"mode":"modulation",name:id==="relative"?"Región relativa":id==="parallel"?"Modo paralelo":id==="tritone"?"Región a distancia de tritono":id.includes("fifth")?"Región de quinta":id.includes("semitone")?"Desplazamiento cromático": "Mediante cromática",
+  return {id,kind:isModeShift?"mode":"modulation",name:({relative:"Región relativa",parallel:"Modo paralelo",up_semitone:"Desplazamiento cromático ascendente (semitono)",down_semitone:"Desplazamiento cromático descendente (semitono)",up_major3:"Mediante cromática ascendente (3ª mayor)",down_major3:"Mediante cromática descendente (3ª mayor)",up_minor3:"Mediante cromática ascendente (3ª menor)",down_minor3:"Mediante cromática descendente (3ª menor)",up_fifth:"Región de quinta ascendente",down_fifth:"Región de quinta descendente",tritone:"Región a distancia de tritono"})[id]||"Cambio de región",
    target:targetName,targetMode:targetMode.name,targetPc:target.tonic,feel:DATA.MODULATIONS?.[id]?.feel||"Cambio de centro tonal con color modal conservado.",common:sharedPcs.length,
    shared:sharedPcs.map(p=>noteNameForPc(p,DATA.KEYS_SHARP[targetName]===1)),pivots:unique,transition};
  });
