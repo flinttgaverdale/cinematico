@@ -473,7 +473,7 @@ function compareHarmonicAlternatives(chords,index,alternatives,intention="neutra
    reasons:[sharedOriginal+" nota(s) conservada(s) respecto al acorde original",
     ...(prev?[sharedPrevious+" nota(s) compartida(s) con el anterior"]:[]),
     ...(next?[sharedNext+" nota(s) compartida(s) con el siguiente"]:[])],
-   caveat:"Contraste estructural de alturas, fundamental y tercera; no equivale a sorpresa percibida ni a calidad artística."}};
+   caveat:"Indicadores descriptivos: no miden tensión percibida, función tonal, ritmo ni calidad artística. El contraste estructural no equivale a sorpresa percibida."}};
  });
  const withRanks=scored.map(p=>({...p,comparison:{...p.comparison,
   continuityRank:1+scored.filter(q=>q.comparison.continuity>p.comparison.continuity).length,
