@@ -58,13 +58,13 @@ const EMOTIONS={
     hints:"frigio · bII · registro grave · drones"},
   esperanza:{name:"Esperanza / Anhelo",mode:"dorian",desc:"Optimismo contenido, superación",
     steps:[{d:3,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""},{d:1,a:0,q:"minor",e:""},{d:4,a:0,q:"major",e:""}],
-    hints:"dórico · sus · movimiento ascendente"},
+    hints:"dórico · IV mayor · V mayor con sensible cromática · resolución circular a i"},
   paz:{name:"Paz / Serenidad",mode:"ionian",desc:"Calma, consuelo, quietud",
     steps:[{d:0,a:0,q:"major",e:"add9"},{d:5,a:0,q:"minor",e:""},{d:3,a:0,q:"major",e:""},{d:4,a:0,q:"major",e:""}],
     hints:"add9 · lento · texturas suaves"},
   misterio:{name:"Misterio",mode:"aeolian",desc:"Enigma, lo oculto, ambigüedad",
     steps:[{d:0,a:0,q:"minor",e:""},{d:5,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
-    hints:"bVI · aumentados · tónica ambigua"},
+    hints:"bVI · acordes aumentados como color opcional · pedal y tónica ambigua"},
   romance:{name:"Romance / Amor",mode:"ionian",desc:"Ternura, pasión, calidez",
     steps:[{d:1,a:0,q:"minor",e:"7"},{d:4,a:0,q:"major",e:"7"},{d:0,a:0,q:"major",e:"maj9"}],
     hints:"ii-V-I · maj7/9 · exuberante"},
@@ -116,7 +116,7 @@ const COMPOSERS={
     devices:"metales grandes · fanfarrias · mayor · heroico directo"},
   horner:{name:"James Horner",tags:"modal · celta · cuartas/quintas",
     signature:[{d:0,a:0,q:"minor",e:""},{d:6,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
-    sigLabel:"i → VII → i  (modal)",
+    sigLabel:"i → ♭VII → i · gesto modal sobre el séptimo grado menor.",
     mods:["up_major3","relative","up_fifth"],
     devices:"intervalos de 4ª/5ª · 'danger motif' · modal · color celta"},
   herrmann:{name:"Bernard Herrmann",tags:"modernista · policordios · politonalidad · celular",
@@ -153,7 +153,7 @@ Object.entries(COMPOSERS).forEach(([k,v])=>$("composer").add(new Option(v.name,k
 Object.entries(MODES).forEach(([k,v])=>$("mode").add(new Option(v.name,k)));
 function draw(){let out='<circle cx="210" cy="210" r="168" fill="none" stroke="#3b4336"/><circle cx="210" cy="210" r="112" fill="none" stroke="#30372d" stroke-dasharray="2 6"/>';KEYS.forEach((k,i)=>{let a=-Math.PI/2+i*Math.PI/6,x=210+Math.cos(a)*168,y=210+Math.sin(a)*168,active=PC[k]===S.key;out+=`<g class="node ${active?"selected":""}" data-key="${k}" tabindex="0" role="button" aria-label="Seleccionar ${k}"><circle cx="${x}" cy="${y}" r="24"/><text x="${x}" y="${y}">${k}</text></g>`;});out+='<circle class="core" cx="210" cy="210" r="73"/><text class="corelabel" x="210" y="195">TONALIDAD</text><text class="corekey" x="210" y="228">'+esc(S.keyName)+'</text>'; $("circle").innerHTML=out;$("circle").querySelectorAll("[data-key]").forEach(n=>{let pick=()=>{S.keyName=n.dataset.key;S.key=PC[S.keyName];draw();render();};n.onclick=pick;n.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}};});}
 function progMarkup(a){return a.map((c,i)=>(i?'<span class="arrow">→</span>':'')+`<div class="chord"><strong>${esc(c.label)}</strong><small>${esc(c.roman||"")}</small></div>`).join("");}
-function typeName(t){return ({"":"Mayor",m:"Menor",dim:"Disminuido",aug:"Aumentado",maj7:"Maj7",7:"7",m7:"m7",m7b5:"Semidisminuido",dim7:"Disminuido 7",mMaj7:"Menor maj7"})[t]||"Extensión";}
+function typeName(t){return ({"":"Mayor",m:"Menor",dim:"Disminuido",aug:"Aumentado",maj7:"Maj7",7:"Dominante 7",m7:"Menor 7",m7b5:"Semidisminuido",dim7:"Disminuido 7",mMaj7:"Menor maj7",custom:"Color / extensión"})[t]||t||"Mayor";}
 function render(){let e=EMOTIONS[S.emotion],c=COMPOSERS[S.composer],m=MODES[S.mode||e.mode],d=CinematicoEngine.analyze(S.key,e,c,S.mode||null,{MODES,KEYS_SHARP,keyNameForPc});$("keyCaption").textContent=S.keyName+" · "+m.name;$("eyebrow").textContent=S.keyName+" · "+m.name.toUpperCase();$("title").textContent=S.keyName+" · "+m.name;$("description").textContent=e.desc+". "+e.hints+".";$("scale").innerHTML=d.scale.map(x=>'<span class="pill">'+esc(x)+'</span>').join("");$("chords").innerHTML=d.chords.map((x,i)=>`<div class="tile"><small>${["I","II","III","IV","V","VI","VII"][i]}</small><strong>${esc(x.label)}</strong><em>${typeName(x.type)}</em></div>`).join("");$("chordNote").textContent="Acordes construidos por terceras dentro del modo seleccionado, no a partir de una clasificación mayor/menor genérica.";$("emotionName").textContent=e.name;$("emotionProgress").innerHTML=progMarkup(d.progression);$("emotionNote").textContent=e.desc+". Pista: "+e.hints+". Úsalo como material de partida, no como secuencia obligatoria.";$("composerName").textContent=c.name;$("signature").innerHTML=progMarkup(d.signature);$("signatureNote").textContent=c.tags+". Referencia: "+c.sigLabel+".";$("devices").textContent=c.devices+".";$("mods").innerHTML=d.mods.map(x=>`<div class="mod"><b>${esc(x.name)}</b><strong>${esc(x.target)}</strong><p>${esc(x.feel)}</p><small>${x.common} notas comunes · ${esc(x.shared.join(" · ")||"ninguna")}</small></div>`).join("");$("modeNote").textContent="Modo sugerido: "+MODES[e.mode].name+". Puedes cambiarlo sin perder la emoción elegida.";}
 function saved(){let a=[];try{a=JSON.parse(localStorage.getItem("cinematico-notebook")||"[]")}catch{}$("savedList").innerHTML=a.map((x,i)=>`<div class="saveditem"><div><b>${esc(x.title)}</b><br><span>${esc(x.detail)}</span></div><button class="secondary" data-del="${i}">×</button></div>`).join("");$("empty").hidden=!!a.length;$("savedList").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{a.splice(+b.dataset.del,1);localStorage.setItem("cinematico-notebook",JSON.stringify(a));saved();});}
 function toast(t){$("toast").textContent=t;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1700);}
