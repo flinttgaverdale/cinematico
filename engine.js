@@ -507,13 +507,15 @@ function compareHarmonicAlternatives(chords,index,alternatives,intention="neutra
   // Descriptive additive score; no timing, voicing, dynamics or tonal function.
   const contrastScore=changed*2+(rootShift?1:0)+(qualityChange?1:0);
   const context=contextualContrastDiagnostics(chords,index,proposal);
+  const contextualContrastScore=contrastScore+Math.max(-2,Math.min(2,context.chromaticDifference))+
+   Math.max(-2,Math.min(2,context.motionDelta));
   const contrastReasons=[
    changed+" cambio(s) de clase de altura respecto al acorde original",
    rootShift?"Fundamental diferente":"Fundamental conservada",
    qualityChange?"Cambio de cualidad de tercera":"Cualidad de tercera conservada"
   ];
   return {...proposal,comparison:{sharedOriginal,sharedPrevious,sharedNext,changed,
-   continuity,contrast:changed,contrastScore,rootShift,qualityChange,contrastReasons,context,
+   continuity,contrast:changed,contrastScore,contextualContrastScore,rootShift,qualityChange,contrastReasons,context,
    reasons:[sharedOriginal+" nota(s) conservada(s) respecto al acorde original",
     ...(prev?[sharedPrevious+" nota(s) compartida(s) con el anterior"]:[]),
     ...(next?[sharedNext+" nota(s) compartida(s) con el siguiente"]:[])],
@@ -521,9 +523,9 @@ function compareHarmonicAlternatives(chords,index,alternatives,intention="neutra
  });
  const withRanks=scored.map(p=>({...p,comparison:{...p.comparison,
   continuityRank:1+scored.filter(q=>q.comparison.continuity>p.comparison.continuity).length,
-  contrastRank:1+scored.filter(q=>q.comparison.contrastScore>p.comparison.contrastScore).length}}));
+  contrastRank:1+scored.filter(q=>q.comparison.contextualContrastScore>p.comparison.contextualContrastScore).length}}));
  if(intention!=="contrast")return withRanks;
- return withRanks.sort((a,b)=>b.comparison.contrastScore-a.comparison.contrastScore||
+ return withRanks.sort((a,b)=>b.comparison.contextualContrastScore-a.comparison.contextualContrastScore||
   b.comparison.continuity-a.comparison.continuity||a.label.localeCompare(b.label));
 }
 function chordAlternatives(chords,index){if(!Array.isArray(chords)||index<0||index>=chords.length)return [];const c=chords[index],previous=chords[index-1],next=chords[index+1];const proposals=[];function add(root,type,intervals,why){const notes=[...new Set(intervals.map(x=>mod(root+x)))];if(root===c.root&&type===c.type)return;const label=spell(root)+(type||"");const common=c.notes.filter(n=>notes.includes(n));const nextCommon=next?notes.filter(n=>next.notes.includes(n)):[];proposals.push({label,root,type,notes,common:common.map(n=>spell(n)),nextCommon:nextCommon.map(n=>spell(n)),why,original:c.label,changesOriginal:false});}if(c.type===""||c.type==="m"){for(const op of ["P","L","R"]){const t=neoTransform(c.root,c.type==="m"?"minor":"major",op);if(t)add(t.target.root,t.target.quality==="minor"?"m":"",t.target.quality==="minor"?[0,3,7]:[0,4,7],"Transformación "+op+": conserva dos notas de la tríada y desplaza una voz "+Math.abs(t.movement.semitones)+" semitono(s).");}}if(next){const dominant=mod(next.root+7);add(dominant,"7",[0,4,7,10],"Dominante potencial del acorde siguiente ("+next.label+"). Comprueba la resolución y el contexto tonal; no implica modulación.");}if(previous&&c.type==="m")add(c.root,"m7",[0,3,7,10],"Añadir séptima introduce una tensión que puedes preparar o resolver en la siguiente voz.");return proposals.slice(0,5);}
