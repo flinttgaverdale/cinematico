@@ -470,8 +470,27 @@ function sustainedToneAnalysis(chords){
  if(!Array.isArray(chords)||!chords.length)return [];
  const roles={0:"fundamental",1:"segunda menor / novena bemol",2:"segunda / novena",3:"tercera menor",4:"tercera mayor",5:"cuarta / oncena",6:"quinta disminuida / oncena aumentada",7:"quinta justa",8:"quinta aumentada / sexta menor",9:"sexta / trecena",10:"séptima menor",11:"séptima mayor"};
  return Array.from({length:12},(_,pc)=>{
-  const steps=chords.map(ch=>{const interval=mod(pc-ch.root);return {chord:ch.label,interval,role:roles[interval],chordTone:ch.notes.includes(pc)};});
-  return {pc,note:spell(pc),steps,chordToneCount:steps.filter(x=>x.chordTone).length,distinctRoles:new Set(steps.map(x=>x.interval)).size};
+  const steps=chords.map((ch,index)=>{
+   const root=mod(ch.root),interval=mod(pc-root),chordTone=ch.notes.some(n=>mod(n)===pc);
+   const rootBass=mod(ch.bass??ch.root)===pc;
+   const classification=rootBass?"bajo indicado":chordTone?"nota del acorde":interval===1?"tensión cromática ♭9":interval===2?"tensión 9":interval===5?"tensión 11 / suspensión posible":interval===6?"tensión cromática ♯11 / ♭5":interval===9?"tensión 13":interval===11?"tensión de séptima mayor":interval===10?"tensión de séptima menor":"nota externa / color";
+   return {index,chord:ch.label,interval,role:roles[interval],chordTone,rootBass,classification};
+  });
+  const chordToneCount=steps.filter(x=>x.chordTone).length;
+  const externalCount=steps.length-chordToneCount;
+  const externalRuns=[];let run=null;
+  for(const step of steps){
+   if(!step.chordTone){
+    if(!run)run={start:step.index,end:step.index,length:0};
+    run.end=step.index;run.length++;
+   }else if(run){externalRuns.push(run);run=null;}
+  }
+  if(run)externalRuns.push(run);
+  const changeCount=steps.slice(1).filter((step,i)=>step.chordTone!==steps[i].chordTone).length;
+  const bassCount=steps.filter(x=>x.rootBass).length;
+  return {pc,note:spell(pc),steps,chordToneCount,externalCount,externalRuns,changeCount,bassCount,
+   distinctRoles:new Set(steps.map(x=>x.interval)).size,
+   caveat:"Función vertical estimada: sin duración, octava, acento ni voces reales no puede distinguirse una suspensión, apoyatura o pedal ejecutado."};
  }).sort((a,b)=>b.chordToneCount-a.chordToneCount||b.distinctRoles-a.distinctRoles||a.pc-b.pc);
 }
 function adjacentVoiceMotion(chords){
