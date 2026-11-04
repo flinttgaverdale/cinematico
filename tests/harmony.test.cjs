@@ -500,3 +500,19 @@ test("single chord, empty progression and impossible locks are stable",()=>{
   assert.equal(impossible.voicings.length,0);
  }
 });
+
+test("add9 chord reductions retain the ninth instead of silently losing their color",()=>{
+ for(const symbol of ["Cadd9","Cmadd9","Cadd9/E"]){
+  const parsed=E.parseUserProgression(symbol);
+  assert.equal(parsed.errors.length,0);
+  const chord=parsed.chords[0];
+  const ninth=(chord.root+2)%12;
+  const third=(chord.root+(symbol.includes("madd9")?3:4))%12;
+  for(const style of ["classical","cinematic"]){
+   const candidates=E.threeVoiceCandidates(chord,style);
+   assert.ok(candidates.length>0,symbol+" "+style);
+   assert.ok(candidates.every(v=>v.some(n=>n%12===ninth)),symbol+" ninth");
+   assert.ok(candidates.every(v=>v.some(n=>n%12===third)),symbol+" third");
+  }
+ }
+});
