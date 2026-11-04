@@ -248,3 +248,24 @@ test("a major chord without target leading tone is not automatically a dominant"
  const progression=E.buildProfileProgression([{d:4,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],0,DATA.MODES.dorian,"C");
  assert.equal(progression[0].classification,"modalDominant");
 });
+
+test("structural chord quality survives added tensions and arbitrary pitch-class ordering", () => {
+ const progress=E.buildProfileProgression([
+  {d:4,a:0,q:"major",e:"9"},
+  {d:0,a:0,q:"major",e:"maj9"}
+ ],0,DATA.MODES.ionian,"C");
+ assert.equal(progress[0].quality,"dominant seventh");
+ assert.equal(progress[0].classification,"dominant");
+ assert.equal(progress[1].quality,"major seventh");
+ const minor=E.buildProfileProgression([{d:0,a:0,q:"minor",e:"m9"}],0,DATA.MODES.aeolian,"C");
+ assert.equal(minor[0].quality,"minor seventh");
+});
+test("modal destinations explicitly flag non-diatonic V7 cadences", () => {
+ const result=E.analyze(0,DATA.EMOTIONS.esperanza,DATA.COMPOSERS.williams,"dorian",DATA);
+ const parallel=result.mods.find(m=>m.id==="parallel");
+ assert.equal(typeof parallel.dominantDiatonic,"boolean");
+ const regions=result.mods.filter(m=>m.kind!=="color");
+ for(const region of regions){
+  if(!region.dominantDiatonic)assert.match(region.transition,/ajenas al modo/);
+ }
+});
