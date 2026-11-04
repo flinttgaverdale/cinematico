@@ -36,11 +36,21 @@ function spellScale(tonic,mode,keyName){return mode.int.map((_,i)=>spellDegree(t
 function scale(tonic,mode){return mode.int.map(n=>mod(tonic+n));}
 function accidentalForPc(pc,degree,tonic){const base=mod(tonic+MAJOR[degree]);let d=mod(pc-base);if(d>6)d-=12;return d;}
 function qualityOf(intervals){
- const k=intervals.join(",");
- const map={"0,4,7":"major","0,3,7":"minor","0,3,6":"diminished","0,4,8":"augmented",
- "0,4,7,11":"major seventh","0,4,7,10":"dominant seventh","0,3,7,10":"minor seventh",
- "0,3,6,10":"half-diminished seventh","0,3,6,9":"diminished seventh","0,3,7,11":"minor-major seventh"};
- return map[k]||"other";
+ const ints=[...new Set(intervals.map(mod))].sort((a,b)=>a-b);
+ const has=(...tones)=>tones.every(n=>ints.includes(n));
+ // Interpret quality from structural chord tones, independently of extensions and ordering.
+ // An altered fifth is not silently interpreted as a perfect fifth.
+ if(has(0,4,7,10))return "dominant seventh";
+ if(has(0,4,7,11))return "major seventh";
+ if(has(0,3,7,10))return "minor seventh";
+ if(has(0,3,7,11))return "minor-major seventh";
+ if(has(0,3,6,10))return "half-diminished seventh";
+ if(has(0,3,6,9))return "diminished seventh";
+ if(has(0,4,7))return "major";
+ if(has(0,3,7))return "minor";
+ if(has(0,3,6))return "diminished";
+ if(has(0,4,8))return "augmented";
+ return "other";
 }
 function romanFor(degree,alter,type){
  const base=["I","II","III","IV","V","VI","VII"][degree];
@@ -174,6 +184,7 @@ function modulationIdeas(tonic,mode,composer,keyName,DATA,progression,emotion){
   const unique=pivots.filter((p,i)=>pivots.findIndex(q=>q.source===p.source&&q.target===p.target)===i).slice(0,3),same=target.tonic===tonic;
   const names={relative:"Campo relativo",parallel:"Cambio de modo paralelo",up_semitone:"Región cromática ascendente (semitono)",down_semitone:"Región cromática descendente (semitono)",up_major3:"Mediante cromática ascendente (3ª mayor)",down_major3:"Mediante cromática descendente (3ª mayor)",up_minor3:"Mediante cromática ascendente (3ª menor)",down_minor3:"Mediante cromática descendente (3ª menor)",up_fifth:"Región de quinta ascendente",down_fifth:"Región de quinta descendente",tritone:"Región a distancia de tritono"};
   const dominantRoot=mod(target.tonic+7),dominant={label:spell(dominantRoot)+"7",root:dominantRoot,type:"7",roman:"V7",notes:[0,4,7,10].map(n=>mod(dominantRoot+n)),bass:dominantRoot};
+  const dominantDiatonic=dominant.notes.every(pc=>targetPcs.includes(pc));
   const tonicTriad=diatonicChord(target.tonic,targetMode,0,targetName,false),tonicLabel=tonicTriad.label;
   const rank=pref.indexOf(id),preferenceScore=rank<0?0:3.1-rank*.62;
   const pivotScore=Math.min(unique.length,2)*1.25,sharedScore=Math.min(sharedPcs.length,7)*.55;
@@ -187,8 +198,9 @@ function modulationIdeas(tonic,mode,composer,keyName,DATA,progression,emotion){
   if(unique.length)reasonBits.push("ofrece "+unique.length+" posible(s) acorde(s) pivote");
   if(dominantEvidence)reasonBits.push("el último acorde puede reinterpretarse como dominante del destino");
   else if(sharedPcs.length)reasonBits.push("conserva "+sharedPcs.length+" nota(s) del campo de origen");
+  const cadenceCaveat=dominantDiatonic?"":" Advertencia: V7 contiene notas ajenas al modo de destino; es una tonicización tonal cromática, no una cadencia modal diatónica.";
   const transition=unique.length?"Candidatos a acorde pivote (no prueban modulación): "+unique.map(p=>p.source+" ("+p.sourceRoman+") puede reinterpretarse como "+p.target+" ("+p.targetRoman+")").join("; ")+". Después, prepara "+dominant.label+" → "+tonicLabel+" para afirmar el destino.":sharedPcs.length?"No hay tríada pivote clara. Notas comunes: "+sharedPcs.map(p=>noteNameForPc(p,DATA.KEYS_SHARP[targetName]===1)).join(", ")+". Conserva una de ellas y prepara "+dominant.label+" → "+tonicLabel+".":"No hay notas comunes entre ambos campos. Haz perceptible el salto mediante el bajo o una melodía puente y prepara "+dominant.label+" → "+tonicLabel+".";
-  return {id,kind:same?"mode":"region",name:names[id]||"Cambio de región",target:targetName,targetMode:targetMode.name,targetPc:target.tonic,feel:DATA.MODULATIONS?.[id]?.feel||"Posibilidad de cambio de región; el nuevo centro debe confirmarse musicalmente.",common:sharedPcs.length,shared:sharedPcs.map(p=>noteNameForPc(p,DATA.KEYS_SHARP[targetName]===1)),pivots:unique,transition,confirmation:"Modulación no confirmada: requiere evidencia cadencial o funcional en el destino.",score,fitReason:reasonBits.join("; ")+".",cadence:{dominant:dominant.label,tonic:tonicLabel,label:"V7 → "+tonicLabel}};
+  return {id,kind:same?"mode":"region",name:names[id]||"Cambio de región",target:targetName,targetMode:targetMode.name,targetPc:target.tonic,feel:DATA.MODULATIONS?.[id]?.feel||"Posibilidad de cambio de región; el nuevo centro debe confirmarse musicalmente.",common:sharedPcs.length,shared:sharedPcs.map(p=>noteNameForPc(p,DATA.KEYS_SHARP[targetName]===1)),pivots:unique,transition:transition+cadenceCaveat,dominantDiatonic,confirmation:"Modulación no confirmada: requiere evidencia cadencial o funcional en el destino.",score,fitReason:reasonBits.join("; ")+".",cadence:{dominant:dominant.label,tonic:tonicLabel,label:"V7 → "+tonicLabel}};
  });
  candidates.sort((a,b)=>b.score-a.score);
  const color=candidates.find(candidate=>candidate.id==="neapolitan");
