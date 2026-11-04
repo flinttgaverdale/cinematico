@@ -292,3 +292,15 @@ test("voice leading handles all twelve emotion profiles", () => {
   assert.equal(leading.voicings.length,result.progression.length,emotion.name);
  }
 });
+
+test("pinned note remains fixed across global voice-leading optimization", () => {
+ const data=E.analyze(0,DATA.EMOTIONS.nostalgia,DATA.COMPOSERS.williams,"ionian",DATA);
+ const baseline=E.voiceLead(data.progression,"cinematic");
+ const pitch=baseline.voicings[1][2];
+ const locked=E.voiceLead(data.progression,"cinematic",{1:{2:pitch}});
+ assert.equal(locked.voicings[1][2],pitch);
+ assert.equal(locked.voicings.length,data.progression.length);
+ const impossible=E.voiceLead(data.progression,"cinematic",{1:{2:127}});
+ assert.equal(impossible.voicings.length,0);
+ assert.match(impossible.warning,/nota|voz|disposición/i);
+});
