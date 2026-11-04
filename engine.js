@@ -408,7 +408,10 @@ function laboratoryVoices(chords,options={}){
  const voicings=base.voicings;
  const voiceOrder=count===3?["Bajo","Voz intermedia","Superior"]:base.voiceOrder;
  const transitions=voicings.slice(1).map((v,i)=>({diffs:v.map((n,j)=>n-voicings[i][j])}));
- const diagnostics=voicings.slice(1).map((v,i)=>({\n  ...voiceMotionDiagnostics(voicings[i],v),\n  harmonic:harmonicResolutionDiagnostics(voicings[i],v,chords[i],chords[i+1])\n }));
+ const diagnostics=voicings.slice(1).map((v,i)=>({
+  ...voiceMotionDiagnostics(voicings[i],v),
+  harmonic:harmonicResolutionDiagnostics(voicings[i],v,chords[i],chords[i+1])
+ }));
  const warnings=diagnostics.flatMap((d,i)=>[...d.observations,...d.harmonic.observations].map(o=>({
   index:i,kind:o.text,level:o.level,count:o.count,
   severity:style==="classical"&&o.level==="classical-warning"?"warning":"review"
