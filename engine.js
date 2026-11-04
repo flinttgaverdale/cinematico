@@ -207,6 +207,66 @@ function modulationIdeas(tonic,mode,composer,keyName,DATA,progression,emotion){
  const regions=candidates.filter(candidate=>candidate.id!=="neapolitan").slice(0,6);
  return color?[...regions,color]:regions;
 }
+// Four-voice, register-aware voice-leading. These are suggested realizations, not strict SATB exercises.
+const VOICE_RANGES=[[36,60],[48,67],[55,74],[60,84]]; // bass, tenor, alto, soprano
+function midiName(n){return spell(n%12)+(Math.floor(n/12)-1);}
+function voicingCandidates(chord,style="cinematic"){
+ const pcs=[...new Set(chord.notes.map(mod))];
+ const ranges=VOICE_RANGES;
+ const possibilities=ranges.map(([lo,hi])=>Array.from({length:hi-lo+1},(_,i)=>lo+i).filter(n=>pcs.includes(n%12)));
+ const out=[];
+ // Assign each distinct chord tone at least once when possible; extensions beyond four tones are optional.
+ const required=pcs.length<=4?pcs:pcs.filter(p=>[0,3,4,6,7,8,10,11].some(x=>mod(chord.root+x)===p)).slice(0,4);
+ const bassPc=mod(chord.bass??chord.root);
+ function walk(i,notes){
+  if(out.length>=650)return;
+  if(i===4){
+   if(required.some(pc=>!notes.some(n=>n%12===pc)))return;
+   out.push(notes.slice());return;
+  }
+  for(const n of possibilities[i]){
+   if(i===0&&n%12!==bassPc)continue;
+   if(i&&n<=notes[i-1])continue;
+   if(i>=2&&n-notes[i-1]>(style==="cinematic"?19:12))continue;
+   notes.push(n);walk(i+1,notes);notes.pop();
+  }
+ }
+ walk(0,[]);
+ // When a five-note chord cannot fit all tones, prioritize its structural notes.
+ return out.slice(0,300);
+}
+function transitionCost(a,b,style){
+ const diffs=a.map((n,i)=>b[i]-n);
+ const motion=diffs.reduce((sum,d,i)=>sum+Math.abs(d)*(i===0?.55:1),0);
+ const leap=diffs.reduce((sum,d,i)=>sum+Math.max(0,Math.abs(d)-(i===0?7:5))**2,0);
+ let parallels=0;
+ for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){
+  const from=mod(a[j]-a[i]),to=mod(b[j]-b[i]);
+  if((from===0||from===7)&&(to===0||to===7)&&diffs[i]*diffs[j]>0)parallels++;
+ }
+ const weights=style==="classical"?{motion:1,leap:2,parallel:12}:style==="minimal"?{motion:2,leap:1.5,parallel:1}:{motion:1,leap:.8,parallel:1.5};
+ return {total:motion*weights.motion+leap*weights.leap+parallels*weights.parallel,motion,leap,parallels,diffs};
+}
+function voiceLead(progression,style="cinematic"){
+ const valid=["classical","cinematic","minimal"].includes(style)?style:"cinematic";
+ if(!progression?.length)return {style:valid,voicings:[],transitions:[],cost:0};
+ const layers=progression.map(chord=>voicingCandidates(chord,valid));
+ if(layers.some(x=>!x.length))return {style:valid,voicings:[],transitions:[],cost:null,warning:"No se encontró una disposición a cuatro voces en los registros actuales."};
+ let costs=layers[0].map((v)=>v.reduce((sum,n,i)=>sum+Math.abs(n-[48,57,64,72][i])*.15,0));
+ const links=[];
+ for(let k=1;k<layers.length;k++){
+  const next=layers[k].map(()=>Infinity),back=layers[k].map(()=>-1);
+  for(let j=0;j<layers[k].length;j++)for(let i=0;i<layers[k-1].length;i++){
+   const score=costs[i]+transitionCost(layers[k-1][i],layers[k][j],valid).total;
+   if(score<next[j]){next[j]=score;back[j]=i;}
+  }
+  links.push(back);costs=next;
+ }
+ let best=costs.indexOf(Math.min(...costs)),voicings=Array(layers.length);
+ for(let k=layers.length-1;k>=0;k--){voicings[k]=layers[k][best];if(k)best=links[k-1][best];}
+ const transitions=voicings.slice(1).map((v,i)=>transitionCost(voicings[i],v,valid));
+ return {style:valid,voicings,transitions,cost:Math.min(...costs),names:voicings.map(v=>v.map(midiName)),voiceOrder:["Bajo","Tenor","Alto","Soprano"],warning:"Realización orientativa: la función, la instrumentación y las resoluciones deben revisarse musicalmente."};
+}
 function analyze(tonic,emotion,composer,modeOverride,DATA){
  const modeKey=modeOverride||emotion.mode,mode=DATA.MODES[modeKey],keyName=DATA.keyNameForPc(tonic);
  const sharp=DATA.KEYS_SHARP[keyName]===1,pcs=scale(tonic,mode),scaleNames=spellScale(tonic,mode,keyName);
@@ -219,5 +279,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
