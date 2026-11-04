@@ -77,13 +77,14 @@ test("modal flats are not applied twice in Phrygian, Mixolydian and Aeolian", ()
   assert.equal(aeolian.progression[1].roman,"♭VI");
 });
 
-test("the Dorian cadence explicitly identifies its borrowed major dominant", () => {
+test("the Dorian major V chord is marked as a parallel-Ionian interchange when no resolution is shown", () => {
   const result=E.analyze(0,DATA.EMOTIONS.esperanza,DATA.COMPOSERS.williams,"dorian",DATA);
   const dominant=result.progression.at(-1);
   assert.equal(dominant.label,"G");
   assert.equal(dominant.roman,"V");
-  assert.equal(dominant.classification,"modalDominant");
-  assert.equal(dominant.borrowed,false);
+  assert.equal(dominant.classification,"modalInterchange");
+  assert.equal(dominant.borrowed,true);
+  assert.equal(dominant.borrowedFrom,"ionian");
   assert.ok(!E.scale(0,DATA.MODES.dorian).includes(11));
   assert.ok(dominant.notes.includes(11));
 });
@@ -193,4 +194,6 @@ test("modal and secondary dominant labels require a chord that leads by fifth", 
   assert.equal(dorian[0].classification,"modalDominant");
   const secondary=E.buildProfileProgression([{d:5,a:0,q:"major",e:"7"},{d:1,a:0,q:"minor",e:""}],0,DATA.MODES.dorian,"C");
   assert.equal(secondary[0].classification,"secondaryDominant");
+  const primary=E.buildProfileProgression([{d:4,a:0,q:"major",e:"7"},{d:0,a:0,q:"major",e:""}],0,DATA.MODES.ionian,"C");
+  assert.equal(primary[0].classification,"dominant");
 });
