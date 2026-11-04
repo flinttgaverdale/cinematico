@@ -531,3 +531,29 @@ test("maximum supported 16-chord progression completes for both voice templates"
   console.log("Laboratorio "+count+" voces, 16 acordes: "+elapsedMs.toFixed(1)+" ms (CI; no es medición de navegador)");
  }
 });
+
+test("held pitch analysis distinguishes chord tones and nonchord tensions without assuming time",()=>{
+ const chords=E.parseUserProgression("C F G7 C").chords;
+ const tones=E.sustainedToneAnalysis(chords);
+ const c=tones.find(x=>x.pc===0);
+ assert.equal(c.chordToneCount,3);
+ assert.equal(c.externalCount,1);
+ assert.equal(c.steps[2].chordTone,false);
+ assert.equal(c.steps[2].classification,"tensión 11 / suspensión posible");
+ assert.equal(c.externalRuns.length,1);
+ assert.equal(c.externalRuns[0].start,2);
+ assert.equal(c.externalRuns[0].end,2);
+ assert.equal(c.changeCount,2);
+ assert.ok(c.caveat.includes("sin duración"));
+});
+test("held pitch classifications respect slash bass and preserve inputs",()=>{
+ const chords=E.parseUserProgression("C/E Fmaj7 C/E").chords;
+ const original=JSON.stringify(chords);
+ const tones=E.sustainedToneAnalysis(chords);
+ const e=tones.find(x=>x.pc===4);
+ assert.equal(e.bassCount,2);
+ assert.equal(e.steps[0].classification,"bajo indicado");
+ assert.equal(e.steps[2].classification,"bajo indicado");
+ assert.equal(JSON.stringify(chords),original);
+ assert.equal(E.sustainedToneAnalysis([]).length,0);
+});
