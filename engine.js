@@ -278,6 +278,27 @@ function tendencyResolution(a,b,fromChord,toChord){
  }
  return {penalty,leadingTone,seventh:seventhCount,details};
 }
+function harmonicResolutionDiagnostics(a,b,fromChord,toChord){
+ const observations=[];
+ if(!fromChord||!toChord||a.length!==b.length)return {observations,penalty:0};
+ const root=mod(fromChord.root),target=mod(toChord.root);
+ const intervals=new Set(fromChord.notes.map(p=>mod(p-root)));
+ const dominantLike=mod(root+5)===target&&intervals.has(4)&&intervals.has(7);
+ let penalty=0;
+ if(!dominantLike)return {observations,penalty};
+ const leading=mod(target-1),seventh=mod(root+10);
+ for(let i=1;i<a.length;i++){
+  if(mod(a[i])===leading&&b[i]-a[i]!==1){
+   observations.push({kind:"leading-tone",voice:i,text:"Sensible sin ascenso por semitono hacia la tónica",level:"classical-warning"});
+   penalty+=14;
+  }
+  if(intervals.has(10)&&mod(a[i])===seventh&&![-1,-2].includes(b[i]-a[i])){
+   observations.push({kind:"chordal-seventh",voice:i,text:"Séptima de dominante sin descenso conjunto",level:"classical-warning"});
+   penalty+=10;
+  }
+ }
+ return {observations,penalty};
+}
 function voiceMotionDiagnostics(a,b){
  const diffs=a.map((n,i)=>b[i]-n),observations=[];
  let parallelFifths=0,parallelOctaves=0,contraryPairs=0,obliquePairs=0;
@@ -362,13 +383,13 @@ function threeVoiceLead(chords,style="cinematic",locks={}){
   let parallel=0;
   for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)
    if(d[i]*d[j]>0&&mod(a[j]-a[i])===mod(b[j]-b[i])&&[0,7].includes(mod(a[j]-a[i])))parallel++;
-  return d.reduce((sum,n,i)=>sum+Math.abs(n)*(i===0?.55:1)+Math.max(0,Math.abs(n)-(i===0?7:5))**2*(style==="classical"?2:.8),0)+parallel*(style==="classical"?12:1.5);
+  return d.reduce((sum,n,i)=>sum+Math.abs(n)*(i===0?.55:1)+Math.max(0,Math.abs(n)-(i===0?7:5))**2*(style==="classical"?2:.8),0)+parallel*(style==="classical"?12:1.5)+harmonicResolutionDiagnostics(a,b,fromChord,toChord).penalty*(style==="classical"?1:.6);
  };
  let costs=layers[0].map(v=>v.reduce((sum,n,i)=>sum+Math.abs(n-[48,64,72][i])*.15,0)),links=[];
  for(let k=1;k<layers.length;k++){
   const next=layers[k].map(()=>Infinity),back=layers[k].map(()=>-1);
   for(let j=0;j<layers[k].length;j++)for(let i=0;i<layers[k-1].length;i++){
-   const cost=costs[i]+score(layers[k-1][i],layers[k][j]);
+   const cost=costs[i]+score(layers[k-1][i],layers[k][j],chords[k-1],chords[k]);
    if(cost<next[j]){next[j]=cost;back[j]=i;}
   }
   links.push(back);costs=next;
@@ -387,8 +408,8 @@ function laboratoryVoices(chords,options={}){
  const voicings=base.voicings;
  const voiceOrder=count===3?["Bajo","Voz intermedia","Superior"]:base.voiceOrder;
  const transitions=voicings.slice(1).map((v,i)=>({diffs:v.map((n,j)=>n-voicings[i][j])}));
- const diagnostics=voicings.slice(1).map((v,i)=>voiceMotionDiagnostics(voicings[i],v));
- const warnings=diagnostics.flatMap((d,i)=>d.observations.map(o=>({
+ const diagnostics=voicings.slice(1).map((v,i)=>({\n  ...voiceMotionDiagnostics(voicings[i],v),\n  harmonic:harmonicResolutionDiagnostics(voicings[i],v,chords[i],chords[i+1])\n }));
+ const warnings=diagnostics.flatMap((d,i)=>[...d.observations,...d.harmonic.observations].map(o=>({
   index:i,kind:o.text,level:o.level,count:o.count,
   severity:style==="classical"&&o.level==="classical-warning"?"warning":"review"
  })));
@@ -460,5 +481,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
