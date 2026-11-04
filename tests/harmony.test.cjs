@@ -683,3 +683,35 @@ test("contextual contrast is explained in the user-facing cards",()=>{
  assert.ok(html.includes("p.comparison.context.reasons"));
  assert.ok(html.includes("no se presupone tonalidad"));
 });
+
+test("tonal contrast detects local dominant preparation without assuming a key",()=>{
+ const chords=E.parseUserProgression("C F C").chords;
+ const proposed={root:7,notes:[7,11,2,5],label:"G7"};
+ const result=E.harmonicContrastCharacter(chords,1,proposed);
+ assert.equal(result.dominant,true);
+ assert.ok(result.tonal.evidence.includes("dominante"));
+ assert.ok(result.caveat.includes("no se deduce una tonalidad"));
+});
+test("modal contrast distinguishes major minor color over shared root",()=>{
+ const chords=E.parseUserProgression("C C G").chords;
+ const minor={root:0,notes:[0,3,7],label:"Cm"};
+ const result=E.harmonicContrastCharacter(chords,1,minor);
+ assert.equal(result.modalColor,true);
+ assert.ok(result.modal.evidence.includes("intercambio modal"));
+ assert.ok(result.chromatic);
+});
+test("chromatic contrast records new pitches without asserting scale membership",()=>{
+ const chords=E.parseUserProgression("C F G").chords;
+ const proposal={root:6,notes:[6,10,1],label:"F#"};
+ const result=E.harmonicContrastCharacter(chords,1,proposal);
+ assert.equal(result.tonal,null);
+ assert.equal(result.modal,null);
+ assert.equal(result.introduced.length,3);
+ assert.ok(result.chromatic.evidence.includes("tonalidad explícita"));
+ assert.equal(E.harmonicContrastCharacter(chords,99,proposal),null);
+});
+test("contrast cards display three separate interpretations and parse as JavaScript",()=>{
+ assert.ok(html.includes("p.comparison.character.hypotheses"));
+ const start=html.lastIndexOf("<script>"),end=html.indexOf("</script>",start);
+ assert.doesNotThrow(()=>new vm.Script(html.slice(start+8,end)));
+});
