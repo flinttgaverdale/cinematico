@@ -342,7 +342,7 @@ test("composer assistance offers explainable options without mutating original m
   assert.ok(ideas.every(x=>x.action&&x.reason&&x.observation&&x.changesOriginal===false));
  }
  assert.equal(JSON.stringify(chords),original);
- assert.deepEqual(E.composerAssistance("unknown",chords),[]);
+ assert.equal(E.composerAssistance("unknown",chords).length,0);
 });
 
 test("user chord parsing is non-destructive and validates input",()=>{
@@ -355,4 +355,40 @@ test("user chord parsing is non-destructive and validates input",()=>{
  assert.equal(E.parseUserProgression("C/H").errors.length,1);
  assert.equal(E.parseUserProgression("C/F#").errors.length,1);
  assert.equal(E.parseUserProgression("C ".repeat(17)).errors.length,1);
+});
+
+test("laboratory three and four voices have independent valid pitches",()=>{
+ const chords=E.parseUserProgression("Cm Abmaj7 Fm7 G7").chords;
+ for(const count of [3,4]){
+  const result=E.laboratoryVoices(chords,{count,style:"classical"});
+  assert.equal(result.voicings.length,chords.length);
+  assert.equal(result.voiceOrder.length,count);
+  result.voicings.forEach((voices,i)=>{
+   assert.equal(voices.length,count);
+   assert.equal(voices[0]%12,chords[i].bass);
+   assert.ok(voices.every((n,j)=>chords[i].notes.includes(n%12)&&(j===0||n>voices[j-1])));
+  });
+  assert.equal(result.transitions.length,chords.length-1);
+ }
+ assert.equal(E.laboratoryVoices(chords,{count:5}).count,4);
+});
+test("three-voice melody lock is respected and impossible locks fail safely",()=>{
+ const chords=E.parseUserProgression("Cm Fm G7 Cm").chords;
+ const initial=E.laboratoryVoices(chords,{count:3});
+ assert.ok(initial.voicings.length);
+ const pitch=initial.voicings[0][2];
+ const locked=E.laboratoryVoices(chords,{count:3,locks:{0:{3:pitch}}});
+ assert.equal(locked.voicings[0][2],pitch);
+ const impossible=E.laboratoryVoices(chords,{count:3,locks:{0:{3:1}}});
+ assert.equal(impossible.voicings.length,0);
+});
+test("sustained tones and adjacent pitch-class comparisons are non-destructive",()=>{
+ const chords=E.parseUserProgression("Cm Abmaj7 Fm7 G7").chords;
+ const original=JSON.stringify(chords);
+ const tones=E.sustainedToneAnalysis(chords);
+ assert.equal(tones.length,12);
+ assert.equal(tones[0].steps.length,4);
+ const links=E.adjacentVoiceMotion(chords);
+ assert.equal(links.length,3);
+ assert.equal(JSON.stringify(chords),original);
 });
