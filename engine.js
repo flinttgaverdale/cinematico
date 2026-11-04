@@ -94,33 +94,32 @@ function buildProfileProgression(steps,tonic,mode,keyName){
  });
 }
 function isQualityDiatonic(type,tonic,mode,degree){
- const triad=diatonicChord(tonic,mode,degree,rootKeyName(tonic),false).type;
- const expected={"major":"","minor":"m","diminished":"dim","augmented":"aug"}[qualityOf(extensionIntervals(type).slice(0,3))];
- return triad===type||triad===expected;
+ const allowed=new Set(scale(tonic,mode));
+ const root=mod(tonic+mode.int[degree]);
+ return extensionIntervals(type).every(interval=>allowed.has(mod(root+interval)));
 }
-function relativeTarget(tonic,mode){
- const names=["ionian","dorian","phrygian","lydian","mixolydian","aeolian","locrian"];
- const idx=names.indexOf(Object.keys(root.MODES||{}).find(k=>root.MODES[k]===mode));
+function relativeTarget(tonic,modeKey){
+ const names=["ionian","dorian","phrygian","lydian","mixolydian","aeolian","locrian"],idx=names.indexOf(modeKey);
  if(idx===0)return {tonic:mod(tonic+9),mode:"aeolian"};
  if(idx===5)return {tonic:mod(tonic-9),mode:"ionian"};
  return {tonic:mod(tonic-MAJOR[idx]),mode:"ionian"};
 }
-function targetModeFor(id,tonic,mode){
- if(id==="relative")return relativeTarget(tonic,mode);
- if(id==="parallel")return {tonic,mode:mode.name==="Mayor (Jónico)"?"aeolian":"ionian"};
+function targetModeFor(id,tonic,modeKey){
+ if(id==="relative")return relativeTarget(tonic,modeKey);
+ if(id==="parallel")return {tonic,mode:modeKey==="ionian"?"aeolian":"ionian"};
  const offsets={up_semitone:1,down_semitone:-1,up_major3:4,down_major3:-4,up_minor3:3,down_minor3:-3,up_fifth:7,down_fifth:-7,tritone:6};
- return {tonic:mod(tonic+(offsets[id]||0)),mode:Object.keys(root.MODES||{}).find(k=>root.MODES[k]===mode)||"ionian"};
+ return {tonic:mod(tonic+(offsets[id]||0)),mode:modeKey};
 }
 function noteNameForPc(pc,sharp){return spell(pc,sharp);}
 function modulationIdeas(tonic,mode,composer,keyName,DATA){
  const sourcePcs=scale(tonic,mode),sourceTriads=sourcePcs.map((_,i)=>diatonicChord(tonic,mode,i,keyName,false));
  return composer.mods.map(id=>{
   if(id==="neapolitan"){
-   const rootPc=mod(tonic+1),rootName=spellDegree(tonic,1,mode,keyName,-1);
+   const rootPc=mod(tonic+1),rootName=spellDegree(tonic,1,DATA.MODES.ionian,keyName,-1);
    const chord={label:rootName,type:"",roman:"♭II",notes:[rootPc,mod(rootPc+4),mod(rootPc+7)].map(x=>x)};
    return {id,kind:"color",name:"Acorde napolitano",target:"♭II",feel:"No es una modulación: es un acorde mayor sobre el segundo grado rebajado. En menor suele actuar como predominante y pide una resolución convincente.",common:0,shared:[],pivots:[],transition:"Prueba ♭II6 → V → i, o mantén una nota común en la melodía.",chord};
   }
-  const target=targetModeFor(id,tonic,mode),targetName=DATA.keyNameForPc(target.tonic);
+  const target=targetModeFor(id,tonic,DATA.modeKey),targetName=DATA.keyNameForPc(target.tonic);
   const targetMode=DATA.MODES[target.mode]||DATA.MODES.ionian;
   const targetPcs=scale(target.tonic,targetMode);
   const sharedPcs=sourcePcs.filter(p=>targetPcs.includes(p));
@@ -150,7 +149,7 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const chords=pcs.map((_,i)=>diatonicChord(tonic,mode,i,keyName,true));
  const progression=buildProfileProgression(emotion.steps,tonic,mode,keyName);
  const signature=buildProfileProgression(composer.signature,tonic,mode,keyName);
- const mods=modulationIdeas(tonic,mode,composer,keyName,DATA);
+ const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey});
  return {mode,modeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
 root.CinematicoEngine={PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze};
