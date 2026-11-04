@@ -269,3 +269,26 @@ test("modal destinations explicitly flag non-diatonic V7 cadences", () => {
   if(!region.dominantDiatonic)assert.match(region.transition,/ajenas al modo/);
  }
 });
+
+test("four-voice optimizer produces complete registral paths for emotional progressions", () => {
+ const data=E.analyze(0,DATA.EMOTIONS.nostalgia,DATA.COMPOSERS.williams,"ionian",DATA);
+ for(const style of ["classical","cinematic","minimal"]){
+  const r=E.voiceLead(data.progression,style);
+  assert.equal(r.voicings.length,3);
+  assert.equal(r.transitions.length,2);
+  assert.ok(Number.isFinite(r.cost));
+  for(let i=0;i<r.voicings.length;i++){
+   const notes=r.voicings[i];
+   assert.equal(notes.length,4);
+   assert.ok(notes.every((n,j)=>j===0||n>notes[j-1]));
+   assert.ok(notes.every(n=>data.progression[i].notes.includes(n%12)));
+  }
+ }
+});
+test("voice leading handles all twelve emotion profiles", () => {
+ for(const emotion of Object.values(DATA.EMOTIONS)){
+  const result=E.analyze(0,emotion,DATA.COMPOSERS.williams,emotion.mode,DATA);
+  const leading=E.voiceLead(result.progression,"cinematic");
+  assert.equal(leading.voicings.length,result.progression.length,emotion.name);
+ }
+});
