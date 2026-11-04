@@ -156,7 +156,9 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const triads=pcs.map((_,i)=>diatonicChord(tonic,mode,i,keyName,false));
  const chords=pcs.map((_,i)=>diatonicChord(tonic,mode,i,keyName,true));
  const progression=buildProfileProgression(emotion.steps,tonic,mode,keyName);
- const signatureModeKey=composer.signatureMode||"ionian";\n const signatureMode=DATA.MODES[signatureModeKey]||DATA.MODES.ionian;\n const signature=buildProfileProgression(composer.signature,tonic,signatureMode,keyName);
+ const signatureModeKey=composer.signatureMode||"ionian";
+ const signatureMode=DATA.MODES[signatureModeKey]||DATA.MODES.ionian;
+ const signature=buildProfileProgression(composer.signature,tonic,signatureMode,keyName);
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey});
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
