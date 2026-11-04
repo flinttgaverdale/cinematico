@@ -173,7 +173,7 @@ function modulationIdeas(tonic,mode,composer,keyName,DATA,progression,emotion){
   const tonicTriad=diatonicChord(target.tonic,targetMode,0,targetName,false),tonicLabel=tonicTriad.label;
   const rank=pref.indexOf(id),preferenceScore=rank<0?0:3.1-rank*.62;
   const pivotScore=Math.min(unique.length,2)*1.25,sharedScore=Math.min(sharedPcs.length,7)*.55;
-  const dominantEvidence=last&&mod(last.root-target.tonic)===7?2.4:0;
+  const dominantEvidence=last&&["major","dominant seventh"].includes(last.quality)&&mod(last.root-target.tonic)===7&&last.notes.includes(mod(target.tonic+11))?2.4:0;
   const tonicEvidence=roots.includes(target.tonic)?1.1:0;
   const composerRank=Array.isArray(composer.mods)?composer.mods.indexOf(id):-1;
   const composerScore=composerRank<0?0:Math.max(0,.32-composerRank*.04);

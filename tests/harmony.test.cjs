@@ -209,6 +209,8 @@ test("modulation recommendations are ranked by emotion and progression context",
   assert.ok(joy.mods[0].fitReason.length>0);
   assert.ok(joy.mods.every(x=>x.cadence && x.cadence.dominant && x.cadence.tonic));
   assert.ok(joy.mods.every(x=>typeof x.score==="number"));
+  const minorV=suspense.mods.find(x=>x.id==="down_fifth");
+  assert.ok(!minorV.fitReason.includes("dominante del destino"),"a minor v chord must not be described as a dominant V7");
 });
 
 test("progression analysis exposes chord tones, default bass and shared pitch classes", () => {
