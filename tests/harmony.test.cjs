@@ -135,3 +135,45 @@ test("composer signatures remain independent from the selected emotional mode", 
   assert.equal(williams.signature[1].label,"Fm6");
   assert.equal(Object.values(DATA.COMPOSERS).filter(c=>c.signatureMode).length,11);
 });
+
+test("the 12 emotional profiles retain their intended harmonic turns in C", () => {
+  const expected = {
+    alegria:["Cadd9","F","G","C"],
+    tristeza:["Cm9","A♭","E♭","Cm"],
+    nostalgia:["Cmaj7","Fm6","Cmaj7"],
+    maravilla:["Cmaj7#11","D","C"],
+    heroismo:["C5","B♭","F","C"],
+    tension:["Cm","D♭","Cm"],
+    oscuridad:["Cm","D♭","Cm"],
+    esperanza:["F","Cm","Dm","G"],
+    paz:["Cadd9","Am","F","G"],
+    misterio:["Cm","A♭","Cm"],
+    romance:["Dm7","G7","Cmaj9"],
+    epica:["Cm","A♭","E♭","B♭"]
+  };
+  for (const [id,labels] of Object.entries(expected)) {
+    const emotion=DATA.EMOTIONS[id];
+    const result=E.analyze(0,emotion,DATA.COMPOSERS.giacchino,emotion.mode,DATA);
+    assert.deepEqual(Array.from(result.progression,x=>x.label),labels,id);
+  }
+});
+
+test("all composer reference gestures keep their intended formula in C", () => {
+  const expected = {
+    giacchino:["Cmaj7","E♭","Cmaj7"],
+    williams:["C","Fm6","C"],
+    zimmer:["Cm","A♭","E♭","B♭"],
+    elfman:["Cm","D♭","Cm"],
+    silvestri:["C","F","G","C"],
+    horner:["Cm","B♭","Cm"],
+    herrmann:["Cm","D♭","Cm"],
+    shore:["Cm","D♭","Cm"],
+    morricone:["Cm","B♭","Cm"],
+    newman:["Cadd9","F","Cadd9"],
+    goransson:["Cm","A♭","B♭","Cm"]
+  };
+  for (const [id,labels] of Object.entries(expected)) {
+    const result=E.analyze(0,DATA.EMOTIONS.alegria,DATA.COMPOSERS[id],"ionian",DATA);
+    assert.deepEqual(Array.from(result.signature,x=>x.label),labels,id);
+  }
+});
