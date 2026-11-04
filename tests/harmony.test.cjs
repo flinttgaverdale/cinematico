@@ -620,7 +620,7 @@ test("contrast intention ranks alternatives by explainable structural changes",(
  const neutral=E.compareHarmonicAlternatives(chords,1,proposals);
  const contrast=E.compareHarmonicAlternatives(chords,1,proposals,"contrast");
  assert.equal(contrast.length,neutral.length);
- assert.ok(contrast.every((p,i)=>i===0||contrast[i-1].comparison.contrastScore>=p.comparison.contrastScore));
+ assert.ok(contrast.every((p,i)=>i===0||contrast[i-1].comparison.contextualContrastScore>=p.comparison.contextualContrastScore));
  assert.ok(contrast.every(p=>p.comparison.contrastReasons.length===3));
  assert.ok(contrast.every(p=>p.changesOriginal===false));
  assert.deepEqual([...contrast.map(p=>p.label)].sort(),[...neutral.map(p=>p.label)].sort());
@@ -640,4 +640,35 @@ test("contrast intention stays in the web harmonic UI without MIDI input",()=>{
  assert.ok(html.includes('alternativeIntention'));
  assert.ok(html.includes('p.comparison.contrastReasons'));
  assert.ok(!html.includes('type="file"'));
+});
+
+test("contextual contrast compares local pitch collections without asserting a key",()=>{
+ const chords=E.parseUserProgression("Cm Ab Fm G7").chords;
+ const alternatives=E.chordAlternatives(chords,1);
+ const analyzed=E.compareHarmonicAlternatives(chords,1,alternatives,"contrast");
+ assert.ok(analyzed.length>0);
+ assert.ok(analyzed.every(p=>Number.isFinite(p.comparison.contextualContrastScore)));
+ assert.ok(analyzed.every(p=>p.comparison.context.caveat.includes("no tonalidad inferida")));
+ assert.ok(analyzed.every(p=>p.comparison.context.reasons.length===3));
+});
+test("pitch-class voice proxy is symmetric, deterministic and handles unequal chords",()=>{
+ const a={notes:[0,4,7]},b={notes:[2,5,9,0]};
+ const forward=E.pitchClassMotionEstimate(a,b),reverse=E.pitchClassMotionEstimate(b,a);
+ assert.equal(forward.distance,reverse.distance);
+ assert.equal(forward.unmatched,1);
+ assert.equal(forward.matched,3);
+ assert.equal(E.pitchClassMotionEstimate({notes:[]},b).matched,0);
+ assert.deepEqual(E.pitchClassMotionEstimate(a,b),forward);
+});
+test("contextual diagnostics work at both ends and do not edit chords",()=>{
+ const chords=E.parseUserProgression("C F G7 C").chords;
+ const original=JSON.stringify(chords);
+ const p=E.chordAlternatives(chords,0)[0];
+ const first=E.contextualContrastDiagnostics(chords,0,p);
+ assert.equal(first.incoming,null);
+ assert.ok(first.outgoing);
+ const last=E.contextualContrastDiagnostics(chords,3,{root:2,notes:[2,6,9]});
+ assert.equal(last.outgoing,null);
+ assert.ok(last.incoming);
+ assert.equal(JSON.stringify(chords),original);
 });
