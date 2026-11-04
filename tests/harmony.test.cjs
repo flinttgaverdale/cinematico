@@ -344,3 +344,15 @@ test("composer assistance offers explainable options without mutating original m
  assert.equal(JSON.stringify(chords),original);
  assert.deepEqual(E.composerAssistance("unknown",chords),[]);
 });
+
+test("user chord parsing is non-destructive and validates input",()=>{
+ const parsed=E.parseUserProgression("Cm Abmaj7 Fm7 G7");
+ assert.equal(parsed.errors.length,0);
+ assert.equal(parsed.chords.length,4);
+ assert.equal(parsed.chords[0].root,0);
+ assert.equal(parsed.chords[0].notes.join(","),"0,3,7");
+ assert.equal(E.parseUserProgression("C/E").chords[0].bass,4);
+ assert.equal(E.parseUserProgression("C/H").errors.length,1);
+ assert.equal(E.parseUserProgression("C/F#").errors.length,1);
+ assert.equal(E.parseUserProgression("C ".repeat(17)).errors.length,1);
+});
