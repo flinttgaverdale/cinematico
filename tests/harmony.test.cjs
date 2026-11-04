@@ -207,3 +207,14 @@ test("modulation candidates come from the harmonic context, while composer profi
   assert.equal(idsA[0],"up_major3");
   assert.equal(idsB[0],"up_minor3");
 });
+
+test("progression analysis exposes chord tones, default bass and shared pitch classes", () => {
+  const chords=E.buildProfileProgression([
+    {d:0,a:0,q:"major",e:"add9"},
+    {d:3,a:0,q:"major",e:""}
+  ],0,DATA.MODES.ionian,"C");
+  assert.equal(chords[0].bass,0);
+  assert.equal(chords[0].inversion,0);
+  assert.ok(chords[0].notes.includes(0));
+  assert.deepEqual(chords[0].commonWithNext,[0]);
+});
