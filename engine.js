@@ -776,7 +776,12 @@ function composerEmotionExperiment(tonic,emotion,composer,DATA,modeOverride){
   for(let index=1;index<base.length-1;index++){
    const original=base[index];
    if(originalFingerprint(candidate)===originalFingerprint(original))continue;
-   const chords=base.map((ch,i)=>i===index?{...candidate}: {...ch});
+   const replaced=base.map((ch,i)=>i===index?{...candidate}:{...ch});
+   const chords=replaced.map((ch,i)=>{
+    const next=replaced[i+1];
+    return {...ch,...classifyProgressionChord(ch,tonic,emotionalMode,next),
+     commonWithNext:next?ch.notes.filter(pc=>next.notes.includes(pc)):[]};
+   });
    const common=original.notes.filter(n=>candidate.notes.includes(n)).length;
    const before=base[index-1],after=base[index+1];
    const neighboringCommon=before.notes.filter(n=>candidate.notes.includes(n)).length+
