@@ -640,10 +640,10 @@ function harmonicContinuations(chords){
   const intervals=seventh?[0,4,7,10]:minor?[0,3,7]:[0,4,7];
   return {root:r,bass:r,type,quality:seventh?"other":minor?"minor":"major",notes:intervals.map(n=>mod(r+n)),label:spell(r,false)+type};
  };
- const relative=isMinor?mod(root+3):mod(root+9);
+ const relative=mod(root+9);
  const opposite=make(root,!isMinor);
  const plans=[
-  {id:"shadow",title:"Hacia la melancolía",intent:"Explorar un centro menor relativo y una llegada menos luminosa.",path:[make(mod(relative+5),true),make(mod(relative+7),false,true),make(relative,true)],target:relative,mode:"minor"},
+  {id:"shadow",title:"Hacia la melancolía",intent:"Explorar una nueva región menor y una llegada menos luminosa; solo será relativa si el contexto lo permite.",path:[make(mod(relative+5),true),make(mod(relative+7),false,true),make(relative,true)],target:relative,mode:"minor"},
   {id:"parallel",title:"Cambio de color",intent:"Reinterpretar la fundamental de llegada mediante una tercera de signo contrario.",path:[opposite,make(mod(root+5),true),opposite],target:root,mode:isMinor?"major":"minor"},
   {id:"mystery",title:"Misterio y apertura",intent:"Introducir una región cromática inesperada conservando la posibilidad de volver.",path:[make(mod(root+8)),make(mod(root+1),true),make(mod(root+8),true)],target:mod(root+8),mode:"minor"}
  ];
