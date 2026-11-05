@@ -317,6 +317,19 @@ function voiceMotionDiagnostics(a,b){
  if(largeLeaps.length)observations.push({kind:"large-leaps",count:largeLeaps.length,level:"review",text:"Saltos superiores a una octava: revisar registro y función expresiva"});
  return {diffs,parallelFifths,parallelOctaves,contraryPairs,obliquePairs,largeLeaps,observations};
 }
+// Optional musical priorities: these guide voice movement, not harmonic substitution.
+function expressiveVoiceCost(a,b,style){
+ const diffs=a.map((n,i)=>b[i]-n);
+ const upper=diffs.slice(1);
+ const sustained=upper.filter(n=>n===0).length;
+ const stepwise=upper.filter(n=>Math.abs(n)<=2).length;
+ const bass=diffs[0];
+ const contrary=upper.filter(n=>bass*n<0).length;
+ const simultaneous=upper.filter(n=>bass*n>0).length;
+ if(style==="sustained")return -sustained*4-stepwise*1.5;
+ if(style==="contrary")return -contrary*3+simultaneous*1.5;
+ return 0;
+}
 function transitionCost(a,b,style,fromChord=null,toChord=null){
  const diffs=a.map((n,i)=>b[i]-n);
  const motion=diffs.reduce((sum,d,i)=>sum+Math.abs(d)*(i===0?.55:1),0);
@@ -327,8 +340,8 @@ function transitionCost(a,b,style,fromChord=null,toChord=null){
   if(from===to&&(from===0||from===7)&&diffs[i]*diffs[j]>0)parallels++;
  }
  const tendency=tendencyResolution(a,b,fromChord,toChord);
- const weights=style==="classical"?{motion:1,leap:2,parallel:12}:style==="minimal"?{motion:2,leap:1.5,parallel:1}:{motion:1,leap:.8,parallel:1.5};
- return {total:motion*weights.motion+leap*weights.leap+parallels*weights.parallel+tendency.penalty*(style==="minimal"?.2:style==="cinematic"?.6:1),motion,leap,parallels,diffs,tendency};
+ const weights=style==="classical"?{motion:1,leap:2,parallel:12}:style==="minimal"||style==="sustained"?{motion:2,leap:1.5,parallel:1}:style==="contrary"?{motion:1,leap:1.3,parallel:5}:{motion:1,leap:.8,parallel:1.5};
+ return {total:motion*weights.motion+leap*weights.leap+parallels*weights.parallel+tendency.penalty*(style==="minimal"||style==="sustained"?.2:style==="cinematic"?.6:1)+expressiveVoiceCost(a,b,style),motion,leap,parallels,diffs,tendency};
 }
 // Shared dynamic-programming solver for independent three- and four-voice models.
 // Keeps scoring musical-style-specific while centralizing path reconstruction.
@@ -354,7 +367,7 @@ function optimizeVoiceLayers(layers,chords,initialScore,transitionScore){
  return {voicings,cost:Math.min(...costs)};
 }
 function voiceLead(progression,style="cinematic",locks={}){
- const valid=["classical","cinematic","minimal"].includes(style)?style:"cinematic";
+ const valid=["classical","cinematic","minimal","sustained","contrary"].includes(style)?style:"cinematic";
  if(!progression?.length)return {style:valid,voicings:[],transitions:[],cost:0};
  const layers=progression.map((chord,i)=>voicingCandidates(chord,valid).filter(v=>Object.entries(locks[i]||{}).every(([voice,pitch])=>v[Number(voice)]===Number(pitch))));
  const solution=optimizeVoiceLayers(layers,progression,
@@ -416,7 +429,7 @@ function threeVoiceLead(chords,style="cinematic",locks={}){
  return {...solution,transitions:voicings.slice(1).map((v,i)=>({diffs:v.map((n,j)=>n-voicings[i][j])}))};
 }
 function laboratoryVoices(chords,options={}){
- const style=options.style==="classical"?"classical":"cinematic";
+ const style=["classical","cinematic","sustained","contrary"].includes(options.style)?options.style:"cinematic";
  const count=Number(options.count)===3?3:4;
  // In three voices, locks use indices 0 (bass) and 2 (upper voice) in the UI.
  const locks=count===3?Object.fromEntries(Object.entries(options.locks||{}).map(([i,voices])=>[i,Object.fromEntries(Object.entries(voices).map(([v,n])=>[v==="3"?"2":v,n]))])):options.locks||{};
