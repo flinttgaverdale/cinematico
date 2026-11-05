@@ -22,6 +22,6 @@ for(const [emotionId,emotion] of Object.entries(EMOTIONS)){
 }
 const studies=["williams","zimmer","newman"].map(id=>api.composerEmotionPhraseStudy(2,EMOTIONS.nostalgia,id,data));
 assert.equal(new Set(studies.map(s=>s.strategy)).size,3);
-assert.deepEqual(studies.map(s=>s.preservedProgression.join("|")).filter(Boolean).length,3);
+assert.equal(new Set(studies.map(s=>s.preservedProgression.join("|"))).size,1,"All profiles must preserve the same emotional progression");
 assert.equal(api.composerEmotionPhraseStudy(2,EMOTIONS.nostalgia,"unknown",data).status,"not-studied");
 console.log("Phrase study checks passed:",checked,"cases; distinct strategy IDs: 3");
