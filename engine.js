@@ -603,7 +603,7 @@ const COMPOSER_TECHNIQUES={
  {id:"rhythmic",name:"Impulso rítmico en ostinato",domain:"Ritmo",reason:"Un patrón de acompañamiento insistente sostiene movimiento sin cambiar el tema.",action:"Mantén los acordes y añade un pulso repetido en cuerdas graves, dejando espacio a la melodía.",source:"Escritura de acción orquestal; ejercicio no atribuido a una partitura concreta."}],
  horner:[
  {id:"modal",name:"Giro melódico modal",domain:"Melodía",reason:"Evitar la sensible tonal puede producir una llegada abierta y evocadora.",action:"Compara una frase que usa el séptimo grado menor con otra que usa la sensible; no cambies la melodía original hasta elegir.",source:"Color modal frecuente en la música de cine; no exclusivo de Horner."},
- {id:"open",name:"Quintas abiertas y espacio",domain:"Textura",reason:"Una quinta sostenida deja margen para que la melodía determine el color mayor o menor.",action:"Prueba una quinta grave durante dos acordes y escucha qué tensiones genera cada melodía.",source:"Escritura de intervalos abiertos y lirismo orquestal; referencia general."},
+ {id:"triadic",name:"Trayectoria de tríadas cromáticas",domain:"Armonía",reason:"Una sucesión de tríadas enlazadas por transformaciones puede construir un recorrido reconocible sin depender de cadencias funcionales.",action:"Toma una tríada mayor o menor de tu idea y compara dos transformaciones P, L o R sucesivas en el laboratorio; decide si la continuidad de notas comunes sirve a tu escena.",source:"Frank Lehman (2013), análisis de tres cues de A Beautiful Mind: redes de transformaciones L, R y S. Ejercicio simplificado, no transcripción de la obra."},
  {id:"longline",name:"Arco lírico prolongado",domain:"Desarrollo",reason:"Una melodía de respiración larga puede aumentar la emoción sin añadir acordes.",action:"Une dos motivos cortos en una frase más larga y retrasa su nota culminante.",source:"Fraseo lírico y desarrollo temático sinfónico; procedimiento compartido."}],
  shore:[
  {id:"leitmotif",name:"Transformación de leitmotiv",domain:"Desarrollo",reason:"Un mismo motivo cambia de significado al alterar su intervalo, ritmo o contexto.",action:"Repite tu célula temática en modo distinto o con inversión de un intervalo y compara el resultado.",source:"Desarrollo leitmotívico de tradición wagneriana, relevante en sus bandas sonoras."},
@@ -640,6 +640,9 @@ function composerAssistance(composerId,progression=[]){
    observation=common.length
     ?"Los dos primeros acordes comparten "+common.length+" nota(s). Prueba una voz contraria, pero verifica el movimiento con una melodía real."
     :"Los dos primeros acordes no comparten notas. Prueba movimiento contrario en una voz, sin asumir que ya existe una contramelodía.";
+  }else if(t.id==="triadic"&&chords.length){
+   const triad=chords.find(ch=>(ch.type===""||ch.type==="m")&&Array.isArray(ch.notes)&&ch.notes.length===3);
+   observation=triad?"Puedes comenzar por "+triad.label+" y comparar transformaciones de tríadas. No se ha identificado una secuencia concreta de Horner en tu material.":"No hay una tríada mayor o menor simple en esta progresión. El ejercicio requiere elegir una tríada de partida.";
   }else if(t.id==="modal"&&chords.length){
    observation="El primer acorde es "+chords[0].label+". Compara una variante modal sin asumir que se ha producido una modulación.";
   }else if(t.id==="color"&&chords.length){
@@ -653,7 +656,7 @@ function composerAssistance(composerId,progression=[]){
   }
   const requiresMelody=["sequence","motif","leitmotif","longline","fanfare","cell","counterpoint"].includes(t.id);
   const requiresTiming=["dance","rhythm","tempo","pulse","ostinato","rhythmic","space","delay"].includes(t.id);
-  const harmonicOnly=["dominant","cadence","chromatic","modal"].includes(t.id);
+  const harmonicOnly=["dominant","cadence","chromatic","modal","triadic"].includes(t.id);
   return {...t,observation,requiresMelody,requiresTiming,harmonicOnly,
    evidenceLevel:"orientative",changesOriginal:false};
  });
