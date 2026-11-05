@@ -489,11 +489,10 @@ function triadicLayeringHypotheses(chord){
  const results=[];
  for(let i=0;i<triads.length;i++)for(let j=i+1;j<triads.length;j++){
   const a=triads[i],b=triads[j];
-  if(a.notes.some(pc=>b.notes.includes(pc)))continue;
   const union=new Set([...a.notes,...b.notes]);
   if(union.size!==pitchClasses.size||[...pitchClasses].some(pc=>!union.has(pc)))continue;
   results.push({layers:[a,b].map(t=>({root:spell(t.root),quality:t.quality,notes:t.notes.map(spell)})),
-   observation:"Conjunto de seis clases de altura compatible con dos tríadas sin notas comunes.",
+   observation:"Conjunto de clases de altura compatible con dos tríadas superpuestas"+(a.notes.some(pc=>b.notes.includes(pc))?" con notas compartidas.":" sin notas compartidas."),
    caveat:"Hipótesis de partición: sin registro, instrumentación ni simultaneidad temporal no puede confirmarse policordio o politonalidad perceptiva."});
  }
  return results;
