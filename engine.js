@@ -641,7 +641,8 @@ function harmonicContinuations(chords){
   r=mod(r);
   const type=quality==="minor"?"m":quality==="dominant"?"7":"";
   const intervals=quality==="minor"?[0,3,7]:quality==="dominant"?[0,4,7,10]:[0,4,7];
-  return {root:r,bass:r,type,notes:intervals.map(n=>mod(r+n)),label:spell(r,false)+type};
+  const useSharp=(quality==="minor"&&[1,6,8].includes(r))||(quality==="dominant"&&[1,6,8].includes(r));
+  return {root:r,bass:r,type,notes:intervals.map(n=>mod(r+n)),label:spell(r,useSharp)+type};
  };
  const keyOf=ch=>[...new Set(ch.notes.map(mod))].sort((a,b)=>a-b).join(",");
  const shared=(a,b)=>{const x=new Set(a.notes.map(mod));return b.notes.filter(n=>x.has(mod(n))).length;};
