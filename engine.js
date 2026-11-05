@@ -629,6 +629,56 @@ function compareHarmonicAlternatives(chords,index,alternatives,intention="neutra
   b.comparison.continuity-a.comparison.continuity||a.label.localeCompare(b.label));
 }
 function chordAlternatives(chords,index){if(!Array.isArray(chords)||index<0||index>=chords.length)return [];const c=chords[index],previous=chords[index-1],next=chords[index+1];const proposals=[];function add(root,type,intervals,why){const notes=[...new Set(intervals.map(x=>mod(root+x)))];if(root===c.root&&type===c.type)return;const label=spell(root)+(type||"");const common=c.notes.filter(n=>notes.includes(n));const nextCommon=next?notes.filter(n=>next.notes.includes(n)):[];proposals.push({label,root,type,notes,common:common.map(n=>spell(n)),nextCommon:nextCommon.map(n=>spell(n)),why,original:c.label,changesOriginal:false});}if(c.type===""||c.type==="m"){for(const op of ["P","L","R"]){const t=neoTransform(c.root,c.type==="m"?"minor":"major",op);if(t)add(t.target.root,t.target.quality==="minor"?"m":"",t.target.quality==="minor"?[0,3,7]:[0,4,7],"Transformación "+op+": conserva dos notas de la tríada y desplaza una voz "+Math.abs(t.movement.semitones)+" semitono(s).");}}if(next){const dominant=mod(next.root+7);add(dominant,"7",[0,4,7,10],"Dominante potencial del acorde siguiente ("+next.label+"). Comprueba la resolución y el contexto tonal; no implica modulación.");}if(previous&&c.type==="m")add(c.root,"m7",[0,3,7,10],"Añadir séptima introduce una tensión que puedes preparar o resolver en la siguiente voz.");return proposals.slice(0,5);}
+// Bounded three/four-chord paths anchored in the user's progression.
+// Scores compare pitch-class sets only: they are not aesthetic or emotional predictions.
+function harmonicTrajectories(chords,start=0){
+ if(!Array.isArray(chords)||!Number.isInteger(start)||start<0||start>=chords.length)return [];
+ const base=chords.slice(start,start+4);
+ if(base.length<3)return [];
+ const pcs=ch=>new Set(ch.notes.map(mod));
+ const difference=(a,b)=>{const x=pcs(a),y=pcs(b);return [...x].filter(n=>!y.has(n)).length+[...y].filter(n=>!x.has(n)).length;};
+ const adjacent=(path)=>path.slice(1).reduce((sum,ch,i)=>sum+pitchClassMotionEstimate(path[i],ch).distance,0);
+ const baseMotion=adjacent(base);
+ const strategies=[
+  {id:"continuity",title:"Continuidad",explain:"Prioriza conservar clases de altura respecto a la idea original."},
+  {id:"contrast",title:"Contraste",explain:"Busca una desviación armónica perceptible manteniendo el inicio y la llegada."},
+  {id:"direction",title:"Dirección hacia la llegada",explain:"Explora una preparación potencial del último acorde; no afirma cadencia ni resolución tonal."}
+ ];
+ const candidates=[];
+ for(let index=1;index<base.length-1;index++){
+  const options=chordAlternatives(base,index);
+  for(const candidate of options){
+   const changed=difference(base[index],candidate);
+   if(changed===0||changed>4)continue;
+   const path=base.map((ch,i)=>i===index?candidate:ch);
+   const movement=adjacent(path);
+   const incoming=pcs(base[index-1]),outgoing=pcs(base[index+1]);
+   const bridge=[...pcs(candidate)].filter(pc=>incoming.has(pc)||outgoing.has(pc)).length;
+   const dominantPreparation=mod(candidate.root+5)===mod(base[index+1].root)&&pcs(candidate).has(mod(candidate.root+4));
+   candidates.push({index,candidate,path,changed,bridge,movement,motionDelta:movement-baseMotion,dominantPreparation});
+  }
+ }
+ const seen=new Set();
+ return strategies.flatMap(strategy=>{
+  const ranked=candidates.map(c=>{
+   const score=strategy.id==="continuity"?c.bridge*3-c.changed*3-c.motionDelta:
+    strategy.id==="contrast"?c.changed*3+c.bridge-Math.max(0,c.motionDelta):
+    (c.dominantPreparation?18:0)+c.bridge*2-c.motionDelta-Math.abs(c.changed-2);
+   return {...c,score};
+  }).sort((a,b)=>b.score-a.score||a.changed-b.changed||a.index-b.index||a.candidate.label.localeCompare(b.candidate.label));
+  const choice=ranked.find(c=>!seen.has(c.index+":"+c.candidate.label));
+  if(!choice)return [];
+  seen.add(choice.index+":"+choice.candidate.label);
+  return [{id:strategy.id,title:strategy.title,explain:strategy.explain,
+   chords:choice.path.map(ch=>ch.label),changedPosition:start+choice.index,
+   original:base[choice.index].label,replacement:choice.candidate.label,
+   preserved:base.length-1,changedPitchClasses:choice.changed,
+   motionDelta:choice.motionDelta,neighborShared:choice.bridge,
+   dominantPreparation:choice.dominantPreparation,
+   why:choice.candidate.why,
+   caveat:"Comparación de clases de altura sin melodía, ritmo, registro ni función tonal confirmada. Propuesta opcional: no modifica tu progresión."}];
+ });
+}
 /* Explainable composition assistance: observations and optional experiments, never edits. */
 const COMPOSER_TECHNIQUES={
  williams:[{id:"sequence",name:"Secuencia motívica",domain:"Desarrollo",reason:"Traslada un motivo por grados sucesivos para construir dirección, conservando su identidad rítmica.",action:"Prueba una secuencia ascendente o descendente de tu motivo; decide tú dónde interrumpirla.",source:"Lenguaje sinfónico y desarrollo temático; recurso compartido con la tradición romántica."},{id:"dominant",name:"Preparación de dominante",domain:"Armonía",reason:"Una dominante preparada puede reforzar la llegada sin reemplazar tu tema.",action:"Examina si el penúltimo acorde admite una dominante secundaria o una cadencia más dirigida.",source:"Sintaxis tonal sinfónica; no exclusiva de Williams."},{id:"counterpoint",name:"Contramelodía",domain:"Textura",reason:"Una segunda línea puede intensificar el desarrollo sin modificar la melodía principal.",action:"Busca notas comunes y movimiento contrario en una voz secundaria.",source:"Escritura contrapuntística sinfónica."}],
@@ -939,5 +989,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
