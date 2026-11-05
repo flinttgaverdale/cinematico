@@ -715,3 +715,53 @@ test("contrast cards display three separate interpretations and parse as JavaScr
  const start=html.lastIndexOf("<script>"),end=html.indexOf("</script>",start);
  assert.doesNotThrow(()=>new vm.Script(html.slice(start+8,end)));
 });
+
+test('tension destinations distinguish seventh resolution, retention and altered colour', () => {
+ const chords=E.parseUserProgression('G7 C').chords;
+ const before=JSON.stringify(chords);
+ const ideas=E.tensionDestinations(chords,0);
+ const seventh=ideas.find(x=>x.pc===5);
+ assert.equal(seventh.resolve[0].pc,4);
+ assert.equal(seventh.resolve[0].semitones,-1);
+ assert.equal(seventh.resolve[0].conventional,true);
+ assert.equal(seventh.hold.chordTone,false);
+ assert.equal(seventh.hold.role,'cuarta / oncena');
+ assert.ok(seventh.displace.some(x=>x.pc===6&&!x.chordTone));
+ const leading=ideas.find(x=>x.pc===11);
+ assert.equal(leading.resolve[0].pc,0);
+ assert.equal(leading.resolve[0].semitones,1);
+ assert.equal(JSON.stringify(chords),before);
+});
+
+test('minor arrival and inversions retain the descending seventh option', () => {
+ const seventh=E.tensionDestinations(E.parseUserProgression('G7/B Cm/Eb').chords,0).find(x=>x.pc===5);
+ assert.equal(seventh.resolve[0].pc,3);
+ assert.equal(seventh.resolve[0].semitones,-2);
+ assert.equal(seventh.resolve[0].conventional,true);
+});
+
+test('retention can integrate a seventh and repeated seventh chords retain tension', () => {
+ const integrated=E.tensionDestinations(E.parseUserProgression('G7 F').chords,0).find(x=>x.pc===5);
+ assert.equal(integrated.hold.stable,true);
+ const repeated=E.tensionDestinations(E.parseUserProgression('Cmaj7 Cmaj7').chords,0);
+ assert.equal(repeated.length,1);
+ assert.equal(repeated[0].hold.chordTone,true);
+ assert.equal(repeated[0].hold.stable,false);
+});
+
+test('tension destinations handle boundaries and never invent a nearby resolution', () => {
+ for(const [chords,index] of [[[],0],[null,0],[E.parseUserProgression('C G').chords,1],[E.parseUserProgression('C G').chords,-1]])assert.equal(E.tensionDestinations(chords,index).length,0);
+ assert.equal(E.tensionDestinations(E.parseUserProgression('C C').chords,0).length,0);
+ const distant=E.tensionDestinations(E.parseUserProgression('C Caug').chords,0).find(x=>x.pc===7);
+ assert.equal(distant.resolve.length,0);
+});
+
+test('tension destination rendering follows selected chord and handles final chord', () => {
+ const source=html.slice(html.indexOf('function renderTensionDestinations(){'),html.indexOf('function renderUserMaterial(){'));
+ const ui=vm.createContext({CinematicoEngine:E,userMaterial:E.parseUserProgression('G7 C').chords,selectedUserChord:0,esc:value=>String(value)});
+ vm.runInContext(source,ui);
+ const rendered=vm.runInContext('renderTensionDestinations()',ui);
+ for(const label of ['<details','Resolver','Mantener','Desplazar','F → E','F → F'])assert.ok(rendered.includes(label),label);
+ ui.selectedUserChord=1;
+ assert.ok(vm.runInContext('renderTensionDestinations()',ui).includes('Selecciona un acorde anterior'));
+});

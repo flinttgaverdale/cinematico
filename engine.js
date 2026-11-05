@@ -647,6 +647,33 @@ function harmonicContinuityIdeas(chords){
    caveat:"Sugerencias entre clases de altura: sin melodía, ritmo ni registro no describen notas realmente ejecutadas."};
  });
 }
+// Compare individual pitch-class paths without inferring voices or rhythmic suspensions.
+function tensionDestinations(chords,index){
+ if(!Array.isArray(chords)||!Number.isInteger(index)||index<0||index>=chords.length-1)return [];
+ const from=chords[index],to=chords[index+1];
+ const source=[...new Set(from.notes.map(mod))],target=[...new Set(to.notes.map(mod))];
+ const roles=sustainedToneAnalysis([to]);
+ const dominantLike=mod(from.root+5)===mod(to.root)&&source.includes(mod(from.root+4))&&source.includes(mod(from.root+7));
+ return source.filter(pc=>!target.includes(pc)||[10,11].includes(mod(pc-from.root))||dominantLike&&pc===mod(to.root-1)).map(pc=>{
+  const leading=dominantLike&&pc===mod(to.root-1);
+  const seventh=[10,11].includes(mod(pc-from.root));
+  const paths=roles.map(role=>{
+   const step=role.steps[0];
+   return {pc:role.pc,note:role.note,semitones:mod(role.pc-pc+6)-6,role:step.role,chordTone:step.chordTone,
+    stable:step.chordTone&&[0,3,4,7].includes(step.interval)};
+  });
+  const resolve=paths.filter(p=>p.stable&&[1,2].includes(Math.abs(p.semitones)))
+   .map(p=>({...p,conventional:leading?p.semitones===1&&p.pc===mod(to.root):seventh?p.semitones<0:false}))
+   .sort((a,b)=>Number(b.conventional)-Number(a.conventional)||Math.abs(a.semitones)-Math.abs(b.semitones)||a.pc-b.pc);
+  const hold=paths.find(p=>p.pc===pc);
+  const displace=paths.filter(p=>!p.stable&&[1,2].includes(Math.abs(p.semitones))&&[1,2,5,6,8,9,10,11].includes(mod(p.pc-to.root)))
+   .sort((a,b)=>Number(b.chordTone)-Number(a.chordTone)||Math.abs(a.semitones)-Math.abs(b.semitones)||a.pc-b.pc).slice(0,2);
+  return {pc,note:spell(pc),from:from.label,to:to.label,
+   reason:leading?"Sensible potencial del acorde de llegada":seventh?"Séptima del acorde de partida":"Nota que queda fuera del acorde siguiente",
+   resolve,hold,displace,
+   caveat:"Posibilidades para una voz. El registro, la duración y el resto de voces determinarán el resultado al escucharlo."};
+ });
+}
 function adjacentVoiceMotion(chords){
  if(!Array.isArray(chords))return [];
  return chords.slice(0,-1).map((ch,i)=>{
@@ -674,5 +701,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
