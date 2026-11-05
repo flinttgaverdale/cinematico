@@ -10,7 +10,7 @@ const profiles={
  first:{name:"A",signatureMode:"aeolian",signature:[chord(0),chord(1,-1,"major"),chord(0)]},
  duplicate:{name:"B",signatureMode:"aeolian",signature:[chord(0),chord(1,-1,"major"),chord(0)]},
  distinct:{name:"C",signatureMode:"aeolian",signature:[chord(0),chord(4),chord(1,-1,"major"),chord(0)]},
- differentMode:{name:"D",signatureMode:"dorian",signature:[chord(0),chord(1,-1,"major"),chord(0)]}
+ differentMode:{name:"D",signatureMode:"phrygian",signature:[chord(0),chord(1,-1,"major"),chord(0)]}
 };
 const result=audit(profiles);
 assert.equal(result.profiles.length,4);
