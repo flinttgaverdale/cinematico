@@ -18,6 +18,15 @@ for(const input of ["C G Am F","Am F C G","Cm Ab Fm G","Cmaj7 Dm7 G7 C","C","C F
  assert.equal(JSON.stringify(p.chords),original);
  assert.equal(JSON.stringify(E.harmonicContinuations(p.chords)),JSON.stringify(result));
 }
+// Same last chord, different preceding harmony: context must influence at least one path.
+const a=E.harmonicContinuations(E.parseUserProgression("C G Am F").chords);
+const b=E.harmonicContinuations(E.parseUserProgression("Dm G C F").chords);
+assert.notEqual(JSON.stringify(a.map(x=>x.chords)),JSON.stringify(b.map(x=>x.chords)));
+for(const result of [...a,...b]){
+ assert.ok(result.contextWindow>=1&&result.contextWindow<=4);
+ assert.ok(Number.isFinite(result.contextScore));
+ for(let i=1;i<result.chords.length;i++)assert.notEqual(result.chords[i],result.chords[i-1]);
+}
 assert.equal(E.harmonicContinuations([]).length,0);
 assert.equal(E.harmonicContinuations(null).length,0);
 console.log("Harmonic continuations: invariants passed.");
