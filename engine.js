@@ -689,6 +689,34 @@ function adjacentVoiceMotion(chords){
  });
 }
 
+
+/**
+ * Audit stylistic reference progressions without claiming score provenance.
+ * Transposition-invariant fingerprint: ordered root intervals + chord quality.
+ * Detects exact duplicates and rotations; rotations are marked as related,
+ * not identical, because phrase placement can change harmonic meaning.
+ */
+function composerProfileAudit(profiles){
+ const entries=Object.entries(profiles||{}).map(([id,p])=>{
+  const steps=Array.isArray(p.signature)?p.signature:[];
+  const mode=p.signatureMode||"ionian";
+  const roots=steps.map(x=>Number(x.d)*2+Number(x.a||0));
+  const qualities=steps.map(x=>String(x.q||"")+"|"+String(x.e||""));
+  const movements=steps.slice(1).map((x,i)=>mod(roots[i+1]-roots[i]));
+  const fingerprint=steps.map((x,i)=>[Number(x.d),Number(x.a||0),qualities[i]].join(":")).join(";");
+  return {id,name:p.name||id,mode,length:steps.length,fingerprint,movements,qualities};
+ });
+ const pairs=[];
+ for(let i=0;i<entries.length;i++)for(let j=i+1;j<entries.length;j++){
+  const a=entries[i],b=entries[j];
+  const exact=a.mode===b.mode&&a.fingerprint===b.fingerprint;
+  const sameMotion=a.movements.length===b.movements.length&&a.movements.every((n,k)=>n===b.movements[k]);
+  const sameQualities=a.qualities.length===b.qualities.length&&a.qualities.every((n,k)=>n===b.qualities[k]);
+  if(exact||sameMotion&&sameQualities)pairs.push({a:a.id,b:b.id,kind:exact?"identical":"related",reason:exact?"Misma sucesión de grados, alteraciones y calidades en el mismo modo":"Movimiento de raíces y calidades similares; comprobar grados y contexto"});
+ }
+ return {profiles:entries,pairs,identical:pairs.filter(x=>x.kind==="identical")};
+}
+
 function analyze(tonic,emotion,composer,modeOverride,DATA){
  const modeKey=modeOverride||emotion.mode,mode=DATA.MODES[modeKey],keyName=DATA.keyNameForPc(tonic);
  const sharp=DATA.KEYS_SHARP[keyName]===1,pcs=scale(tonic,mode),scaleNames=spellScale(tonic,mode,keyName);
@@ -701,5 +729,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
