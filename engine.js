@@ -731,6 +731,38 @@ function composerProfileAudit(profiles){
  return {profiles:entries,pairs,identical:pairs.filter(x=>x.kind==="identical")};
 }
 
+// Experimental, opt-in composition bridge: preserve the emotional frame and
+// suggest a single composer-derived substitution without mutating either source.
+function composerEmotionExperiment(tonic,emotion,composer,DATA){
+ const keyName=DATA.keyNameForPc(tonic);
+ const emotionalMode=DATA.MODES[emotion.mode];
+ const composerMode=DATA.MODES[composer.signatureMode||"ionian"];
+ if(!emotionalMode||!composerMode)return {status:"unsupported",alternatives:[]};
+ const base=buildProfileProgression(emotion.steps,tonic,emotionalMode,keyName);
+ const signature=buildProfileProgression(composer.signature,tonic,composerMode,keyName);
+ if(base.length<3||signature.length<2)return {status:"insufficient-material",alternatives:[]};
+ const originalFingerprint=ch=>mod(ch.root)+":"+ch.notes.map(n=>mod(n-ch.root)).sort((a,b)=>a-b).join(",");
+ const existing=new Set(base.map(originalFingerprint));
+ const candidates=signature.slice(1,-1).filter(ch=>!existing.has(originalFingerprint(ch)));
+ const options=[];
+ for(const candidate of candidates){
+  for(let index=1;index<base.length-1;index++){
+   const chords=base.map((ch,i)=>i===index?{...candidate}: {...ch});
+   const original=base[index];
+   const common=original.notes.filter(n=>candidate.notes.includes(n)).length;
+   const before=base[index-1],after=base[index+1];
+   const neighboringCommon=before.notes.filter(n=>candidate.notes.includes(n)).length+
+    after.notes.filter(n=>candidate.notes.includes(n)).length;
+   const rootMotion=mod(candidate.root-before.root);
+   const score=common*3+neighboringCommon*2-(rootMotion===6?2:0);
+   options.push({index,score,changedFrom:original.label,changedTo:candidate.label,
+    progression:chords,explanation:"Sustitución experimental de un acorde interior por un gesto del perfil compositivo; conserva inicio, final y los demás acordes. No representa una atribución histórica."});
+  }
+ }
+ options.sort((a,b)=>b.score-a.score||a.index-b.index);
+ return {status:options.length?"suggestions":"no-distinct-gesture",base,alternatives:options.slice(0,3),
+  limitation:"Experimento armónico: no modela todavía melodía, duración, ritmo, textura ni fraseo. No aplicar automáticamente."};
+}
 function analyze(tonic,emotion,composer,modeOverride,DATA){
  const modeKey=modeOverride||emotion.mode,mode=DATA.MODES[modeKey],keyName=DATA.keyNameForPc(tonic);
  const sharp=DATA.KEYS_SHARP[keyName]===1,pcs=scale(tonic,mode),scaleNames=spellScale(tonic,mode,keyName);
@@ -743,5 +775,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
