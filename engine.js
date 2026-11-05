@@ -742,13 +742,13 @@ function composerEmotionExperiment(tonic,emotion,composer,DATA){
  const signature=buildProfileProgression(composer.signature,tonic,composerMode,keyName);
  if(base.length<3||signature.length<2)return {status:"insufficient-material",alternatives:[]};
  const originalFingerprint=ch=>mod(ch.root)+":"+ch.notes.map(n=>mod(n-ch.root)).sort((a,b)=>a-b).join(",");
- const existing=new Set(base.map(originalFingerprint));
- const candidates=signature.slice(1,-1).filter(ch=>!existing.has(originalFingerprint(ch)));
+ const candidates=signature.slice(1,-1);
  const options=[];
  for(const candidate of candidates){
   for(let index=1;index<base.length-1;index++){
-   const chords=base.map((ch,i)=>i===index?{...candidate}: {...ch});
    const original=base[index];
+   if(originalFingerprint(candidate)===originalFingerprint(original))continue;
+   const chords=base.map((ch,i)=>i===index?{...candidate}: {...ch});
    const common=original.notes.filter(n=>candidate.notes.includes(n)).length;
    const before=base[index-1],after=base[index+1];
    const neighboringCommon=before.notes.filter(n=>candidate.notes.includes(n)).length+
@@ -756,10 +756,15 @@ function composerEmotionExperiment(tonic,emotion,composer,DATA){
    const rootMotion=mod(candidate.root-before.root);
    const context=contextualContrastDiagnostics(base,index,candidate);
    const motionDelta=context.motionDelta;
-   const score=common*3+neighboringCommon*2-(rootMotion===6?2:0)-motionDelta;
+   const classification=classifyProgressionChord(candidate,tonic,emotionalMode,after);
+   const chromaticCount=candidate.notes.filter(pc=>!scale(tonic,emotionalMode).includes(mod(pc))).length;
+   const isLocalDominant=classification.classification==="dominant"||classification.classification==="modalDominant"||classification.classification==="secondaryDominant";
+   const score=common*3+neighboringCommon*2-(rootMotion===6?2:0)-motionDelta-
+    chromaticCount*2+(isLocalDominant?2:0);
    options.push({index,score,changedFrom:original.label,changedTo:candidate.label,
     progression:chords,diagnostics:{commonWithOriginal:common,commonWithNeighbors:neighboringCommon,motionDelta,
-     chromaticDifference:context.chromaticDifference},
+     chromaticDifference:context.chromaticDifference,chromaticCount,
+     harmonicRole:classification.classification,roleExplanation:classification.explanation},
     explanation:"Sustitución experimental de un acorde interior por un gesto del perfil compositivo; conserva inicio, final y los demás acordes. La continuidad se estima por clases de altura, sin conducción registral. No representa una atribución histórica."});
   }
  }
