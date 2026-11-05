@@ -23,4 +23,12 @@ for(const [id,composer] of Object.entries(COMPOSERS)){
 }
 assert.equal(JSON.stringify(progression),before,"Technique suggestions must not mutate user material");
 assert.equal(api.composerAssistance("unknown",progression).length,0);
+const shore=api.composerAssistance("shore",progression).find(t=>t.id==="leitmotif");
+assert.ok(shore.requiresMelody&&shore.observation.includes("no se ha detectado ningún motivo"));
+const goransson=api.composerAssistance("goransson",progression).find(t=>t.id==="tempo");
+assert.ok(goransson.requiresTiming&&goransson.observation.includes("No se han analizado duraciones"));
+const newman=api.composerAssistance("newman",progression).find(t=>t.id==="space");
+assert.ok(newman.requiresTiming&&newman.observation.includes("No se han analizado duraciones"));
+const williams=api.composerAssistance("williams",progression).find(t=>t.id==="counterpoint");
+assert.ok(williams.requiresMelody&&williams.observation.includes("comparten"));
 console.log("Composer technique coverage passed:",Object.keys(COMPOSERS).length,"composers",count,"resources");
