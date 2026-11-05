@@ -754,13 +754,22 @@ function composerEmotionExperiment(tonic,emotion,composer,DATA){
    const neighboringCommon=before.notes.filter(n=>candidate.notes.includes(n)).length+
     after.notes.filter(n=>candidate.notes.includes(n)).length;
    const rootMotion=mod(candidate.root-before.root);
-   const score=common*3+neighboringCommon*2-(rootMotion===6?2:0);
+   const context=contextualContrastDiagnostics(base,index,candidate);
+   const motionDelta=context.motionDelta;
+   const score=common*3+neighboringCommon*2-(rootMotion===6?2:0)-motionDelta;
    options.push({index,score,changedFrom:original.label,changedTo:candidate.label,
-    progression:chords,explanation:"Sustitución experimental de un acorde interior por un gesto del perfil compositivo; conserva inicio, final y los demás acordes. No representa una atribución histórica."});
+    progression:chords,diagnostics:{commonWithOriginal:common,commonWithNeighbors:neighboringCommon,motionDelta,
+     chromaticDifference:context.chromaticDifference},
+    explanation:"Sustitución experimental de un acorde interior por un gesto del perfil compositivo; conserva inicio, final y los demás acordes. La continuidad se estima por clases de altura, sin conducción registral. No representa una atribución histórica."});
   }
  }
  options.sort((a,b)=>b.score-a.score||a.index-b.index);
- return {status:options.length?"suggestions":"no-distinct-gesture",base,alternatives:options.slice(0,3),
+ const unique=[],seen=new Set();
+ for(const option of options){
+  const fingerprint=option.index+":"+originalFingerprint(option.progression[option.index]);
+  if(!seen.has(fingerprint)){seen.add(fingerprint);unique.push(option);}
+ }
+ return {status:unique.length?"suggestions":"no-distinct-gesture",base,alternatives:unique.slice(0,3),
   limitation:"Experimento armónico: no modela todavía melodía, duración, ritmo, textura ni fraseo. No aplicar automáticamente."};
 }
 function analyze(tonic,emotion,composer,modeOverride,DATA){
