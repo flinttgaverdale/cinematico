@@ -642,7 +642,7 @@ function harmonicTrajectories(chords,start=0){
  const strategies=[
   {id:"continuity",title:"Continuidad",explain:"Prioriza conservar clases de altura respecto a la idea original."},
   {id:"contrast",title:"Contraste",explain:"Busca una desviación armónica perceptible manteniendo el inicio y la llegada."},
-  {id:"direction",title:"Dirección hacia la llegada",explain:"Explora una preparación potencial del último acorde; no afirma cadencia ni resolución tonal."}
+  {id:"direction",title:"Dirección armónica",explain:"Explora la conexión con el acorde siguiente al cambio; no afirma una cadencia ni resolución tonal."}
  ];
  const candidates=[];
  for(let index=1;index<base.length-1;index++){
@@ -666,9 +666,9 @@ function harmonicTrajectories(chords,start=0){
     (c.dominantPreparation?18:0)+c.bridge*2-c.motionDelta-Math.abs(c.changed-2);
    return {...c,score};
   }).sort((a,b)=>b.score-a.score||a.changed-b.changed||a.index-b.index||a.candidate.label.localeCompare(b.candidate.label));
-  const choice=ranked.find(c=>!seen.has(c.index+":"+c.candidate.label));
+  const choice=ranked.find(c=>!seen.has(c.index+":"+[...pcs(c.candidate)].sort((a,b)=>a-b).join(",")));
   if(!choice)return [];
-  seen.add(choice.index+":"+choice.candidate.label);
+  seen.add(choice.index+":"+[...pcs(choice.candidate)].sort((a,b)=>a-b).join(","));
   return [{id:strategy.id,title:strategy.title,explain:strategy.explain,
    chords:choice.path.map(ch=>ch.label),changedPosition:start+choice.index,
    original:base[choice.index].label,replacement:choice.candidate.label,
