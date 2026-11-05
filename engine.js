@@ -688,6 +688,58 @@ function harmonicContinuations(chords){
    caveat:"El carácter emocional y la tonalidad de llegada son hipótesis creativas. Sin melodía, duraciones, acentos y registro no puede confirmarse el efecto. No se aplica ningún cambio."}];
  });
 }
+
+// Emotion-specific continuation studies. All proposals are non-destructive and
+// describe harmonic devices, not a reliable prediction of perceived emotion.
+// Degrees are relative to the last chord root; no global key is presumed.
+function emotionalContinuations(chords,emotion){
+ if(!Array.isArray(chords)||!chords.length)return [];
+ const last=chords[chords.length-1];
+ if(!last||!Number.isFinite(last.root)||!Array.isArray(last.notes))return [];
+ const root=mod(last.root),minor=last.type==="m"||last.type==="m7";
+ const tonic=mod(root+(minor?0:0));
+ const make=(offset,kind="M")=>{
+  const r=mod(tonic+offset);
+  const intervals={M:[0,4,7],m:[0,3,7],dom:[0,4,7,10],maj7:[0,4,7,11],m7:[0,3,7,10],sus4:[0,5,7],add9:[0,4,7,14],madd9:[0,3,7,14],dim:[0,3,6]}[kind];
+  if(!intervals)return null;
+  const suffix={M:"",m:"m",dom:"7",maj7:"maj7",m7:"m7",sus4:"sus4",add9:"add9",madd9:"madd9",dim:"dim"}[kind];
+  return {root:r,bass:r,type:suffix,notes:[...new Set(intervals.map(n=>mod(r+n)))],label:spell(r,[1,6,8].includes(r))+suffix};
+ };
+ const recipes={
+ misterio:{title:"Misterio",device:"Desplazamiento cromático y llegada ambigua",why:"El semitono altera el centro percibido; la llegada menor evita una confirmación tonal evidente.",patterns:[[[1,"M"],[6,"m"],[8,"m"]],[[6,"M"],[1,"m"],[8,"m"]],[[8,"M"],[1,"m"],[6,"m"]]]},
+ melancolia:{title:"Melancolía",device:"Predominante menor y dominante de llegada",why:"La preparación con predominante menor y dominante dibuja una dirección hacia una llegada menor.",patterns:[[[5,"m"],[7,"dom"],[0,"m"]],[[2,"dim"],[7,"dom"],[0,"m"]],[[9,"m"],[7,"dom"],[0,"m"]]]},
+ tension:{title:"Tensión",device:"Dominantes encadenadas y resolución aplazada",why:"Las séptimas de dominante introducen tendencias de resolución que se posponen antes de llegar al último acorde.",patterns:[[[2,"dom"],[7,"dom"],[0,"m"]],[[9,"dom"],[2,"dom"],[7,"dom"]],[[6,"dom"],[7,"dom"],[0,"m"]]]},
+ esperanza:{title:"Esperanza",device:"Apertura hacia acordes mayores",why:"El recorrido pasa por regiones mayores y una llegada con novena añadida, que puede sugerir apertura sin cerrar completamente la frase.",patterns:[[[5,"M"],[7,"M"],[0,"add9"]],[[9,"m"],[5,"M"],[0,"maj7"]],[[2,"m"],[7,"M"],[0,"add9"]]]},
+ nostalgia:{title:"Nostalgia",device:"Mediantes y color de séptima mayor",why:"Las relaciones de tercera y la séptima mayor pueden conservar notas comunes y producir una evocación armónica menos directa.",patterns:[[[8,"M"],[5,"m"],[0,"maj7"]],[[9,"m7"],[5,"maj7"],[0,"maj7"]],[[4,"m"],[9,"m7"],[0,"maj7"]]]},
+ epica:{title:"Épica",device:"Movimiento amplio de fundamentales y llegada afirmativa",why:"Los saltos entre regiones armónicas y la llegada mayor crean una base para un gesto expansivo; el carácter épico requiere además ritmo, registro y orquestación.",patterns:[[[8,"M"],[10,"M"],[0,"M"]],[[5,"M"],[10,"M"],[0,"M"]],[[3,"M"],[10,"M"],[0,"M"]]]},
+ tristeza:{title:"Tristeza",device:"Descenso hacia una llegada menor",why:"La llegada menor y el movimiento por regiones vecinas ofrecen un contorno más recogido que una cadencia mayor afirmativa.",patterns:[[[8,"M"],[5,"m"],[0,"m"]],[[10,"M"],[5,"m"],[0,"m"]],[[3,"M"],[7,"dom"],[0,"m"]]]},
+ alegria:{title:"Alegría",device:"Predominante y cadencia mayor",why:"Una preparación sencilla seguida de dominante y llegada mayor ofrece claridad tonal; el ritmo decidirá gran parte del carácter.",patterns:[[[2,"m"],[7,"dom"],[0,"M"]],[[5,"M"],[7,"dom"],[0,"M"]],[[9,"m"],[7,"dom"],[0,"M"]]]},
+ ternura:{title:"Ternura",device:"Enlace cercano con novenas y séptimas",why:"Las notas comunes y las extensiones suaves permiten transiciones poco abruptas, especialmente con dinámica y registro contenidos.",patterns:[[[9,"m7"],[5,"maj7"],[0,"add9"]],[[5,"maj7"],[2,"m7"],[0,"maj7"]],[[4,"m7"],[5,"maj7"],[0,"add9"]]]},
+ asombro:{title:"Asombro / magia",device:"Mediantes cromáticas y apertura armónica",why:"Las mediantes cromáticas cambian de región sin seguir una cadencia habitual; la novena final deja una sonoridad abierta.",patterns:[[[4,"M"],[8,"M"],[0,"add9"]],[[8,"M"],[4,"m"],[0,"maj7"]],[[3,"M"],[8,"M"],[0,"add9"]]]},
+ inquietud:{title:"Inquietud",device:"Desplazamientos de semitono y acorde disminuido",why:"La proximidad cromática y la tríada disminuida generan inestabilidad sin una resolución inmediata.",patterns:[[[1,"dim"],[6,"m"],[0,"m"]],[[11,"dim"],[1,"m"],[0,"m"]],[[6,"dim"],[1,"M"],[0,"m"]]]},
+ suspense:{title:"Suspense",device:"Suspensión de la resolución",why:"La dominante y la cuarta suspendida retienen una expectativa de llegada; la última sonoridad evita resolver la tercera.",patterns:[[[2,"m"],[7,"dom"],[0,"sus4"]],[[6,"dim"],[7,"dom"],[0,"sus4"]],[[9,"m"],[7,"dom"],[0,"sus4"]]]},
+ oscuridad:{title:"Oscuridad",device:"Región cromática y llegada menor",why:"El contraste cromático y el acorde menor final pueden aportar densidad armónica, aunque el registro grave y la textura serán decisivos.",patterns:[[[6,"m"],[1,"M"],[0,"m"]],[[3,"m"],[6,"M"],[0,"m"]],[[8,"m"],[1,"M"],[0,"m"]]]},
+ calma:{title:"Calma",device:"Continuidad por notas comunes",why:"Séptimas mayores, novenas y acordes próximos favorecen enlaces graduales si se interpretan sin acentos bruscos.",patterns:[[[5,"maj7"],[2,"m7"],[0,"maj7"]],[[9,"m7"],[5,"maj7"],[0,"add9"]],[[4,"m7"],[5,"maj7"],[0,"maj7"]]]},
+ contraste:{title:"Contraste inesperado",device:"Mediantes cromáticas y cambio de modo",why:"El cambio de calidad y las relaciones cromáticas separan claramente esta continuación del recorrido anterior.",patterns:[[[6,"M"],[8,"m"],[0,minor?"M":"m"]],[[4,"M"],[8,"M"],[0,minor?"M":"m"]],[[1,"M"],[6,"m"],[0,minor?"M":"m"]]]}
+ };
+ const spec=recipes[emotion]||recipes.misterio;
+ const context=new Set(chords.slice(-4).flatMap(c=>c.notes.map(mod)));
+ const fingerprint=c=>[...new Set(c.notes.map(mod))].sort((a,b)=>a-b).join(",");
+ const seen=new Set(),options=[];
+ for(const pattern of spec.patterns){
+  const path=pattern.map(([offset,kind])=>make(offset,kind));
+  if(path.some((c,i)=>!c||fingerprint(c)===fingerprint(i?path[i-1]:last)))continue;
+  const key=path.map(fingerprint).join("|");
+  if(seen.has(key))continue;seen.add(key);
+  const full=[last,...path],shared=full.slice(1).map((c,i)=>c.notes.filter(n=>full[i].notes.some(p=>mod(p)===mod(n))).length);
+  const movement=full.slice(1).map((c,i)=>pitchClassMotionEstimate(full[i],c).distance);
+  const familiarity=path[0].notes.filter(n=>context.has(mod(n))).length;
+  const score=shared.reduce((a,b)=>a+b,0)*2+familiarity*2-movement.reduce((a,b)=>a+b,0);
+  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,explanation:spec.why,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
+ }
+ options.sort((a,b)=>b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
+ return options.slice(0,3).map((o,i)=>({...o,variant:i+1,title:i===0?spec.title:spec.title+" · alternativa "+(i+1)}));
+}
 // Bounded three/four-chord paths anchored in the user's progression.
 // Scores compare pitch-class sets only: they are not aesthetic or emotional predictions.
 function harmonicTrajectories(chords,start=0){
@@ -1048,5 +1100,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
