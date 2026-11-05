@@ -635,10 +635,27 @@ function composerAssistance(composerId,progression=[]){
    observation="Revisa la llegada de "+chords[chords.length-2].label+" a "+chords[chords.length-1].label+" y escucha si pide una preparación más dirigida.";
   }else if(t.id==="pedal"&&chords.length){
    observation="Puedes probar un pedal sobre "+spell(chords[0].root)+" mientras comparas la progresión sin cambiar sus acordes.";
-  }else if(t.id==="counterpoint"&&chords.length){
-   observation="Observa las notas compartidas entre los primeros acordes y prueba una voz que se mueva en dirección contraria.";
+  }else if(t.id==="counterpoint"&&chords.length>1){
+   const common=chords[0].notes.filter(pc=>chords[1].notes.includes(pc));
+   observation=common.length
+    ?"Los dos primeros acordes comparten "+common.length+" nota(s). Prueba una voz contraria, pero verifica el movimiento con una melodía real."
+    :"Los dos primeros acordes no comparten notas. Prueba movimiento contrario en una voz, sin asumir que ya existe una contramelodía.";
+  }else if(t.id==="modal"&&chords.length){
+   observation="El primer acorde es "+chords[0].label+". Compara una variante modal sin asumir que se ha producido una modulación.";
+  }else if(t.id==="color"&&chords.length){
+   observation="Mantén "+chords[0].label+" como referencia y prueba otra distribución o timbre. Los acordes no contienen información instrumental.";
+  }else if(t.id==="space"&&chords.length){
+   observation="Tu progresión contiene "+chords.length+" acordes; prueba dejar más espacio entre ataques. No se han analizado duraciones ni silencios.";
+  }else if(t.id==="leitmotif"||t.id==="motif"){
+   observation="Para comprobar una transformación temática se necesita una melodía. Aquí solo se propone un ejercicio; no se ha detectado ningún motivo.";
+  }else if(t.id==="tempo"||t.id==="rhythm"||t.id==="dance"||t.id==="pulse"||t.id==="ostinato"||t.id==="rhythmic"){
+   observation="Esta propuesta afecta al ritmo. No se han analizado duraciones, compases ni acentos a partir de los acordes.";
   }
-  return {...t,observation,changesOriginal:false};
+  const requiresMelody=["sequence","motif","leitmotif","longline","fanfare","cell","counterpoint"].includes(t.id);
+  const requiresTiming=["dance","rhythm","tempo","pulse","ostinato","rhythmic","space","delay"].includes(t.id);
+  const harmonicOnly=["dominant","cadence","chromatic","modal"].includes(t.id);
+  return {...t,observation,requiresMelody,requiresTiming,harmonicOnly,
+   evidenceLevel:"orientative",changesOriginal:false};
  });
 }
 
