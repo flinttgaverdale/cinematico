@@ -739,17 +739,18 @@ const PHRASE_STRATEGIES={
  zimmer:{id:"cyclic-build",name:"Ciclo y acumulación",preparation:"Establecer una célula repetible sobre el primer acorde.",development:"Repetir el patrón y aumentar gradualmente densidad o registro sin cambiar la armonía.",arrival:"Conservar el pulso del ciclo y transformar la intensidad del regreso.",focus:"repetición, densidad y arco dinámico"},
  newman:{id:"sparse-color",name:"Espacio y resonancia",preparation:"Exponer pocas notas, dejando respiración entre gestos.",development:"Sostener notas comunes y explorar el registro o la resonancia del acorde central.",arrival:"Permitir que la llegada sea discreta, con silencios o una textura reducida.",focus:"espacio, timbre y continuidad de notas comunes"}
 };
-function composerEmotionPhraseStudy(tonic,emotion,composerId,DATA){
+function composerEmotionPhraseStudy(tonic,emotion,composerId,DATA,modeOverride){
  const profile=PHRASE_STRATEGIES[composerId];
  if(!profile)return {status:"not-studied",composerId,proposals:[],warning:"No se ha validado un tratamiento de frase para este perfil."};
- if(!emotion||!DATA?.MODES?.[emotion.mode]||!Array.isArray(emotion.steps)||emotion.steps.length<3)
+ const modeKey=modeOverride||emotion?.mode;
+ if(!emotion||!DATA?.MODES?.[modeKey]||!Array.isArray(emotion.steps)||emotion.steps.length<3)
   return {status:"insufficient-material",composerId,proposals:[]};
- const progression=buildProfileProgression(emotion.steps,tonic,DATA.MODES[emotion.mode],DATA.keyNameForPc(tonic));
+ const progression=buildProfileProgression(emotion.steps,tonic,DATA.MODES[modeKey],DATA.keyNameForPc(tonic));
  const middle=Math.floor((progression.length-1)/2);
  const anchor=progression[middle],previous=progression[middle-1],next=progression[middle+1];
  const sharedPrevious=anchor.notes.filter(n=>previous.notes.includes(n));
  const sharedNext=anchor.notes.filter(n=>next.notes.includes(n));
- return {status:"study",composerId,strategy:profile.id,name:profile.name,
+ return {status:"study",composerId,modeKey,strategy:profile.id,name:profile.name,
   focus:profile.focus,anchorIndex:middle,anchorChord:anchor.label,
   preservedProgression:progression.map(ch=>ch.label),
   sharedPrevious,sharedNext,
@@ -760,9 +761,9 @@ function composerEmotionPhraseStudy(tonic,emotion,composerId,DATA){
   ],
   warning:"Hipótesis de tratamiento de frase, no reconstrucción ni atribución exclusiva del lenguaje del compositor. Ritmo, melodía, instrumentación y registro requieren juicio humano."};
 }
-function composerEmotionExperiment(tonic,emotion,composer,DATA){
+function composerEmotionExperiment(tonic,emotion,composer,DATA,modeOverride){
  const keyName=DATA.keyNameForPc(tonic);
- const emotionalMode=DATA.MODES[emotion.mode];
+ const emotionalMode=DATA.MODES[modeOverride||emotion.mode];
  const composerMode=DATA.MODES[composer.signatureMode||"ionian"];
  if(!emotionalMode||!composerMode)return {status:"unsupported",alternatives:[]};
  const base=buildProfileProgression(emotion.steps,tonic,emotionalMode,keyName);
