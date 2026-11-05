@@ -13,7 +13,7 @@ for(const raw of ["{bad", "{}", "null", "42", '"string"']){
  const {context}=load(raw);
  assert.equal(context.readNotebook().length,0,"Malformed notebook should safely become empty: "+raw);
 }
-const {context}=load('[null,1,{"title":"A"},{"title":"B"}]');
+const {context}=load('[null,1,{},{"title":"A","detail":"x","state":{"key":0}},{"title":"B","detail":"y","state":{"key":2}}]');
 assert.deepEqual(Array.from(context.readNotebook().map(x=>x.title)),["A","B"]);
 assert.equal(context.writeNotebook([{title:"OK"}]),true);
 const blocked=load("[]",true);
