@@ -1,0 +1,10 @@
+const assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path");
+const html=fs.readFileSync(path.join(__dirname,"..","index.html"),"utf8");
+const worker=fs.readFileSync(path.join(__dirname,"..","service-worker.js"),"utf8");
+const registration=html.match(/service-worker\.js\?v=(\d+)/);
+const cache=worker.match(/cinematico-studio-v(\d+)/);
+assert.ok(registration,"PWA registration version missing");
+assert.ok(cache,"PWA cache version missing");
+assert.equal(registration[1],cache[1],"Registration and offline cache versions must match");
+assert.ok(worker.includes('request.mode === "navigate"'),"Navigations must use network-first shell");
+console.log("PWA worker version and shell checks passed:",cache[1]);
