@@ -475,6 +475,29 @@ function tritoneTriadRelations(chords){
  }
  return found;
 }
+// Simultaneous triadic layering is distinct from successive triadic motion.
+// This analyzes supplied pitch classes only; it cannot infer orchestration or perceptual fusion.
+function triadicLayeringHypotheses(chord){
+ if(!chord||!Array.isArray(chord.notes))return [];
+ const pitchClasses=new Set(chord.notes.map(mod));
+ if(pitchClasses.size<5)return [];
+ const triads=[];
+ for(let root=0;root<12;root++)for(const [quality,third] of [["major",4],["minor",3]]){
+  const notes=[root,mod(root+third),mod(root+7)];
+  if(notes.every(pc=>pitchClasses.has(pc)))triads.push({root,quality,notes});
+ }
+ const results=[];
+ for(let i=0;i<triads.length;i++)for(let j=i+1;j<triads.length;j++){
+  const a=triads[i],b=triads[j];
+  if(a.notes.some(pc=>b.notes.includes(pc)))continue;
+  const union=new Set([...a.notes,...b.notes]);
+  if(union.size!==pitchClasses.size||[...pitchClasses].some(pc=>!union.has(pc)))continue;
+  results.push({layers:[a,b].map(t=>({root:spell(t.root),quality:t.quality,notes:t.notes.map(spell)})),
+   observation:"Conjunto de seis clases de altura compatible con dos tríadas sin notas comunes.",
+   caveat:"Hipótesis de partición: sin registro, instrumentación ni simultaneidad temporal no puede confirmarse policordio o politonalidad perceptiva."});
+ }
+ return results;
+}
 // Relative comparison of proposed chords, not an absolute aesthetic ranking.
 // Contrast is a selectable compositional lens, not a universal quality judgement.
 // Pitch-class voice-motion proxy: exhaustive assignment, no octave or voice claims.
@@ -898,5 +921,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
