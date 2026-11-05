@@ -47,3 +47,14 @@ for(const [emotionId,emotion] of Object.entries(EMOTIONS)){
 }
 assert.equal(total,132);
 console.log("All 132 emotion/composer experimental combinations satisfy safety invariants");
+
+const nostalgia=EMOTIONS.nostalgia;
+const williams=api.composerEmotionExperiment(2,nostalgia,COMPOSERS.williams,DATA);
+const zimmer=api.composerEmotionExperiment(2,nostalgia,COMPOSERS.zimmer,DATA);
+const newman=api.composerEmotionExperiment(2,nostalgia,COMPOSERS.newman,DATA);
+assert.equal(williams.status,"no-distinct-gesture","An existing Williams iv6 gesture must not be presented as a novel substitution");
+assert.equal(williams.alternatives.length,0);
+assert.ok(zimmer.alternatives.length>0,"Zimmer provides an alternative in the pilot");
+assert.ok(newman.alternatives.length>0,"Newman provides an alternative in the pilot");
+assert.notEqual(zimmer.alternatives[0].changedTo,newman.alternatives[0].changedTo,"Pilot composer gestures should differ");
+console.log("Pilot differentiation checked without fabricating Williams novelty");
