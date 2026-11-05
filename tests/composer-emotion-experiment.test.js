@@ -20,7 +20,11 @@ for(const id of ["williams","zimmer","newman"]){
   assert.equal(alternative.progression.at(-1).label,result.base.at(-1).label,id);
   const changed=alternative.progression.filter((ch,i)=>ch.label!==result.base[i].label);
   assert.equal(changed.length,1,"Exactly one proposed change: "+id);
+  assert.ok(Number.isFinite(alternative.score),id);
+  assert.ok(Number.isFinite(alternative.diagnostics.motionDelta),id);
+  assert.ok(Number.isFinite(alternative.diagnostics.chromaticDifference),id);
  }
+ assert.equal(new Set(result.alternatives.map(a=>a.index+":"+a.changedTo)).size,result.alternatives.length,"No duplicated alternatives: "+id);
  console.log(id,result.status,result.alternatives.length);
 }
 console.log("Composer-emotion experimental bridge invariants passed");
