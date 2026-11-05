@@ -25,3 +25,8 @@ assert.equal(new Set(studies.map(s=>s.strategy)).size,3);
 assert.equal(new Set(studies.map(s=>s.preservedProgression.join("|"))).size,1,"All profiles must preserve the same emotional progression");
 assert.equal(api.composerEmotionPhraseStudy(2,EMOTIONS.nostalgia,"unknown",data).status,"not-studied");
 console.log("Phrase study checks passed:",checked,"cases; distinct strategy IDs: 3");
+
+const overridden=api.composerEmotionPhraseStudy(2,EMOTIONS.nostalgia,"williams",data,"dorian");
+assert.equal(overridden.status,"study");
+assert.equal(overridden.modeKey,"dorian");
+assert.equal(api.composerEmotionPhraseStudy(2,EMOTIONS.nostalgia,"williams",data,"invalid").status,"insufficient-material");
