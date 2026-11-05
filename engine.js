@@ -758,6 +758,25 @@ function harmonicContinuityIdeas(chords){
    caveat:"Sugerencias entre clases de altura: sin melodía, ritmo ni registro no describen notas realmente ejecutadas."};
  });
 }
+// Small, explainable developments of the user's own material; no edits or inferred performance.
+function gradualDevelopmentIdeas(chords,index){
+ if(!Array.isArray(chords)||!Number.isInteger(index)||index<0||index>=chords.length)return [];
+ const ch=chords[index],pcs=new Set(ch.notes.map(mod)),root=mod(ch.root),ideas=[];
+ if(pcs.has(mod(root+7))){
+  ideas.push({id:"retain-fifth",title:"Mantener un eje de quinta",description:"Prueba conservar "+spell(root)+" y "+spell(root+7)+" como referencia mientras decides si cambia el resto del acorde.",change:"No se altera ningún acorde; es una propuesta de disposición o prolongación.",requires:"Registro, duración y distribución de voces."});
+ }
+ if(ch.type===""||ch.type==="m"){
+  const third=mod(root+(ch.type==="m"?3:4)),other=mod(root+(ch.type==="m"?4:3));
+  ideas.push({id:"modal-third",title:"Explorar la tercera paralela",description:"Compara "+spell(third)+" con "+spell(other)+" manteniendo la fundamental "+spell(root)+" y la quinta "+spell(root+7)+".",change:"Cambia una clase de altura (la tercera) en un experimento hipotético.",requires:"Centro tonal y contexto para decidir si realmente hay intercambio modal."});
+ }
+ const next=chords[index+1];
+ if(next){
+  const common=[...pcs].filter(pc=>next.notes.some(n=>mod(n)===pc));
+  if(common.length)ideas.push({id:"common-tone-bridge",title:"Prolongar una nota común",description:"Prueba sostener "+spell(common[0])+" al pasar de "+ch.label+" a "+next.label+"; compara el efecto de conservarla o rearticularla.",change:"Se conservan las alturas de los acordes.",requires:"Duración, ritmo y voz asignada para comprobar el efecto real."});
+  else ideas.push({id:"nearest-connection",title:"Buscar un enlace gradual",description:"No hay clases de altura compartidas entre "+ch.label+" y "+next.label+". Explora una voz que se desplace por semitono o tono antes de cambiar la armonía completa.",change:"No hay sustitución automática.",requires:"Voces concretas y registro para verificar el movimiento."});
+ }
+ return ideas.slice(0,3);
+}
 // Compare individual pitch-class paths without inferring voices or rhythmic suspensions.
 function tensionDestinations(chords,index){
  if(!Array.isArray(chords)||!Number.isInteger(index)||index<0||index>=chords.length-1)return [];
@@ -920,5 +939,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
