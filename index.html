@@ -90,6 +90,12 @@ button:active{transform:translateY(1px)}
 .guide[hidden],.guide-steps[hidden]{display:none!important}
 .help-details{margin-top:12px;border-top:1px solid #ffffff14;padding-top:10px}
 .help-details summary{cursor:pointer;color:var(--sage);font-size:11px;font-weight:700;list-style-position:inside}
+#userAnalysis > .help-details{margin-top:14px;padding:12px 14px;border:1px solid #ffffff1c;border-radius:12px;background:#ffffff03}
+#userAnalysis > .help-details > summary{font-size:13px;color:var(--txt);line-height:1.6}
+#userAnalysis > .help-details > .help-details{margin-top:8px;padding:10px 0 10px 8px;border-top:1px solid #ffffff12}
+#userAnalysis > .help-details > .help-details summary{font-size:12px;font-weight:600;line-height:1.6}
+#userAnalysis .help-details summary:focus-visible{outline:2px solid var(--sage);outline-offset:3px;border-radius:4px}
+@media(max-width:600px){#userAnalysis > .help-details{padding:11px 12px}#userAnalysis > .help-details > summary{font-size:12px}}
 .help-details p,.help-details li{font-size:11px;line-height:1.65;color:var(--muted)}
 .help-details ul{padding-left:20px;margin:9px 0}
 .cardhead{gap:12px}
