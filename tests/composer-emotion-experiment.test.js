@@ -23,8 +23,27 @@ for(const id of ["williams","zimmer","newman"]){
   assert.ok(Number.isFinite(alternative.score),id);
   assert.ok(Number.isFinite(alternative.diagnostics.motionDelta),id);
   assert.ok(Number.isFinite(alternative.diagnostics.chromaticDifference),id);
+  assert.ok(Number.isInteger(alternative.diagnostics.chromaticCount),id);
+  assert.ok(typeof alternative.diagnostics.harmonicRole==="string",id);
  }
  assert.equal(new Set(result.alternatives.map(a=>a.index+":"+a.changedTo)).size,result.alternatives.length,"No duplicated alternatives: "+id);
  console.log(id,result.status,result.alternatives.length);
 }
 console.log("Composer-emotion experimental bridge invariants passed");
+
+let total=0;
+for(const [emotionId,emotion] of Object.entries(EMOTIONS)){
+ for(const [composerId,composer] of Object.entries(COMPOSERS)){
+  const result=api.composerEmotionExperiment(2,emotion,composer,DATA);
+  assert.ok(["suggestions","no-distinct-gesture","insufficient-material"].includes(result.status),emotionId+"/"+composerId);
+  for(const alternative of result.alternatives){
+   assert.equal(alternative.progression[0].label,result.base[0].label,emotionId+"/"+composerId);
+   assert.equal(alternative.progression.at(-1).label,result.base.at(-1).label,emotionId+"/"+composerId);
+   assert.equal(alternative.progression.filter((ch,i)=>ch.label!==result.base[i].label).length,1,emotionId+"/"+composerId);
+   assert.ok(Number.isFinite(alternative.score),emotionId+"/"+composerId);
+  }
+  total++;
+ }
+}
+assert.equal(total,132);
+console.log("All 132 emotion/composer experimental combinations satisfy safety invariants");
