@@ -14,3 +14,8 @@ assert.ok(html.includes('guideToggle").onclick'),"Guide must have a toggle handl
 assert.ok(html.includes('name="viewport"'),"Mobile viewport required");
 assert.ok(html.includes(":focus-visible"),"Visible keyboard focus required");
 console.log("Frontend inline JavaScript syntax and static wiring passed");
+
+assert.ok(html.includes("function readNotebook()"),"Notebook must tolerate corrupt storage");
+assert.ok(html.includes("Array.isArray(value)"),"Notebook must reject non-array storage");
+assert.ok(html.includes("function writeNotebook(items)"),"Notebook writes must handle unavailable storage");
+assert.ok(html.includes("if(writeNotebook(a)){saved();toast"),"Do not announce a save when persistence fails");
