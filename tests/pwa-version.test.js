@@ -7,4 +7,5 @@ assert.ok(registration,"PWA registration version missing");
 assert.ok(cache,"PWA cache version missing");
 assert.equal(registration[1],cache[1],"Registration and offline cache versions must match");
 assert.ok(worker.includes('request.mode === "navigate"'),"Navigations must use network-first shell");
+assert.ok(worker.includes('request.mode === "navigate" ? caches.match("./index.html") : Response.error()'),"Non-navigation resources must never receive an HTML fallback");
 console.log("PWA worker version and shell checks passed:",cache[1]);
