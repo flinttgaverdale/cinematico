@@ -629,6 +629,37 @@ function compareHarmonicAlternatives(chords,index,alternatives,intention="neutra
   b.comparison.continuity-a.comparison.continuity||a.label.localeCompare(b.label));
 }
 function chordAlternatives(chords,index){if(!Array.isArray(chords)||index<0||index>=chords.length)return [];const c=chords[index],previous=chords[index-1],next=chords[index+1];const proposals=[];function add(root,type,intervals,why){const notes=[...new Set(intervals.map(x=>mod(root+x)))];if(root===c.root&&type===c.type)return;const label=spell(root)+(type||"");const common=c.notes.filter(n=>notes.includes(n));const nextCommon=next?notes.filter(n=>next.notes.includes(n)):[];proposals.push({label,root,type,notes,common:common.map(n=>spell(n)),nextCommon:nextCommon.map(n=>spell(n)),why,original:c.label,changesOriginal:false});}if(c.type===""||c.type==="m"){for(const op of ["P","L","R"]){const t=neoTransform(c.root,c.type==="m"?"minor":"major",op);if(t)add(t.target.root,t.target.quality==="minor"?"m":"",t.target.quality==="minor"?[0,3,7]:[0,4,7],"Transformación "+op+": conserva dos notas de la tríada y desplaza una voz "+Math.abs(t.movement.semitones)+" semitono(s).");}}if(next){const dominant=mod(next.root+7);add(dominant,"7",[0,4,7,10],"Dominante potencial del acorde siguiente ("+next.label+"). Comprueba la resolución y el contexto tonal; no implica modulación.");}if(previous&&c.type==="m")add(c.root,"m7",[0,3,7,10],"Añadir séptima introduce una tensión que puedes preparar o resolver en la siguiente voz.");return proposals.slice(0,5);}
+// Optional three-chord continuations. Mood labels are creative intentions, not predictions.
+function harmonicContinuations(chords){
+ if(!Array.isArray(chords)||!chords.length)return [];
+ const last=chords[chords.length-1];
+ if(!last||!Number.isFinite(last.root)||!Array.isArray(last.notes))return [];
+ const root=mod(last.root),isMinor=last.type==="m"||last.type==="m7";
+ const make=(r,minor=false,seventh=false)=>{
+  r=mod(r);const type=seventh?"7":minor?"m":"";
+  const intervals=seventh?[0,4,7,10]:minor?[0,3,7]:[0,4,7];
+  return {root:r,bass:r,type,quality:seventh?"other":minor?"minor":"major",notes:intervals.map(n=>mod(r+n)),label:spell(r,false)+type};
+ };
+ const relative=isMinor?mod(root+3):mod(root+9);
+ const opposite=make(root,!isMinor);
+ const plans=[
+  {id:"shadow",title:"Hacia la melancolía",intent:"Explorar un centro menor relativo y una llegada menos luminosa.",path:[make(mod(relative+5),true),make(mod(relative+7),false,true),make(relative,true)],target:relative,mode:"minor"},
+  {id:"parallel",title:"Cambio de color",intent:"Reinterpretar la fundamental de llegada mediante una tercera de signo contrario.",path:[opposite,make(mod(root+5),true),opposite],target:root,mode:isMinor?"major":"minor"},
+  {id:"mystery",title:"Misterio y apertura",intent:"Introducir una región cromática inesperada conservando la posibilidad de volver.",path:[make(mod(root+8)),make(mod(root+1),true),make(mod(root+8),true)],target:mod(root+8),mode:"minor"}
+ ];
+ return plans.map(plan=>{
+  const full=[last,...plan.path];
+  const motions=full.slice(1).map((ch,i)=>pitchClassMotionEstimate(full[i],ch).distance);
+  const common=full.slice(1).map((ch,i)=>{
+   const a=new Set(full[i].notes.map(mod));return ch.notes.filter(n=>a.has(mod(n))).map(spell);
+  });
+  return {id:plan.id,title:plan.title,intent:plan.intent,source:last.label,
+   chords:plan.path.map(ch=>ch.label),rootTarget:spell(plan.target,false),
+   destinationQuality:plan.mode,estimatedMotion:motions,
+   sharedNotes:common,explain:"Tres acordes nuevos tras el último acorde escrito; distancia estimada entre clases de altura, no conducción de voces.",
+   caveat:"El carácter emocional y la tonalidad de llegada son hipótesis creativas. Sin melodía, duraciones, acentos y registro no puede confirmarse el efecto. No se aplica ningún cambio."};
+ });
+}
 // Bounded three/four-chord paths anchored in the user's progression.
 // Scores compare pitch-class sets only: they are not aesthetic or emotional predictions.
 function harmonicTrajectories(chords,start=0){
@@ -989,5 +1020,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
