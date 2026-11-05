@@ -20,6 +20,12 @@ for(const id of ["williams","zimmer","newman"]){
   assert.equal(alternative.progression.at(-1).label,result.base.at(-1).label,id);
   const changed=alternative.progression.filter((ch,i)=>ch.label!==result.base[i].label);
   assert.equal(changed.length,1,"Exactly one proposed change: "+id);
+  for(let i=0;i<alternative.progression.length;i++){
+   const chord=alternative.progression[i],next=alternative.progression[i+1];
+   const common=next?chord.notes.filter(pc=>next.notes.includes(pc)):[];
+   assert.deepEqual(Array.from(chord.commonWithNext),Array.from(common),"Common tones must reflect the proposed progression: "+id);
+   assert.ok(typeof chord.classification==="string","Every proposed chord must have an updated role: "+id);
+  }
   assert.ok(Number.isFinite(alternative.score),id);
   assert.ok(Number.isFinite(alternative.diagnostics.motionDelta),id);
   assert.ok(Number.isFinite(alternative.diagnostics.chromaticDifference),id);
