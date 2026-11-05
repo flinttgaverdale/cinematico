@@ -23,6 +23,9 @@ for(const [id,composer] of Object.entries(COMPOSERS)){
 }
 assert.equal(JSON.stringify(progression),before,"Technique suggestions must not mutate user material");
 assert.equal(api.composerAssistance("unknown",progression).length,0);
+const horner=api.composerAssistance("horner",progression).find(t=>t.id==="triadic");
+assert.ok(horner&&horner.harmonicOnly&&horner.source.includes("Lehman"));
+assert.ok(horner.observation.includes("No se ha identificado una secuencia concreta"));
 const shore=api.composerAssistance("shore",progression).find(t=>t.id==="leitmotif");
 assert.ok(shore.requiresMelody&&shore.observation.includes("no se ha detectado ningún motivo"));
 const goransson=api.composerAssistance("goransson",progression).find(t=>t.id==="tempo");
