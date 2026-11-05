@@ -733,6 +733,33 @@ function composerProfileAudit(profiles){
 
 // Experimental, opt-in composition bridge: preserve the emotional frame and
 // suggest a single composer-derived substitution without mutating either source.
+// Phrase-level proposals describe interpretive decisions; they never rewrite chords.
+const PHRASE_STRATEGIES={
+ williams:{id:"prepared-resolution",name:"Preparación y resolución expresiva",preparation:"Presentar el motivo y preparar el acorde de color mediante una línea de aproximación.",development:"Mantener la nota característica del acorde de color mientras las otras voces se mueven con independencia.",arrival:"Resolver la tensión con una llegada clara, evitando tratar la cadencia como un mero cambio de acorde.",focus:"desarrollo temático y resolución dirigida"},
+ zimmer:{id:"cyclic-build",name:"Ciclo y acumulación",preparation:"Establecer una célula repetible sobre el primer acorde.",development:"Repetir el patrón y aumentar gradualmente densidad o registro sin cambiar la armonía.",arrival:"Conservar el pulso del ciclo y transformar la intensidad del regreso.",focus:"repetición, densidad y arco dinámico"},
+ newman:{id:"sparse-color",name:"Espacio y resonancia",preparation:"Exponer pocas notas, dejando respiración entre gestos.",development:"Sostener notas comunes y explorar el registro o la resonancia del acorde central.",arrival:"Permitir que la llegada sea discreta, con silencios o una textura reducida.",focus:"espacio, timbre y continuidad de notas comunes"}
+};
+function composerEmotionPhraseStudy(tonic,emotion,composerId,DATA){
+ const profile=PHRASE_STRATEGIES[composerId];
+ if(!profile)return {status:"not-studied",composerId,proposals:[],warning:"No se ha validado un tratamiento de frase para este perfil."};
+ if(!emotion||!DATA?.MODES?.[emotion.mode]||!Array.isArray(emotion.steps)||emotion.steps.length<3)
+  return {status:"insufficient-material",composerId,proposals:[]};
+ const progression=buildProfileProgression(emotion.steps,tonic,DATA.MODES[emotion.mode],DATA.keyNameForPc(tonic));
+ const middle=Math.floor((progression.length-1)/2);
+ const anchor=progression[middle],previous=progression[middle-1],next=progression[middle+1];
+ const sharedPrevious=anchor.notes.filter(n=>previous.notes.includes(n));
+ const sharedNext=anchor.notes.filter(n=>next.notes.includes(n));
+ return {status:"study",composerId,strategy:profile.id,name:profile.name,
+  focus:profile.focus,anchorIndex:middle,anchorChord:anchor.label,
+  preservedProgression:progression.map(ch=>ch.label),
+  sharedPrevious,sharedNext,
+  proposals:[
+   {stage:"preparation",chord:previous.label,action:profile.preparation},
+   {stage:"development",chord:anchor.label,action:profile.development},
+   {stage:"arrival",chord:next.label,action:profile.arrival}
+  ],
+  warning:"Hipótesis de tratamiento de frase, no reconstrucción ni atribución exclusiva del lenguaje del compositor. Ritmo, melodía, instrumentación y registro requieren juicio humano."};
+}
 function composerEmotionExperiment(tonic,emotion,composer,DATA){
  const keyName=DATA.keyNameForPc(tonic);
  const emotionalMode=DATA.MODES[emotion.mode];
@@ -789,5 +816,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
