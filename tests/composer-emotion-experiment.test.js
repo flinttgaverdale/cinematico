@@ -58,3 +58,7 @@ assert.ok(zimmer.alternatives.length>0,"Zimmer provides an alternative in the pi
 assert.ok(newman.alternatives.length>0,"Newman provides an alternative in the pilot");
 assert.notEqual(zimmer.alternatives[0].changedTo,newman.alternatives[0].changedTo,"Pilot composer gestures should differ");
 console.log("Pilot differentiation checked without fabricating Williams novelty");
+
+const overridden=api.composerEmotionExperiment(2,EMOTIONS.nostalgia,COMPOSERS.zimmer,DATA,"dorian");
+assert.ok(["suggestions","no-distinct-gesture"].includes(overridden.status));
+assert.equal(api.composerEmotionExperiment(2,EMOTIONS.nostalgia,COMPOSERS.zimmer,DATA,"invalid").status,"unsupported");
