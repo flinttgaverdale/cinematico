@@ -1,0 +1,26 @@
+name: Cinematico quality checks
+on:
+  push:
+    branches: [feature/cinematico-studio-v1]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          node --check engine.js
+          node --check service-worker.js
+      - name: Run regression tests
+        run: |
+          set -e
+          for file in tests/*.test.js; do
+            echo "Running $file"
+            node "$file"
+          done
