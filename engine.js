@@ -630,34 +630,61 @@ function compareHarmonicAlternatives(chords,index,alternatives,intention="neutra
 }
 function chordAlternatives(chords,index){if(!Array.isArray(chords)||index<0||index>=chords.length)return [];const c=chords[index],previous=chords[index-1],next=chords[index+1];const proposals=[];function add(root,type,intervals,why){const notes=[...new Set(intervals.map(x=>mod(root+x)))];if(root===c.root&&type===c.type)return;const label=spell(root)+(type||"");const common=c.notes.filter(n=>notes.includes(n));const nextCommon=next?notes.filter(n=>next.notes.includes(n)):[];proposals.push({label,root,type,notes,common:common.map(n=>spell(n)),nextCommon:nextCommon.map(n=>spell(n)),why,original:c.label,changesOriginal:false});}if(c.type===""||c.type==="m"){for(const op of ["P","L","R"]){const t=neoTransform(c.root,c.type==="m"?"minor":"major",op);if(t)add(t.target.root,t.target.quality==="minor"?"m":"",t.target.quality==="minor"?[0,3,7]:[0,4,7],"Transformación "+op+": conserva dos notas de la tríada y desplaza una voz "+Math.abs(t.movement.semitones)+" semitono(s).");}}if(next){const dominant=mod(next.root+7);add(dominant,"7",[0,4,7,10],"Dominante potencial del acorde siguiente ("+next.label+"). Comprueba la resolución y el contexto tonal; no implica modulación.");}if(previous&&c.type==="m")add(c.root,"m7",[0,3,7,10],"Añadir séptima introduce una tensión que puedes preparar o resolver en la siguiente voz.");return proposals.slice(0,5);}
 // Optional three-chord continuations. Mood labels are creative intentions, not predictions.
+// Context-aware, non-destructive three-chord paths; creative intentions, not emotion predictions.
 function harmonicContinuations(chords){
  if(!Array.isArray(chords)||!chords.length)return [];
  const last=chords[chords.length-1];
  if(!last||!Number.isFinite(last.root)||!Array.isArray(last.notes))return [];
- const root=mod(last.root),isMinor=last.type==="m"||last.type==="m7";
- const make=(r,minor=false,seventh=false)=>{
-  r=mod(r);const type=seventh?"7":minor?"m":"";
-  const intervals=seventh?[0,4,7,10]:minor?[0,3,7]:[0,4,7];
-  return {root:r,bass:r,type,quality:seventh?"other":minor?"minor":"major",notes:intervals.map(n=>mod(r+n)),label:spell(r,false)+type};
+ const history=chords.slice(-4),root=mod(last.root);
+ const minor=ch=>ch.type==="m"||ch.type==="m7";
+ const make=(r,quality="major")=>{
+  r=mod(r);
+  const type=quality==="minor"?"m":quality==="dominant"?"7":"";
+  const intervals=quality==="minor"?[0,3,7]:quality==="dominant"?[0,4,7,10]:[0,4,7];
+  return {root:r,bass:r,type,notes:intervals.map(n=>mod(r+n)),label:spell(r,false)+type};
  };
- const relative=mod(root+9);
- const opposite=make(root,!isMinor);
- const plans=[
-  {id:"shadow",title:"Hacia la melancolía",intent:"Explorar una nueva región menor y una llegada menos luminosa; solo será relativa si el contexto lo permite.",path:[make(mod(relative+5),true),make(mod(relative+7),false,true),make(relative,true)],target:relative,mode:"minor"},
-  {id:"parallel",title:"Cambio de color",intent:"Reinterpretar la fundamental de llegada mediante una tercera de signo contrario.",path:[opposite,make(mod(root+5),true),opposite],target:root,mode:isMinor?"major":"minor"},
-  {id:"mystery",title:"Misterio y apertura",intent:"Introducir una región cromática inesperada conservando la posibilidad de volver.",path:[make(mod(root+8)),make(mod(root+1),true),make(mod(root+8),true)],target:mod(root+8),mode:"minor"}
- ];
- return plans.map(plan=>{
-  const full=[last,...plan.path];
-  const motions=full.slice(1).map((ch,i)=>pitchClassMotionEstimate(full[i],ch).distance);
-  const common=full.slice(1).map((ch,i)=>{
-   const a=new Set(full[i].notes.map(mod));return ch.notes.filter(n=>a.has(mod(n))).map(spell);
-  });
-  return {id:plan.id,title:plan.title,intent:plan.intent,source:last.label,
-   chords:plan.path.map(ch=>ch.label),rootTarget:spell(plan.target,false),
-   destinationQuality:plan.mode,estimatedMotion:motions,
-   sharedNotes:common,explain:"Tres acordes nuevos tras el último acorde escrito; distancia estimada entre clases de altura, no conducción de voces.",
-   caveat:"El carácter emocional y la tonalidad de llegada son hipótesis creativas. Sin melodía, duraciones, acentos y registro no puede confirmarse el efecto. No se aplica ningún cambio."};
+ const keyOf=ch=>[...new Set(ch.notes.map(mod))].sort((a,b)=>a-b).join(",");
+ const shared=(a,b)=>{const x=new Set(a.notes.map(mod));return b.notes.filter(n=>x.has(mod(n))).length;};
+ const contextSet=new Set(history.flatMap(ch=>ch.notes.map(mod)));
+ const candidates=[];
+ const add=(id,title,intent,path,target,mode)=>{
+  if(path.some((ch,i)=>keyOf(ch)===keyOf(i?path[i-1]:last)))return;
+  const full=[last,...path],motion=full.slice(1).map((ch,i)=>pitchClassMotionEstimate(full[i],ch).distance);
+  const common=full.slice(1).map((ch,i)=>{const a=new Set(full[i].notes.map(mod));return ch.notes.filter(n=>a.has(mod(n))).map(spell);});
+  const contextMatches=path[0].notes.filter(n=>contextSet.has(mod(n))).length;
+  const historicalReturn=history.slice(0,-1).some(ch=>keyOf(ch)===keyOf(path[2]));
+  const totalMotion=motion.reduce((a,b)=>a+b,0);
+  const score=contextMatches*3+common[0].length*2+common[1].length+common[2].length-totalMotion-(historicalReturn?2:0);
+  candidates.push({id,title,intent,path,target,mode,motion,common,contextMatches,historicalReturn,score});
+ };
+ // A potential minor destination can be prepared with a dominant; alternative
+ // destinations are derived from both recent roots and the preceding pitch classes.
+ const anchors=[root,mod(root+9),mod(root+5),mod(history[0].root+9)];
+ for(const target of [...new Set(anchors)]){
+  add("shadow","Hacia la melancolía","Explora una llegada menor preparada por una dominante potencial.",
+   [make(mod(target+5),"minor"),make(mod(target+7),"dominant"),make(target,"minor")],target,"minor");
+ }
+ const parallel=minor(last)?"major":"minor";
+ for(const pivot of [...new Set([root,mod(history[0].root)])]){
+  add("parallel","Cambio de color","Reinterpreta una fundamental del fragmento con otra tercera; no presupone cambio de tonalidad.",
+   [make(pivot,parallel),make(mod(pivot+5),"minor"),make(pivot,parallel)],pivot,parallel);
+ }
+ for(const offset of [1,8,6]){
+  const target=mod(root+offset);
+  add("mystery","Misterio y apertura","Explora una región cromática distante y una llegada menor no necesariamente funcional.",
+   [make(target),make(mod(target+5),"minor"),make(target,"minor")],target,"minor");
+ }
+ const order=["shadow","parallel","mystery"];
+ return order.flatMap(id=>{
+  const best=candidates.filter(c=>c.id===id).sort((a,b)=>b.score-a.score||a.target-b.target)[0];
+  if(!best)return [];
+  return [{id:best.id,title:best.title,intent:best.intent,source:last.label,
+   chords:best.path.map(ch=>ch.label),rootTarget:spell(best.target,false),
+   destinationQuality:best.mode,estimatedMotion:best.motion,sharedNotes:best.common,
+   contextMatches:best.contextMatches,contextWindow:history.length,contextScore:best.score,
+   historicalReturn:best.historicalReturn,
+   explain:"Se compararon alternativas usando hasta cuatro acordes previos: notas compartidas, enlace desde el final y movimiento mínimo estimado.",
+   caveat:"El carácter emocional y la tonalidad de llegada son hipótesis creativas. Sin melodía, duraciones, acentos y registro no puede confirmarse el efecto. No se aplica ningún cambio."}];
  });
 }
 // Bounded three/four-chord paths anchored in the user's progression.
