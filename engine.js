@@ -453,20 +453,29 @@ function laboratoryVoices(chords,options={}){
 function parseUserProgression(input){const tokens=String(input||"").trim().split(/[\s,;|]+/).filter(Boolean);if(!tokens.length)return {chords:[],errors:[]};if(tokens.length>8)return {chords:[],errors:["Máximo 8 acordes por análisis."]};const names={"C":0,"D":2,"E":4,"F":5,"G":7,"A":9,"B":11};const shapes={"":{intervals:[0,4,7],type:""},"m":{intervals:[0,3,7],type:"m"},"dim":{intervals:[0,3,6],type:"dim"},"aug":{intervals:[0,4,8],type:"aug"},"7":{intervals:[0,4,7,10],type:"7"},"maj7":{intervals:[0,4,7,11],type:"maj7"},"m7":{intervals:[0,3,7,10],type:"m7"},"sus4":{intervals:[0,5,7],type:"sus4"},"add9":{intervals:[0,4,7,14],type:"add9"},"madd9":{intervals:[0,3,7,14],type:"madd9"}};const chords=[],errors=[];for(const token of tokens){const match=/^([A-Ga-g])([#♯b♭]?)(maj7|madd9|add9|sus4|dim|aug|m7|m|7)?(?:\/([A-Ga-g])([#♯b♭]?))?$/.exec(token);if(!match){errors.push("Acorde no reconocido: "+token);continue;}const pc=(letter,acc)=>((names[letter.toUpperCase()]+(acc==="#"||acc==="♯"?1:acc==="b"||acc==="♭"?-1:0))%12+12)%12;const root=pc(match[1],match[2]),shape=shapes[match[3]||""],bass=match[4]?pc(match[4],match[5]):root;const notes=[...new Set(shape.intervals.map(i=>(root+i)%12))];if(!notes.includes(bass)){errors.push("El bajo de "+token+" no pertenece al acorde; usa una inversión.");continue;}chords.push({root,bass,notes,type:shape.type,quality:shape.type==="m"?"minor":shape.type===""?"major":"other",intervals:shape.intervals,label:token,roman:"—"});}return {chords:errors.length?[]:chords,errors};}
 // Symbolic cadence evidence. No claim about meter, melody, or phrase boundaries.
 function cadenceEvidence(chords,tonic,mode){
- const events=[];if(!Array.isArray(chords))return events;
- const minor=mode==="menor natural",t=mod(tonic),dominant=mod(t+7),predominant=mod(t+2),subdominant=mod(t+5);
- const isTonic=c=>mod(c.root)===t&&(minor?(c.type==="m"||c.type==="m7"):(c.type===""||c.type==="maj7"||c.type==="add9"));
- const isDominant=c=>mod(c.root)===dominant&&(c.type===""||c.type==="7");
- const isPredominant=c=>mod(c.root)===predominant||(mod(c.root)===subdominant);
+ const events=[];if(!Array.isArray(chords)||!chords.length)return events;
+ const minor=mode==="menor natural",t=mod(tonic),v=mod(t+7),ii=mod(t+2),iv=mod(t+5);
+ const tonicQuality=minor?["m","m7"]:["","maj7","add9"];
+ const isTonic=c=>mod(c.root)===t&&tonicQuality.includes(c.type);
+ const isDominant=c=>mod(c.root)===v&&(c.type===""||c.type==="7");
+ const isPredominant=c=>(mod(c.root)===ii&&(minor?["dim","m7b5","m"].includes(c.type):["m","m7"].includes(c.type)))||(mod(c.root)===iv&&(minor?["m","m7"].includes(c.type):["","maj7"].includes(c.type)));
+ const diatonic=new Set((minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11]).map(n=>mod(t+n)));
  for(let i=1;i<chords.length;i++){
-  const prev=chords[i-1],current=chords[i];
-  if(isDominant(prev)&&isTonic(current))events.push({kind:"V–i/I",index:i,weight:2.5,description:"Dominante hacia tónica"});
-  if(i>=2&&isPredominant(chords[i-2])&&isDominant(prev)&&isTonic(current))
-   events.push({kind:"predominante–V–i/I",index:i,weight:2.3,description:"Preparación, dominante y llegada"});
-  if(mod(prev.root)===subdominant&&isTonic(current))events.push({kind:"IV–I / iv–i",index:i,weight:1,description:"Llegada plagal posible"});
-  if(isDominant(prev)&&mod(current.root)===mod(t+9)&&!minor)
-   events.push({kind:"V–vi",index:i,weight:.8,description:"Resolución deceptiva posible"});
+  const prev=chords[i-1],cur=chords[i],prevRoot=mod(prev.root),curRoot=mod(cur.root);
+  if(isDominant(prev)&&isTonic(cur)){
+   events.push({kind:"V–I/i",index:i,weight:2.5,description:"Dominante hacia tónica; llegada armónica, no cadencia formal confirmada"});
+   if(i>=2&&isPredominant(chords[i-2]))events.push({kind:"predominante–V–I/i",index:i,weight:2.3,description:"Preparación predominante, dominante y llegada"});
+  }
+  if(prevRoot===iv&&isTonic(cur)&&isPredominant(prev))events.push({kind:"IV–I / iv–i",index:i,weight:.8,description:"Movimiento plagal posible"});
+  if(isDominant(prev)&&curRoot===mod(t+(minor?8:9))&&((minor&&cur.type==="")||(!minor&&cur.type==="m")))
+   events.push({kind:minor?"V–VI":"V–vi",index:i,weight:.7,description:"Resolución interrumpida posible"});
+  // Applied V7: a major dominant seventh resolves down a fifth to a diatonic chord other than the tonic.
+  if(prev.type==="7"&&curRoot===mod(prevRoot+5)&&diatonic.has(curRoot)&&curRoot!==t&&prevRoot!==v)
+   events.push({kind:"V7/"+spell(curRoot),index:i,weight:.65,description:"Dominante secundaria con resolución local; posible tonicización"});
  }
+ // Ending on a dominant is a harmonic half-cadence clue, not proof of a phrase ending.
+ if(chords.length>=2&&isDominant(chords[chords.length-1])&&!isDominant(chords[chords.length-2]))
+  events.push({kind:"semicadencia posible",index:chords.length-1,weight:.4,description:"Final del fragmento sobre dominante; requiere comprobar frase y métrica"});
  return events;
 }
 // Conservative tonal hypotheses: compatibility is not proof of a tonic.
@@ -765,7 +774,7 @@ function emotionalContinuations(chords,emotion){
  const spec=recipes[emotion]||recipes.misterio;
  const context=new Set(chords.slice(-4).flatMap(c=>c.notes.map(mod)));
  const fingerprint=c=>[...new Set(c.notes.map(mod))].sort((a,b)=>a-b).join(",");
- const seen=new Set(),options=[];
+ const seen=new Set(),options=[];const tonal=tonalHypotheses(chords),leading=tonal.candidates[0];const plausible=tonal.candidates.filter(c=>leading.score-c.score<0.65);
  for(const pattern of spec.patterns){
   const path=pattern.map(([offset,kind])=>make(offset,kind));
   if(path.some((c,i)=>!c||fingerprint(c)===fingerprint(i?path[i-1]:last)))continue;
@@ -774,11 +783,11 @@ function emotionalContinuations(chords,emotion){
   const full=[last,...path],shared=full.slice(1).map((c,i)=>c.notes.filter(n=>full[i].notes.some(p=>mod(p)===mod(n))).length);
   const movement=full.slice(1).map((c,i)=>pitchClassMotionEstimate(full[i],c).distance);
   const familiarity=path[0].notes.filter(n=>context.has(mod(n))).length;
-  const tonal=tonalHypotheses(chords),leading=tonal.candidates[0];const plausible=tonal.candidates.filter(c=>leading.score-c.score<0.65);const cadenceFit=plausible.length?Math.max(...plausible.map(c=>cadenceEvidence([...chords,...path],c.tonic,c.mode).filter(x=>x.index>=chords.length).reduce((sum,x)=>sum+x.weight,0))):0;const contextFit=path.reduce((sum,c)=>sum+c.notes.filter(n=>context.has(mod(n))).length,0);const score=shared.reduce((a,b)=>a+b,0)*2+familiarity*2+contextFit*.5+cadenceFit*2-movement.reduce((a,b)=>a+b,0);
-  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,cadenceFit,explanation:spec.why,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
+  const cadenceFit=plausible.length?Math.max(...plausible.map(c=>cadenceEvidence([...chords,...path],c.tonic,c.mode).filter(x=>x.index>=chords.length).reduce((sum,x)=>sum+x.weight,0))):0;const contextFit=path.reduce((sum,c)=>sum+c.notes.filter(n=>context.has(mod(n))).length,0);const score=shared.reduce((a,b)=>a+b,0)*2+familiarity*2+contextFit*.5+cadenceFit*2-movement.reduce((a,b)=>a+b,0);const lastRoot=mod(path[path.length-1].root);const resolves=plausible.some(c=>lastRoot===c.tonic);const dominantEnding=plausible.some(c=>lastRoot===mod(c.tonic+7));const direction=resolves?"resolver":dominantEnding?"mantener tensión":cadenceFit>0?"tonicizar":"cambiar dirección";
+  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,cadenceFit,direction,explanation:spec.why,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
  }
  options.sort((a,b)=>b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
- return options.slice(0,3).map((o,i)=>({...o,variant:i+1,title:i===0?spec.title:spec.title+" · alternativa "+(i+1)}));
+ const distinct=[],used=new Set();for(const o of options){if(!used.has(o.direction)){distinct.push(o);used.add(o.direction);}}for(const o of options){if(distinct.length>=3)break;if(!distinct.includes(o))distinct.push(o);}return distinct.slice(0,3).map((o,i)=>({...o,variant:i+1,title:i===0?spec.title:spec.title+" · alternativa "+(i+1)}));
 }
 // Validate a complete continuation without dropping or altering the user's chords.
 // This helper is shared by the web interface and future hosts.
