@@ -37,7 +37,7 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       await page.locator('#simpleExplore').click();
       assert.equal(await page.locator('.simple-path').count(), 0);
       assert.ok((await page.locator('#simpleFeedback').innerText()).length > 0);
-      await page.locator('#simpleChords').fill(Array(14).fill('Am').join(' '));
+      await page.locator('#simpleChords').fill(Array(6).fill('Am').join(' '));
       await page.locator('#simpleExplore').click();
       assert.equal(await page.locator('.simple-path').count(), 3);
       assert.equal(await page.locator('.simple-path [data-open-advanced]:disabled').count(), 3);
