@@ -478,6 +478,20 @@ function cadenceEvidence(chords,tonic,mode){
   events.push({kind:"semicadencia posible",index:chords.length-1,weight:.4,description:"Final del fragmento sobre dominante; requiere comprobar frase y métrica"});
  return events;
 }
+// Evidence for chromatic dominant practice in minor. This describes harmonic
+// vocabulary, not a claim that a complete passage uses one fixed minor scale.
+function minorDominantEvidence(chords,tonic){
+ if(!Array.isArray(chords))return {raisedLeadingTone:false,dominantMajor:false,indices:[],description:""};
+ const t=mod(tonic),leading=mod(t+11),dominantRoot=mod(t+7),indices=[];
+ for(let i=0;i<chords.length;i++){
+  const ch=chords[i];
+  if(!ch||!Array.isArray(ch.notes))continue;
+  const isMajorDominant=mod(ch.root)===dominantRoot&&(ch.type===""||ch.type==="7");
+  if(isMajorDominant&&ch.notes.some(n=>mod(n)===leading))indices.push(i);
+ }
+ return {raisedLeadingTone:indices.length>0,dominantMajor:indices.length>0,indices,
+  description:indices.length?"Dominante mayor con sensible elevada: práctica tonal del modo menor; no implica que toda la progresión pertenezca a la escala menor natural.":"No se identifica una dominante mayor con sensible elevada en los acordes proporcionados."};
+}
 // Conservative tonal hypotheses: compatibility is not proof of a tonic.
 function tonalHypotheses(chords){
  if(!Array.isArray(chords)||!chords.length)return {status:"empty",candidates:[],explanation:"Introduce acordes para explorar posibles centros tonales."};
@@ -493,7 +507,7 @@ function tonalHypotheses(chords){
    if(mod(chord.root)===tonic)tonicRoots+=i===chords.length-1?1.3:1;
   }
   const cadences=cadenceEvidence(chords,tonic,pattern.mode);const cadenceScore=cadences.reduce((sum,x)=>sum+x.weight,0);const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8+cadenceScore;
-  candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences});
+  candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences,minorDominant:pattern.mode==="menor natural"?minorDominantEvidence(chords,tonic):null});
  }
  candidates.sort((a,b)=>b.score-a.score||a.tonic-b.tonic);
  const best=candidates[0],second=candidates[1],close=candidates.filter(x=>best.score-x.score<0.6);
@@ -1169,5 +1183,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
