@@ -458,15 +458,15 @@ function tonalHypotheses(chords){
  const candidates=[];
  for(let tonic=0;tonic<12;tonic++)for(const pattern of patterns){
   const scaleSet=new Set(pattern.steps.map(x=>mod(x+tonic)));
-  let coverage=0,roots=0,tonicRoots=0;
+  let coverage=0,roots=0,tonicRoots=0,totalWeight=0;
   for(let i=0;i<chords.length;i++){
-   const chord=chords[i],weight=i===chords.length-1?1.15:1;
+   const chord=chords[i],weight=i===chords.length-1?1.15:1;totalWeight+=weight;
    coverage+=weight*(chord.notes.filter(pc=>scaleSet.has(mod(pc))).length/chord.notes.length);
    if(scaleSet.has(mod(chord.root)))roots+=weight;
    if(mod(chord.root)===tonic)tonicRoots+=i===chords.length-1?1.3:1;
   }
-  const score=coverage/chords.length*7+roots/chords.length+tonicRoots/chords.length*.8;
-  candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,score:Math.round(score*100)/100,coverage:Math.round(coverage/chords.length*100)});
+  const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8;
+  candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100)});
  }
  candidates.sort((a,b)=>b.score-a.score||a.tonic-b.tonic);
  const best=candidates[0],second=candidates[1],close=candidates.filter(x=>best.score-x.score<0.6);
