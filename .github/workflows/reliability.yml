@@ -18,6 +18,7 @@ jobs:
           node tests/phase1-regression.cjs
           node tests/cadence-regression.cjs
           node tests/harmonic-evidence.cjs
+          node tests/chromatic-research.cjs
           node tests/static-audit.cjs
       - name: Install browser runner
         run: |
