@@ -501,6 +501,34 @@ function neoRiemannianPath(chord,operations){
  for(const operation of operations){const next=neoRiemannianTransform(current,operation);if(!next)return null;steps.push(next);current=next;}
  return {operations,steps,result:current};
 }
+// Explore triadic paths by voice-leading economy without claiming tonal function.
+function transformationalPathExplorer(start,options={}){
+ if(!start||!["","m"].includes(start.type))return [];
+ const depth=Math.max(1,Math.min(3,Number.isInteger(options.depth)?options.depth:3));
+ const lastRoot=mod(start.root),initialType=start.type;
+ const results=[];
+ const visit=(chord,ops,steps)=>{
+  if(ops.length===depth){
+   const destination=steps[steps.length-1];
+   if(destination.root===lastRoot&&destination.type===initialType)return;
+   const movement=steps.reduce((sum,c,i)=>sum+pitchClassMotionEstimate(i?steps[i-1]:start,c).distance,0);
+   const rootDistance=Math.min(mod(destination.root-lastRoot),mod(lastRoot-destination.root));
+   results.push({operations:ops,chords:steps.map(c=>c.label),destination:destination.label,
+    motionEstimate:movement,rootDistance,sharedPitchClasses:steps.map(c=>c.sharedPitchClasses),
+    caveat:"Recorrido de tríadas por proximidad abstracta; no implica modulación, voz real ni afecto."});
+   return;
+  }
+  for(const op of ["P","L","R"]){
+   const next=neoRiemannianTransform(chord,op);
+   if(!next||next.root===lastRoot&&next.type===initialType&&ops.length===depth-1)continue;
+   if(steps.some(c=>c.root===next.root&&c.type===next.type))continue;
+   visit(next,ops+op,[...steps,next]);
+  }
+ };
+ visit(start,"",[]);
+ results.sort((a,b)=>a.motionEstimate-b.motionEstimate||b.rootDistance-a.rootDistance||a.operations.localeCompare(b.operations));
+ return results;
+}
 function chromaticRelationAudit(from,to){
  if(!from||!to||!Array.isArray(from.notes)||!Array.isArray(to.notes))return null;
  const a=mod(from.root),b=mod(to.root),delta=mod(b-a),distance=Math.min(delta,12-delta);
@@ -1239,5 +1267,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={neoRiemannianTransform,neoRiemannianPath,chromaticRelationAudit,appliedDominantAudit,harmonicEvidenceAudit,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={transformationalPathExplorer,neoRiemannianTransform,neoRiemannianPath,chromaticRelationAudit,appliedDominantAudit,harmonicEvidenceAudit,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
