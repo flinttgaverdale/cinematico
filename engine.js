@@ -740,6 +740,21 @@ function emotionalContinuations(chords,emotion){
  options.sort((a,b)=>b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
  return options.slice(0,3).map((o,i)=>({...o,variant:i+1,title:i===0?spec.title:spec.title+" · alternativa "+(i+1)}));
 }
+// Validate a complete continuation without dropping or altering the user's chords.
+// This helper is shared by the web interface and future hosts.
+function prepareContinuationForAnalysis(original,additional,maxChords=16){
+ const labels=items=>Array.isArray(items)?items.map(x=>typeof x==="string"?x:x&&x.label):[];
+ const base=labels(original),next=labels(additional);
+ if(!base.length||!next.length||[...base,...next].some(x=>typeof x!=="string"||!x.trim()))
+  return {ok:false,error:"No hay acordes suficientes para analizar esta opción.",chords:[],text:""};
+ if(base.length+next.length>maxChords)
+  return {ok:false,error:"Esta opción suma "+(base.length+next.length)+" acordes. El estudio admite un máximo de "+maxChords+". Reduce tu idea inicial para analizarla completa.",chords:[],text:""};
+ const text=[...base,...next].join(" ");
+ const parsed=parseUserProgression(text);
+ if(parsed.errors.length||parsed.chords.length!==base.length+next.length)
+  return {ok:false,error:parsed.errors.join(" · ")||"No hemos podido interpretar todos los acordes.",chords:[],text:""};
+ return {ok:true,error:"",chords:parsed.chords,text};
+}
 // Bounded three/four-chord paths anchored in the user's progression.
 // Scores compare pitch-class sets only: they are not aesthetic or emotional predictions.
 function harmonicTrajectories(chords,start=0){
@@ -1100,5 +1115,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
