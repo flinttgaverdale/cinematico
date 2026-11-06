@@ -451,6 +451,24 @@ function laboratoryVoices(chords,options={}){
 }
 
 function parseUserProgression(input){const tokens=String(input||"").trim().split(/[\s,;|]+/).filter(Boolean);if(!tokens.length)return {chords:[],errors:[]};if(tokens.length>8)return {chords:[],errors:["Máximo 8 acordes por análisis."]};const names={"C":0,"D":2,"E":4,"F":5,"G":7,"A":9,"B":11};const shapes={"":{intervals:[0,4,7],type:""},"m":{intervals:[0,3,7],type:"m"},"dim":{intervals:[0,3,6],type:"dim"},"aug":{intervals:[0,4,8],type:"aug"},"7":{intervals:[0,4,7,10],type:"7"},"maj7":{intervals:[0,4,7,11],type:"maj7"},"m7":{intervals:[0,3,7,10],type:"m7"},"sus4":{intervals:[0,5,7],type:"sus4"},"add9":{intervals:[0,4,7,14],type:"add9"},"madd9":{intervals:[0,3,7,14],type:"madd9"}};const chords=[],errors=[];for(const token of tokens){const match=/^([A-Ga-g])([#♯b♭]?)(maj7|madd9|add9|sus4|dim|aug|m7|m|7)?(?:\/([A-Ga-g])([#♯b♭]?))?$/.exec(token);if(!match){errors.push("Acorde no reconocido: "+token);continue;}const pc=(letter,acc)=>((names[letter.toUpperCase()]+(acc==="#"||acc==="♯"?1:acc==="b"||acc==="♭"?-1:0))%12+12)%12;const root=pc(match[1],match[2]),shape=shapes[match[3]||""],bass=match[4]?pc(match[4],match[5]):root;const notes=[...new Set(shape.intervals.map(i=>(root+i)%12))];if(!notes.includes(bass)){errors.push("El bajo de "+token+" no pertenece al acorde; usa una inversión.");continue;}chords.push({root,bass,notes,type:shape.type,quality:shape.type==="m"?"minor":shape.type===""?"major":"other",intervals:shape.intervals,label:token,roman:"—"});}return {chords:errors.length?[]:chords,errors};}
+// Symbolic cadence evidence. No claim about meter, melody, or phrase boundaries.
+function cadenceEvidence(chords,tonic,mode){
+ const events=[];if(!Array.isArray(chords))return events;
+ const minor=mode==="menor natural",t=mod(tonic),dominant=mod(t+7),predominant=mod(t+2),subdominant=mod(t+5);
+ const isTonic=c=>mod(c.root)===t&&(minor?(c.type==="m"||c.type==="m7"):(c.type===""||c.type==="maj7"||c.type==="add9"));
+ const isDominant=c=>mod(c.root)===dominant&&(c.type===""||c.type==="7");
+ const isPredominant=c=>mod(c.root)===predominant||(mod(c.root)===subdominant);
+ for(let i=1;i<chords.length;i++){
+  const prev=chords[i-1],current=chords[i];
+  if(isDominant(prev)&&isTonic(current))events.push({kind:"V–i/I",index:i,weight:2.5,description:"Dominante hacia tónica"});
+  if(i>=2&&isPredominant(chords[i-2])&&isDominant(prev)&&isTonic(current))
+   events.push({kind:"predominante–V–i/I",index:i,weight:2.3,description:"Preparación, dominante y llegada"});
+  if(mod(prev.root)===subdominant&&isTonic(current))events.push({kind:"IV–I / iv–i",index:i,weight:1,description:"Llegada plagal posible"});
+  if(isDominant(prev)&&mod(current.root)===mod(t+9)&&!minor)
+   events.push({kind:"V–vi",index:i,weight:.8,description:"Resolución deceptiva posible"});
+ }
+ return events;
+}
 // Conservative tonal hypotheses: compatibility is not proof of a tonic.
 function tonalHypotheses(chords){
  if(!Array.isArray(chords)||!chords.length)return {status:"empty",candidates:[],explanation:"Introduce acordes para explorar posibles centros tonales."};
@@ -465,8 +483,8 @@ function tonalHypotheses(chords){
    if(scaleSet.has(mod(chord.root)))roots+=weight;
    if(mod(chord.root)===tonic)tonicRoots+=i===chords.length-1?1.3:1;
   }
-  const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8;
-  candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100)});
+  const cadences=cadenceEvidence(chords,tonic,pattern.mode);const cadenceScore=cadences.reduce((sum,x)=>sum+x.weight,0);const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8+cadenceScore;
+  candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences});
  }
  candidates.sort((a,b)=>b.score-a.score||a.tonic-b.tonic);
  const best=candidates[0],second=candidates[1],close=candidates.filter(x=>best.score-x.score<0.6);
@@ -756,8 +774,8 @@ function emotionalContinuations(chords,emotion){
   const full=[last,...path],shared=full.slice(1).map((c,i)=>c.notes.filter(n=>full[i].notes.some(p=>mod(p)===mod(n))).length);
   const movement=full.slice(1).map((c,i)=>pitchClassMotionEstimate(full[i],c).distance);
   const familiarity=path[0].notes.filter(n=>context.has(mod(n))).length;
-  const score=shared.reduce((a,b)=>a+b,0)*2+familiarity*2-movement.reduce((a,b)=>a+b,0);
-  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,explanation:spec.why,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
+  const tonal=tonalHypotheses(chords),leading=tonal.candidates[0];const plausible=tonal.candidates.filter(c=>leading.score-c.score<0.65);const cadenceFit=plausible.length?Math.max(...plausible.map(c=>cadenceEvidence([...chords,...path],c.tonic,c.mode).filter(x=>x.index>=chords.length).reduce((sum,x)=>sum+x.weight,0))):0;const contextFit=path.reduce((sum,c)=>sum+c.notes.filter(n=>context.has(mod(n))).length,0);const score=shared.reduce((a,b)=>a+b,0)*2+familiarity*2+contextFit*.5+cadenceFit*2-movement.reduce((a,b)=>a+b,0);
+  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,cadenceFit,explanation:spec.why,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
  }
  options.sort((a,b)=>b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
  return options.slice(0,3).map((o,i)=>({...o,variant:i+1,title:i===0?spec.title:spec.title+" · alternativa "+(i+1)}));
@@ -1137,5 +1155,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
