@@ -13,6 +13,11 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(BASE, {waitUntil:'domcontentloaded'});
+      // Regression: the public landing page must show the complete studio.
+      assert.equal(await page.locator('body').getAttribute('data-workspace'), 'advanced');
+      assert.ok(await page.locator('#circle').isVisible(), 'Circle of fifths must be visible');
+      assert.ok(await page.locator('#userChords').isVisible(), 'User progression editor must be visible');
+      assert.ok(await page.locator('.reference-flow').isVisible(), 'Reference column must be visible');
       await page.locator('#workspaceExplore').click();
       await page.locator('#simpleChords').fill('Am F C G');
       await page.locator('#simpleMood').selectOption('misterio');
