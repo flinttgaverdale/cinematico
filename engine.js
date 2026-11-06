@@ -479,6 +479,26 @@ function cadenceEvidence(chords,tonic,mode){
  return events;
 }
 // Conservative tonal hypotheses: compatibility is not proof of a tonic.
+// Evidence-aware harmonic interpretation. Chord symbols alone cannot establish
+// phrase boundaries, melodic tendency resolution, or literal voice leading.
+function harmonicEvidenceAudit(chords){
+ const tonal=tonalHypotheses(chords);
+ if(!Array.isArray(chords)||!chords.length)return {confidence:"insufficient",tonal,events:[],warnings:["No hay acordes para analizar."]};
+ const best=tonal.candidates[0],runner=tonal.candidates[1];
+ const gap=best&&runner?best.score-runner.score:0;
+ const confidence=chords.length<3?"insufficient":gap<0.6?"ambiguous":gap<1.4?"moderate":"suggestive";
+ const events=[];
+ for(let i=1;i<chords.length;i++){
+  const a=chords[i-1],b=chords[i],common=[...new Set(a.notes.map(mod))].filter(n=>b.notes.some(m=>mod(m)===n));
+  const motion=pitchClassMotionEstimate(a,b);
+  events.push({from:i-1,to:i,sharedPitchClasses:common.length,motionEstimate:motion.distance,
+   caveat:"Clases de altura sin octavas ni asignación de voces; no demuestra conducción real ni paralelismos."});
+ }
+ const warnings=["La función tonal depende del contexto: estas hipótesis no sustituyen el análisis de melodía, ritmo y fraseo.",
+  "Una secuencia V–I no confirma por sí sola una cadencia auténtica formal."];
+ if(confidence==="ambiguous"||confidence==="insufficient")warnings.push("Centro tonal insuficientemente determinado; conviene mostrar alternativas y no afirmar una modulación.");
+ return {confidence,tonal,events,warnings};
+}
 function tonalHypotheses(chords){
  if(!Array.isArray(chords)||!chords.length)return {status:"empty",candidates:[],explanation:"Introduce acordes para explorar posibles centros tonales."};
  const patterns=[{mode:"mayor",steps:[0,2,4,5,7,9,11]},{mode:"menor natural",steps:[0,2,3,5,7,8,10]}];
@@ -1169,5 +1189,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={harmonicEvidenceAudit,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
