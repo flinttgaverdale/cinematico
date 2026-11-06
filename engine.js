@@ -511,8 +511,9 @@ function tonalHypotheses(chords){
  }
  candidates.sort((a,b)=>b.score-a.score||a.tonic-b.tonic);
  const best=candidates[0],second=candidates[1],close=candidates.filter(x=>best.score-x.score<0.6);
+ const minorCaveat=best.mode==="menor natural"&&best.minorDominant?.raisedLeadingTone?" Aparece una dominante con sensible elevada, habitual en la tonalidad menor; «menor natural» aquí es solo la escala de referencia.":"";
  return {status:chords.length<3?"insufficient":close.length>1?"ambiguous":"suggestive",
-  candidates:candidates.slice(0,3),explanation:chords.length<3?"Hay pocos acordes para sugerir un centro tonal fiable.":close.length>1?"Varias tonalidades explican estos acordes de forma parecida; no se puede asegurar una tónica solo con sus símbolos.":"Esta es una posibilidad armónica, no una tonalidad confirmada. El ritmo, la melodía y las cadencias pueden cambiar la percepción."};
+  candidates:candidates.slice(0,3),explanation:(chords.length<3?"Hay pocos acordes para sugerir un centro tonal fiable.":close.length>1?"Varias tonalidades explican estos acordes de forma parecida; no se puede asegurar una tónica solo con sus símbolos.":"Esta es una posibilidad armónica, no una tonalidad confirmada. El ritmo, la melodía y las cadencias pueden cambiar la percepción.")+minorCaveat};
 }
 function progressionInsights(chords){return chords.map((ch,i)=>{const next=chords[i+1],prev=chords[i-1];const shared=next?ch.notes.filter(n=>next.notes.includes(n)):[];const bassMotion=next?((next.bass-ch.bass+18)%12)-6:null;return {index:i,label:ch.label,notes:ch.notes.map(n=>spell(n)),previous:prev?.label||null,next:next?.label||null,shared:shared.map(n=>spell(n)),bassMotion,description:next?(shared.length?shared.length+" nota(s) común(es) con "+next.label+": "+shared.map(n=>spell(n)).join(", ")+".":"Sin notas comunes con "+next.label+"."):"Final de la progresión; puedes estudiar su función de llegada."};});}
 // Detects an observable interval relationship, not a film-composer attribution.
