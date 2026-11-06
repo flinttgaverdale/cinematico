@@ -520,7 +520,7 @@ function transformationalPathExplorer(start,options={}){
   }
   for(const op of ["P","L","R"]){
    const next=neoRiemannianTransform(chord,op);
-   if(!next||next.root===lastRoot&&next.type===initialType&&ops.length===depth-1)continue;
+   if(!next||(next.root===lastRoot&&next.type===initialType))continue;
    if(steps.some(c=>c.root===next.root&&c.type===next.type))continue;
    visit(next,ops+op,[...steps,next]);
   }
