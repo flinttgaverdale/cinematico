@@ -14,7 +14,9 @@ jobs:
         with:
           node-version: '22'
       - name: Test harmonic engine
-        run: node tests/phase1-regression.cjs
+        run: |
+          node tests/phase1-regression.cjs
+          node tests/cadence-regression.cjs
       - name: Install browser runner
         run: |
           npm install --no-save playwright
