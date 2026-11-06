@@ -1,0 +1,27 @@
+name: Cinematico reliability checks
+on:
+  push:
+    branches: [feature/simple-create-trial]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Test harmonic engine
+        run: node tests/phase1-regression.cjs
+      - name: Install browser runner
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Start local app server
+        run: |
+          python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/cinematico-server.log 2>&1 &
+          sleep 2
+      - name: Test browser on desktop and mobile
+        run: node tests/browser-smoke.cjs
