@@ -482,6 +482,25 @@ function cadenceEvidence(chords,tonic,mode){
 // Evidence-aware harmonic interpretation. Chord symbols alone cannot establish
 // phrase boundaries, melodic tendency resolution, or literal voice leading.
 // Chromatic relations describe chord-to-chord structure, not emotion or modulation.
+// P/L/R apply only to major/minor triads, not sevenths or suspended chords.
+function neoRiemannianTransform(chord,operation){
+ if(!chord||!["","m"].includes(chord.type)||!["P","L","R"].includes(operation))return null;
+ const r=mod(chord.root),major=chord.type==="",targetMajor=!major;
+ const targetRoot=operation==="P"?r:operation==="L"?mod(r+(major?4:8)):mod(r+(major?9:3));
+ const notes=(targetMajor?[0,4,7]:[0,3,7]).map(n=>mod(targetRoot+n));
+ const original=new Set(chord.notes.map(mod));
+ const common=notes.filter(n=>original.has(n));
+ return {operation,root:targetRoot,type:targetMajor?"":"m",notes,
+  label:spell(targetRoot,[1,3,6,8,10].includes(targetRoot))+(targetMajor?"":"m"),
+  sharedPitchClasses:common.length,
+  caveat:"Transformación de tríadas abstractas; no describe registro, disposición, función tonal ni afecto."};
+}
+function neoRiemannianPath(chord,operations){
+ if(typeof operations!=="string"||!/^[PLR]{1,8}$/.test(operations))return null;
+ let current=chord;const steps=[];
+ for(const operation of operations){const next=neoRiemannianTransform(current,operation);if(!next)return null;steps.push(next);current=next;}
+ return {operations,steps,result:current};
+}
 function chromaticRelationAudit(from,to){
  if(!from||!to||!Array.isArray(from.notes)||!Array.isArray(to.notes))return null;
  const a=mod(from.root),b=mod(to.root),delta=mod(b-a),distance=Math.min(delta,12-delta);
@@ -1220,5 +1239,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={chromaticRelationAudit,appliedDominantAudit,harmonicEvidenceAudit,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={neoRiemannianTransform,neoRiemannianPath,chromaticRelationAudit,appliedDominantAudit,harmonicEvidenceAudit,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
