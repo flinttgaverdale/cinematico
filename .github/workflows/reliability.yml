@@ -20,6 +20,7 @@ jobs:
           node tests/harmonic-evidence.cjs
           node tests/chromatic-research.cjs
           node tests/neo-riemannian.cjs
+          node tests/transformational-paths.cjs
           node tests/static-audit.cjs
       - name: Install browser runner
         run: |
