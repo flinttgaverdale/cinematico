@@ -16,11 +16,18 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       await page.locator('#workspaceExplore').click();
       await page.locator('#simpleChords').fill('Am F C G');
       await page.locator('#simpleMood').selectOption('misterio');
+      // Direct navigation must carry unsent edits into advanced mode.
+      await page.locator('#simpleChords').fill('Dm G7 C');
+      await page.locator('#workspaceAdvanced').click();
+      assert.equal(await page.locator('#userChords').inputValue(), 'Dm G7 C');
+      await page.locator('#workspaceExplore').click();
+      await page.locator('#simpleChords').fill('Am F C G');
       await page.locator('#simpleExplore').click();
       assert.equal(await page.locator('.simple-path').count(), 3);
       await page.locator('.simple-path [data-open-advanced]').first().click();
       assert.equal(await page.locator('body').getAttribute('data-workspace'), 'advanced');
       assert.equal((await page.locator('#userChords').inputValue()).split(' ').length, 7);
+      assert.equal((await page.locator('#simpleChords').inputValue()).split(' ').length, 7);
       await page.locator('#save').click();
       assert.ok((await page.locator('#savedList').innerText()).length > 0);
       await page.reload({waitUntil:'domcontentloaded'});
