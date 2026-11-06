@@ -481,6 +481,37 @@ function cadenceEvidence(chords,tonic,mode){
 // Conservative tonal hypotheses: compatibility is not proof of a tonic.
 // Evidence-aware harmonic interpretation. Chord symbols alone cannot establish
 // phrase boundaries, melodic tendency resolution, or literal voice leading.
+// Chromatic relations describe chord-to-chord structure, not emotion or modulation.
+function chromaticRelationAudit(from,to){
+ if(!from||!to||!Array.isArray(from.notes)||!Array.isArray(to.notes))return null;
+ const a=mod(from.root),b=mod(to.root),delta=mod(b-a),distance=Math.min(delta,12-delta);
+ const majorLike=c=>["","maj7","add9"].includes(c.type);
+ const minorLike=c=>["m","m7","madd9"].includes(c.type);
+ const triadic=(majorLike(from)||minorLike(from))&&(majorLike(to)||minorLike(to));
+ const common=[...new Set(from.notes.map(mod))].filter(n=>to.notes.some(p=>mod(p)===n));
+ const chromaticMediant=triadic&&(distance===3||distance===4)&&
+  (majorLike(from)===majorLike(to))&&common.length>=1;
+ const relation=chromaticMediant?"chromatic-mediant":distance===7||distance===5?"fifth-related":distance===0?"same-root":"other";
+ return {relation,rootSemitones:distance,sharedPitchClasses:common.length,
+  motionEstimate:pitchClassMotionEstimate(from,to).distance,
+  caveat:"Relación descriptiva entre acordes: no demuestra modulación, función formal ni emoción determinada."};
+}
+function appliedDominantAudit(chords){
+ if(!Array.isArray(chords))return [];
+ const events=[];
+ for(let i=1;i<chords.length;i++){
+  const from=chords[i-1],to=chords[i];
+  if(!from||!to||!["7",""].includes(from.type)||mod(from.root+5)!==mod(to.root))continue;
+  const third=mod(from.root+4),seventh=mod(from.root+10);
+  const hasThird=from.notes.some(n=>mod(n)===third);
+  const hasSeventh=from.notes.some(n=>mod(n)===seventh);
+  if(!hasThird)continue;
+  events.push({index:i,target:to.label,dominant:from.label,seventh:hasSeventh,
+   classification:"dominant-to-target",
+   caveat:"Una quinta descendente sugiere relación de dominante; para llamarla secundaria hay que comprobar el centro tonal global y que el objetivo no sea su tónica."});
+ }
+ return events;
+}
 function harmonicEvidenceAudit(chords){
  const tonal=tonalHypotheses(chords);
  if(!Array.isArray(chords)||!chords.length)return {confidence:"insufficient",tonal,events:[],warnings:["No hay acordes para analizar."]};
@@ -1189,5 +1220,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={harmonicEvidenceAudit,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={chromaticRelationAudit,appliedDominantAudit,harmonicEvidenceAudit,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
