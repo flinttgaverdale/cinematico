@@ -1,122 +1,219 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#14141c">
-<title>Círculo Cinemático</title>
-<link rel="manifest" href="manifest.json">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Círculo Cinemático">
-<link rel="apple-touch-icon" href="icon-192.png">
-<style>
-  :root{
-    --bg:#14141c; --panel:#1e1e28; --panel2:#262633; --line:#3a3a4a;
-    --txt:#e8e8f0; --dim:#9a9ab0; --accent:#f59a2e; --accent2:#4aa3ff;
-    --good:#6fd08c; --warn:#e0b34a;
-  }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    height:100%;}
-  body{display:flex;flex-direction:column;min-height:100dvh;}
-  header{padding:14px 16px 8px;text-align:center;}
-  header h1{font-size:1.15rem;margin:0;font-weight:700;letter-spacing:.3px;}
-  header p{margin:4px 0 0;font-size:.78rem;color:var(--dim);}
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111310"><meta name="description" content="Estudio de exploración armónica cinematográfica"><title>Cinemático — Estudio de composición</title><link rel="manifest" href="manifest.json"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><style>
+:root{color-scheme:dark;--bg:#111310;--p:#191d18;--p2:#232820;--line:#394034;--txt:#f1f0e8;--muted:#a2aa98;--quiet:#778071;--gold:#d6a86b;--sage:#b2c09a;--r:17px}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% -15%,#303b2c 0,transparent 40%),var(--bg);color:var(--txt);font-family:"DM Sans",sans-serif}.shell{max-width:1380px;margin:auto;padding:0 30px}.top{height:76px;border-bottom:1px solid #fff1;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;gap:12px;align-items:center}.mark{width:34px;height:34px;border:1px solid #d6a86b99;border-radius:50%;display:grid;place-items:center;color:var(--gold);font:700 19px Manrope}.brand b{font:800 15px Manrope;letter-spacing:.15em}.brand small{display:block;color:var(--quiet);font-size:9px;letter-spacing:.16em;text-transform:uppercase;margin-top:3px}.top small,.kicker{font-size:10px;color:var(--quiet);letter-spacing:.16em;text-transform:uppercase}.hero{padding:38px 0 25px}.kicker{color:var(--gold);font-weight:700}.hero h1{font:600 clamp(30px,4vw,46px)/1.08 Manrope;letter-spacing:-.04em;margin:11px 0}.hero p{font-size:13px;line-height:1.7;color:var(--muted);max-width:650px;margin:0}.layout{display:grid;grid-template-columns:minmax(320px,.85fr) minmax(0,1.35fr);gap:17px;padding-bottom:48px}.panel{background:linear-gradient(145deg,#1c211b,#171a16);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 18px 55px #0004}.head{padding:20px 21px 0;display:flex;justify-content:space-between;gap:10px;align-items:center}.head b{font:700 13px Manrope}.circlewrap{padding:8px 15px 0;display:grid;place-items:center}.circle{width:100%;max-width:400px}.node{cursor:pointer}.node circle{fill:#272e24;stroke:#46503f;stroke-width:1.2}.node text{fill:#e7e8df;text-anchor:middle;dominant-baseline:middle;font:600 14px "DM Sans"}.node.selected circle{fill:var(--gold);stroke:var(--gold)}.node.selected text{fill:#191a14}.core{fill:#171b16;stroke:#40483a}.corelabel{text-anchor:middle;fill:var(--gold);font:700 10px "DM Sans";letter-spacing:2px}.corekey{text-anchor:middle;fill:var(--txt);font:700 25px Manrope}.caption{text-align:center;color:var(--muted);font-size:11px;padding:0 0 18px}.caption strong{color:var(--gold)}.controls{padding:0 20px 20px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;color:var(--muted);font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:7px}.field select{width:100%;background:var(--p2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:11px 10px;font-size:12px}.field.full{grid-column:1/-1}.note{font-size:10px;color:var(--quiet);margin-top:6px}.buttons{display:flex;gap:8px;align-items:center;margin-top:15px}.auto-update{font-size:9px;color:var(--quiet);line-height:1.5;flex:1}button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;font-size:11px}.primary{background:var(--gold);color:#1b1a14;flex:1}.secondary{background:var(--p2);color:var(--txt);border:1px solid var(--line)}.results{display:flex;flex-direction:column;gap:15px}.heroresult{padding:23px;position:relative;overflow:hidden}.heroresult:after{content:"";position:absolute;width:200px;height:200px;border:1px solid #d6a86b22;border-radius:50%;right:-65px;top:-110px;box-shadow:0 0 0 25px #d6a86b08,0 0 0 50px #d6a86b05}.heroresult h2{font:600 clamp(25px,3vw,35px) Manrope;margin:10px 0 5px}.heroresult p{font-size:12px;color:var(--muted);line-height:1.6;margin:0}.scale{display:flex;flex-wrap:wrap;gap:6px;margin-top:19px}.pill{border:1px solid var(--line);background:#fff06;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:600}.pill:first-child{color:var(--gold);border-color:#d6a86b88}.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.card{padding:19px 20px;min-width:0}.card.full{grid-column:1/-1}.cardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.cardhead b{font:700 13px Manrope}.cardhead span{font-size:9px;color:var(--quiet);letter-spacing:.12em;text-transform:uppercase}.chords{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.tile{border:1px solid var(--line);background:var(--p2);border-radius:10px;text-align:center;padding:10px 4px}.tile small{display:block;color:var(--quiet);font-size:9px;margin-bottom:6px}.tile strong{font:700 15px Manrope}.tile em{display:block;color:var(--muted);font-size:9px;font-style:normal;margin-top:5px}.progress{display:flex;align-items:center;flex-wrap:wrap;gap:7px}.chord{border:1px solid #515c47;background:#272e24;border-radius:9px;padding:9px 11px;text-align:center;min-width:56px}.chord strong{color:var(--sage);font:700 15px Manrope}.chord small{display:block;color:var(--muted);font-size:9px;margin-top:4px}.chord .tones{color:var(--txt);font-size:9px;line-height:1.5}.chord .bassline,.chord .common{color:var(--quiet);font-size:8px;line-height:1.4}.arrow{color:var(--quiet);font-size:11px}.insight{margin-top:12px;padding:11px 12px;border-left:2px solid var(--gold);background:#fff05;border-radius:0 8px 8px 0;color:var(--muted);font-size:11px;line-height:1.6}.copy{font-size:11px;color:var(--muted);line-height:1.7;margin:12px 0 0}.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}.mod{border:1px solid var(--line);background:#fff03;border-radius:10px;padding:11px}.mod b{display:block;font-size:11px}.mod strong{display:block;float:none;margin-top:5px;color:var(--gold);font:700 15px Manrope}.mod p{font-size:10px;color:var(--muted);line-height:1.5;margin:6px 0 0}.mod small{font-size:9px;color:var(--quiet)}.saved{padding:19px 20px}.savedrow{display:flex;justify-content:space-between;align-items:center;gap:10px}.savedlist{display:grid;gap:7px;margin-top:12px}.saveditem{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:9px;background:var(--p2);font-size:11px}.saveditem span{color:var(--muted)}.empty{font-size:11px;color:var(--quiet);margin:12px 0 0}.foot{border-top:1px solid #fff1;padding:18px 0 25px;color:var(--quiet);font-size:9px;letter-spacing:.08em;display:flex;justify-content:space-between}.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,15px);background:#e9e8dc;color:#1b1c16;border-radius:30px;padding:10px 16px;font-size:11px;font-weight:700;opacity:0;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}@media(max-width:850px){.layout{grid-template-columns:1fr}.circle{max-width:380px}}@media(max-width:560px){.shell{padding:0 12px}.top{height:65px}.top>small{display:none}.hero{padding:27px 2px 20px}.layout{gap:12px}.grid{grid-template-columns:1fr;gap:12px}.card.full{grid-column:auto}.fields{gap:9px}.field select{font-size:11px;padding:10px 6px}.head{padding:17px 16px 0}.controls{padding:0 16px 17px}.circlewrap{padding:5px 7px 0}.heroresult,.card,.saved{padding:17px}.mods{grid-template-columns:1fr}.chords{gap:5px}.tile strong{font-size:13px}.foot{font-size:8px;gap:8px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 
-  main{flex:1;padding:0 12px 16px;display:flex;flex-direction:column;gap:12px;}
+/* Cinemático Studio — visual refinement v1 */
+:root{--bg:#10120f;--p:#171a16;--p2:#20251f;--line:#30372e;--txt:#f3f1e9;--muted:#aeb3a6;--quiet:#858d7e;--gold:#d8b47b;--sage:#c2cdb0;--r:14px}
+body{background:var(--bg);font-family:"DM Sans",sans-serif;letter-spacing:.005em}
+.shell{max-width:1240px;padding:0 28px}
+.top{height:68px;border-bottom-color:#ffffff12}
+.mark{width:31px;height:31px;font-size:17px}
+.brand b{letter-spacing:.19em;font-size:13px}
+.brand small{font-size:8px;letter-spacing:.19em}
+.hero{padding:46px 0 31px}
+.hero h1{font-size:clamp(32px,4.2vw,49px);letter-spacing:-.055em;line-height:1.04;margin:13px 0}
+.hero p{font-size:13px;max-width:590px;color:#aeb3a6}
+.layout{grid-template-columns:minmax(290px,.78fr) minmax(0,1.42fr);gap:14px}
+.panel{background:var(--p);border-color:#ffffff13;border-radius:14px;box-shadow:0 12px 36px #0002}
+.head{padding:18px 19px 0}
+.head b,.cardhead b{font-size:12px;letter-spacing:.015em}
+.controls{padding:0 19px 19px}
+.field label,.kicker,.top small{letter-spacing:.13em}
+.field select{background:#111510;border-color:#343b32;border-radius:8px;padding:11px 10px}
+.field select:focus{outline:1px solid var(--gold);border-color:var(--gold)}
+button{border-radius:8px;cursor:pointer;transition:background .18s,border-color .18s,transform .18s}
+button:active{transform:translateY(1px)}
+.primary{background:var(--gold);color:#171810}
+.primary:hover{background:#e5c795}
+.secondary{background:transparent;border-color:#424a3e}
+.secondary:hover{background:#ffffff0b;border-color:#68725f}
+.heroresult{padding:22px 23px}
+.heroresult:after{width:150px;height:150px;right:-65px;top:-100px;box-shadow:0 0 0 20px #d6a86b07,0 0 0 40px #d6a86b04}
+.heroresult h2{font-size:clamp(25px,2.7vw,33px);letter-spacing:-.04em}
+.scale{gap:5px;margin-top:16px}
+.pill{background:#ffffff06;border-color:#ffffff17;border-radius:7px;padding:7px 9px}
+.pill:first-child{background:#d8b47b12}
+.results{gap:12px}
+.grid{gap:12px}
+.card{padding:17px 18px}
+.cardhead{margin-bottom:12px}
+.cardhead span{font-size:8px;letter-spacing:.1em}
+.tile{background:#111510;border-color:#ffffff13;border-radius:8px;padding:10px 3px}
+.tile strong{font-size:14px}
+.progress{gap:6px}
+.chord{background:#20261e;border-color:#424b3c;border-radius:8px;padding:8px 10px}
+.chord strong{font-size:14px}
+.insight{background:#d8b47b0b;border-left-color:#d8b47b;border-radius:0 7px 7px 0;font-size:10px;line-height:1.65}
+.copy{font-size:10px}
+.mods{grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:9px}
+.mod{position:relative;min-width:0;overflow:hidden;background:#111510;border:1px solid #ffffff15;border-radius:10px;padding:13px 13px 12px;transition:border-color .18s,background .18s}
+.mod:hover{border-color:#d8b47b66;background:#151a14}
+.mod .modtop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.mod .mod-index{display:inline-grid;place-items:center;width:22px;height:22px;border:1px solid #ffffff20;border-radius:50%;font-size:9px;color:var(--quiet)}
+.mod .mod-type{font-size:8px;color:var(--quiet);letter-spacing:.12em;text-transform:uppercase}
+.mod b{font-size:10px;font-weight:600;color:#d9dccf;line-height:1.4}
+.mod .mod-route{display:grid;grid-template-columns:minmax(0,1fr) 25px minmax(0,1fr);align-items:center;gap:5px;margin:0 0 10px}
+.mod .mod-node{min-width:0;border:1px solid #ffffff15;background:#ffffff04;border-radius:8px;padding:8px 7px;text-align:center}
+.mod .mod-node small{display:block;font-size:8px;color:var(--quiet);margin-bottom:4px}
+.mod .mod-node strong{display:block;float:none;margin:0;color:var(--txt);font:700 15px Manrope;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mod .mod-node.target{border-color:#d8b47b55;background:#d8b47b0c}
+.mod .mod-node.target strong{color:var(--gold)}
+.mod .mod-arrow{text-align:center;color:var(--gold);font-size:15px}
+.mod .mod-feel{font-size:10px;color:var(--muted);line-height:1.5;margin:0 0 9px}
+.mod .mod-evidence{border-top:1px solid #ffffff12;padding-top:9px}
+.mod .mod-evidence small{display:block;font-size:8px;color:var(--quiet);line-height:1.5}
+.mod .mod-pivots{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:7px 0}
+.mod .pivot{display:inline-flex;align-items:center;gap:4px;padding:4px 6px;border:1px solid #ffffff16;border-radius:5px;font-size:8px;color:#d7d9ce;background:#ffffff05}
+.mod .pivot em{font-style:normal;color:var(--gold)}
+.mod .mod-transition{font-size:9px;color:var(--muted);line-height:1.55;margin:7px 0 0}
+.mod .mod-status{display:inline-block;margin-top:9px;padding:4px 6px;border-radius:5px;background:#d8b47b0c;color:#d8b47b;font-size:8px;letter-spacing:.04em}
+.saved{padding:17px 18px}
+.saveditem{background:#111510;border:1px solid #ffffff0c}
+.foot{border-top-color:#ffffff12}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.circle{max-width:350px}.hero{padding:34px 0 24px}}
+@media(max-width:560px){.shell{padding:0 13px}.top{height:61px}.hero{padding:29px 2px 21px}.hero h1{font-size:34px}.layout{gap:11px}.head{padding:16px 15px 0}.controls{padding:0 15px 16px}.heroresult,.card,.saved{padding:16px}.mods{grid-template-columns:1fr}.mod{padding:12px}.foot{font-size:8px}}
 
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;}
 
-  /* CÍRCULO */
-  #circleWrap{display:flex;justify-content:center;align-items:center;}
-  #circle{width:100%;max-width:340px;aspect-ratio:1/1;touch-action:manipulation;}
+/* DESIGN LAB / Instrumental workspace prototype. Isolated from public release. */
+:root{--bg:#171a19;--p:#252a27;--p2:#303631;--line:#454d46;--txt:#eceee8;--muted:#c0c7bd;--quiet:#a5aea3;--gold:#d2ad77;--sage:#b3c8b7;--r:7px}
+body{background:#171a19;background-image:linear-gradient(#ffffff03 1px,transparent 1px);background-size:100% 32px;font-size:14px}
+.shell{max-width:1520px;padding:0 22px}
+.top{height:58px;border-bottom:1px solid #606a603e}
+.brand .mark{border-radius:5px;background:#d2ad77;color:#1b211b;border:0;width:30px;height:30px;font-weight:800}
+.brand b{letter-spacing:.12em;font-size:14px}.brand small{font-size:10px;color:#b1b9ae}
+.top>small{color:#b6c0b6}
+.hero{padding:17px 0 15px;display:flex;gap:18px;align-items:center;justify-content:space-between;border-bottom:1px solid #465048;margin-bottom:12px}
+.hero .kicker{font-size:10px;white-space:nowrap}
+.hero h1{font:650 clamp(19px,2.1vw,28px)/1.18 Manrope;margin:0;letter-spacing:-.03em}
+.hero h1 br{display:none}
+.hero p{max-width:420px;font-size:12px;line-height:1.5;margin:0}
+.workspace-switch{background:#242a26;border:1px solid #4b554b;border-radius:6px;padding:10px 14px;margin-bottom:10px}
+.workspace-switch strong{font-size:13px}.workspace-switch p{font-size:12px}
+.workspace-tabs{border-radius:5px;background:#181d19}.workspace-tabs button{border-radius:3px;font-size:12px}
+.guide{border-radius:6px;background:#252a26;border:1px solid #4b5449;padding:10px 14px;margin-bottom:10px}
+.guide-head b{font-size:12px;color:var(--muted)}
+.layout{grid-template-columns:minmax(260px,.58fr) minmax(0,1.42fr);gap:10px}
+.panel{background:#252a27;border:1px solid #495148;border-radius:7px;box-shadow:none}
+.head{padding:14px 16px 0}.head b,.cardhead b{font-size:14px;letter-spacing:0}
+.circle{max-width:320px}.circlewrap{padding:0 12px}
+.controls{padding:0 16px 16px}
+.field label,.kicker,.top small{font-size:11px;letter-spacing:.07em;color:#b8c1b5}
+.field select,.vl-controls select,select,input{border-radius:4px!important;background:#1d221e!important;border:1px solid #626d61!important;color:#f0f1eb!important;font-size:13px!important;min-height:37px}
+.field select{padding:8px 9px}
+button,.secondary,.primary{border-radius:4px;font-size:12px;min-height:35px}
+button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid #e5c68d;outline-offset:2px}
+.results,.grid{gap:10px}
+.card,.heroresult{padding:15px 17px}
+.heroresult:after{display:none}
+.heroresult h2{font-size:29px}.heroresult p{font-size:13px}
+.cardhead{border-bottom:1px solid #4d574d;padding-bottom:10px;margin-bottom:12px}
+.cardhead span{font-size:10px;color:#b5c0b4;letter-spacing:.05em}
+.chord,.tile,.mod,.tech-card{border-radius:4px!important}
+.chord{background:#313b33;border-color:#5b6a5d;padding:10px}
+.chord strong{font-size:17px}.chord small,.chord .tones,.chord .common,.chord .bassline{font-size:11px}
+.tile{background:#202720}.tile strong{font-size:16px}.tile small,.tile em{font-size:11px}
+.insight{background:#d2ad7710;border-radius:0;padding:11px 12px;font-size:12px;line-height:1.6}
+.copy,.section-lead,.tech-caption{font-size:12px;line-height:1.6}
+.mod{background:#202722;border-radius:4px;padding:12px}
+.mod b,.mod p,.mod .mod-feel{font-size:12px}.mod small,.mod .mod-type,.mod .mod-evidence small{font-size:10px}
+.mod .mod-node{border-radius:3px}.mod .mod-node strong{font-size:17px}
+.help-details{border-radius:4px}
+.foot{font-size:10px}
+@media(min-width:1100px){.layout>section:first-child{align-self:start;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow-y:auto;scrollbar-width:thin}}
+@media(max-width:950px){.layout{grid-template-columns:1fr}.layout>section:first-child{position:static;max-height:none}.circle{max-width:340px}}
+@media(max-width:650px){.shell{padding:0 12px}.hero{display:block;padding:15px 0}.hero h1{margin:7px 0;font-size:24px}.hero p{font-size:12px}.workspace-switch{flex-direction:column;align-items:stretch}.workspace-tabs{width:100%}.workspace-tabs button{flex:1}.panel{border-radius:5px}.card,.heroresult{padding:14px}.field label{font-size:11px}.chord{min-width:50px;padding:8px 6px}.chord strong{font-size:15px}}
+.reference-style-card{margin:12px 0 18px;padding:15px 16px;border:1px solid #b6a77955;border-radius:13px;background:linear-gradient(125deg,#292a20,#20251f)}.reference-style-card label{display:block;margin:7px 0 8px;font-weight:700;font-size:13px}.reference-style-card select{width:100%}.reference-style-kicker{color:var(--gold);font-size:10px;letter-spacing:.13em;font-weight:800}.reference-style-note{color:var(--muted);font-size:12px;line-height:1.5;margin:9px 0 0}.reference-controls{padding:12px 0 15px;margin:0 0 12px;border-bottom:1px solid var(--line)}.reference-controls .caption{margin:0 0 12px}.reference-controls .field+.field{margin-top:12px}.reference-controls .reference-style-note{margin-top:6px}.reference-language-panel{margin:18px 0 0;padding:16px;border:1px solid #b6a77955;border-radius:14px;background:linear-gradient(145deg,#25291f,#1b201b)}.reference-language-panel .cardhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.reference-language-panel .progress{max-width:100%;overflow-wrap:anywhere}.reference-language-panel .reference-style-note strong{color:var(--txt)}.reference-flow{display:flex;flex-direction:column;gap:14px}.reference-flow>.panel{box-shadow:none}.reference-flow>.heroresult,.reference-flow>.card{padding:16px;border:1px solid var(--line);border-radius:13px}.reference-flow>.reference-controls{display:flex;flex-direction:column;gap:12px}.reference-flow .reference-language-panel{margin-top:0}.reference-flow .chords{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))}.reference-flow .cardhead{flex-wrap:wrap}.tonal-reading{margin:16px 0;padding:16px;border:1px solid var(--line);border-radius:13px;background:var(--p2)}.tonal-reading strong{font-size:14px}.tonal-reading p{color:var(--muted);font-size:12px;line-height:1.5}.tonal-options{display:flex;flex-wrap:wrap;gap:8px}</style><style>
+.vl-controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:14px 0}.vl-controls label{font-size:12px;color:var(--muted,#a7a89b)}.vl-controls select{max-width:190px;background:#202820;color:#e9e7db;border:1px solid #505848;border-radius:9px;padding:9px}
+.voiceleading{overflow-x:auto;padding:10px 0}.vl-chart{display:block;min-width:520px;width:100%;height:auto}.vl-legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0;font-size:12px;color:var(--muted,#b4b4aa)}.vl-legend span:before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--voice-color);margin-right:6px}.vl-summary{font-size:12px;line-height:1.6;color:#d0d0c4}.vl-warning{font-size:12px;color:#b8b7a8}
 
-  /* SELECTORES */
-  .row{display:flex;gap:8px;flex-wrap:wrap;}
-  .field{flex:1;min-width:120px;}
-  .field label{display:block;font-size:.7rem;color:var(--dim);margin-bottom:4px;
-    text-transform:uppercase;letter-spacing:.5px;}
-  select{width:100%;background:var(--panel2);color:var(--txt);border:1px solid var(--line);
-    border-radius:9px;padding:9px 8px;font-size:.9rem;appearance:none;
-    -webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8'><path d='M1 1l5 5 5-5' stroke='%239a9ab0' stroke-width='2' fill='none'/></svg>");
-    background-repeat:no-repeat;background-position:right 10px center;}
+/* Guided visual hierarchy — professional, progressive disclosure */
+:root{--focus:#e1bb82}
+:focus-visible{outline:2px solid var(--focus)!important;outline-offset:3px}
+.guide{border:1px solid #d8b47b3d;background:linear-gradient(110deg,#26271e,#1b211b);border-radius:12px;padding:16px 18px;margin:0 0 14px}
+.guide-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.guide-head b{font:700 13px Manrope;color:#f3ebd9}
+.guide-head button{padding:7px 10px;font-size:11px}
+.guide-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.guide-step{display:flex;gap:9px;align-items:flex-start;color:var(--muted);font-size:11px;line-height:1.5}
+.guide-number{display:grid;place-items:center;flex:none;width:25px;height:25px;border:1px solid #d8b47b77;border-radius:50%;color:var(--gold);font:700 11px Manrope}
+.guide-step strong{display:block;color:var(--txt);font-size:11px;margin-bottom:2px}
+.guide[hidden],.guide-steps[hidden]{display:none!important}
+.help-details{margin-top:12px;border-top:1px solid #ffffff14;padding-top:10px}
+.help-details summary{cursor:pointer;color:var(--sage);font-size:11px;font-weight:700;list-style-position:inside}
+#userAnalysis > .help-details{margin-top:14px;padding:12px 14px;border:1px solid #ffffff1c;border-radius:12px;background:#ffffff03}
+#userAnalysis > .help-details > summary{font-size:13px;color:var(--txt);line-height:1.6}
+#userAnalysis > .help-details > .help-details{margin-top:8px;padding:10px 0 10px 8px;border-top:1px solid #ffffff12}
+#userAnalysis > .help-details > .help-details summary{font-size:12px;font-weight:600;line-height:1.6}
+#userAnalysis .help-details summary:focus-visible{outline:2px solid var(--sage);outline-offset:3px;border-radius:4px}
+@media(max-width:600px){#userAnalysis > .help-details{padding:11px 12px}#userAnalysis > .help-details > summary{font-size:12px}}
+.help-details p,.help-details li{font-size:11px;line-height:1.65;color:var(--muted)}
+.help-details ul{padding-left:20px;margin:9px 0}
+.cardhead{gap:12px}
+.cardhead span{text-align:right;line-height:1.4}
+.vl-controls{background:#ffffff04;border:1px solid #ffffff12;border-radius:10px;padding:12px;gap:8px 12px}
+.vl-controls label{font-size:11px;color:#d2d5c9;font-weight:600}
+.vl-controls select{min-height:39px;max-width:220px;border-color:#495347}
+.vl-controls button{min-height:39px}
+#neoResult{border:1px solid #ffffff13;border-radius:10px;background:#111510;padding:15px;margin-top:12px}
+#neoResult .progress{gap:13px;margin-bottom:13px}
+#neoResult .chord{padding:13px 18px;min-width:110px}
+#neoResult .chord strong{font-size:19px}
+#neoResult .chord small{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+#neoResult .chord .pill{font-size:11px}
+#neoResult .vl-summary{border-top:1px solid #ffffff13;padding-top:12px}
+.section-lead{font-size:11px;line-height:1.7;color:var(--muted);margin:0 0 10px}
+@media(max-width:650px){.guide-steps{grid-template-columns:1fr}.guide{padding:14px}.vl-controls{display:grid;grid-template-columns:1fr 1fr}.vl-controls label{grid-column:span 1}.vl-controls select{width:100%;max-width:none}.vl-controls button{grid-column:span 1}.cardhead{align-items:flex-start}#neoResult .chord{min-width:90px;padding:10px}}
 
-  /* RESULTADO */
-  #result{font-size:.9rem;line-height:1.5;}
-  .sec{margin-bottom:12px;}
-  .sec:last-child{margin-bottom:0;}
-  .sec h3{margin:0 0 6px;font-size:.72rem;text-transform:uppercase;letter-spacing:.6px;
-    color:var(--accent);}
-  .chips{display:flex;flex-wrap:wrap;gap:6px;}
-  .chip{background:var(--panel2);border:1px solid var(--line);border-radius:8px;
-    padding:5px 9px;font-size:.85rem;font-weight:600;}
-  .chip.arrow{background:none;border:none;color:var(--dim);padding:5px 2px;font-weight:400;}
-  .chip.hl{border-color:var(--accent);color:var(--accent);}
-  .muted{color:var(--dim);font-size:.82rem;}
-  .mods{display:flex;flex-direction:column;gap:5px;}
-  .mod{background:var(--panel2);border-radius:8px;padding:7px 9px;font-size:.82rem;}
-  .mod b{color:var(--accent2);}
-  .mod .feel{color:var(--dim);font-size:.76rem;}
+/* Two-depth workspace: simple discovery, full analytical access */
+.workspace-switch{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#1a201a;border:1px solid #ffffff1c;border-radius:12px;padding:14px 17px;margin-bottom:13px}
+.workspace-switch strong{font:700 13px Manrope}.workspace-switch p{color:var(--muted);font-size:11px;line-height:1.5;margin:4px 0 0}
+.workspace-tabs{display:flex;gap:4px;background:#0e120e;padding:4px;border:1px solid #ffffff1b;border-radius:10px;flex-shrink:0}
+.workspace-tabs button{background:transparent;color:var(--muted);padding:10px 13px;border-radius:7px;font-size:11px;white-space:nowrap}
+.workspace-tabs button[aria-pressed="true"]{background:#d8b47b;color:#181b14}
+body[data-workspace="explore"] [data-advanced]{display:none!important}
+@media(max-width:650px){.workspace-switch{align-items:stretch;flex-direction:column}.workspace-tabs{width:100%}.workspace-tabs button{flex:1;padding:11px 7px}}
 
-  /* BOTONES */
-  .btns{display:flex;gap:8px;}
-  button{flex:1;background:var(--accent);color:#1a1206;border:none;border-radius:10px;
-    padding:12px;font-size:.95rem;font-weight:700;cursor:pointer;}
-  button.secondary{background:var(--panel2);color:var(--txt);border:1px solid var(--line);}
-  button:active{opacity:.8;}
+.tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.tech-card{border:1px solid #ffffff20;background:#111510;border-radius:10px;padding:14px}.tech-card small{font-size:9px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase}.tech-card h3{font:700 14px Manrope;margin:7px 0}.tech-card p{font-size:11px;line-height:1.65;color:var(--muted)}.tech-card details{border-top:1px solid #ffffff18;margin-top:12px;padding-top:10px}.tech-card summary{font-size:11px;color:var(--sage);cursor:pointer;font-weight:700}.tech-card .observation{color:#e1decf}.tech-caption{font-size:11px;color:var(--muted);line-height:1.6;margin:-4px 0 13px}
 
-  footer{padding:10px 16px 16px;text-align:center;color:var(--dim);font-size:.7rem;}
-</style>
-</head>
-<body>
-<header>
-  <h1>Círculo Cinemático</h1>
-  <p>Toca un tono · elige emoción y compositor · consulta acordes y modulaciones</p>
-</header>
+/* CINEMATICO DESIGN SYSTEM v2 — one canonical layer for Create / workspace tabs */
+:root{--studio-bg:#111713;--studio-panel:#252d27;--studio-raised:#303b32;--studio-edge:#526052;--studio-ink:#f1f0e8;--studio-muted:#c3cec2;--studio-gold:#d6b17b;--studio-chord:#3b4c3e;--studio-next:#695239;--studio-radius:6px}
+.workspace-switch{background:var(--studio-panel);border:1px solid var(--studio-edge);border-radius:var(--studio-radius);padding:12px 15px;display:flex;align-items:center;gap:18px}
+.workspace-switch>div:first-child{flex:1;min-width:0}
+.workspace-switch strong{font-size:14px;color:var(--studio-ink)}
+.workspace-switch p{font-size:13px;line-height:1.5;color:var(--studio-muted);margin:5px 0 0}
+.workspace-tabs{display:flex;gap:4px;padding:4px;background:var(--studio-bg);border:1px solid #3e4c40;border-radius:var(--studio-radius)}
+.workspace-tabs button{min-height:44px;padding:10px 17px;border:0;border-radius:4px;font-size:14px;font-weight:700;white-space:nowrap;background:transparent;color:var(--studio-muted);cursor:pointer}
+.workspace-tabs button[aria-pressed="true"]{background:var(--studio-gold);color:#1a211b}
+.workspace-tabs button:focus-visible,.simple-create button:focus-visible,.simple-create select:focus-visible,.simple-create input:focus-visible{outline:3px solid #f1ce94;outline-offset:3px}
+body[data-workspace="explore"] main.layout,body[data-workspace="explore"] #studioGuide{display:none!important}
+body[data-workspace="advanced"] .simple-create{display:none!important}
+.simple-create{max-width:1060px;margin:15px auto 36px;background:var(--studio-panel);border:1px solid var(--studio-edge);border-radius:var(--studio-radius);padding:clamp(20px,3vw,36px)}
+.simple-intro h2{font:650 clamp(27px,3vw,34px)/1.2 Manrope,sans-serif;color:var(--studio-ink);letter-spacing:-.025em;margin:9px 0 11px}
+.simple-intro p{max-width:660px;font-size:14px;line-height:1.65;color:var(--studio-muted);margin:0}
+.simple-fields{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;margin-top:26px}
+.simple-fields label{display:block;color:var(--studio-ink);font-size:14px;font-weight:700;margin-bottom:10px}
+.simple-fields input,.simple-fields select{width:100%;min-height:52px!important;font-size:17px!important;line-height:1.3;padding:12px 14px!important;border-radius:5px!important}
+.simple-fields p{color:var(--studio-muted);font-size:13px;line-height:1.5;margin:9px 0 0}
+.simple-actions{display:flex;flex-wrap:wrap;gap:10px;margin:23px 0 16px}
+.simple-actions button{min-height:46px;padding:11px 18px;font-size:14px;font-weight:700}
+.simple-feedback{font-size:13px;color:var(--studio-muted);line-height:1.6;margin:12px 0}
+.simple-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+.simple-path{min-width:0;background:#1b241e;border:1px solid #536254;border-radius:var(--studio-radius);padding:19px;display:flex;flex-direction:column;gap:10px}
+.simple-path h3{font-size:17px;line-height:1.3;color:var(--studio-ink);margin:0;font-weight:750}
+.simple-path p{color:var(--studio-muted);font-size:14px;line-height:1.55;margin:0}
+.simple-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}
+.simple-chips span{display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:40px;background:var(--studio-chord);color:#f3f5ee;border:1px solid #617663;border-radius:4px;padding:7px 10px;font:750 18px/1.2 Manrope,sans-serif;letter-spacing:-.025em}
+.simple-chips span.new{background:var(--studio-next);color:#f9e1b9;border-color:#a48a62}
+.simple-path details{border-top:1px solid #4a5b4b;padding-top:12px;margin-top:auto;font-size:13px;line-height:1.55;color:var(--studio-muted)}
+.simple-path summary{cursor:pointer;color:#efc992;font-size:14px;font-weight:650}
+.simple-path details p{margin-top:10px}
+.simple-path button{width:100%;min-height:43px;font-size:13px;margin-top:7px}
+@media(max-width:850px){.simple-results{grid-template-columns:1fr 1fr}.workspace-switch{flex-wrap:wrap}.workspace-tabs{width:100%}.workspace-tabs button{flex:1}}
+@media(max-width:650px){.simple-fields,.simple-results{grid-template-columns:1fr}.simple-create{margin:10px 0 25px;padding:20px}.simple-actions button{width:100%}.workspace-tabs button{font-size:13px;padding:10px 8px}.simple-chips span{font-size:17px}}
 
-<main>
-  <div class="card" id="circleWrap">
-    <canvas id="circle" width="680" height="680"></canvas>
-  </div>
-
-  <div class="card">
-    <div class="row">
-      <div class="field">
-        <label>Emoción</label>
-        <select id="emotion"></select>
-      </div>
-      <div class="field">
-        <label>Compositor</label>
-        <select id="composer"></select>
-      </div>
-    </div>
-    <div class="row" style="margin-top:8px;">
-      <div class="field">
-        <label>Modo (opcional, anula el de la emoción)</label>
-        <select id="mode">
-          <option value="">— automático —</option>
-        </select>
-      </div>
-    </div>
-  </div>
-
-  <div class="btns">
-    <button id="genBtn">Generar</button>
-  </div>
-
-  <div class="card" id="result">
-    <div class="muted">Elige un tono y pulsa <b>Generar</b>.</div>
-  </div>
-</main>
-
-<footer>Círculo Cinemático · funciona sin conexión · añádela a tu pantalla de inicio</footer>
-
-<script>
-"use strict";
-/* ================= DATOS ================= */
+/* Emotion-specific harmonic paths */
+.simple-path-heading{display:flex;flex-direction:column;gap:7px}.simple-variant{font-size:11px;letter-spacing:.12em;font-weight:800;color:var(--studio-gold)}.simple-device{color:#e9d0a9!important;font-weight:650}.simple-chips .simple-arrow{min-width:auto;min-height:auto;background:transparent;border:0;color:var(--studio-gold);font-size:20px;padding:0 4px}.simple-path .simple-chips{margin:10px 0 14px}.simple-path details{margin-top:auto}
+</style></head><body><div class="shell"><header class="top"><div class="brand"><div class="mark">C</div><div><b>CINEMÁTICO</b><small>Estudio de composición</small></div></div><small>Exploración armónica · herramienta creativa</small></header><section class="hero"><div class="kicker">CINEMÁTICO / INSTRUMENTO ARMÓNICO</div><h1>Encuentra el color de tu próxima escena.</h1><p>Explora tonalidades, modos y lenguajes cinematográficos. Cinemático te propone caminos; las decisiones musicales siguen siendo tuyas.</p></section><nav class="workspace-switch" aria-label="Modo de trabajo"><div><strong id="workspaceTitle">Crear</strong><p id="workspaceDesc">Tus acordes, nuevas posibilidades. Sin necesidad de teoría musical.</p></div><div class="workspace-tabs" role="group" aria-label="Nivel de herramientas"><button id="workspaceExplore" type="button" aria-pressed="true">Crear</button><button id="workspaceAdvanced" type="button" aria-pressed="false">Estudio avanzado</button></div></nav><aside class="guide" id="studioGuide" aria-label="Guía de inicio"><div class="guide-head"><b>Guía rápida · Tres pasos para empezar</b><button class="secondary" id="guideToggle" type="button" aria-expanded="false" aria-controls="guideSteps">Mostrar guía</button></div><div class="guide-steps" id="guideSteps" hidden><div class="guide-step"><span class="guide-number">1</span><div><strong>Elige el centro tonal</strong>Pulsa una nota del círculo de quintas.</div></div><div class="guide-step"><span class="guide-number">2</span><div><strong>Define la intención</strong>Selecciona emoción, compositor y, si quieres, un modo.</div></div><div class="guide-step"><span class="guide-number">3</span><div><strong>Explora y profundiza</strong>Consulta acordes y voces. Abre las ayudas de cada herramienta cuando las necesites.</div></div></div></aside><section class="simple-create" aria-label="Crear con tus acordes"><div class="simple-intro"><span class="kicker">CREAR / TU IDEA MUSICAL</span><h2>Vamos a continuar tu idea.</h2><p>Escribe los acordes que conoces. No necesitas teoría musical.</p></div><div class="simple-fields"><div><label for="simpleChords">Tus acordes</label><input id="simpleChords" value="Am F C G" placeholder="Am F C G"><p>Separa los acordes con espacios. Conservaremos tu idea.</p></div><div><label for="simpleMood">¿Qué quieres transmitir?</label><select id="simpleMood"><option value="misterio">Misterio</option><option value="melancolia">Melancolía</option><option value="tension">Tensión</option><option value="esperanza">Esperanza</option><option value="nostalgia">Nostalgia</option><option value="epica">Épica</option><option value="tristeza">Tristeza</option><option value="alegria">Alegría</option><option value="ternura">Ternura</option><option value="asombro">Asombro / magia</option><option value="inquietud">Inquietud</option><option value="suspense">Suspense</option><option value="oscuridad">Oscuridad</option><option value="calma">Calma</option><option value="contraste">Contraste inesperado</option></select></div></div><div class="simple-actions"><button class="primary" id="simpleExplore" type="button">Buscar nuevos acordes →</button><button class="secondary" id="simpleToAdvanced" type="button">Ir al estudio avanzado</button></div><p class="simple-feedback" id="simpleFeedback" role="status" aria-live="polite"></p><div id="simpleResults" class="simple-results"></div></section><main class="layout"><section class="panel reference-flow"><div class="head"><b>Círculo de quintas</b><span class="kicker">Selecciona una tónica</span></div><div class="circlewrap"><svg id="circle" class="circle" viewBox="0 0 420 420" role="group" aria-label="Círculo de quintas interactivo"></svg></div><div class="reference-controls"><div class="caption">Referencia · <strong id="keyCaption">C</strong></div><div class="field"><label for="quickKey">Tonalidad de referencia</label><select id="quickKey" aria-label="Seleccionar tonalidad"></select></div><div class="field"><label for="emotion">Intención emocional</label><select id="emotion"></select></div><div class="field full"><label for="mode">Modo musical</label><select id="mode"><option value="">Sugerido por la emoción</option></select><div class="note" id="modeNote"></div></div><div class="field"><label for="composer">Lenguaje de referencia</label><select id="composer" aria-describedby="composerContextNote"></select><p class="reference-style-note" id="composerContextNote">Estilo elegido para explorar posibilidades; no se deduce de tus acordes.</p></div><div class="buttons"><span class="auto-update" role="status">Actualización automática · cambia cualquier selección</span><button class="secondary" id="reset" aria-label="Restablecer">↺</button></div></div><article class="panel heroresult"><div class="kicker" id="eyebrow">CONTEXTO DE REFERENCIA · TONALIDAD · MODO</div><h2 id="title">Do · Mayor</h2><p class="tech-caption" id="referenceScopeNote">Ejemplo construido con la tonalidad, el modo y el lenguaje que has seleccionado. No es un análisis automático de tus acordes.</p><p id="description"></p><div class="scale" id="scale"></div></article><article class="panel card"><div class="cardhead"><b>Acordes del modo</b><span>Armonía diatónica</span></div><div class="chords" id="chords"></div><div class="insight" id="chordNote"></div></article><article class="panel card"><div class="cardhead"><b>Idea emocional</b><span id="emotionName"></span></div><div class="progress" id="emotionProgress"></div><div class="insight" id="emotionNote"></div></article><article class="reference-language-panel"><div class="cardhead"><b>Ideas del lenguaje de referencia</b><span id="composerName"></span></div><p class="reference-style-note">Giros creados desde la tonalidad, el modo y el compositor seleccionados arriba. <strong>No son continuaciones de tu progresión.</strong></p><div class="field" style="margin:10px 0 14px"><label for="composerHere">Compositor de referencia</label><select id="composerHere" aria-label="Elegir compositor desde lenguaje de referencia"></select></div><div class="progress" id="signature"></div><div class="insight" id="signatureNote"></div><p class="copy" id="devices"></p></article></section><section class="results"><div class="grid"><article class="panel card full" data-advanced><div class="cardhead"><b>Conducción de voces</b><span>Cuatro voces · realización sugerida</span></div><div class="vl-controls"><label for="vlStyle">Carácter contrapuntístico</label><select id="vlStyle" aria-label="Estilo de conducción de voces"><option value="cinematic">Cinematográfica</option><option value="classical">Clásica</option><option value="minimal">Minimalista</option></select><label for="vlSource">Material</label><select id="vlSource"><option value="emotion">Idea emocional</option><option value="signature">Referencia del compositor</option></select></div><div class="vl-controls"><label for="vlChord">Acorde</label><select id="vlChord"></select><label for="vlVoice">Voz</label><select id="vlVoice"><option value="0">Bajo</option><option value="1">Tenor</option><option value="2">Alto</option><option value="3">Soprano</option></select><label for="vlPitch">Nota</label><select id="vlPitch"></select><button class="secondary" id="vlLock" type="button">Fijar nota</button><button class="secondary" id="vlClear" type="button">Liberar todas</button></div><div id="vlLocks" class="vl-summary"></div><div id="voiceLeading" class="voiceleading" aria-live="polite"></div><details class="help-details"><summary>Cómo leer y editar la conducción de voces</summary><ul><li>Las cuatro líneas representan bajo, tenor, alto y soprano; cada punto es una nota.</li><li>Elige acorde y voz, selecciona la altura y pulsa «Fijar nota» para conservarla al recalcular.</li><li>«Liberar todas» elimina las restricciones de este material. El resultado es una propuesta, no una regla de orquestación.</li></ul></details></article><article class="panel card full" data-advanced><div class="cardhead"><b>Transformaciones cromáticas</b><span>Neo-riemannianas · tríadas</span></div><p class="section-lead">Cambia de acorde conservando dos notas. Elige una tríada y una operación; verás qué nota se mueve y cuánto.</p><div class="vl-controls"><label for="neoRoot">Fundamental</label><select id="neoRoot"></select><label for="neoQuality">Calidad</label><select id="neoQuality"><option value="major">Mayor</option><option value="minor">Menor</option></select><label for="neoOperation">Transformación</label><select id="neoOperation"><option value="P">P · Paralela</option><option value="L">L · Leittonwechsel</option><option value="R">R · Relativa</option></select></div><div id="neoResult" aria-live="polite"></div><details class="help-details"><summary>Entender P, L y R con ejemplos</summary><ul><li><strong>P · Paralela:</strong> Do mayor → Do menor. La tercera Mi baja a Mi♭.</li><li><strong>L · Leittonwechsel:</strong> Do mayor → Mi menor. Do baja a Si.</li><li><strong>R · Relativa:</strong> Do mayor → La menor. Sol sube a La.</li></ul><p>Son transformaciones de tríadas mayores y menores, no reglas obligatorias para cualquier progresión.</p></details></article><article class="panel card full"><div class="cardhead"><b>Tu progresión · laboratorio</b><span>Material propio · solo lectura y análisis</span></div><p class="section-lead">Introduce tus acordes separados por espacios. Cinemático no cambiará tu progresión: mostrará las técnicas del compositor seleccionado aplicadas a ese contexto.</p><label for="userChords">Tus acordes (hasta 8)</label><div class="vl-controls"><input id="userChords" type="text" placeholder="Cm Abmaj7 Fm7 G7" aria-describedby="userChordsHelp"><button class="secondary" id="userAnalyze" type="button">Analizar mi progresión</button><button class="secondary" id="userClear" type="button">Volver al ejemplo</button></div><p id="userChordsHelp" class="tech-caption">Admite C, Cm, C7, Cmaj7, Cm7, Cdim, Caug, Csus4, Cadd9, Cmadd9 e inversiones como C/E. Usa letras A–G y # o b para alteraciones.</p><div id="userFeedback" class="insight" role="status" aria-live="polite"></div><div id="userProgress" class="progress"></div><div class="tech-card" id="labVoicesPanel"><h3>Conducción de voces · tu progresión</h3><p class="tech-caption">Realización orientativa en registros concretos; no altera tus acordes.</p><div class="vl-controls"><label for="labVoiceCount">Plantilla</label><select id="labVoiceCount"><option value="4">Cuatro voces SATB</option><option value="3">Tres voces</option></select><label for="labVoiceStyle">Criterio</label><select id="labVoiceStyle"><option value="cinematic">Cinematográfico</option><option value="classical">Clásico</option><option value="sustained">Notas comunes y continuidad</option><option value="contrary">Movimiento contrario al bajo</option></select></div><details id="labLockDetails" style="margin:12px 0"><summary>Fijar una nota de tu melodía o bajo (opcional)</summary><p class="tech-caption">Selecciona acorde, voz y altura. La realización respetará esa nota mientras sea compatible.</p><div class="vl-controls"><label for="labLockChord">Acorde</label><select id="labLockChord"></select><label for="labLockVoice">Voz</label><select id="labLockVoice"><option value="3">Melodía · soprano</option><option value="0">Bajo</option></select><label for="labLockPitch">Nota</label><select id="labLockPitch"></select><button type="button" class="secondary" id="labLockApply">Fijar</button><button type="button" class="secondary" id="labLockReset">Liberar todas</button></div><p class="tech-caption" id="labLockStatus">Sin notas fijadas</p></details><div id="labVoiceOutput" aria-live="polite"></div></div><div class="tonal-reading" id="userTonalReading" role="status" aria-live="polite"></div><div id="userAnalysis"></div><div id="userAlternatives"></div></article><article class="panel card full"><div class="cardhead"><b>Recursos para avanzar tu idea</b><span>Asistencia · No modifica tu música</span></div><p class="tech-caption" id="techIntro">Explora técnicas asociadas al lenguaje seleccionado. Son opciones para experimentar, no instrucciones ni imitaciones literales.</p><div class="tech-grid" id="techCards"></div><details class="help-details"><summary>¿Cómo se usan estas sugerencias?</summary><p>Parte de una idea tuya y compara cada recurso con tu intención musical. Las observaciones se basan por ahora en la progresión mostrada, no en un clip MIDI propio. Nada se aplica automáticamente.</p></details></article><article class="panel card full" data-advanced><div class="cardhead"><b>Posibles destinos armónicos</b><span>Ideas para desarrollar</span></div><div class="mods" id="mods"></div><div class="insight">Se muestran seis rutas priorizadas por la intención emocional, los acordes de la progresión y la relación entre los campos armónicos; el compositor aporta solo un ajuste de orden. La napolitana aparece aparte como color, no como modulación. Ninguna ruta confirma por sí sola un cambio de tonalidad: busca un pivote funcional y confirma el nuevo centro con una cadencia.</div></article></div><section class="panel saved"><div class="savedrow"><div><b style="font:700 13px Manrope">Cuaderno de ideas</b><div class="note">Guarda caminos para retomarlos después</div></div><button class="secondary" id="save">＋ Guardar idea</button></div><div class="savedlist" id="savedList"></div><p class="empty" id="empty">Todavía no has guardado ninguna idea.</p></section></section></main><footer class="foot"><span>CINEMÁTICO · APOYO A LA COMPOSICIÓN</span><span>La música la decides tú.</span></footer></div><div class="toast" id="toast" role="status"></div>
+<script src="engine.js"></script><script>
 const NOTE_SHARP=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const NOTE_FLAT =["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
 const PC={"C":0,"C#":1,"Db":1,"D":2,"D#":3,"Eb":3,"E":4,"F":5,"F#":6,"Gb":6,
@@ -163,29 +260,29 @@ const EMOTIONS={
     steps:[{d:0,a:0,q:"major",e:"maj7#11"},{d:1,a:0,q:"major",e:""},{d:0,a:0,q:"major",e:""}],
     hints:"lidio · #11 · II mayor · arpegios"},
   heroismo:{name:"Heroísmo",mode:"mixolydian",desc:"Épico, valiente, triunfal",
-    steps:[{d:0,a:0,q:"major",e:"5"},{d:6,a:-1,q:"major",e:""},{d:3,a:0,q:"major",e:""},{d:0,a:0,q:"major",e:""}],
-    hints:"bVII (mixolidio) · cuartas/quintas abiertas · metales"},
+    steps:[{d:0,a:0,q:"major",e:"5"},{d:6,a:0,q:"major",e:""},{d:3,a:0,q:"major",e:""},{d:0,a:0,q:"major",e:""}],
+    hints:"♭VII diatónico en mixolidio · cuartas/quintas abiertas · metales"},
   tension:{name:"Tensión / Suspense",mode:"aeolian",desc:"Inquietud, peligro inminente",
     steps:[{d:0,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
-    hints:"bII (napolitana) · disminuidos · semitonos · pedal"},
+    hints:"♭II cromático · si funciona como N6: primera inversión → V7 → i · semitonos · pedal"},
   oscuridad:{name:"Oscuridad / Peligro",mode:"phrygian",desc:"Siniestro, amenaza",
-    steps:[{d:0,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
-    hints:"frigio · bII · registro grave · drones"},
+    steps:[{d:0,a:0,q:"minor",e:""},{d:1,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    hints:"frigio · ♭II diatónico · registro grave · drones"},
   esperanza:{name:"Esperanza / Anhelo",mode:"dorian",desc:"Optimismo contenido, superación",
     steps:[{d:3,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""},{d:1,a:0,q:"minor",e:""},{d:4,a:0,q:"major",e:""}],
-    hints:"dórico · sus · movimiento ascendente"},
+    hints:"dórico · IV mayor · V mayor con sensible cromática como giro de color · añade C/i si buscas una resolución tonal"},
   paz:{name:"Paz / Serenidad",mode:"ionian",desc:"Calma, consuelo, quietud",
     steps:[{d:0,a:0,q:"major",e:"add9"},{d:5,a:0,q:"minor",e:""},{d:3,a:0,q:"major",e:""},{d:4,a:0,q:"major",e:""}],
     hints:"add9 · lento · texturas suaves"},
   misterio:{name:"Misterio",mode:"aeolian",desc:"Enigma, lo oculto, ambigüedad",
-    steps:[{d:0,a:0,q:"minor",e:""},{d:5,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
-    hints:"bVI · aumentados · tónica ambigua"},
+    steps:[{d:0,a:0,q:"minor",e:""},{d:5,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    hints:"♭VI diatónico en menor natural · acordes aumentados como color opcional · pedal y tónica ambigua"},
   romance:{name:"Romance / Amor",mode:"ionian",desc:"Ternura, pasión, calidez",
     steps:[{d:1,a:0,q:"minor",e:"7"},{d:4,a:0,q:"major",e:"7"},{d:0,a:0,q:"major",e:"maj9"}],
     hints:"ii-V-I · maj7/9 · exuberante"},
   epica:{name:"Épica",mode:"aeolian",desc:"Grandeza, destino, monumental",
     steps:[{d:0,a:0,q:"minor",e:""},{d:5,a:0,q:"major",e:""},{d:2,a:0,q:"major",e:""},{d:6,a:0,q:"major",e:""}],
-    hints:"i-VI-III-VII · ostinato · coros · power"}
+    hints:"i–♭VI–♭III–♭VII · ostinato · coros · variante en quintas abiertas"}
 };
 
 const MODULATIONS={
@@ -204,240 +301,248 @@ const MODULATIONS={
 };
 
 const COMPOSERS={
-  giacchino:{name:"Michael Giacchino",tags:"pluralismo/pastiche · jazz · John Barry/Korngold · contrastes",
+  giacchino:{name:"Michael Giacchino",tags:"pluralismo/pastiche · jazz · John Barry/Korngold · contrastes",    signatureMode:"ionian",
+
     signature:[{d:0,a:0,q:"major",e:"maj7"},{d:2,a:-1,q:"major",e:""},{d:0,a:0,q:"major",e:"maj7"}],
-    sigLabel:"I(maj7) → bIII → I  (G→Eb en 'The Incredibles')",
+    sigLabel:"I(maj7) → ♭III → I(maj7) · mediante cromática y contraste de color.",
     mods:["up_major3","neapolitan","up_semitone","relative"],
     devices:"leitmotiv simple que varía · repite la melodía cambiando orquestación y tonalidad · cuartas/quintas abiertas · acordes de jazz extendidos"},
-  williams:{name:"John Williams",tags:"romántico tardío · intercambio modal · leitmotiv",
+  williams:{name:"John Williams",tags:"romántico tardío · intercambio modal · leitmotiv",    signatureMode:"ionian",
+
     signature:[{d:0,a:0,q:"major",e:""},{d:3,a:0,q:"minor",e:"6"},{d:0,a:0,q:"major",e:""}],
     sigLabel:"I → iv6 → I  (agridulce, 'Princess Leia')",
     mods:["up_major3","down_major3","neapolitan","up_semitone","relative"],
     devices:"intercambio modal (bVII mixolidio = heroico · II lidio = magia/vuelo) · mediante cromática · tríadas menores por semitonos"},
-  zimmer:{name:"Hans Zimmer",tags:"minimalismo · ostinato catártico · rock · ciclos",
-    signature:[{d:0,a:0,q:"minor",e:""},{d:5,a:-1,q:"major",e:""},{d:2,a:0,q:"major",e:""},{d:6,a:-1,q:"major",e:""}],
-    sigLabel:"i → bVI → III → bVII  (Dm/Bb/F/C)",
+  zimmer:{name:"Hans Zimmer",tags:"minimalismo · ostinato catártico · rock · ciclos",    signatureMode:"aeolian",
+
+    signature:[{d:0,a:0,q:"minor",e:""},{d:5,a:0,q:"major",e:""},{d:2,a:0,q:"major",e:""},{d:6,a:0,q:"major",e:""}],
+    sigLabel:"i → ♭VI → ♭III → ♭VII · ciclo modal menor",
     mods:["up_minor3","down_minor3","parallel","up_semitone"],
     devices:"ostinato repetido con intensificación · progresiones cíclicas · tónica ambigua · power chords · coro masculino"},
-  elfman:{name:"Danny Elfman",tags:"oscuro · carnaval · vals · cromático",
+  elfman:{name:"Danny Elfman",tags:"oscuro · carnaval · vals · cromático",    signatureMode:"aeolian",
+
     signature:[{d:0,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
     sigLabel:"i → bII → i  (carnaval oscuro)",
     mods:["down_semitone","tritone","parallel"],
     devices:"disminuidos · cromatismo · vals · coros infantiles · carnaval siniestro"},
-  silvestri:{name:"Alan Silvestri",tags:"heroico · mayor · metales",
+  silvestri:{name:"Alan Silvestri",tags:"heroico · mayor · metales",    signatureMode:"ionian",
+
     signature:[{d:0,a:0,q:"major",e:""},{d:3,a:0,q:"major",e:""},{d:4,a:0,q:"major",e:""},{d:0,a:0,q:"major",e:""}],
     sigLabel:"I → IV → V → I  (fanfarria)",
     mods:["up_fifth","up_semitone","relative"],
     devices:"metales grandes · fanfarrias · mayor · heroico directo"},
-  horner:{name:"James Horner",tags:"modal · celta · cuartas/quintas",
+  horner:{name:"James Horner",tags:"modal · celta · cuartas/quintas",    signatureMode:"aeolian",
+
     signature:[{d:0,a:0,q:"minor",e:""},{d:6,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
-    sigLabel:"i → VII → i  (modal)",
+    sigLabel:"i → ♭VII → i · gesto modal sobre el séptimo grado menor.",
     mods:["up_major3","relative","up_fifth"],
     devices:"intervalos de 4ª/5ª · 'danger motif' · modal · color celta"},
-  herrmann:{name:"Bernard Herrmann",tags:"modernista · policordios · politonalidad · celular",
-    signature:[{d:0,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
-    sigLabel:"i → bII → i  (ostinato)",
+  herrmann:{name:"Bernard Herrmann",tags:"modernista · policordios · politonalidad · células interválicas",    signatureMode:"aeolian",
+
+    signature:[{d:0,a:0,q:"minor",e:""},{d:4,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    sigLabel:"i → v → ♭II → i · célula obsesiva y fricción cromática",
     mods:["tritone","down_semitone"],
     devices:"policordios · politonalidad · células repetidas · ostinato"},
-  shore:{name:"Howard Shore",tags:"cromático · wagneriano · leitmotiv",
-    signature:[{d:0,a:0,q:"minor",e:""},{d:1,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
-    sigLabel:"i → bII → i  (cromático)",
+  shore:{name:"Howard Shore",tags:"cromático · wagneriano · leitmotiv",    signatureMode:"aeolian",
+
+    signature:[{d:0,a:0,q:"minor",e:""},{d:3,a:0,q:"minor",e:""},{d:3,a:0,q:"major",e:""},{d:4,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    sigLabel:"i → iv → IV → V → i · transformación modal y resolución dramática",
     mods:["down_semitone","tritone","relative"],
     devices:"leitmotiv wagneriano · cromatismo · coros · texturas densas"},
-  morricone:{name:"Ennio Morricone",tags:"modal · espartano · instrumentos inusuales",
-    signature:[{d:0,a:0,q:"minor",e:""},{d:6,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
-    sigLabel:"i → VII → i  (modal)",
+  morricone:{name:"Ennio Morricone",tags:"modal · espartano · instrumentos inusuales",    signatureMode:"aeolian",
+
+    signature:[{d:0,a:0,q:"minor",e:""},{d:3,a:0,q:"major",e:""},{d:6,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    sigLabel:"i → IV modal → ♭VII → i · economía de materiales y retorno abierto",
     mods:["relative","up_fifth"],
     devices:"modal · espartano · silbido · guitarra · instrumentos inusuales"},
-  newman:{name:"Thomas Newman",tags:"impresionista · espartano · modal",
+  newman:{name:"Thomas Newman",tags:"impresionista · espartano · modal",    signatureMode:"ionian",
+
     signature:[{d:0,a:0,q:"major",e:"add9"},{d:3,a:0,q:"major",e:""},{d:0,a:0,q:"major",e:"add9"}],
     sigLabel:"I(add9) → IV → I  (espartano)",
     mods:["relative","parallel"],
     devices:"espartano · voicings inusuales · piano · texturas impresionistas"},
-  goransson:{name:"Ludwig Göransson",tags:"minimalismo rítmico · ostinatos · percusión · orquestal+electrónica+world",
-    signature:[{d:0,a:0,q:"minor",e:""},{d:5,a:-1,q:"major",e:""},{d:6,a:-1,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
-    sigLabel:"i → bVI → bVII → i  (épica modal, 'Black Panther')",
+  goransson:{name:"Ludwig Göransson",tags:"minimalismo rítmico · ostinatos · percusión · orquestal+electrónica+world",    signatureMode:"aeolian",
+
+    signature:[{d:0,a:0,q:"minor",e:""},{d:5,a:0,q:"major",e:""},{d:6,a:0,q:"major",e:""},{d:0,a:0,q:"minor",e:""}],
+    sigLabel:"i → ♭VI → ♭VII → i · ciclo modal con retorno a tónica",
     mods:["up_minor3","down_minor3","parallel","up_semitone"],
     devices:"ostinatos rítmicos · percusión africana/mundial · texturas disonantes (Tenet/Oppenheimer) · mezcla orquestal y electrónica"}
 };
-
-/* ================= ESTADO ================= */
-let state={key:0,keyName:"C",emotion:"alegria",composer:"giacchino",modeOverride:null};
-let lastScale=null, lastSharp=true, lastFamily="major";
-
-/* ================= UTILIDADES ================= */
-function spell(pc,sharp){const t=((pc%12)+12)%12;return sharp?NOTE_SHARP[t]:NOTE_FLAT[t];}
-function keyNameForPc(pc){for(const k of KEYS)if(PC[k]===pc)return k;return NOTE_SHARP[pc];}
-function keyIsSharp(pc){return KEYS_SHARP[keyNameForPc(pc)]===1;}
-function buildScale(tonic,int){return int.map(i=>(tonic+i)%12);}
-function diatonicQuality(d,f){if(f==="major")return["major","minor","minor","major","major","minor","dim"][d];
-  if(f==="minor")return["minor","dim","major","minor","minor","major","major"][d];
-  return["dim","minor","minor","major","minor","dim","major"][d];}
-function diatonicSeventh(d,f){if(f==="major")return["maj7","m7","m7","maj7","7","m7","m7b5"][d];
-  if(f==="minor")return["m7","m7b5","maj7","m7","m7","maj7","7"][d];
-  return["m7b5","m7","m7","maj7","m7","maj7","m7"][d];}
-function chordFromRoot(tonic,off,type,sharp){
-  const root=((tonic+off)%12+12)%12;const ints=CHORD_TYPES[type].int;
-  const notes=ints.map(i=>(root+i)%12);
-  return{root,notes,type,label:spell(root,sharp)+CHORD_TYPES[type].label};}
-function qualExtToType(q,e){
-  if(e){if(q==="major"&&e==="7")return"7";if(q==="major"&&e==="maj7")return"maj7";
-    if(q==="major"&&e==="add9")return"add9";if(q==="major"&&e==="6")return"6";
-    if(q==="major"&&e==="9")return"9";if(q==="major"&&e==="maj9")return"maj9";
-    if(q==="major"&&e==="maj7#11")return"maj7#11";if(q==="major"&&e==="5")return"5";
-    if(q==="minor"&&e==="7")return"m7";if(q==="minor"&&e==="9")return"m9";
-    if(q==="minor"&&e==="m9")return"m9";if(q==="minor"&&e==="6")return"m6";
-    if(q==="minor"&&e==="maj7")return"mMaj7";if(q==="dim"&&e==="7")return"dim7";
-    if(q==="dim"&&e==="")return"dim";if(q==="aug"&&e==="")return"aug";}
-  if(q==="major")return"";if(q==="minor")return"m";if(q==="dim")return"dim";if(q==="aug")return"aug";return"";}
-function stepLabel(d,a,q,e,f){
-  const base=f==="major"?ROMAN_MAJOR[d]:ROMAN_MINOR[d];
-  const acc=a<0?"b":a>0?"#":"";
-  const diat=diatonicQuality(d,f);let roman;
-  if(q===diat)roman=base;
-  else if(q==="major"||q==="aug")roman=base.toUpperCase();
-  else if(q==="minor"||q==="dim")roman=base.toLowerCase();
-  else roman=base;
-  if(q==="dim"&&!roman.includes("°"))roman+="°";
-  if(q==="aug"&&!roman.includes("+"))roman+="+";
-  return acc+roman+e;}
-function buildProgression(steps,tonic,scale,family,sharp){
-  const names=[],romans=[],chords=[];
-  for(const s of steps){
-    const off=((scale[s.d]+s.a-tonic)%12+12)%12;
-    const type=qualExtToType(s.q,s.e);
-    const ch=chordFromRoot(tonic,off,type,sharp);
-    names.push(ch.label);romans.push(stepLabel(s.d,s.a,s.q,s.e,family));chords.push(ch);}
-  return{names,romans,chords};}
-
-/* ================= GENERAR ================= */
-function generate(){
-  const tonic=state.key, sharp=keyIsSharp(tonic);
-  const emo=EMOTIONS[state.emotion], comp=COMPOSERS[state.composer];
-  const modeKey=state.modeOverride||emo.mode;
-  const mode=MODES[modeKey], family=mode.family;
-  const scale=buildScale(tonic,mode.int);
-
-  lastScale=scale;lastSharp=sharp;lastFamily=family;
-
-  const scaleNames=scale.map(p=>spell(p,sharp));
-  const palette=[];
-  for(let d=0;d<7;d++){
-    const type=diatonicSeventh(d,family);
-    const ch=chordFromRoot(tonic,(scale[d]-tonic+12)%12,type,sharp);
-    const roman=family==="major"?ROMAN_MAJOR[d]:ROMAN_MINOR[d];
-    palette.push({roman,label:ch.label});}
-
-  const prog=buildProgression(emo.steps,tonic,scale,family,sharp);
-  const sig=buildProgression(comp.signature,tonic,scale,family,sharp);
-
-  const mods=comp.mods.map(m=>{
-    const mod=MODULATIONS[m];
-    const interval=typeof mod.int==="function"?mod.int(family):mod.int;
-    const target=keyNameForPc(((tonic+interval)%12+12)%12);
-    return{name:mod.name,target,feel:mod.feel};});
-
-  render(emo,comp,mode,scaleNames,palette,prog,sig,mods);
+function keyNameForPc(pc){return KEYS.find(k=>PC[k]===pc)||NOTE_SHARP[pc];}
+const S={key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""};
+const $=id=>document.getElementById(id), esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+KEYS.forEach(k=>$("quickKey").add(new Option(k,k)));$("quickKey").onchange=()=>{S.keyName=$("quickKey").value;S.key=PC[S.keyName];draw();render();};
+Object.entries(EMOTIONS).forEach(([k,v])=>$("emotion").add(new Option(v.name,k)));
+Object.entries(COMPOSERS).forEach(([k,v])=>{ $("composer").add(new Option(v.name,k)); $("composerHere").add(new Option(v.name,k)); });
+Object.entries(MODES).forEach(([k,v])=>$("mode").add(new Option(v.name,k)));
+function draw(){$("quickKey").value=S.keyName;let out='<circle cx="210" cy="210" r="168" fill="none" stroke="#3b4336"/><circle cx="210" cy="210" r="112" fill="none" stroke="#30372d" stroke-dasharray="2 6"/>';KEYS.forEach((k,i)=>{let a=-Math.PI/2+i*Math.PI/6,x=210+Math.cos(a)*168,y=210+Math.sin(a)*168,active=PC[k]===S.key;out+=`<g class="node ${active?"selected":""}" data-key="${k}" tabindex="0" role="button" aria-label="Seleccionar ${k}"><circle cx="${x}" cy="${y}" r="24"/><text x="${x}" y="${y}">${k}</text></g>`;});out+='<circle class="core" cx="210" cy="210" r="73"/><text class="corelabel" x="210" y="195">TONALIDAD</text><text class="corekey" x="210" y="228">'+esc(S.keyName)+'</text>'; $("circle").innerHTML=out;$("circle").querySelectorAll("[data-key]").forEach(n=>{let pick=()=>{S.keyName=n.dataset.key;S.key=PC[S.keyName];draw();render();};n.onclick=pick;n.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}};});}
+function progMarkup(a,sharp){
+ return a.map((c,i)=>{
+  const role=c.classification==="modalInterchange"?" · posible intercambio modal"+(c.borrowedFrom?" ("+c.borrowedFrom+")":""):c.classification==="secondaryDominant"?" · dominante secundaria":c.classification==="modalDominant"?" · dominante modal":c.classification==="dominant"?" · dominante":c.classification==="chromatic"?" · cromático":"";
+  const tones=(c.notes||[]).map(pc=>CinematicoEngine.spell(pc,sharp)).join(" · ");
+  const bass=CinematicoEngine.spell(c.bass??c.root,sharp);
+  const common=(c.commonWithNext||[]).map(pc=>CinematicoEngine.spell(pc,sharp)).join(" · ");
+  return (i?'<span class="arrow">→</span>':'')+'<div class="chord"><strong>'+esc(c.label)+'</strong><small>'+esc(c.roman||'')+role+'</small><small class="tones">'+esc(tones)+'</small><small class="bassline">Bajo base: '+esc(bass)+'</small>'+(common?'<small class="common">Notas comunes con el siguiente: '+esc(common)+'</small>':'')+'</div>';
+ }).join('');
 }
-
-function render(emo,comp,mode,scaleNames,palette,prog,sig,mods){
-  const r=document.getElementById("result");
-  const chips=(arr,hl=false)=>arr.map(x=>`<span class="chip${hl?' hl':''}">${x}</span>`).join('<span class="chip arrow">→</span>');
-  r.innerHTML=`
-    <div class="sec">
-      <h3>${state.keyName} · ${mode.name}</h3>
-      <div class="chips">${scaleNames.map(n=>`<span class="chip">${n}</span>`).join('')}</div>
-    </div>
-    <div class="sec">
-      <h3>Acordes diatónicos</h3>
-      <div class="chips">${palette.map(p=>`<span class="chip">${p.roman} <span class="muted">${p.label}</span></span>`).join('')}</div>
-    </div>
-    <div class="sec">
-      <h3>Progresión · ${emo.name}</h3>
-      <div class="chips">${chips(prog.names,true)}</div>
-      <div class="muted" style="margin-top:4px;">${prog.romans.join(' → ')}</div>
-      <div class="muted">${emo.hints}</div>
-    </div>
-    <div class="sec">
-      <h3>Firma · ${comp.name}</h3>
-      <div class="chips">${chips(sig.names)}</div>
-      <div class="muted" style="margin-top:4px;">${sig.romans.join(' → ')} · ${comp.sigLabel}</div>
-    </div>
-    <div class="sec">
-      <h3>Modulaciones sugeridas</h3>
-      <div class="mods">${mods.map(m=>`<div class="mod"><b>${m.name}</b> → ${m.target} <span class="feel">· ${m.feel}</span></div>`).join('')}</div>
-    </div>
-    <div class="sec">
-      <h3>Dispositivos</h3>
-      <div class="muted">${comp.devices}</div>
-    </div>`;
+function typeName(t){return ({"":"Mayor",m:"Menor",dim:"Disminuido",aug:"Aumentado",maj7:"Maj7",7:"Dominante 7",m7:"Menor 7",m7b5:"Semidisminuido",dim7:"Disminuido 7",mMaj7:"Menor maj7",custom:"Color / extensión"})[t]||t||"Mayor";}
+function render(){
+ $("composerHere").value=S.composer;
+ $("composer").value=S.composer;
+ let e=EMOTIONS[S.emotion],c=COMPOSERS[S.composer],m=MODES[S.mode||e.mode];
+ let d=CinematicoEngine.analyze(S.key,e,c,S.mode||null,{MODES,KEYS_SHARP,keyNameForPc,MODULATIONS});
+ $("keyCaption").textContent=S.keyName+" · "+m.name;
+ $("eyebrow").textContent="CONTEXTO DE REFERENCIA · "+S.keyName+" · "+m.name.toUpperCase();
+ $("title").textContent=S.keyName+" · "+m.name;
+ $("description").textContent=e.desc+". "+e.hints+".";
+ $("scale").innerHTML=d.scale.map(x=>'<span class="pill">'+esc(x)+'</span>').join("");
+ $("chords").innerHTML=d.chords.map(x=>'<div class="tile"><small>'+esc(x.roman)+'</small><strong>'+esc(x.label)+'</strong><em>'+typeName(x.type)+'</em></div>').join("");
+ $("chordNote").textContent="Acordes construidos por terceras dentro del modo seleccionado. Las progresiones distinguen armonía diatónica, posibles intercambios modales, dominantes y cromatismo. La pertenencia de un acorde a otro modo no confirma por sí sola su función.";
+ renderVoiceLeading(d);
+ renderNeo();
+ renderTechniques(d,c);
+ $("emotionName").textContent=e.name;
+ $("emotionProgress").innerHTML=progMarkup(d.progression,d.sharp);
+ $("emotionNote").textContent=e.desc+". Pista: "+e.hints+". Úsalo como material de partida, no como secuencia obligatoria.";
+ $("composerName").textContent=c.name;
+ $("signature").innerHTML=progMarkup(d.signature,d.sharp);
+ $("signatureNote").textContent=c.tags+". Firma calculada en "+MODES[c.signatureMode||"ionian"].name+". Referencia estilística orientativa, no una transcripción literal. Gesto: "+c.sigLabel+".";
+ $("devices").textContent=c.devices+".";
+ $("mods").innerHTML=d.mods.map((x,i)=>{
+  const target=esc(x.target)+(x.targetMode?" · "+esc(x.targetMode):"");
+  const source=esc(S.keyName)+(x.kind==="mode"?" · "+esc(d.mode.name):" · "+esc(d.mode.name));
+  const kind=x.kind==="color"?"Color / acorde":x.kind==="mode"?"Cambio modal":"Nueva región";
+  const pivots=(x.pivots||[]).map(p=>'<span class="pivot">'+esc(p.source)+' <em>→</em> '+esc(p.target)+'</span>').join("");
+  const shared=(x.shared||[]).length?'<small>Notas comunes</small><div class="mod-pivots">'+x.shared.map(n=>'<span class="pivot">'+esc(n)+'</span>').join("")+'</div>':"";
+  const pivotBlock=pivots?'<small>Posibles acordes pivote</small><div class="mod-pivots">'+pivots+'</div>':shared;
+  const evidence=x.kind==="color"?(x.resolution||[]).map(c=>'<span class="pivot">'+esc(c.label)+'</span>').join('<em style="color:var(--gold);font-style:normal"> → </em>'):'';
+  const detail=x.kind==="color"?'<small>Ruta armónica sugerida</small><div class="mod-pivots">'+evidence+'</div>':pivotBlock;
+  const fit=x.fitReason?'<p class="mod-transition"><b>Por qué encaja:</b> '+esc(x.fitReason)+'</p>':"";
+  const cadence=x.cadence?'<p class="mod-transition"><b>Cadencia de llegada:</b> '+esc(x.cadence.label)+'</p>':"";
+  return '<article class="mod"><div class="modtop"><span class="mod-index">'+String(i+1).padStart(2,"0")+'</span><span class="mod-type">'+kind+'</span></div><b>'+esc(x.name)+'</b><div class="mod-route"><div class="mod-node"><small>ORIGEN</small><strong>'+source+'</strong></div><div class="mod-arrow">→</div><div class="mod-node target"><small>DESTINO</small><strong>'+target+'</strong></div></div><p class="mod-feel">'+esc(x.feel)+'</p><div class="mod-evidence">'+detail+fit+'<p class="mod-transition">'+esc(x.transition)+'</p>'+cadence+'</div><span class="mod-status">'+(x.kind==="color"?"Idea de color · no implica modulación":(x.pivots&&x.pivots.length?"Pivote candidato · confirmar destino":"Destino candidato · confirmar con cadencia"))+'</span></article>';
+ }).join("");
+ $("modeNote").textContent=S.mode?"Modo activo: "+m.name+" · sugerido por la emoción: "+MODES[e.mode].name:"Modo automático: "+m.name+" · cambia con la emoción. Puedes elegir otro modo manualmente.";
 }
-
-/* ================= CÍRCULO (canvas) ================= */
-const cv=document.getElementById("circle");
-const ctx=cv.getContext("2d");
-let selected=0;
-function drawCircle(){
-  const w=cv.width,h=cv.height,cx=w/2,cy=h/2,r=Math.min(w,h)/2-30,rr=34;
-  ctx.clearRect(0,0,w,h);
-  ctx.strokeStyle="#3a3a4a";ctx.lineWidth=2;
-  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
-  for(let i=0;i<12;i++){
-    const ang=-Math.PI/2+i*(Math.PI*2/12);
-    const x=cx+Math.cos(ang)*r,y=cy+Math.sin(ang)*r;
-    ctx.beginPath();ctx.arc(x,y,rr,0,Math.PI*2);
-    ctx.fillStyle=i===selected?"#f59a2e":"#262633";ctx.fill();
-    ctx.strokeStyle=i===selected?"#f59a2e":"#3a3a4a";ctx.lineWidth=2;ctx.stroke();
-    ctx.fillStyle="#fff";ctx.font="bold 26px -apple-system,Segoe UI,Roboto,sans-serif";
-    ctx.textAlign="center";ctx.textBaseline="middle";
-    ctx.fillText(KEYS[i],x,y);
-  }
+const voiceLocks={emotion:{},signature:{}};
+let userMaterial=null;
+let alternativeIntention="neutral";
+$("userAnalyze").addEventListener("click",()=>{const result=CinematicoEngine.parseUserProgression($("userChords").value);if(result.errors.length||!result.chords.length){$("userFeedback").textContent=result.errors.join(" · ")||"Escribe al menos un acorde.";return;}userMaterial=result.chords;$("simpleChords").value=$("userChords").value.trim();$("simpleResults").innerHTML="";$("simpleFeedback").textContent="Tus acordes están actualizados. Busca nuevos acordes para continuar.";for(const k of Object.keys(labLocks))delete labLocks[k];selectedUserChord=0;renderUserMaterial();renderTechniques(CinematicoEngine.analyze(S.key,EMOTIONS[S.emotion],COMPOSERS[S.composer],S.mode||null,{MODES,KEYS_SHARP,keyNameForPc,MODULATIONS}),COMPOSERS[S.composer]);});$("userClear").addEventListener("click",()=>{userMaterial=null;$("userChords").value="";$("simpleChords").value="";$("simpleResults").innerHTML="";$("simpleFeedback").textContent="Escribe nuevos acordes para empezar.";renderUserMaterial();render();});renderUserMaterial();
+let selectedUserChord=0;
+const labLocks={};
+function labLockOptions(){
+ const chord=$("labLockChord"),voice=$("labLockVoice"),pitch=$("labLockPitch");
+ if(!userMaterial){chord.innerHTML="";pitch.innerHTML="";return;}
+ const prior=chord.value;
+ chord.innerHTML=userMaterial.map((c,i)=>'<option value="'+i+'">'+esc(c.label)+'</option>').join('');
+ if(prior!==""&&Number(prior)<userMaterial.length)chord.value=prior;
+ const index=Number(chord.value),v=Number(voice.value);
+ const isThree=$("labVoiceCount").value==="3";const candidates=isThree?CinematicoEngine.threeVoiceCandidates(userMaterial[index],$("labVoiceStyle").value):CinematicoEngine.voicingCandidates(userMaterial[index],$("labVoiceStyle").value);
+ const pitches=[...new Set(candidates.map(c=>c[isThree&&v===3?2:v]))].sort((a,b)=>a-b);
+ const prev=pitch.value;
+ pitch.innerHTML=pitches.map(n=>'<option value="'+n+'">'+esc(CinematicoEngine.spell(n%12))+String(Math.floor(n/12)-1)+'</option>').join('');
+ const chosen=labLocks[index]?.[v];
+ if(pitches.includes(chosen))pitch.value=String(chosen);
+ else if(pitches.includes(Number(prev))&&prev!=="")pitch.value=prev;
+ $("labLockStatus").textContent=Object.entries(labLocks).flatMap(([i,vs])=>Object.entries(vs).map(([v,n])=>userMaterial[i]?.label+" · "+(v==="0"?"Bajo":"Melodía")+": "+CinematicoEngine.spell(n%12)+(Math.floor(n/12)-1))).join(" · ")||"Sin notas fijadas";
 }
-function hitTest(x,y){
-  const w=cv.width,h=cv.height,cx=w/2,cy=h/2,r=Math.min(w,h)/2-30;
-  for(let i=0;i<12;i++){
-    const ang=-Math.PI/2+i*(Math.PI*2/12);
-    const bx=cx+Math.cos(ang)*r,by=cy+Math.sin(ang)*r;
-    if((x-bx)**2+(y-by)**2<40*40)return i;}
-  return -1;
+function renderLabVoices(){
+ const out=$("labVoiceOutput");if(!out)return;
+ if(!userMaterial){out.textContent="Introduce una progresión para visualizar las voces.";labLockOptions();return;}
+ labLockOptions();
+ const result=CinematicoEngine.laboratoryVoices(userMaterial,{count:Number($("labVoiceCount").value),style:$("labVoiceStyle").value,locks:labLocks});
+ if(!result.voicings.length){out.textContent=result.warning+" Puedes liberar una nota fijada.";return;}
+ out.innerHTML='<div class="tech-grid">'+userMaterial.map((c,i)=>'<div class="tech-card"><small>'+esc(c.label)+'</small>'+result.voicings[i].map((n,j)=>'<p>'+esc(result.voiceOrder[j])+': <strong>'+esc(CinematicoEngine.spell(n%12))+String(Math.floor(n/12)-1)+'</strong></p>').join('')+'</div>').join('')+'</div><details style="margin-top:12px"><summary>Ver movimientos y observaciones</summary><p class="tech-caption">Movimientos (semitonos): '+result.transitions.map((t,i)=>esc(userMaterial[i].label+' → '+userMaterial[i+1].label)+': '+t.diffs.map(n=>(n>0?'+':'')+n).join(' / ')).join(' · ')+'</p><p class="tech-caption">'+(result.warnings.length?result.warnings.map(w=>'Entre '+esc(userMaterial[w.index].label)+' y '+esc(userMaterial[w.index+1].label)+': '+esc(w.kind)+' · '+(w.severity==='warning'?'revisión contrapuntística':'observación expresiva')).join(' · '):'Sin paralelismos perfectos ni saltos superiores a una octava detectados.')+'</p><p class="tech-caption">'+esc(result.warning)+'</p></details>';
 }
-cv.addEventListener("pointerdown",e=>{
-  const rect=cv.getBoundingClientRect();
-  const x=(e.clientX-rect.left)*(cv.width/rect.width);
-  const y=(e.clientY-rect.top)*(cv.height/rect.height);
-  const i=hitTest(x,y);
-  if(i>=0){selected=i;state.key=PC[KEYS[i]];state.keyName=KEYS[i];drawCircle();}
+$("labVoiceCount").addEventListener("change",()=>{for(const k of Object.keys(labLocks))delete labLocks[k];renderLabVoices();});
+$("labVoiceStyle").addEventListener("change",renderLabVoices);
+$("labLockChord").addEventListener("change",()=>{ $("labLockPitch").value="";labLockOptions();});
+$("labLockVoice").addEventListener("change",()=>{ $("labLockPitch").value="";labLockOptions();});
+$("labLockApply").addEventListener("click",()=>{
+ if(!userMaterial)return;
+ const i=Number($("labLockChord").value),v=Number($("labLockVoice").value),n=Number($("labLockPitch").value);
+ if(!Number.isFinite(n))return;
+ labLocks[i]??={};labLocks[i][v]=n;renderLabVoices();
 });
-
-/* ================= UI ================= */
-function fillSelect(el,obj,extra){
-  el.innerHTML="";
-  if(extra)el.innerHTML=extra;
-  for(const k in obj){const o=document.createElement("option");o.value=k;o.textContent=obj[k].name;el.appendChild(o);}
+$("labLockReset").addEventListener("click",()=>{for(const k of Object.keys(labLocks))delete labLocks[k];renderLabVoices();});
+function renderTensionDestinations(){
+ const next=userMaterial[selectedUserChord+1];
+ const heading='<h3 style="margin:18px 0 8px">Destinos de la tensión</h3>';
+ if(!next)return heading+'<p class="tech-caption">Selecciona un acorde anterior para comparar su enlace con el siguiente.</p>';
+ const ideas=CinematicoEngine.tensionDestinations(userMaterial,selectedUserChord);
+ if(!ideas.length)return heading+'<p class="tech-caption">Este enlace conserva las notas del acorde y no presenta séptimas o sensibles potenciales que explorar con este criterio.</p>';
+ function pathText(source,path){
+  const direction=path.semitones>0?'sube':'baja';
+  return esc(source)+' → '+esc(path.note)+' · '+direction+' '+Math.abs(path.semitones)+' semitono(s). '+esc(path.role)+' sobre '+esc(next.label)+'.';
+ }
+ return heading+'<p class="tech-caption">'+esc(userMaterial[selectedUserChord].label)+' → '+esc(next.label)+'. Compara posibilidades para una nota cada vez. Resolver busca una fundamental, tercera o quinta del acorde de llegada a uno o dos semitonos.</p>'+ideas.map(idea=>
+  '<details class="tech-card" style="margin:10px 0"><summary style="cursor:pointer">'+esc(idea.note)+' · '+esc(idea.reason)+'</summary><div class="tech-grid" style="margin-top:12px">'+
+  '<div><h4>Resolver</h4>'+(idea.resolve.length?idea.resolve.map(path=>'<p>'+pathText(idea.note,path)+(path.conventional?' <small>Dirección habitual de esta nota de tendencia.</small>':'')+'</p>').join(''):'<p>No hay una llegada de ese tipo a uno o dos semitonos. Puedes explorar un salto o cambiar el acorde de destino.</p>')+'</div>'+
+  '<div><h4>Mantener</h4><p>'+esc(idea.note)+' → '+esc(idea.note)+'. '+esc(idea.hold.role)+' sobre '+esc(next.label)+'. '+(idea.hold.stable?'La nota queda integrada en el acorde de llegada.':idea.hold.chordTone?'Conserva una tensión incluida en el acorde.':'Añade una nota externa al acorde indicado.')+'</p></div>'+
+  '<div><h4>Desplazar</h4>'+(idea.displace.length?idea.displace.map(path=>'<p>'+pathText(idea.note,path)+' '+(path.chordTone?'Tensión incluida en el acorde.':'Color añadido al acorde indicado.')+'</p>').join(''):'<p>No aparece otro color de tensión a uno o dos semitonos con este criterio.</p>')+'</div></div><p class="tech-caption">'+esc(idea.caveat)+'</p></details>'
+ ).join('');
 }
-fillSelect(document.getElementById("emotion"),EMOTIONS);
-fillSelect(document.getElementById("composer"),COMPOSERS);
-const modeSel=document.getElementById("mode");
-for(const k in MODES){const o=document.createElement("option");o.value=k;o.textContent=MODES[k].name;modeSel.appendChild(o);}
-
-document.getElementById("emotion").addEventListener("change",e=>{state.emotion=e.target.value;});
-document.getElementById("composer").addEventListener("change",e=>{state.composer=e.target.value;});
-document.getElementById("mode").addEventListener("change",e=>{state.modeOverride=e.target.value||null;});
-document.getElementById("genBtn").addEventListener("click",generate);
-
-drawCircle();
-generate();
-</script>
-
-<script>
-/* Registro del service worker (offline + instalación completa) */
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log('SW registrado'))
-      .catch(err => console.log('SW error', err));
-  });
+function renderUserMaterial(){const scope=$("referenceScopeNote");if(scope)scope.textContent=userMaterial&&userMaterial.length?"Referencia independiente de tus "+userMaterial.length+" acordes: muestra posibilidades de la tonalidad, el modo y el compositor seleccionados, no conclusiones extraídas de tu progresión.":"Ejemplo construido con la tonalidad, el modo y el lenguaje que has seleccionado. No es un análisis automático de tus acordes.";renderLabVoices();const tonal=$("userTonalReading");if(tonal){if(!userMaterial){tonal.innerHTML="";}else{const reading=CinematicoEngine.tonalHypotheses(userMaterial);tonal.innerHTML='<strong>Posibles centros tonales de tus acordes</strong><p>'+esc(reading.explanation)+'</p><div class="tonal-options">'+reading.candidates.map(x=>'<span class="pill">'+esc(x.label)+(x.cadences.length?' · '+x.cadences.length+' indicio(s) cadencial(es)':'')+'</span>').join("")+'</div>'+(reading.candidates[0]?.cadences.length?'<p class="tech-caption">Indicios en la primera hipótesis: '+reading.candidates[0].cadences.map(c=>esc(c.kind)+' ('+esc(c.description)+')').join(' · ')+'.</p>':'')+'<p class="tech-caption">Estimación por notas, fundamentales y cadencias simbólicas; no analiza ritmo ni melodía. Independiente de la tonalidad de referencia.</p>';}}const el=$("userProgress");if(!userMaterial){el.innerHTML="";$("userAnalysis").innerHTML="";$("userAlternatives").innerHTML="";$("userFeedback").textContent="Introduce tus acordes y pulsa «Analizar mi progresión». Después selecciona un acorde para explorar alternativas.";return;}$("userFeedback").textContent="He reconocido "+userMaterial.length+" acordes. Selecciona uno para estudiar su relación con los demás; las propuestas no se aplican automáticamente.";el.innerHTML=userMaterial.map((ch,i)=>'<button type="button" class="secondary" data-chord-index="'+i+'" aria-pressed="'+(i===selectedUserChord)+'" style="margin:4px;border-color:'+(i===selectedUserChord?'#b6a779':'')+'">'+esc(ch.label)+'</button>').join("");el.querySelectorAll("[data-chord-index]").forEach(btn=>btn.onclick=()=>{selectedUserChord=Number(btn.dataset.chordIndex);renderUserMaterial();});const insights=CinematicoEngine.progressionInsights(userMaterial);const selected=insights[selectedUserChord];const tritonePairs=CinematicoEngine.tritoneTriadRelations(userMaterial);const tritoneSection=tritonePairs.length?'<h3 style="margin:18px 0 8px">Relaciones de tritono observadas</h3><p class="tech-caption">Tríadas consecutivas con fundamentales a seis semitonos. Es una relación armónica, no una emoción ni una atribución a un compositor.</p><div class="tech-grid">'+tritonePairs.map(x=>'<div class="tech-card"><small>ACORDES '+(x.fromIndex+1)+'–'+(x.toIndex+1)+'</small><h3>'+esc(x.from)+' → '+esc(x.to)+'</h3><p>'+esc(x.observation)+'</p><p class="tech-caption">Notas comunes: '+esc(x.sharedPitchClasses.length?x.sharedPitchClasses.join(" · "):"ninguna")+'</p></div>').join("")+'</div>':'';$("userAnalysis").innerHTML='<h3 style="margin:18px 0 8px">1. Qué ocurre en tu progresión</h3><p class="tech-caption">Observaciones verificables sobre las notas y los enlaces; no presupone una tonalidad.</p><div class="tech-grid">'+insights.map(x=>'<div class="tech-card"><small>ACORDE '+(x.index+1)+'</small><h3>'+esc(x.label)+'</h3><p>Notas: '+esc(x.notes.join(" · "))+'</p><p>'+esc(x.description)+'</p></div>').join("")+'</div>'+tritoneSection+'<details class="help-details"><summary>¿Y si…? Explora otros caminos</summary><p class="tech-caption">Tres invitaciones musicales. Tus acordes permanecen intactos.</p>'+(()=>{const trajectories=CinematicoEngine.harmonicTrajectories(userMaterial,Math.max(0,Math.min(selectedUserChord,userMaterial.length-3)));const continuations=CinematicoEngine.harmonicContinuations(userMaterial);const ideas=[];if(trajectories.length){const t=trajectories[0];ideas.push({question:"¿Y si cambiamos un acorde sin perder tu idea?",chords:t.chords.join(" → "),detail:t.explain+(t.why?" "+t.why:""),caveat:t.caveat});}for(const id of ["shadow","mystery","parallel"]){if(ideas.length>=3)break;const t=continuations.find(x=>x.id===id);if(t)ideas.push({question:id==="shadow"?"¿Y si la siguiente sección fuera más melancólica?":id==="mystery"?"¿Y si abrimos una región inesperada?":"¿Y si reinterpretamos el color del final?",chords:t.source+" → "+t.chords.join(" → "),detail:t.intent+" "+t.explain,caveat:t.caveat});}return ideas.map(idea=>'<details class="help-details" name="whatif-path"><summary>'+esc(idea.question)+'</summary><p><strong>'+esc(idea.chords)+'</strong></p><p>'+esc(idea.detail)+'</p><p class="tech-caption">'+esc(idea.caveat)+'</p></details>').join("");})()+'</details><h3 style="margin:18px 0 8px">2. Acorde seleccionado: '+esc(selected.label)+'</h3><p class="section-lead">'+esc(selected.description)+'</p>';$("userAlternatives").innerHTML='<h3 style="margin:18px 0 8px">3. Alternativas para comparar (no aplicadas)</h3><p class="tech-caption">Son experimentos armónicos, no recomendaciones obligatorias. Haz clic en otro acorde arriba para cambiar el foco.</p><label for="contrastLens" class="tech-caption">Criterio de comparación</label><select id="contrastLens" aria-label="Criterio de comparación"><option value="neutral"'+(alternativeIntention==='neutral'?' selected':'')+'>Exploración libre</option><option value="contrast"'+(alternativeIntention==='contrast'?' selected':'')+'>Buscar contraste</option></select><p class="tech-caption">El contraste considera cambios de notas, fundamental, tercera, color respecto a acordes vecinos y movimiento mínimo estimado. No predice la emoción que producirá.</p><div class="tech-grid">'+CinematicoEngine.compareHarmonicAlternatives(userMaterial,selectedUserChord,CinematicoEngine.chordAlternatives(userMaterial,selectedUserChord),alternativeIntention).map(p=>'<div class="tech-card"><small>OPCIÓN · SIN CAMBIOS'+(alternativeIntention==='contrast'?' · CONTRASTE #'+p.comparison.contrastRank:'')+'</small><h3>'+esc(p.label)+'</h3><p>Notas: '+esc(p.notes.map(n=>CinematicoEngine.spell(n)).join(" · "))+'</p><p>'+esc(p.why)+'</p><p class="tech-caption">'+esc(p.comparison.sharedOriginal)+' notas conservadas · '+esc(p.comparison.changed)+' cambios de altura · '+esc(p.comparison.continuity)+' coincidencias con vecinos</p>'+(alternativeIntention==='contrast'?'<p class="tech-caption">Contraste contextual: '+esc(p.comparison.contextualContrastScore)+' puntos (base '+esc(p.comparison.contrastScore)+'). '+esc(p.comparison.contrastReasons.join(' · '))+'</p><p class="tech-caption">'+esc(p.comparison.context.reasons.join(' · '))+'</p><p class="tech-caption">Lecturas armónicas: '+esc(p.comparison.character.hypotheses.map(h=>h.kind==='tonal'?'Tonal: '+h.evidence:h.kind==='modal'?'Modal: '+h.evidence:'Color cromático: '+h.evidence).join(' · ')||'Sin lectura adicional concluyente')+'</p><p class="tech-caption">Estimación sin registro ni voces reales; no se presupone tonalidad.</p>':'')+'<p>Notas comunes con el original: '+esc(p.common.join(", ")||"ninguna")+'</p>'+(selected.next?'<p>Notas comunes con el siguiente: '+esc(p.nextCommon.join(", ")||"ninguna")+'</p>':"")+'</div>').join("")+'</div>';$('contrastLens').addEventListener('change',e=>{alternativeIntention=e.target.value==='contrast'?'contrast':'neutral';renderUserMaterial();});const pedals=CinematicoEngine.sustainedToneAnalysis(userMaterial).slice(0,3);const motions=CinematicoEngine.adjacentVoiceMotion(userMaterial);const continuity=CinematicoEngine.harmonicContinuityIdeas(userMaterial);$("userAnalysis").innerHTML+='<h3 style="margin:18px 0 8px">Notas mantenidas y continuidad</h3><p class="tech-caption">Análisis vertical de clases de altura: distingue notas del acorde y tensiones posibles, pero no confirma pedales o suspensiones sin duración, octavas y voces reales.</p><div class="tech-grid">'+pedals.map(p=>'<div class="tech-card"><small>NOTA MANTENIDA · '+p.chordToneCount+'/'+userMaterial.length+' ACORDES</small><h3>'+esc(p.note)+'</h3><p>'+p.steps.map(x=>esc(x.chord)+': '+esc(x.role)+' · '+esc(x.classification)).join('<br>')+'</p></div>').join('')+'</div><h3 style="margin:18px 0 8px">Enlaces entre acordes</h3><div class="tech-grid">'+motions.map((m,i)=>'<div class="tech-card"><small>'+esc(m.from)+' → '+esc(m.to)+'</small><p>Notas comunes: '+esc(m.common.join(', ')||'ninguna')+'</p><p>Notas que salen: '+esc(m.leaving.join(', ')||'ninguna')+'</p><p>Notas que entran: '+esc(m.arriving.join(', ')||'ninguna')+'</p>'+(continuity[i]?.ideas.length?'<p class="tech-caption">Idea contextual: '+esc(continuity[i].ideas[0].description)+'</p>':'')+'</div>').join('')+'</div><p class="tech-caption">Los movimientos reales de cada voz requieren información de registro y disposición; estos datos no son todavía una realización contrapuntística.</p>';$("userAnalysis").innerHTML+=renderTensionDestinations();}
+function renderTechniques(d,c){const suggestions=CinematicoEngine.composerAssistance(S.composer,userMaterial||d.progression);$("techIntro").textContent=suggestions.length?"Tres técnicas para explorar desde tu idea, inspiradas en recursos asociados a "+c.name+". No se modifica ninguna nota.":"El perfil de "+c.name+" conserva su referencia armónica. Estamos preparando su biblioteca de técnicas contextualizadas.";const cards=$("techCards");cards.innerHTML=suggestions.length?suggestions.map(t=>'<div class="tech-card"><small>'+esc(t.domain)+'</small><h3>'+esc(t.name)+'</h3><p>'+esc(t.reason)+'</p><details><summary>Ver cómo probarlo</summary><p class="observation">'+esc(t.observation)+'</p><p>'+esc(t.action)+'</p><p><small>Contexto: '+esc(t.source)+'</small></p></details></div>').join(""):'<p class="section-lead">Las técnicas específicas de este perfil se incorporarán en próximas versiones. Puedes seguir explorando su progresión y su lenguaje armónico.</p>';}
+function renderNeo(){
+ const root=Number($("neoRoot").value),quality=$("neoQuality").value,operation=$("neoOperation").value;
+ const result=CinematicoEngine.neoTransform(root,quality,operation);
+ if(!result){$("neoResult").textContent="Selecciona una tríada mayor o menor.";return;}
+ const note=p=>CinematicoEngine.spell(p,![1,3,5,6,8,10].includes(p));
+ const label=c=>note(c.root)+(c.quality==="minor"?"m":"");
+ const tiles=pcs=>pcs.map(pc=>'<span class="pill">'+esc(note(pc))+'</span>').join("");
+ $("neoResult").innerHTML='<div class="progress"><div class="chord"><strong>'+esc(label(result.source))+'</strong><small>'+tiles(result.source.notes)+'</small></div><span class="arrow">→</span><div class="chord"><strong>'+esc(label(result.target))+'</strong><small>'+tiles(result.target.notes)+'</small></div></div><p class="vl-summary">Notas comunes: '+esc(result.common.map(note).join(" · "))+' · Voz móvil: '+esc(note(result.movement.from))+' → '+esc(note(result.movement.to))+' ('+(result.movement.semitones>0?'+':'')+result.movement.semitones+' semitonos)</p><p class="note">'+esc(result.description)+'</p>';
 }
-</script>
-</body>
-</html>
+function renderVoiceLeading(d){
+ const style=$("vlStyle").value,source=$("vlSource").value;
+ const chords=source==="signature"?d.signature:d.progression;
+ const locks=voiceLocks[source];
+ const result=CinematicoEngine.voiceLead(chords,style,locks);
+ const chordSelect=$("vlChord"),voiceSelect=$("vlVoice"),pitchSelect=$("vlPitch");
+ const oldChord=chordSelect.value;
+ chordSelect.innerHTML=chords.map((c,i)=>`<option value="${i}">${esc(c.label)}</option>`).join("");
+ chordSelect.value=Number(oldChord)<chords.length&&oldChord!==""?oldChord:"0";
+ const chordIndex=Number(chordSelect.value),voiceIndex=Number(voiceSelect.value);
+ const candidates=CinematicoEngine.voicingCandidates(chords[chordIndex],style);
+ const pitches=[...new Set(candidates.map(v=>v[voiceIndex]))].sort((a,b)=>a-b);
+ const previous=pitchSelect.value;
+ pitchSelect.innerHTML=pitches.map(n=>`<option value="${n}">${esc(CinematicoEngine.spell(n%12))}${Math.floor(n/12)-1}</option>`).join("");
+ const chosen=locks[chordIndex]?.[voiceIndex]??(result.voicings[chordIndex]?.[voiceIndex]);
+ pitchSelect.value=pitches.includes(Number(previous))&&previous!==""?previous:String(chosen??pitches[0]);
+ $("vlLocks").textContent=Object.entries(locks).flatMap(([i,voices])=>Object.entries(voices).map(([v,n])=>`${chords[i]?.label||"Acorde"} · ${["Bajo","Tenor","Alto","Soprano"][v]}: ${CinematicoEngine.spell(n%12)}${Math.floor(n/12)-1}`)).join(" · ")||"Sin notas fijadas";
+ const el=$("voiceLeading");
+ if(!result.voicings.length){el.textContent=result.warning||"No hay realización disponible.";return;}
+ const colors=["#a7a9a0","#aa9bd7","#74bdb0","#d6ad67"],names=result.voiceOrder;
+ const width=Math.max(520,120+chords.length*145),height=265,left=58,top=28;
+ const all=result.voicings.flat(),lo=Math.min(...all)-2,hi=Math.max(...all)+2;
+ const x=i=>left+i*(width-left-80)/Math.max(1,chords.length-1);
+ const y=n=>top+(hi-n)*(height-top-55)/(hi-lo);
+ let svg='<svg class="vl-chart" viewBox="0 0 '+width+' '+height+'" role="img" aria-label="Trayectorias de cuatro voces entre acordes">';
+ for(let n=Math.ceil(lo/12)*12;n<=hi;n+=12)svg+='<line x1="40" y1="'+y(n)+'" x2="'+(width-30)+'" y2="'+y(n)+'" stroke="#7e8277" stroke-opacity=".22" stroke-dasharray="3 5"/>';
+ for(let voice=0;voice<4;voice++){
+  for(let i=0;i<result.voicings.length-1;i++){
+   svg+='<path d="M '+x(i)+' '+y(result.voicings[i][voice])+' L '+x(i+1)+' '+y(result.voicings[i+1][voice])+'" fill="none" stroke="'+colors[voice]+'" stroke-width="2.6" stroke-linecap="round"/>';
+  }
+  for(let i=0;i<result.voicings.length;i++){
+   const yy=y(result.voicings[i][voice]),xx=x(i);
+   svg+='<circle cx="'+xx+'" cy="'+yy+'" r="4.5" fill="'+colors[voice]+'"/><text x="'+(xx+7)+'" y="'+(yy-7)+'" font-size="11" fill="'+colors[voice]+'">'+esc(result.names[i][voice])+'</text>';
+  }
+ }
+ chords.forEach((c,i)=>{svg+='<text x="'+x(i)+'" y="'+(height-9)+'" text-anchor="middle" font-size="12" fill="#e4e2d7">'+esc(c.label)+'</text>';});
+ svg+='</svg>';
+ const legend='<div class="vl-legend">'+names.map((n,i)=>'<span style="--voice-color:'+colors[i]+'">'+n+'</span>').join('')+'</div>';
+ const details=result.transitions.map((t,i)=>'<span>'+esc(chords[i].label)+' → '+esc(chords[i+1].label)+': '+t.diffs.map(n=>(n>0?'+':'')+n).join(' / ')+' semitonos</span>').join('<span aria-hidden="true"> · </span>');
+ el.innerHTML=legend+svg+'<div class="vl-summary">Movimiento por voz (bajo → soprano): '+details+'</div><p class="vl-warning">'+esc(result.warning)+'</p>';
+}
+function readNotebook(){try{const value=JSON.parse(localStorage.getItem("cinematico-notebook")||"[]");return Array.isArray(value)?value.filter(x=>x&&typeof x==="object"&&!Array.isArray(x)&&typeof x.title==="string"&&typeof x.detail==="string"&&x.state&&typeof x.state==="object").slice(0,30):[]}catch{return []}}
+function writeNotebook(items){try{localStorage.setItem("cinematico-notebook",JSON.stringify(items.slice(0,30)));return true}catch{toast("No se pudo guardar en este navegador");return false}}
+function saved(){let a=readNotebook();$("savedList").innerHTML=a.map((x,i)=>`<div class="saveditem"><div><b>${esc(x.title)}</b><br><span>${esc(x.detail)}</span></div><div><button class="secondary" data-load="${i}" ${x.state?"":"disabled"}>Recuperar</button> <button class="secondary" data-del="${i}" aria-label="Eliminar idea">×</button></div></div>`).join("");$("empty").hidden=!!a.length;$("savedList").querySelectorAll("[data-load]").forEach(b=>b.onclick=()=>{const item=a[+b.dataset.load];if(!item?.state||!EMOTIONS[item.state.emotion]||!COMPOSERS[item.state.composer]||!MODES[item.state.mode||EMOTIONS[item.state.emotion].mode]||!Number.isInteger(item.state.key)||item.state.key<0||item.state.key>11){toast("No se puede recuperar esta idea");return;}const storedProgression=typeof item.progression==="string"&&item.progression.trim()?CinematicoEngine.parseUserProgression(item.progression):null;if(storedProgression&&(storedProgression.errors.length||!storedProgression.chords.length)){toast("Esta idea contiene acordes que no se pueden recuperar");return;}Object.assign(S,item.state);$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value=S.mode;$("vlStyle").value=item.voiceStyle||"cinematic";$("vlSource").value=item.voiceSource||"emotion";if(storedProgression){userMaterial=storedProgression.chords;$("userChords").value=item.progression;$("simpleChords").value=item.progression;selectedUserChord=0;for(const k of Object.keys(labLocks))delete labLocks[k];renderUserMaterial();}else{userMaterial=null;$("userChords").value="";$("simpleChords").value="";renderUserMaterial();}if(item.simpleMood&&$("simpleMood").querySelector('option[value="'+item.simpleMood+'"]'))$("simpleMood").value=item.simpleMood;$("simpleResults").innerHTML="";$("simpleFeedback").textContent="Idea recuperada. Busca nuevos acordes si quieres otras opciones.";draw();render();toast("Idea recuperada");});$("savedList").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{a.splice(+b.dataset.del,1);if(writeNotebook(a))saved();});}
+function toast(t){$("toast").textContent=t;$("toast").classList.add("show");setTimeout(()=>$("toast").classList.remove("show"),1700);}
+function simpleOpenAdvanced(){const input=$("simpleChords").value.trim();const parsed=CinematicoEngine.parseUserProgression(input);if(parsed.errors.length){$("simpleFeedback").textContent=parsed.errors.join(" · ");return;}const current=$("userChords").value.trim();if(current!==input){userMaterial=parsed.chords.length?parsed.chords:null;$("userChords").value=input;selectedUserChord=0;for(const k of Object.keys(labLocks))delete labLocks[k];renderUserMaterial();}setWorkspace("advanced");$("userChords").focus()}function simpleExplore(){const p=CinematicoEngine.parseUserProgression($("simpleChords").value.trim());const out=$("simpleResults");out.innerHTML="";if(p.errors.length||!p.chords.length){$("simpleFeedback").textContent=p.errors.join(" · ")||"Escribe al menos un acorde.";return;}userMaterial=p.chords;$("userChords").value=$("simpleChords").value.trim();selectedUserChord=0;for(const k of Object.keys(labLocks))delete labLocks[k];renderUserMaterial();const mood=$("simpleMood").value;const paths=CinematicoEngine.emotionalContinuations(userMaterial,mood);const plain={
+misterio:"Un giro inesperado que deja preguntas abiertas.",melancolia:"Un camino hacia acordes menores, con una sensación más íntima.",tension:"Los acordes crean expectativa y retrasan la llegada.",esperanza:"La música se abre hacia acordes más luminosos.",nostalgia:"Cambios de color que recuerdan algo familiar, pero diferente.",epica:"Saltos armónicos amplios para dar fuerza a la idea.",tristeza:"Una continuación que busca un final más recogido.",alegria:"Un recorrido claro hacia un acorde mayor.",ternura:"Cambios suaves, con notas que se mantienen entre acordes.",asombro:"Acordes inesperados que abren una dirección nueva.",inquietud:"Pequeños movimientos que evitan una sensación de descanso.",suspense:"Parece que va a llegar a casa, pero se queda esperando.",oscuridad:"Un recorrido con cambios más ásperos y llegada menor.",calma:"Acordes cercanos entre sí, sin cambios bruscos.",contraste:"Un cambio marcado respecto al color de tu progresión."};
+$("simpleFeedback").textContent=paths.length?"Tus acordes aparecen primero; los nuevos están en dorado. Compara las opciones y elige la que más te guste.":"No hemos encontrado opciones diferentes. Prueba otra emoción o cambia el último acorde.";
+const canAnalyze=p.chords.length+3<=8;if(!canAnalyze)$("simpleFeedback").textContent="Puedes comparar estas opciones, pero para analizarlas en el Estudio avanzado necesitas un máximo de 5 acordes iniciales.";out.innerHTML=paths.map((q,i)=>'<article class="simple-path"><div class="simple-path-heading"><span class="simple-variant">OPCIÓN '+(i+1)+'</span><h3>'+esc(i===0?"Primera idea":i===1?"Otra posibilidad":"Un camino diferente")+'</h3></div><p class="simple-device">'+esc(plain[mood]||"Una nueva forma de continuar tus acordes.")+'</p><p class="tech-caption">Dirección armónica: '+esc(q.direction||"explorar")+'</p><div class="simple-chips" aria-label="Tus acordes y los acordes propuestos">'+userMaterial.map(c=>'<span title="Tu acorde">'+esc(c.label)+'</span>').join('')+'<span class="simple-arrow" aria-hidden="true">→</span>'+q.chords.map(c=>'<span class="new" title="Acorde nuevo">'+esc(c)+'</span>').join('')+'</div><details><summary>¿Por qué estos acordes?</summary><p>'+esc(q.explanation)+'</p><p>Es una sugerencia: la melodía y la forma de tocarla también cambian la sensación.</p></details><button class="secondary" type="button" data-open-advanced="'+i+'" '+(canAnalyze?"":"disabled title=\"El estudio admite 8 acordes como máximo\"")+'>Analizar esta opción →</button></article>').join('');
+out.querySelectorAll("[data-open-advanced]").forEach(b=>b.onclick=()=>{const chosen=paths[Number(b.dataset.openAdvanced)];if(!chosen)return;const prepared=CinematicoEngine.prepareContinuationForAnalysis(p.chords,chosen.chords);if(!prepared.ok){$("simpleFeedback").textContent=prepared.error;return;}$("userChords").value=prepared.text;$("simpleChords").value=prepared.text;userMaterial=prepared.chords;selectedUserChord=0;for(const k of Object.keys(labLocks))delete labLocks[k];renderUserMaterial();simpleOpenAdvanced();})}$("simpleChords").addEventListener("input",()=>{$("simpleResults").innerHTML="";$("simpleFeedback").textContent="Has cambiado tus acordes. Pulsa «Buscar nuevos acordes» para actualizar las opciones.";});$("simpleMood").addEventListener("change",()=>{$("simpleResults").innerHTML="";$("simpleFeedback").textContent="Has cambiado la emoción. Busca nuevos acordes para ver otras opciones.";});$("simpleExplore").onclick=simpleExplore;$("simpleToAdvanced").onclick=simpleOpenAdvanced;$("simpleChords").onkeydown=e=>{if(e.key==="Enter")simpleExplore()};function setWorkspace(mode){const advanced=mode==="advanced";document.body.dataset.workspace=advanced?"advanced":"explore";$("workspaceExplore").setAttribute("aria-pressed",String(!advanced));$("workspaceAdvanced").setAttribute("aria-pressed",String(advanced));$("workspaceTitle").textContent=advanced?"Estudio avanzado":"Crear";$("workspaceDesc").textContent=advanced?"Conducción de voces, transformaciones cromáticas y rutas de modulación. Conservas la misma selección musical." :"Tus acordes, nuevas posibilidades. Sin necesidad de teoría musical.";try{localStorage.setItem("cinematico-workspace",advanced?"advanced":"explore")}catch{}}
+$("workspaceExplore").onclick=()=>setWorkspace("explore");$("workspaceAdvanced").onclick=()=>{if(document.body.dataset.workspace==="explore")simpleOpenAdvanced();else setWorkspace("advanced");};try{setWorkspace(localStorage.getItem("cinematico-workspace")==="advanced"?"advanced":"explore")}catch{setWorkspace("explore")}
+$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("save").onclick=()=>{const source=document.body.dataset.workspace==="explore"?$("simpleChords").value.trim():$("userChords").value.trim();if(source){const checked=CinematicoEngine.parseUserProgression(source);if(checked.errors.length||!checked.chords.length){toast("Revisa tus acordes antes de guardar");return;}userMaterial=checked.chords;$("userChords").value=source;selectedUserChord=0;for(const k of Object.keys(labLocks))delete labLocks[k];renderUserMaterial();}else{userMaterial=null;$("userChords").value="";renderUserMaterial();}let a=readNotebook(),e=EMOTIONS[S.emotion],m=MODES[S.mode||e.mode];a.unshift({title:S.keyName+" · "+m.name,detail:e.name+" / "+COMPOSERS[S.composer].name,state:{key:S.key,keyName:S.keyName,emotion:S.emotion,composer:S.composer,mode:S.mode},voiceStyle:$("vlStyle").value,voiceSource:$("vlSource").value,progression:userMaterial?userMaterial.map(c=>c.label).join(" "):"",simpleMood:$("simpleMood").value});if(writeNotebook(a)){saved();toast("Idea guardada")}};
+$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();saved();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=26",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
+</script></body></html>
