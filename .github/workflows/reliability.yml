@@ -26,6 +26,7 @@ jobs:
           node tests/composer-voicing-research.cjs
           node tests/composer-listening-regression.cjs
           node tests/contextual-voice-resolution.cjs
+          node tests/harmonic-context-composer-comparison.cjs
           node tests/static-audit.cjs
       - name: Install browser runner
         run: |
