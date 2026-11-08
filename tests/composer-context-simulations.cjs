@@ -19,6 +19,7 @@ for(const b of fixture.briefs){
  assert.equal(b.criteria.length,3,"Equalized 3-criterion briefs: "+b.id);
  assert.equal(new Set(b.criteria).size,3,b.id);
  assert.ok(b.criteria.every(x=>CRITERIA.includes(x)),"Unsupported feature in "+b.id);
+ assert.ok(!fixture.briefs.slice(0,fixture.briefs.indexOf(b)).some(other=>other.criteria.slice().sort().join("|")===b.criteria.slice().sort().join("|")),"Duplicated structural requirements: "+b.id);
 }
 function fingerprint(ch){
  return MOD(ch.root)+":"+[...new Set(ch.notes.map(MOD))].sort((a,b)=>a-b).join(",");
