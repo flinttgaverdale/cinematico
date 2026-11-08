@@ -924,10 +924,13 @@ function emotionalContinuations(chords,emotion){
   const dominantGoal=mod(root+5);
   // Prefer a root already stated earlier when the final V7 targets it.
   const tonicInHistory=last.type==="7"?chords.slice(0,-1).find(c=>mod(c.root)===dominantGoal&&["","m","maj7","m7","add9","madd9"].includes(c.type)):null;
-  const reliableCenter=tonal.status==="suggestive"&&gap>=0.65&&chords.length>=3;
+  const tentativeCadentialCenter=chords.length>=3&&leading&&leading.coverage>=96&&
+   (leading.cadences||[]).length>0&&gap>=0.25;
+  const reliableCenter=chords.length>=3&&
+   ((tonal.status==="suggestive"&&gap>=0.65)||tentativeCadentialCenter);
   const tonic=tonicInHistory?dominantGoal:(reliableCenter?leading.tonic:root);
   const minor=tonicInHistory?["m","m7","madd9"].includes(tonicInHistory.type):(reliableCenter?leading.mode==="menor natural":["m","m7","madd9"].includes(last.type));
-  const anchorBasis=tonicInHistory?"dominante dirigida a una tónica anterior":reliableCenter?"principal hipótesis tonal":"último acorde (sin centro confirmado)";
+  const anchorBasis=tonicInHistory?"dominante dirigida a una tónica anterior":tentativeCadentialCenter&&tonal.status==="ambiguous"?"hipótesis tonal preferente, con alternativas posibles":reliableCenter?"principal hipótesis tonal":"último acorde (sin centro confirmado)";
  const make=(offset,kind="M")=>{
   const r=mod(tonic+offset);
   const intervals={M:[0,4,7],m:[0,3,7],dom:[0,4,7,10],maj7:[0,4,7,11],m7:[0,3,7,10],sus4:[0,5,7],add9:[0,4,7,14],madd9:[0,3,7,14],dim:[0,3,6]}[kind];
