@@ -19,6 +19,8 @@ jobs:
           node tests/cadence-regression.cjs
           node tests/musicology-regression.cjs
           node tests/musicology-precision.cjs
+          node tests/extended-chord-input-validation.cjs
+          node tests/deep-musicology-validation.cjs
           node tests/composer-research-regression.cjs
           node tests/composer-lenses-integration.cjs
           node tests/composer-continuity-regression.cjs
