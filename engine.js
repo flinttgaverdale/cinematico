@@ -1114,7 +1114,7 @@ const COMPOSER_CREATIVE_LENSES={
   "focus": "Recurrencia y fricción cromática",
   "evidence": "A/B",
   "work": "Vertigo — Main Title; Scene d'amour",
-  "source": "https://mtosmt.org/issues/mto.22.28.1/mto.22.28.1.murphy.php",
+  "source": "https://mtosmt.org/issues/mto.22.28.1/mto.22.28.1.murphy.html",
   "limit": "Reiteración real, registro, duración y suspensión no se deducen de los acordes.",
   "routes": [
    {
@@ -1534,7 +1534,7 @@ const COMPOSER_CREATIVE_LENSES={
   "focus": "Retorno y relectura modal de una idea",
   "evidence": "B/C",
   "work": "The Lord of the Rings — transformaciones de temas",
-  "source": "https://howardshore.com/works/concert/the-two-towers-live-to-projection/",
+  "source": "https://soundtrackworld.com/2020/01/interview-howard-shore/",
   "limit": "Una transformación de leitmotiv no puede verificarse solo a partir de acordes.",
   "routes": [
    {
@@ -1616,7 +1616,7 @@ const COMPOSER_CREATIVE_LENSES={
   "focus": "Economía de materiales y módulos contrastantes",
   "evidence": "C",
   "work": "Once Upon a Time in the West; The Mission",
-  "source": "https://blog.oup.com/2019/03/maestro-speaks-ennio-morricone-life-music/",
+  "source": "https://www.bfi.org.uk/sight-and-sound/interviews/if-you-want-call-yourself-composer-you-follow-every-step-instrumentation-ennio-morricone-interviewed-2006",
   "limit": "La armónica, el oboe y el sentido narrativo no son propiedades de la progresión armónica.",
   "routes": [
    {
@@ -1756,7 +1756,7 @@ const COMPOSER_CREATIVE_LENSES={
   "focus": "Cambio de energía sobre material reconocible",
   "evidence": "C",
   "work": "Oppenheimer — Can You Hear the Music",
-  "source": "https://www.nme.com/features/film-interviews/oppenheimer-score-soundtrack-ludwig-goransson-christopher-nolan-3471661",
+  "source": "https://www.soundonsound.com/people/ludwig-goransson",
   "limit": "Velocidad, vibrato, acentos y articulación requieren decisiones temporales e instrumentales.",
   "routes": [
    {
