@@ -1801,7 +1801,7 @@ function composerRouteComparison(paths){
  let message,dimension;
  if(sameRoots&&changedColors>0){
   dimension="color";
-  message="Comparten la misma secuencia de fundamentales, pero cambian las calidades o extensiones en "+
+  message="Comparten la misma secuencia de fundamentales, pero cambian las calidades o extensiones de color en "+
    changedColors+" de "+a.chords.length+" posiciones. Escucha el color sin atribuirle automáticamente más emoción.";
  }else if(opsA&&opsB&&opsA!==opsB){
   dimension="transformation";
