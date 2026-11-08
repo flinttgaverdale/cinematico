@@ -784,7 +784,9 @@ function emotionalContinuations(chords,emotion){
   const intervals={M:[0,4,7],m:[0,3,7],dom:[0,4,7,10],maj7:[0,4,7,11],m7:[0,3,7,10],sus4:[0,5,7],add9:[0,4,7,14],madd9:[0,3,7,14],dim:[0,3,6]}[kind];
   if(!intervals)return null;
   const suffix={M:"",m:"m",dom:"7",maj7:"maj7",m7:"m7",sus4:"sus4",add9:"add9",madd9:"madd9",dim:"dim"}[kind];
-  return {root:r,bass:r,type:suffix,notes:[...new Set(intervals.map(n=>mod(r+n)))],label:spell(r,[1,6,8].includes(r))+suffix};
+  const sharpKey=minor?[1,4,6,11].includes(tonic):[1,2,4,6,7,9,11].includes(tonic);
+   const useSharp=minor&&r===mod(tonic+11)?true:sharpKey;
+   return {root:r,bass:r,type:suffix,notes:[...new Set(intervals.map(n=>mod(r+n)))],label:spell(r,useSharp)+suffix};
  };
  const recipes={
  misterio:{title:"Misterio",device:"Desplazamiento cromático y llegada ambigua",why:"El semitono altera el centro percibido; la llegada menor evita una confirmación tonal evidente.",patterns:[[[1,"M"],[6,"m"],[8,"m"]],[[6,"M"],[1,"m"],[8,"m"]],[[8,"M"],[1,"m"],[6,"m"]]]},
