@@ -31,7 +31,7 @@ for(const input of [
  assert.equal(result.errors.length,0,input+' '+result.errors.join('|'));
  assert.ok(result.chords.length>0);
 }
-for(const invalid of ['C7b9','Cmaj7#12','Hmaj7','Cmaj7#11/G#','C9/Eb']){
+for(const invalid of ['C7b9','Cmaj7#12','Hmaj7','Cmaj7#11/H','C9/Ebb']){
  assert.ok(E.parseUserProgression(invalid).errors.length>0,invalid);
 }
 assert.ok(E.parseUserProgression('C F G7 C').chords.length===4,'Legacy multi-chord parsing');

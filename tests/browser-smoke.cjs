@@ -146,6 +146,19 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       await page.locator('#userChords').fill('Cadd9 Fmaj7');
       await page.locator('#userAnalyze').click();
       assert.ok(!(await page.locator('#labVoiceOutput').textContent()).includes('sensible sin resolución ascendente'),'A diatonic I–IV must not be mistaken for a V/IV');
+      // New chromatic slash-bass notation must reach the visible voice laboratory intact.
+      await page.locator('#userChords').fill('C/Bb G7sus4 G7 C');
+      await page.locator('#userAnalyze').click();
+      assert.ok((await page.locator('#userChords').inputValue()).includes('C/Bb'));
+      assert.ok(!(await page.locator('#userFeedback').innerText()).includes('Acorde no reconocido'),
+        'An independent bass is valid, not a syntax error');
+      const actualLab=await page.locator('#labVoiceOutput').textContent();
+      const actualFeedback=await page.locator('#userFeedback').textContent();
+      assert.ok(actualLab.includes('C/Bb'),
+        'The voice laboratory should display the original slash chord. Actual lab: '+actualLab.slice(0,500)+' | Feedback: '+actualFeedback);
+      await page.locator('#neoOperation').selectOption('S');
+      assert.ok((await page.locator('#neoResult').innerText()).includes('SLIDE'),
+        'SLIDE must render two voice movements without a browser exception');
       assert.deepEqual(errors, [], 'Browser errors: ' + errors.join('; '));
       await context.close();
       console.log('PASS browser',viewport.width,'px');
