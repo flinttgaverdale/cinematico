@@ -23,6 +23,7 @@ jobs:
           node tests/composer-lenses-integration.cjs
           node tests/composer-continuity-regression.cjs
           node tests/composer-context-simulations.cjs --json
+          node tests/composer-voicing-research.cjs
           node tests/static-audit.cjs
       - name: Install browser runner
         run: |
