@@ -470,7 +470,7 @@ function laboratoryVoices(chords,options={}){
 }
 
 function parseUserProgression(input){
- const tokens=String(input||"").trim().split(/[\\s,;|]+/).filter(Boolean);
+ const tokens=String(input||"").trim().split(/[\s,;|]+/).filter(Boolean);
  if(!tokens.length)return {chords:[],errors:[]};
  if(tokens.length>8)return {chords:[],errors:["Máximo 8 acordes por análisis."]};
  const names={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
