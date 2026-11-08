@@ -543,13 +543,23 @@ function renderComposerExplorations(){
    '<li><strong>'+esc(link.from+' → '+link.to)+'</strong><span>'+esc(link.explanation)+'</span></li>'
   ).join("")+'</ol><p class="composer-scope">'+esc(route.insights.scope)+'</p></details>';
  const pathA=study.paths[0].insights,pathB=study.paths[1].insights;
- const contrast=pathA.returnToCenter!==pathB.returnToCenter
-  ?'Una ruta regresa al centro inicial y la otra termina en una fundamental distinta.'
-  :pathA.sharedLinkCount!==pathB.sharedLinkCount
-   ?'Las rutas conservan una cantidad distinta de enlaces con notas comunes. Esto no determina cuál funciona mejor.'
-   :pathA.chromaticCount!==pathB.chromaticCount
-    ?'Las rutas usan cantidades distintas de acordes con notas ajenas al modo de referencia.'
-    :'Las rutas comparten algunos rasgos armónicos; compara su color y decide dónde situar el contraste.';
+ const sameRootRoute=study.paths[0].chords.length===study.paths[1].chords.length&&
+  study.paths[0].chords.every((ch,i)=>ch.root===study.paths[1].chords[i].root);
+ const colorCount=path=>path.chords.filter(ch=>["maj7","maj7#11","add9","m7","m9","maj9","mMaj7"].includes(ch.type)).length;
+ const colorsA=colorCount(study.paths[0]),colorsB=colorCount(study.paths[1]);
+ const ops=path=>path.insights.transitions.map(x=>x.operator).filter(Boolean).join("–");
+ const opsA=ops(study.paths[0]),opsB=ops(study.paths[1]);
+ const contrast=sameRootRoute&&colorsA!==colorsB
+  ?'Ambos caminos comparten la misma secuencia de fundamentales. El primero utiliza '+colorsA+' acordes con extensiones de color y el segundo '+colorsB+'. Compara su efecto sin sustituir tu melodía.'
+  :opsA&&opsB&&opsA!==opsB
+   ?'Los dos recorridos conservan notas comunes, pero cambian el orden de las transformaciones: '+opsA+' frente a '+opsB+'. Compara ambos trayectos antes de elegir.'
+   :pathA.returnToCenter!==pathB.returnToCenter
+    ?'Una ruta regresa al centro inicial y la otra termina en una fundamental distinta.'
+    :pathA.chromaticCount!==pathB.chromaticCount
+     ?'Una ruta contiene más acordes ajenos al modo de referencia; eso no garantiza mayor tensión percibida.'
+     :pathA.sharedLinkCount!==pathB.sharedLinkCount
+      ?'Las rutas conservan una cantidad distinta de enlaces con notas comunes. Esto no determina cuál funciona mejor.'
+      :'Los indicadores armónicos no establecen una diferencia clara. Prueba contrastar ritmo, registro o textura sin modificar los acordes.';
  target.innerHTML='<div class="composer-ideas-heading"><strong>Dos caminos para explorar</strong><span>Ejercicios armónicos originales · referencia independiente</span></div>'+
   '<p class="composer-ideas-focus">'+esc(study.focus)+'</p>'+
   '<div class="composer-path-grid">'+study.paths.map((route,i)=>
