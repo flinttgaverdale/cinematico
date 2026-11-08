@@ -1,6 +1,6 @@
 // Service Worker — Cinemático Studio
 // Network-first para evitar que una instalación PWA conserve indefinidamente el motor anterior.
-const CACHE = "cinematico-studio-v43";
+const CACHE = "cinematico-studio-v44";
 const ASSETS = ["./", "./index.html", "./engine.js", "./manifest.json", "./icon-192.png", "./icon-512.png"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE)

@@ -49,6 +49,14 @@ for(const source of inputs){
    assert.ok(option.creativeScore===option.contextScore+option.gestureFit*1.6);
    assert.equal(option.expressiveProfile.id,mood);
    assert.ok(typeof option.gestureSummary==='string'&&option.gestureSummary.length>8);
+   assert.equal(option.arcSummary,option.harmonicArc.summary,'Create uses the same harmonic journey as the engine');
+   assert.equal(option.harmonicArc.steps.length,3,'Three readable stages: link, transformation, destination');
+   assert.equal(option.harmonicArc.linkChangeLevels.length,3);
+   assert.ok(option.harmonicArc.linkChangeLevels.every(x=>Number.isInteger(x)&&x>=0&&x<=2));
+   assert.equal(option.arcSummary,option.harmonicArc.steps.join(' → '));
+   assert.ok(option.arcSummary.length<110,'Keep the front of the card readable on mobile');
+   assert.match(option.harmonicArc.scope,/no mide intensidad emocional/);
+   assert.ok(!/provoca|garantiza|sentirás|intensidad emocional:/i.test(option.arcSummary),'No invented emotion intensity');
    assert.ok(typeof option.expressiveEvidence.suspendedEnding==='boolean');
    assert.ok(!/sentir[aá]|emocionar[aá]|alegr[ií]a inevitable/i.test(option.gestureSummary),'No emotional certainty in user heading');
    const ending=p.chords.at(-1);
@@ -71,7 +79,8 @@ assert.equal(E.emotionalContinuations(basic,'suspense')[0].direction,'mantener t
 assert.equal(E.emotionalContinuations(basic,'asombro')[0].direction,'cambiar dirección');
 assert.ok(E.emotionalContinuations(basic,'esperanza').some(x=>x.chords.at(-1).includes('add9')));
 const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
-assert.ok(html.includes('q.gestureSummary'),'Show direct harmonic observation in Create');
+assert.ok(html.includes('q.arcSummary||q.gestureSummary'),'Show the harmonic arc directly in Create');
+assert.ok(html.includes('Gesto armónico: '),'Keep the detailed harmonic gesture behind optional explanation');
 assert.ok(html.includes('id="simpleMood"'),'Keep all 15 intentions opt-in');
 assert.ok(!html.includes('id="save"'),'Do not reintroduce an unwanted notebook');
 console.log('PASS evidence-aware emotions: '+cases+' contexts, '+paths+' tested suggestions, '+changedEndings+' different-destination contexts, '+suspended+' suspended endings.');

@@ -979,6 +979,24 @@ function emotionCreativeProfile(id){
   nearbyIntents:neighborhood.relatedIntents,
   scope:"Mapa de diseño interpretativo, no clasificación GEMS validada, ni predicción de la emoción que sentirá el oyente."};
 }
+// Observable chord links only: not a score of felt emotion or performance.
+function harmonicArcPreview(shared, evidence, credibleCenter){
+ const linkChangeLevels=shared.map(count=>count>=2?0:count===1?1:2);
+ const first=shared[0]>=2?"Enlace cercano":shared[0]===1?"Una nota en común":"Giro inicial";
+ const middle=credibleCenter&&evidence.foreignPitches>=2?"Desvío cromático":
+   shared.slice(1).every(count=>count>=2)?"Enlaces próximos":
+   shared.slice(1).some(count=>count===0)?"Cambio de color":"Variación gradual";
+ const end=evidence.suspendedEnding?"Suspensión final":
+   evidence.dominantEnding?"Llegada abierta":
+   evidence.modeChange?"Cambio mayor/menor":
+   evidence.tonalArrival?"Posible regreso":"Otra dirección";
+ const pattern=linkChangeLevels.every(x=>x===linkChangeLevels[0])?"uniforme":
+   linkChangeLevels[2]>linkChangeLevels[0]?"mayor-cambio-final":
+   linkChangeLevels[2]<linkChangeLevels[0]?"mayor-continuidad-final":"alternancia";
+ const steps=[first,middle,end];
+ return {summary:steps.join(" → "),steps,linkChangeLevels,pattern,
+  scope:"Esquema orientativo de enlaces armónicos y posible llegada; no mide intensidad emocional, tensión escuchada ni conducción real de voces."};
+}
 function emotionalContinuations(chords,emotion){
  if(!Array.isArray(chords)||!chords.length)return [];
  const last=chords[chords.length-1];
@@ -1099,8 +1117,9 @@ function emotionalContinuations(chords,emotion){
     tonalArrival?"Regreso posible al centro":"Cambio de dirección armónica";
   const expressiveEvidence={foreignPitches,sharedNotes:sharedTotal,rootLeaps,
     suspendedEnding:suspended,dominantEnding,tonalArrival,modeChange:majorMinorTurn};
+  const harmonicArc=harmonicArcPreview(shared,expressiveEvidence,Boolean(tonicInHistory||reliableCenter));
   const explanation=continuity+" "+directionText+" "+spec.why+" Centro de referencia: "+center+" ("+anchorBasis+"). No se confirma tonalidad ni cadencia sin frase, melodía y ritmo.";
-  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,creativeScore,gestureFit,gestureSummary,expressiveEvidence,expressiveProfile:creativeProfile,cadenceFit,direction,explanation,suggestedCenter:center,anchorBasis,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
+  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,creativeScore,gestureFit,gestureSummary,harmonicArc,arcSummary:harmonicArc.summary,expressiveEvidence,expressiveProfile:creativeProfile,cadenceFit,direction,explanation,suggestedCenter:center,anchorBasis,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
  }
  options.sort((a,b)=>b.creativeScore-a.creativeScore||b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
  if(!options.length)return [];
@@ -1112,7 +1131,8 @@ function emotionalContinuations(chords,emotion){
  while(distinct.length<3&&remaining.length){
   remaining.sort((a,b)=>{
    const novelty=o=>Math.min(...distinct.map(reference=>distance(o,reference)));
-   const diversity=o=>novelty(o)*2+(distinct.every(x=>x.direction!==o.direction)?1.5:0)+o.gestureFit*.65;
+   const diversity=o=>novelty(o)*2+(distinct.every(x=>x.direction!==o.direction)?1.5:0)+
+    (distinct.every(x=>x.harmonicArc.pattern!==o.harmonicArc.pattern)?.65:0)+o.gestureFit*.65;
    return diversity(b)-diversity(a)||b.creativeScore-a.creativeScore||b.contextScore-a.contextScore||
     a.chords.join(" ").localeCompare(b.chords.join(" "));
   });
