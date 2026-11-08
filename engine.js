@@ -534,6 +534,28 @@ function tonalCenterSpelling(tonic,minor=false,chords=[]){
  return spell(pc,!preferFlat);
 }
 // Conservative tonal hypotheses: compatibility is not proof of a tonic.
+// Readable harmonic observations: separate local tonicization, harmonic arrival
+// and possible phrase ending without claiming to hear meter, melody or form.
+function harmonicContextSummary(chords){
+ const reading=tonalHypotheses(chords);
+ const best=reading.candidates[0];
+ if(!best)return {status:"empty",center:null,observations:[],caveat:"Introduce una progresión para explorar su contexto."};
+ const events=best.cadences||[],observations=[];
+ const applied=[...new Set(events.filter(e=>e.kind.startsWith("V7/")).map(e=>e.kind.slice(3)))];
+ if(applied.length)observations.push("Dominante aplicada hacia "+applied.join(", ")+": posible tonicización local; no demuestra una modulación.");
+ if(best.minorDominant?.raisedLeadingTone)
+  observations.push("Dominante mayor con sensible elevada sobre un centro menor: recurso tonal menor, no cambio obligatorio de escala.");
+ if(events.some(e=>e.kind==="V–I/i"))
+  observations.push("Se observa un enlace dominante–tónica; sin melodía ni articulación de frase no se confirma una cadencia formal.");
+ else if(events.some(e=>e.kind==="semicadencia posible"))
+  observations.push("El fragmento acaba sobre una posible dominante; el cierre de frase no se puede confirmar solo con acordes.");
+ if(!observations.length)
+  observations.push("No se identifica una llegada dominante–tónica concluyente en la hipótesis principal.");
+ return {status:reading.status,center:best.displayLabel||best.label,observations,
+  caveat:(reading.status==="ambiguous"?"Hay varias lecturas tonales cercanas. ":reading.status==="insufficient"?"Hay pocos acordes para determinar un centro. ":"Centro tonal provisional. ")+
+   "Se analizan acordes, no melodía, ritmo, duraciones ni límites de frase."};
+}
+
 function tonalHypotheses(chords){
  if(!Array.isArray(chords)||!chords.length)return {status:"empty",candidates:[],explanation:"Introduce acordes para explorar posibles centros tonales."};
  const patterns=[{mode:"mayor",steps:[0,2,4,5,7,9,11]},{mode:"menor natural",steps:[0,2,3,5,7,8,10]}];
@@ -1758,6 +1780,53 @@ function composerMemberName(chord,pc){
  const degree=distance===0?0:[1,2].includes(distance)?1:[3,4].includes(distance)?2:[5,6].includes(distance)?3:[7,8].includes(distance)?4:distance===9?5:6;
  return spellDegreePc(chord.root,degree,mod(pc),chord.label);
 }
+// Compare compositional routes by observable harmony, without style attribution
+// or treating an identical score on simple structural briefs as identical music.
+function composerRouteComparison(paths){
+ if(!Array.isArray(paths)||paths.length!==2||paths.some(p=>!p||!Array.isArray(p.chords)||!p.insights))
+  return null;
+ const [a,b]=paths;
+ const rootsA=a.chords.map(c=>mod(c.root)),rootsB=b.chords.map(c=>mod(c.root));
+ const sameLength=rootsA.length===rootsB.length;
+ const sameRoots=sameLength&&rootsA.every((root,i)=>root===rootsB[i]);
+ const changedColors=sameRoots?a.chords.filter((c,i)=>{
+  const other=b.chords[i];
+  const setA=[...new Set(c.notes.map(mod))].sort((x,y)=>x-y);
+  const setB=[...new Set(other.notes.map(mod))].sort((x,y)=>x-y);
+  return c.type!==other.type||setA.join(",")!==setB.join(",");
+ }).length:null;
+ const operations=p=>p.insights.transitions.map(x=>x.operator).filter(Boolean).join("–");
+ const opsA=operations(a),opsB=operations(b);
+ const rootChanges=sameLength?rootsA.filter((root,i)=>root!==rootsB[i]).length:null;
+ let message,dimension;
+ if(sameRoots&&changedColors>0){
+  dimension="color";
+  message="Comparten la misma secuencia de fundamentales, pero cambian las calidades o extensiones en "+
+   changedColors+" de "+a.chords.length+" posiciones. Escucha el color sin atribuirle automáticamente más emoción.";
+ }else if(opsA&&opsB&&opsA!==opsB){
+  dimension="transformation";
+  message="Las dos rutas muestran transformaciones triádicas en diferente orden: "+opsA+" frente a "+opsB+
+   ". Es un contraste de recorrido, no una clasificación de estilo.";
+ }else if(a.insights.returnToCenter!==b.insights.returnToCenter){
+  dimension="ending";
+  message="Una ruta vuelve a la fundamental inicial y la otra termina sobre una fundamental distinta; eso no confirma por sí solo una cadencia ni modulación.";
+ }else if(sameLength&&rootChanges>0){
+  dimension="roots";
+  message="Cambian "+rootChanges+" de "+a.chords.length+" fundamentales en las posiciones comparables. Explora si su dirección encaja con tu frase.";
+ }else if(a.insights.chromaticCount!==b.insights.chromaticCount){
+  dimension="chromatic";
+  message="Las rutas utilizan diferente cantidad de acordes ajenos al modo de referencia; eso no equivale necesariamente a más tensión percibida.";
+ }else if(a.insights.sharedLinkCount!==b.insights.sharedLinkCount){
+  dimension="shared-notes";
+  message="Las rutas difieren en enlaces con notas comunes. Es una medida de clases de altura, no de conducción de voces real.";
+ }else{
+  dimension="unresolved";
+  message="Las métricas armónicas no distinguen claramente ambas rutas. Para contrastarlas, prueba ritmo, registro o textura sin cambiar los acordes.";
+ }
+ return {dimension,message,sameRoots,changedColors,rootChanges,operators:[opsA,opsB],
+  limitation:"Comparación estructural de ejemplos originales; no se deduce timbre, emoción, calidad estética ni identidad exclusiva de un compositor."};
+}
+
 function composerRouteInsights(chords,tonic){
  if(!Array.isArray(chords)||chords.length<2)return {transitions:[],sharedLinkCount:0,chromaticCount:0,returnToCenter:false,ending:"Sin enlace suficiente."};
  const transitions=chords.slice(1).map((target,i)=>{
@@ -2124,5 +2193,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
