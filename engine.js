@@ -107,7 +107,10 @@ function classifyProgressionChord(chord,tonic,mode,nextChord){
  const allowed=new Set(scale(tonic,mode)),pcs=chord.notes.map(mod),inMode=pcs.every(p=>allowed.has(p));
  const currentMode=Object.entries(MODAL_INTERVALS).find(([,ints])=>ints.join(",")===mode.int.join(","))?.[0];
  const dominant=["major","dominant seventh"].includes(chord.quality)&&nextChord&&mod(chord.root+5)===mod(nextChord.root)&&pcs.includes(mod(nextChord.root+11));
- if(dominant){
+ // A diatonic I–IV is not, by itself, an applied dominant to IV.
+ // Reserve secondary-dominant classification for non-diatonic evidence;
+ // the primary V–I remains valid even when its notes fit the selected key.
+ if(dominant && (mod(nextChord.root)===mod(tonic) || !inMode)){
   const primary=mod(nextChord.root)===mod(tonic);
   const classification=primary?(inMode?"dominant":"modalDominant"):"secondaryDominant";
   return {classification,harmonicRole:classification,borrowed:false,chromatic:!inMode,explanation:classification==="dominant"?"Dominante diatónica que conduce a la tónica por quinta descendente.":classification==="modalDominant"?"Dominante mayor que introduce una sensible ajena al modo y conduce al centro modal.":"Dominante secundaria dirigida al acorde siguiente por relación de quinta; verifica sensible y resolución de la séptima."};
