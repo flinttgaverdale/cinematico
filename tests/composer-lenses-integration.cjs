@@ -66,7 +66,7 @@ assert.equal(labels('silvestri')[1][1],'G♭');
 assert.equal(labels('newman')[1].at(-1),'Fmaj7','Open ending should not manufacture an authentic cadence');
 assert.equal(labels('shore')[0][1],'Fm');
 assert.equal(labels('shore')[0][2],'F');
-assert.ok(labels('zimmer')[0][0]===labels('zimmer')[0][2],'Zimmer's exercise sustains a recognisable center');
+assert.ok(labels('zimmer')[0][0]===labels('zimmer')[0][2],"Zimmer exercise sustains a recognisable center");
 assert.notEqual(labels('zimmer')[0].join(' '),labels('goransson')[0].join(' '));
 const horner=E.composerCreativePaths('horner',0,'C').paths;
 for(const [index,ops] of [[0,['P','L','R']],[1,['R','L','P']]]){
