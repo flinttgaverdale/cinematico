@@ -30,6 +30,7 @@ jobs:
           node tests/composer-listening-regression.cjs
           node tests/contextual-voice-resolution.cjs
           node tests/independent-bass-suspension-slide.cjs
+          node tests/score-grounded-regression.cjs
           node tests/harmonic-context-composer-comparison.cjs
           node tests/continuation-diversity.cjs
           node tests/static-audit.cjs
