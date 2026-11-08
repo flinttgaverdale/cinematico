@@ -927,6 +927,813 @@ function harmonicTrajectories(chords,start=0){
    caveat:"Comparación de clases de altura sin melodía, ritmo, registro ni función tonal confirmada. Propuesta opcional: no modifica tu progresión."}];
  });
 }
+
+/* Evidence-informed composer exploration: non-destructive, original harmonic experiments. */
+const COMPOSER_CREATIVE_LENSES={
+ "williams": {
+  "mode": "ionian",
+  "focus": "Intercambio modal y control de la llegada",
+  "evidence": "A/B",
+  "work": "Star Wars — Binary Sunset",
+  "source": "https://academic.oup.com/book/63100/chapter/567207145",
+  "limit": "Sin frase y melodía no podemos confirmar una cadencia dramática ni un leitmotiv.",
+  "routes": [
+   {
+    "name": "Color que vuelve a casa",
+    "intention": "Prueba un iv menor y un retorno sobrio; decide si esa sombra basta.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     }
+    ]
+   },
+   {
+    "name": "Llegada con más recorrido",
+    "intention": "Contrasta una región cromática antes de V7–I; escucha si la resolución es demasiado explícita.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 5,
+      "a": -1,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "major",
+      "e": "7"
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     }
+    ]
+   }
+  ]
+ },
+ "herrmann": {
+  "mode": "aeolian",
+  "focus": "Recurrencia y fricción cromática",
+  "evidence": "A/B",
+  "work": "Vertigo — Main Title; Scene d'amour",
+  "source": "https://mtosmt.org/issues/mto.22.28.1/mto.22.28.1.murphy.php",
+  "limit": "Reiteración real, registro, duración y suspensión no se deducen de los acordes.",
+  "routes": [
+   {
+    "name": "Centro con roce cromático",
+    "intention": "Alterna la tónica menor con ♭II; el retorno mantiene un punto reconocible.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 1,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     }
+    ]
+   },
+   {
+    "name": "Región cercana pero extraña",
+    "intention": "Compara un acorde distante por semitono antes de regresar al mismo centro.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 6,
+      "a": 1,
+      "q": "major",
+      "e": "maj7"
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     }
+    ]
+   }
+  ]
+ },
+ "zimmer": {
+  "mode": "aeolian",
+  "focus": "Escalar una idea sin multiplicar los cambios",
+  "evidence": "C",
+  "work": "Interstellar — proceso del tema íntimo",
+  "source": "https://www.bafta.org/media-centre/press-releases/a-life-in-pictures-christopher-nolan/",
+  "limit": "El cifrado no demuestra pedal sostenido, capas, ostinato ni diseño sonoro.",
+  "routes": [
+   {
+    "name": "Permanencia del núcleo",
+    "intention": "Repite el centro menor entre cambios de color; prueba aumentar la densidad sin añadir acordes.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 5,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 5,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     }
+    ]
+   },
+   {
+    "name": "Arco modal sin clausura fuerte",
+    "intention": "Deja el ciclo en ♭VII; decide tú si prolongarlo o volver a i.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 5,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 2,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 6,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     }
+    ]
+   }
+  ]
+ },
+ "giacchino": {
+  "mode": "ionian",
+  "focus": "Identidad temática y grados de intimidad",
+  "evidence": "C",
+  "work": "Up — Married Life",
+  "source": "https://michaelgiacchino.com/projects/up/",
+  "limit": "Variación del motivo y tratamiento instrumental requieren melodía y contexto.",
+  "routes": [
+   {
+    "name": "Arco tonal sencillo",
+    "intention": "Imagina una melodía estable sobre acordes claros: deja respirar su frase.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 5,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "major",
+      "e": "7"
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     }
+    ]
+   },
+   {
+    "name": "El mismo arco con otro color",
+    "intention": "Compara extensiones suaves sin tocar el motivo imaginado: no tiene por qué sonar más emocional.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": "maj7"
+     },
+     {
+      "d": 5,
+      "a": 0,
+      "q": "minor",
+      "e": "7"
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "major",
+      "e": "maj7"
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "major",
+      "e": "7"
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": "maj7"
+     }
+    ]
+   }
+  ]
+ },
+ "elfman": {
+  "mode": "aeolian",
+  "focus": "Teatralidad cromática frente a fragilidad",
+  "evidence": "C",
+  "work": "Edward Scissorhands",
+  "source": "https://www.avclub.com/danny-elfman-on-oingo-boingo-film-scores-and-the-beat-1798274010",
+  "limit": "Un ♭II o un acorde disminuido no confirma danza, coro ni carácter grotesco.",
+  "routes": [
+   {
+    "name": "Gesto inquietante",
+    "intention": "Introduce ♭II y contrástalo con una dominante que busca regreso.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 1,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "major",
+      "e": "7"
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     }
+    ]
+   },
+   {
+    "name": "Fragilidad sin sobresalto",
+    "intention": "Cambia el cromatismo explícito por un color mayor suave; evita imponer un vals.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 5,
+      "a": 0,
+      "q": "major",
+      "e": "maj7"
+     },
+     {
+      "d": 2,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     }
+    ]
+   }
+  ]
+ },
+ "silvestri": {
+  "mode": "ionian",
+  "focus": "Color lidio y relaciones de tritono",
+  "evidence": "A/B",
+  "work": "Back to the Future — análisis con notación",
+  "source": "https://www.blogs.berklee.edu/wp-content/uploads/2017/09/BTTF-Analysis.pdf",
+  "limit": "Un acorde de tritono no certifica una escala octatónica, ni la cifra identifica el motivo de la película.",
+  "routes": [
+   {
+    "name": "Brillo lidio",
+    "intention": "Colorea la tónica con ♯11 y explora II mayor; no es obligado convertirlo en V/V.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": "maj7#11"
+     },
+     {
+      "d": 1,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     }
+    ]
+   },
+   {
+    "name": "Choque por tritono",
+    "intention": "Compara dos centros separados seis semitonos y regresa mediante IV.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 4,
+      "a": -1,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     }
+    ]
+   }
+  ]
+ },
+ "horner": {
+  "mode": "aeolian",
+  "focus": "Continuidad por transformaciones triádicas",
+  "evidence": "A/B",
+  "work": "A Beautiful Mind — análisis neo-riemanniano",
+  "source": "https://franklehman.com/wp-content/uploads/2020/02/MTS-Article.pdf",
+  "limit": "Estos son ejercicios originales P/L/R; el análisis académico trata una red L/R/S más compleja.",
+  "routes": [
+   {
+    "name": "Cadena P–L–R",
+    "intention": "Escucha dos notas comunes en cada cambio, incluso al abandonar el centro menor.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 2,
+      "a": 1,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     }
+    ]
+   },
+   {
+    "name": "Cadena R–L–P",
+    "intention": "Parte de la misma tríada y construye otra trayectoria de proximidad entre voces.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 2,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     }
+    ]
+   }
+  ]
+ },
+ "shore": {
+  "mode": "aeolian",
+  "focus": "Retorno y relectura modal de una idea",
+  "evidence": "B/C",
+  "work": "The Lord of the Rings — transformaciones de temas",
+  "source": "https://howardshore.com/works/concert/the-two-towers-live-to-projection/",
+  "limit": "Una transformación de leitmotiv no puede verificarse solo a partir de acordes.",
+  "routes": [
+   {
+    "name": "El mismo centro, otro modo",
+    "intention": "Contrasta iv menor e IV mayor sin cambiar el punto de partida.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "major",
+      "e": "7"
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     }
+    ]
+   },
+   {
+    "name": "Recorrido y regreso",
+    "intention": "Dale tiempo a la región ♭VI antes de cerrar en menor; conserva tu idea melódica si la tienes.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 5,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "major",
+      "e": "7"
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     }
+    ]
+   }
+  ]
+ },
+ "morricone": {
+  "mode": "aeolian",
+  "focus": "Economía de materiales y módulos contrastantes",
+  "evidence": "C",
+  "work": "Once Upon a Time in the West; The Mission",
+  "source": "https://blog.oup.com/2019/03/maestro-speaks-ennio-morricone-life-music/",
+  "limit": "La armónica, el oboe y el sentido narrativo no son propiedades de la progresión armónica.",
+  "routes": [
+   {
+    "name": "Giro de pocos materiales",
+    "intention": "Trabaja tres regiones y repite un gesto propio; prueba qué sucede al quitar una.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 6,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 5,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     }
+    ]
+   },
+   {
+    "name": "Centro frente a color modal",
+    "intention": "Contrasta i con IV mayor y ♭VII; valora un pedal hipotético sin asumir que ya existe.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 6,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     }
+    ]
+   }
+  ]
+ },
+ "newman": {
+  "mode": "ionian",
+  "focus": "Sonoridad abierta y posibilidad de no cerrar",
+  "evidence": "C",
+  "work": "Saving Mr. Banks; American Beauty",
+  "source": "https://www.bfi.org.uk/interviews/scoring-mr-banks-composers-life-hollywood",
+  "limit": "Espacio, silencio y colocación de voces no pueden inferirse del cifrado.",
+  "routes": [
+   {
+    "name": "Color sin sobresalto",
+    "intention": "Mantén extensiones ligeras entre regiones próximas y compara si necesitas resolver.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": "add9"
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "major",
+      "e": "maj7"
+     },
+     {
+      "d": 1,
+      "a": 0,
+      "q": "minor",
+      "e": "7"
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": "add9"
+     }
+    ]
+   },
+   {
+    "name": "Final deliberadamente abierto",
+    "intention": "Prueba acabar en IVmaj7 sin cadencia auténtica; el silencio posterior lo decides tú.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "major",
+      "e": "add9"
+     },
+     {
+      "d": 4,
+      "a": 0,
+      "q": "major",
+      "e": "sus4"
+     },
+     {
+      "d": 5,
+      "a": 0,
+      "q": "minor",
+      "e": "7"
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "major",
+      "e": "maj7"
+     }
+    ]
+   }
+  ]
+ },
+ "goransson": {
+  "mode": "aeolian",
+  "focus": "Cambio de energía sobre material reconocible",
+  "evidence": "C",
+  "work": "Oppenheimer — Can You Hear the Music",
+  "source": "https://www.nme.com/features/film-interviews/oppenheimer-score-soundtrack-ludwig-goransson-christopher-nolan-3471661",
+  "limit": "Velocidad, vibrato, acentos y articulación requieren decisiones temporales e instrumentales.",
+  "routes": [
+   {
+    "name": "Armonía con retornos",
+    "intention": "Conserva i entre regiones; contrasta una versión sobria y otra con articulación más tensa.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 5,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 6,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     }
+    ]
+   },
+   {
+    "name": "Otra curva de tensión",
+    "intention": "Cambia la ruta armónica, pero mantén un mismo motivo rítmico imaginado para comparar energía.",
+    "steps": [
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 3,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     },
+     {
+      "d": 6,
+      "a": 0,
+      "q": "major",
+      "e": ""
+     },
+     {
+      "d": 0,
+      "a": 0,
+      "q": "minor",
+      "e": ""
+     }
+    ]
+   }
+  ]
+ }
+};
+
+function composerCreativePaths(composerId,tonic,keyName){
+ const profile=COMPOSER_CREATIVE_LENSES[composerId];
+ if(!profile||!Number.isInteger(tonic)||tonic<0||tonic>11)return null;
+ const mode={int:MODAL_INTERVALS[profile.mode]};
+ const destinationKey=keyName||rootKeyName(tonic);
+ const paths=profile.routes.map((r)=>{
+  const chords=buildProfileProgression(r.steps,tonic,mode,destinationKey);
+  const sameAsPrevious=chords.slice(1).filter((c,i)=>c.label===chords[i].label).length;
+  const chromatic=chords.filter(c=>c.chromatic).length;
+  const commonTransitions=chords.slice(1).map((c,i)=>chords[i].commonWithNext.length);
+  return {id:r.name,name:r.name,intention:r.intention,chords,
+   chromaticChords:chromatic,commonTransitions,
+   note:"Ejercicio creativo original. Ninguna de estas cifras equivale a una transcripción o una predicción de estilo."};
+ });
+ return {composerId,modeKey:profile.mode,focus:profile.focus,evidence:profile.evidence,
+  work:profile.work,source:profile.source,limit:profile.limit,paths,
+  originalIsUntouched:true,
+  caveat:"La armonía es un punto de partida: melodía, ritmo, registro y orquestación siguen bajo control del compositor."};
+}
+
 /* Explainable composition assistance: observations and optional experiments, never edits. */
 const COMPOSER_TECHNIQUES={
  williams:[{id:"sequence",name:"Secuencia motívica",domain:"Desarrollo",reason:"Traslada un motivo por grados sucesivos para construir dirección, conservando su identidad rítmica.",action:"Prueba una secuencia ascendente o descendente de tu motivo; decide tú dónde interrumpirla.",source:"Lenguaje sinfónico y desarrollo temático; recurso compartido con la tradición romántica."},{id:"dominant",name:"Preparación de dominante",domain:"Armonía",reason:"Una dominante preparada puede reforzar la llegada sin reemplazar tu tema.",action:"Examina si el penúltimo acorde admite una dominante secundaria o una cadencia más dirigida.",source:"Sintaxis tonal sinfónica; no exclusiva de Williams."},{id:"counterpoint",name:"Contramelodía",domain:"Textura",reason:"Una segunda línea puede intensificar el desarrollo sin modificar la melodía principal.",action:"Busca notas comunes y movimiento contrario en una voz secundaria.",source:"Escritura contrapuntística sinfónica."}],
@@ -973,7 +1780,7 @@ function composerAssistance(composerId,progression=[]){
   let observation="Aplica esta técnica a un fragmento de tu propia idea.";
   if(t.id==="chromatic"&&chords.length){
    const c=chords.find(c=>c.type===""||c.type==="m");
-   if(c)observation="La tríada "+c.label+" admite operaciones P, L y R: compara notas comunes antes de escoger.";
+   if(c)observation="En "+c.label+" puedes desplazar una sola nota un semitono, conservando las otras dos. Es una exploración de fricción cromática, no una técnica exclusiva ni una secuencia detectada.";
   }else if(t.id==="dominant"&&chords.length>1){
    observation="Revisa la llegada de "+chords[chords.length-2].label+" a "+chords[chords.length-1].label+" y escucha si pide una preparación más dirigida.";
   }else if(t.id==="pedal"&&chords.length){
@@ -1237,5 +2044,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
