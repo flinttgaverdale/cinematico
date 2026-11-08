@@ -477,8 +477,13 @@ function cadenceEvidence(chords,tonic,mode){
    events.push({kind:"V7/"+spell(curRoot),index:i,weight:.65,description:"Dominante secundaria con resolución local; posible tonicización"});
  }
  // Ending on a dominant is a harmonic half-cadence clue, not proof of a phrase ending.
- if(chords.length>=2&&isDominant(chords[chords.length-1])&&!isDominant(chords[chords.length-2]))
+ if(chords.length>=2&&isDominant(chords[chords.length-1])&&!isDominant(chords[chords.length-2])){
   events.push({kind:"semicadencia posible",index:chords.length-1,weight:.4,description:"Final del fragmento sobre dominante; requiere comprobar frase y métrica"});
+  const preceding=chords[chords.length-2];
+  const earlierTonic=chords.slice(0,-2).some(c=>isTonic(c));
+  if(earlierTonic&&isPredominant(preceding))
+   events.push({kind:"tónica–predominante–V posible",index:chords.length-1,weight:1.5,description:"Dirección T–PD–V hacia la dominante; no confirma una semicadencia formal"});
+ }
  return events;
 }
 // Evidence for chromatic dominant practice in minor. This describes harmonic
@@ -514,7 +519,7 @@ function tonalHypotheses(chords){
    if(scaleSet.has(mod(chord.root)))roots+=weight;
    if(mod(chord.root)===tonic)tonicRoots+=i===chords.length-1?1.3:1;
   }
-  const cadences=cadenceEvidence(chords,tonic,pattern.mode);const cadenceScore=cadences.reduce((sum,x)=>sum+x.weight,0);const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8+cadenceScore;
+  const cadences=cadenceEvidence(chords,tonic,pattern.mode);const cadenceScore=cadences.reduce((sum,x)=>sum+x.weight*(x.index===chords.length-1?1:.45),0);const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8+cadenceScore;
   candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,displayLabel:spell(tonic)+" "+(pattern.mode==="menor natural"?"menor":"mayor"),score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences,minorDominant:pattern.mode==="menor natural"?minorDominantEvidence(chords,tonic):null});
  }
  candidates.sort((a,b)=>b.score-a.score||a.tonic-b.tonic);
