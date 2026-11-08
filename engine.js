@@ -763,13 +763,22 @@ function harmonicContinuations(chords){
 
 // Emotion-specific continuation studies. All proposals are non-destructive and
 // describe harmonic devices, not a reliable prediction of perceived emotion.
-// Degrees are relative to the last chord root; no global key is presumed.
+// Degrees use a tentative tonal center, falling back to the last chord root.
+ // A final V7 can point toward a previously stated tonic, without establishing a cadence.
 function emotionalContinuations(chords,emotion){
  if(!Array.isArray(chords)||!chords.length)return [];
  const last=chords[chords.length-1];
  if(!last||!Number.isFinite(last.root)||!Array.isArray(last.notes))return [];
- const root=mod(last.root),minor=last.type==="m"||last.type==="m7";
- const tonic=mod(root+(minor?0:0));
+ const root=mod(last.root);
+  const tonal=tonalHypotheses(chords),leading=tonal.candidates[0];
+  const gap=leading&&tonal.candidates[1]?leading.score-tonal.candidates[1].score:0;
+  const dominantGoal=mod(root+5);
+  // Prefer a root already stated earlier when the final V7 targets it.
+  const tonicInHistory=last.type==="7"?chords.slice(0,-1).find(c=>mod(c.root)===dominantGoal&&["","m","maj7","m7","add9","madd9"].includes(c.type)):null;
+  const reliableCenter=tonal.status==="suggestive"&&gap>=0.9&&chords.length>=3;
+  const tonic=tonicInHistory?dominantGoal:(reliableCenter?leading.tonic:root);
+  const minor=tonicInHistory?["m","m7","madd9"].includes(tonicInHistory.type):(reliableCenter?leading.mode==="menor natural":["m","m7","madd9"].includes(last.type));
+  const anchorBasis=tonicInHistory?"dominante dirigida a una tónica anterior":reliableCenter?"principal hipótesis tonal":"último acorde (sin centro confirmado)";
  const make=(offset,kind="M")=>{
   const r=mod(tonic+offset);
   const intervals={M:[0,4,7],m:[0,3,7],dom:[0,4,7,10],maj7:[0,4,7,11],m7:[0,3,7,10],sus4:[0,5,7],add9:[0,4,7,14],madd9:[0,3,7,14],dim:[0,3,6]}[kind];
@@ -797,7 +806,9 @@ function emotionalContinuations(chords,emotion){
  const spec=recipes[emotion]||recipes.misterio;
  const context=new Set(chords.slice(-4).flatMap(c=>c.notes.map(mod)));
  const fingerprint=c=>[...new Set(c.notes.map(mod))].sort((a,b)=>a-b).join(",");
- const seen=new Set(),options=[];const tonal=tonalHypotheses(chords),leading=tonal.candidates[0];const plausible=tonal.candidates.filter(c=>leading.score-c.score<0.65);
+ const seen=new Set(),options=[];
+  const plausible=tonal.candidates.filter(c=>leading.score-c.score<0.65);
+  if(!plausible.some(c=>c.tonic===tonic))plausible.unshift({tonic,mode:minor?"menor natural":"mayor",label:spell(tonic)+(minor?" menor":" mayor")});
  for(const pattern of spec.patterns){
   const path=pattern.map(([offset,kind])=>make(offset,kind));
   if(path.some((c,i)=>!c||fingerprint(c)===fingerprint(i?path[i-1]:last)))continue;
@@ -806,13 +817,13 @@ function emotionalContinuations(chords,emotion){
   const full=[last,...path],shared=full.slice(1).map((c,i)=>c.notes.filter(n=>full[i].notes.some(p=>mod(p)===mod(n))).length);
   const movement=full.slice(1).map((c,i)=>pitchClassMotionEstimate(full[i],c).distance);
   const familiarity=path[0].notes.filter(n=>context.has(mod(n))).length;
-  const cadenceFit=plausible.length?Math.max(...plausible.map(c=>cadenceEvidence([...chords,...path],c.tonic,c.mode).filter(x=>x.index>=chords.length).reduce((sum,x)=>sum+x.weight,0))):0;const contextFit=path.reduce((sum,c)=>sum+c.notes.filter(n=>context.has(mod(n))).length,0);const score=shared.reduce((a,b)=>a+b,0)*2+familiarity*2+contextFit*.5+cadenceFit*2-movement.reduce((a,b)=>a+b,0);const lastRoot=mod(path[path.length-1].root);const resolves=plausible.some(c=>lastRoot===c.tonic);const dominantEnding=plausible.some(c=>lastRoot===mod(c.tonic+7));const direction=resolves?"resolver":dominantEnding?"mantener tensión":cadenceFit>0?"tonicizar":"cambiar dirección";
-  const lead=plausible[0],center=lead?lead.label:null;
+  const cadenceFit=plausible.length?Math.max(...plausible.map(c=>cadenceEvidence([...chords,...path],c.tonic,c.mode).filter(x=>x.index>=chords.length).reduce((sum,x)=>sum+x.weight,0))):0;const contextFit=path.reduce((sum,c)=>sum+c.notes.filter(n=>context.has(mod(n))).length,0);const score=shared.reduce((a,b)=>a+b,0)*2+familiarity*2+contextFit*.5+cadenceFit*2-movement.reduce((a,b)=>a+b,0);const lastRoot=mod(path[path.length-1].root);const resolves=lastRoot===tonic||plausible.some(c=>lastRoot===c.tonic);const dominantEnding=lastRoot===mod(tonic+7)||plausible.some(c=>lastRoot===mod(c.tonic+7));const direction=resolves?"resolver":dominantEnding?"mantener tensión":cadenceFit>0?"tonicizar":"cambiar dirección";
+  const center=spell(tonic)+(minor?" menor":" mayor");
   const startLink=shared[0]||0;
   const continuity=startLink>=2?"El primer acorde propuesto conserva "+startLink+" notas con tu último acorde.":startLink===1?"El primer acorde propuesto conserva una nota con tu último acorde.":"El primer acorde propuesto cambia todas las notas del último acorde.";
   const directionText=direction==="resolver"?"La secuencia termina sobre una posible tónica"+(center?" ("+center+")":"")+".":direction==="mantener tensión"?"La secuencia termina sobre una posible dominante y deja abierta la resolución.":direction==="tonicizar"?"Aparece una relación de dominante que puede sugerir un centro local.":"La secuencia se aleja de una llegada tonal clara y permite explorar otro recorrido.";
-  const explanation=continuity+" "+directionText+" "+spec.why+" Es una lectura de acordes: la melodía y el ritmo pueden modificarla.";
-  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,cadenceFit,direction,explanation,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
+  const explanation=continuity+" "+directionText+" "+spec.why+" Centro de referencia: "+center+" ("+anchorBasis+"). No se confirma tonalidad ni cadencia sin frase, melodía y ritmo.";
+  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,cadenceFit,direction,explanation,suggestedCenter:center,anchorBasis,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
  }
  options.sort((a,b)=>b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
  const distinct=[],used=new Set();for(const o of options){if(!used.has(o.direction)){distinct.push(o);used.add(o.direction);}}for(const o of options){if(distinct.length>=3)break;if(!distinct.includes(o))distinct.push(o);}return distinct.slice(0,3).map((o,i)=>({...o,variant:i+1,title:i===0?spec.title:spec.title+" · alternativa "+(i+1)}));
