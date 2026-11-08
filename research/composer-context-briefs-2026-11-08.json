@@ -98,12 +98,12 @@
     },
     {
       "id": "soledad",
-      "title": "Soledad sin dominante",
-      "brief": "Quiero menor, salida abierta y no recurrir a V–i final.",
+      "title": "Soledad con pocos acordes y salida abierta",
+      "brief": "Quiero empezar en menor, usar como máximo dos regiones de fundamentales y dejar la salida abierta.",
       "criteria": [
         "minor",
-        "openRoot",
-        "noVClosing"
+        "fewRoots",
+        "openRoot"
       ]
     },
     {
