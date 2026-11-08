@@ -219,7 +219,17 @@ function voicingCandidates(chord,style="cinematic"){
  const possibilities=ranges.map(([lo,hi])=>Array.from({length:hi-lo+1},(_,i)=>lo+i).filter(n=>pcs.includes(n%12)));
  const out=[];
  // Assign each distinct chord tone at least once when possible; extensions beyond four tones are optional.
- const required=pcs.length<=4?pcs:pcs.filter(p=>[0,3,4,6,7,8,10,11].some(x=>mod(chord.root+x)===p)).slice(0,4);
+ // With five pitch classes and four voices, preserve the color-defining tones:
+ // root, third, seventh and ninth/#11; omit the perfect fifth when necessary.
+ const colorIntervals={
+  "maj7#11":[0,4,11,6],
+  "m9":[0,3,10,2],
+  "maj9":[0,4,11,2],
+  "9":[0,4,10,2]
+ };
+ const prioritized=colorIntervals[chord.type]?.map(n=>mod(chord.root+n)).filter(pc=>pcs.includes(pc));
+ const required=pcs.length<=4?pcs:prioritized?.length===4?prioritized:
+  pcs.filter(p=>[0,3,4,6,7,8,10,11].some(x=>mod(chord.root+x)===p)).slice(0,4);
  const bassPc=mod(chord.bass??chord.root);
  function walk(i,notes){
   if(out.length>=650)return;
