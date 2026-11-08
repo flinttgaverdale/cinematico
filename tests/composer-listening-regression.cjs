@@ -28,6 +28,16 @@ for(const id of Object.keys(E.COMPOSER_CREATIVE_LENSES)){
      assert.ok(hz>20&&hz<20000);
     });
    });
+   const pulse=E.composerListeningPlan(route.chords,{equalChordDuration:true});
+   assert.equal(pulse.status,"ready");
+   assert.equal(pulse.timingBasis,"equal-chord");
+   assert.equal(pulse.totalSeconds,route.chords.length*2);
+   assert.match(pulse.warning,/duración total distinta/);
+   pulse.steps.forEach((step,i)=>{
+    assert.equal(step.startSeconds,i*2);
+    assert.equal(step.durationSeconds,2);
+    assert.equal(step.pitches.length,4);
+   });
    assert.equal(JSON.stringify(route.chords),sourceSnapshots[n],"Audio cannot alter the original progression");
    compared++;
   }
