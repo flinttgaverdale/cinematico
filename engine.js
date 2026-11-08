@@ -989,12 +989,13 @@ function emotionalContinuations(chords,emotion){
   const chromaticDeparture=["misterio","asombro","contraste","inquietud","oscuridad"].includes(emotion);
   const majorMinorTurn=resolves&&((minor&&["","maj7","add9"].includes(ending.type))||
       (!minor&&["m","m7","madd9"].includes(ending.type)));
-  const direction=suspended||dominantEnding?"mantener tensión":
-    chromaticDeparture||majorMinorTurn||!resolves?"cambiar dirección":"resolver";
+  const direction=suspended?"mantener tensión":
+    chromaticDeparture||majorMinorTurn?"cambiar dirección":
+    dominantEnding?"mantener tensión":!resolves?"cambiar dirección":"resolver";
   const center=tonalCenterSpelling(tonic,minor,chords)+(minor?" menor":" mayor");
   const startLink=shared[0]||0;
   const continuity=startLink>=2?"El primer acorde propuesto conserva "+startLink+" notas con tu último acorde.":startLink===1?"El primer acorde propuesto conserva una nota con tu último acorde.":"El primer acorde propuesto cambia todas las notas del último acorde.";
-  const directionText=direction==="resolver"?"La secuencia termina en una posible llegada tonal"+(center?" ("+center+")":"")+", no confirmada sin frase.":direction==="mantener tensión"?(suspended?"La cuarta suspendida del último acorde deja una resolución posible sin completar.":"La ruta termina cerca de una dominante posible y mantiene abierta la llegada."):"La ruta cambia el color o la región armónica respecto al centro de referencia; no confirma modulación.";
+  const directionText=direction==="resolver"?"La secuencia termina en una posible llegada tonal"+(center?" ("+center+")":"")+", no confirmada sin frase.":direction==="mantener tensión"?(suspended?"La cuarta suspendida del último acorde deja una resolución posible sin completar.":"La ruta termina cerca de una dominante posible y mantiene abierta la llegada."):majorMinorTurn?"La llegada cambia el color mayor/menor respecto al centro de referencia; es una exploración, no una modulación demostrada.":"La ruta cambia el color o la región armónica respecto al centro de referencia; no confirma modulación.";
   const explanation=continuity+" "+directionText+" "+spec.why+" Centro de referencia: "+center+" ("+anchorBasis+"). No se confirma tonalidad ni cadencia sin frase, melodía y ritmo.";
   options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,cadenceFit,direction,explanation,suggestedCenter:center,anchorBasis,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
  }
