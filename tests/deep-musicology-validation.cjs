@@ -41,14 +41,12 @@ for(const scenario of cases){
   const shifted=source.map(ch=>({...ch,root:mod(ch.root+shift),
    bass:mod(ch.bass+shift),notes:ch.notes.map(n=>mod(n+shift))}));
   const result=E.cadenceEvidence(shifted,mod(scenario.tonic+shift),scenario.mode);
-  // Applied-dominant targets are re-spelled after transposition; compare
-  // harmonic function, not the literal pitch name of the original key.
-  for(const expected of scenario.required||[])
-   assert.ok(expected.startsWith('V7/')?result.some(e=>e.kind.startsWith('V7/')):matches(result,expected),
-    scenario.id+' transposition +'+shift+' missing '+expected);
-  for(const absent of scenario.forbidden||[])
-   assert.ok(!(absent.startsWith('V7/')?result.some(e=>e.kind.startsWith('V7/')):matches(result,absent)),
-    scenario.id+' transposition +'+shift+' false '+absent);
+  // Compare every event, including its exact destination and position.
+  const canonical=(events,offset)=>events.map(e=>({
+   ...e,kind:e.kind.startsWith('V7/')?'V7/pc'+mod(parse(e.kind.slice(3))[0].root-offset):e.kind
+  }));
+  assert.deepEqual(canonical(result,shift),canonical(sourceResult,0),
+   scenario.id+' transposition +'+shift+' changed harmonic evidence');
   if(typeof scenario.raisedLeadingTone==='boolean')
    assert.equal(E.minorDominantEvidence(shifted,mod(scenario.tonic+shift)).raisedLeadingTone,
     scenario.raisedLeadingTone,scenario.id+' transposition +'+shift);

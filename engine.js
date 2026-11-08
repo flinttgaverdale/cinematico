@@ -500,14 +500,25 @@ function parseUserProgression(input){
  }
  return {chords:errors.length?[]:chords,errors};
 }
+// Chord families preserve triadic identity when optional colors are added.
+const MAJOR_TONIC_TYPES=["","maj7","maj9","maj7#11","add9","6"];
+const MINOR_TONIC_TYPES=["m","m7","m9","mMaj7","madd9","m6"];
+const DOMINANT_TYPES=["","7","9"];
+// A diatonic target is identified by its triad, never by a count of matching
+// notes: Bm7 has three C-major notes, but its F# makes the triad non-diatonic.
+function diatonicTargetTriad(chord,scaleSet){
+ const intervals=chord.notes.map(n=>mod(n-chord.root));
+ const third=intervals.includes(4)?4:intervals.includes(3)?3:null;
+ return third!==null&&[0,third,7].every(n=>intervals.includes(n)&&scaleSet.has(mod(chord.root+n)));
+}
 // Symbolic cadence evidence. No claim about meter, melody, or phrase boundaries.
 function cadenceEvidence(chords,tonic,mode){
  const events=[];if(!Array.isArray(chords)||!chords.length)return events;
  const minor=mode==="menor natural",t=mod(tonic),v=mod(t+7),ii=mod(t+2),iv=mod(t+5);
- const tonicQuality=minor?["m","m7","madd9"]:["","maj7","add9"];
+ const tonicQuality=minor?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES;
  const isTonic=c=>mod(c.root)===t&&tonicQuality.includes(c.type);
- const isDominant=c=>mod(c.root)===v&&(c.type===""||c.type==="7");
- const isPredominant=c=>(mod(c.root)===ii&&(minor?["dim","m7b5","m"].includes(c.type):["m","m7"].includes(c.type)))||(mod(c.root)===iv&&(minor?["m","m7"].includes(c.type):["","maj7"].includes(c.type)));
+ const isDominant=c=>mod(c.root)===v&&DOMINANT_TYPES.includes(c.type);
+ const isPredominant=c=>(mod(c.root)===ii&&(minor?["dim","m7b5","m"].includes(c.type):["m","m7","m9","madd9"].includes(c.type)))||(mod(c.root)===iv&&(minor?["m","m7","m9","madd9"].includes(c.type):MAJOR_TONIC_TYPES.includes(c.type)));
  const diatonic=new Set((minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11]).map(n=>mod(t+n)));
  for(let i=1;i<chords.length;i++){
   const prev=chords[i-1],cur=chords[i],prevRoot=mod(prev.root),curRoot=mod(cur.root);
@@ -517,12 +528,12 @@ function cadenceEvidence(chords,tonic,mode){
    if(i>=2&&isPredominant(chords[i-2]))events.push({kind:"predominante–V–I/i",index:i,weight:2.3,description:"Preparación predominante, dominante y llegada"});
   }
   if(prevRoot===iv&&isTonic(cur)&&isPredominant(prev))events.push({kind:"IV–I / iv–i",index:i,weight:.8,description:"Movimiento plagal posible"});
-  if(isDominant(prev)&&curRoot===mod(t+(minor?8:9))&&((minor&&cur.type==="")||(!minor&&cur.type==="m")))
+  if(isDominant(prev)&&curRoot===mod(t+(minor?8:9))&&(minor?MAJOR_TONIC_TYPES:MINOR_TONIC_TYPES).includes(cur.type))
    events.push({kind:minor?"V–VI":"V–vi",index:i,weight:.7,description:"Resolución interrumpida posible"});
-  // Applied V7: a major dominant seventh resolves down a fifth to a diatonic chord other than the tonic.
-  if(prev.type==="7"&&curRoot===mod(prevRoot+5)&&diatonic.has(curRoot)&&curRoot!==t&&prevRoot!==v
-    &&["","m","maj7","m7","add9","madd9"].includes(cur.type)
-    &&cur.notes.filter(pc=>diatonic.has(mod(pc))).length>=3)
+  // Applied dominant-seventh core, optionally with a ninth. V7/ names
+  // the functional core, not an exact transcription of every extension.
+  if(["7","9"].includes(prev.type)&&curRoot===mod(prevRoot+5)&&diatonic.has(curRoot)&&curRoot!==t&&prevRoot!==v
+    &&diatonicTargetTriad(cur,diatonic))
    events.push({kind:"V7/"+spell(curRoot),index:i,weight:.65,description:"Dominante secundaria con resolución local; posible tonicización"});
  }
  // Ending on a dominant is a harmonic half-cadence clue, not proof of a phrase ending.
@@ -542,12 +553,12 @@ function minorDominantEvidence(chords,tonic){
  if(!Array.isArray(chords)||!chords.length)return empty("No hay acordes para evaluar una dominante en menor.");
  const t=mod(tonic),leading=mod(t+11),dominantRoot=mod(t+7);
  // A major V7 implies a raised leading tone in minor only if the minor tonic is evidenced.
- const minorContext=chords.some(ch=>ch&&mod(ch.root)===t&&["m","m7","madd9"].includes(ch.type));
+ const minorContext=chords.some(ch=>ch&&mod(ch.root)===t&&MINOR_TONIC_TYPES.includes(ch.type));
  if(!minorContext)return empty("No hay tónica menor que justifique atribuir a este centro una sensible elevada.");
  const indices=[];
  for(let i=0;i<chords.length;i++){
   const ch=chords[i];if(!ch||!Array.isArray(ch.notes))continue;
-  if(mod(ch.root)===dominantRoot&&["","7"].includes(ch.type)&&ch.notes.some(n=>mod(n)===leading))indices.push(i);
+  if(mod(ch.root)===dominantRoot&&DOMINANT_TYPES.includes(ch.type)&&ch.notes.some(n=>mod(n)===leading))indices.push(i);
  }
  return {raisedLeadingTone:indices.length>0,dominantMajor:indices.length>0,minorContext:true,indices,
   description:indices.length?"Se observan tónica menor y dominante mayor con sensible elevada; es práctica tonal menor, no prueba de una escala fija.":"Hay tónica menor, pero no se observa su dominante mayor con sensible elevada."};
@@ -592,11 +603,11 @@ function tonalHypotheses(chords){
  const candidates=[];
  for(let tonic=0;tonic<12;tonic++)for(const pattern of patterns){
   const scaleSet=new Set(pattern.steps.map(x=>mod(x+tonic)));
-  const minorContext=pattern.mode==="menor natural"&&chords.some(ch=>mod(ch.root)===tonic&&["m","m7","madd9"].includes(ch.type));
+  const minorContext=pattern.mode==="menor natural"&&chords.some(ch=>mod(ch.root)===tonic&&MINOR_TONIC_TYPES.includes(ch.type));
   let coverage=0,roots=0,tonicRoots=0,totalWeight=0;
   for(let i=0;i<chords.length;i++){
    const chord=chords[i],weight=i===chords.length-1?1.15:1;totalWeight+=weight;
-   const majorV=minorContext&&mod(chord.root)===mod(tonic+7)&&["","7"].includes(chord.type);
+   const majorV=minorContext&&mod(chord.root)===mod(tonic+7)&&DOMINANT_TYPES.includes(chord.type);
    coverage+=weight*(chord.notes.filter(pc=>scaleSet.has(mod(pc))||(majorV&&mod(pc)===mod(tonic+11))).length/chord.notes.length);
    if(scaleSet.has(mod(chord.root)))roots+=weight;
    if(mod(chord.root)===tonic)tonicRoots+=i===chords.length-1?1.3:1;
