@@ -20,6 +20,7 @@ jobs:
           node tests/musicology-regression.cjs
           node tests/musicology-precision.cjs
           node tests/composer-research-regression.cjs
+          node tests/composer-lenses-integration.cjs
           node tests/static-audit.cjs
       - name: Install browser runner
         run: |
