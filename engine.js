@@ -273,55 +273,49 @@ function neoTransform(root,quality,operation){
  return {operation,source:{root:mod(root),quality,notes:source},target:{root:targetRoot,quality:targetQuality,notes:target},common,movement,description:{P:"Paralela: conserva fundamental y quinta; cambia la tercera.",L:"Leittonwechsel: conserva dos notas y desplaza la tercera voz un semitono.",R:"Relativa: conserva dos notas y desplaza la tercera voz un tono."}[operation]};
 }
 function tendencyResolution(a,b,fromChord,toChord,style="classical"){
- // Without a demonstrated tonal center a plain major chord moving down a fifth may be I–IV.
- // Require an explicit dominant seventh and fifth-related root movement before penalizing
- // unresolved tendency tones. No function is inferred from an added ninth or maj7 chord.
- if(!fromChord||!toChord||fromChord.type!=="7"||mod(fromChord.root+5)!==mod(toChord.root))
-  return {penalty:0,leadingTone:0,seventh:0,details:[]};
+ const blank=()=>({penalty:0,leadingTone:0,seventh:0,retainedLeadingTone:0,details:[],observations:[]});
+ if(!fromChord||!toChord||a.length!==b.length||fromChord.type!=="7"||
+    mod(fromChord.root+5)!==mod(toChord.root))return blank();
  const intervals=new Set(fromChord.notes.map(p=>mod(p-fromChord.root)));
- if(!intervals.has(4)||!intervals.has(7)||!intervals.has(10))
-  return {penalty:0,leadingTone:0,seventh:0,details:[]};
+ if(!intervals.has(4)||!intervals.has(7)||!intervals.has(10))return blank();
  const target=mod(toChord.root),leading=mod(target-1),seventh=mod(fromChord.root+10);
- let penalty=0,leadingTone=0,seventhCount=0;const details=[];
- for(let i=1;i<4;i++){
+ const retainedColor=["maj7","maj9","maj7#11"].includes(toChord.type)&&
+  (toChord.notes||[]).some(pc=>mod(pc)===leading);
+ const names=a.length===3?["Bajo","Intermedia","Superior"]:["Bajo","Tenor","Alto","Soprano"];
+ let penalty=0,leadingTone=0,seventhCount=0,retainedLeadingTone=0;
+ const details=[],observations=[];
+ for(let i=1;i<a.length;i++){
   if(mod(a[i])===leading){
    const resolved=mod(b[i])===target&&b[i]-a[i]===1;
-   // In a tonic maj7, the former leading tone may deliberately persist as
-   // a common-tone color. Keep strict classical detection separately.
-   const tonicMajorSeventh=toChord.type==="maj7"&&toChord.notes.some(pc=>mod(pc)===leading);
-   const intentionallyHeld=tonicMajorSeventh&&b[i]===a[i];
-   if(!resolved&&!(style!=="classical"&&intentionallyHeld)){
+   const heldAsMajorSeventh=retainedColor&&style!=="classical"&&b[i]===a[i];
+   if(heldAsMajorSeventh){
+    retainedLeadingTone++;
+    observations.push({kind:"retained-leading-tone",voice:i,
+     text:names[i]+": sensible mantenida como séptima mayor del acorde de llegada; opción de color, no resolución clásica.",
+     level:"contextual-info"});
+   }else if(!resolved){
     penalty+=14;leadingTone++;
-    details.push(["Tenor","Alto","Soprano"][i-1]+": sensible sin resolución ascendente");
+    const msg=names[i]+": sensible sin resolución ascendente";
+    details.push(msg);
+    observations.push({kind:"leading-tone",voice:i,text:msg,level:"classical-warning"});
    }
   }
-  if(intervals.has(10)&&mod(a[i])===seventh){
+  if(mod(a[i])===seventh){
    const resolved=b[i]-a[i]===-1||b[i]-a[i]===-2;
-   if(!resolved){penalty+=10;seventhCount++;details.push(["Tenor","Alto","Soprano"][i-1]+": séptima sin resolución descendente");}
+   if(!resolved){
+    penalty+=10;seventhCount++;
+    const msg=names[i]+": séptima de dominante sin resolución descendente";
+    details.push(msg);
+    observations.push({kind:"chordal-seventh",voice:i,text:msg,level:"classical-warning"});
+   }
   }
  }
- return {penalty,leadingTone,seventh:seventhCount,details};
+ return {penalty,leadingTone,seventh:seventhCount,retainedLeadingTone,details,observations};
 }
-function harmonicResolutionDiagnostics(a,b,fromChord,toChord){
- const observations=[];
- if(!fromChord||!toChord||a.length!==b.length)return {observations,penalty:0};
- const root=mod(fromChord.root),target=mod(toChord.root);
- const intervals=new Set(fromChord.notes.map(p=>mod(p-root)));
- const dominantLike=fromChord.type==="7"&&mod(root+5)===target&&intervals.has(4)&&intervals.has(7)&&intervals.has(10);
- let penalty=0;
- if(!dominantLike)return {observations,penalty};
- const leading=mod(target-1),seventh=mod(root+10);
- for(let i=1;i<a.length;i++){
-  if(mod(a[i])===leading&&b[i]-a[i]!==1){
-   observations.push({kind:"leading-tone",voice:i,text:"Sensible sin ascenso por semitono hacia la tónica",level:"classical-warning"});
-   penalty+=14;
-  }
-  if(intervals.has(10)&&mod(a[i])===seventh&&![-1,-2].includes(b[i]-a[i])){
-   observations.push({kind:"chordal-seventh",voice:i,text:"Séptima de dominante sin descenso conjunto",level:"classical-warning"});
-   penalty+=10;
-  }
- }
- return {observations,penalty};
+// One source of truth for both the three-voice laboratory and four-voice graph.
+function harmonicResolutionDiagnostics(a,b,fromChord,toChord,style="classical"){
+ const result=tendencyResolution(a,b,fromChord,toChord,style);
+ return {observations:result.observations,penalty:result.penalty,retainedLeadingTone:result.retainedLeadingTone};
 }
 function voiceMotionDiagnostics(a,b){
  const diffs=a.map((n,i)=>b[i]-n),observations=[];
@@ -445,7 +439,7 @@ function threeVoiceLead(chords,style="cinematic",locks={}){
   let parallel=0;
   for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)
    if(d[i]*d[j]>0&&mod(a[j]-a[i])===mod(b[j]-b[i])&&[0,7].includes(mod(a[j]-a[i])))parallel++;
-  return d.reduce((sum,n,i)=>sum+Math.abs(n)*(i===0?.55:1)+Math.max(0,Math.abs(n)-(i===0?7:5))**2*(style==="classical"?2:.8),0)+parallel*(style==="classical"?12:1.5)+harmonicResolutionDiagnostics(a,b,fromChord,toChord).penalty*(style==="classical"?1:.6);
+  return d.reduce((sum,n,i)=>sum+Math.abs(n)*(i===0?.55:1)+Math.max(0,Math.abs(n)-(i===0?7:5))**2*(style==="classical"?2:.8),0)+parallel*(style==="classical"?12:1.5)+harmonicResolutionDiagnostics(a,b,fromChord,toChord,style).penalty*(style==="classical"?1:.6);
  };
  const solution=optimizeVoiceLayers(layers,chords,
   v=>v.reduce((sum,n,i)=>sum+Math.abs(n-[48,64,72][i])*.15,0),score);
@@ -464,13 +458,14 @@ function laboratoryVoices(chords,options={}){
  const transitions=voicings.slice(1).map((v,i)=>({diffs:v.map((n,j)=>n-voicings[i][j])}));
  const diagnostics=voicings.slice(1).map((v,i)=>({
   ...voiceMotionDiagnostics(voicings[i],v),
-  harmonic:harmonicResolutionDiagnostics(voicings[i],v,chords[i],chords[i+1])
+  harmonic:harmonicResolutionDiagnostics(voicings[i],v,chords[i],chords[i+1],style)
  }));
- const warnings=diagnostics.flatMap((d,i)=>[...d.observations,...d.harmonic.observations].map(o=>({
+ const warnings=diagnostics.flatMap((d,i)=>[...d.observations,...d.harmonic.observations].filter(o=>o.level!=="contextual-info").map(o=>({
   index:i,kind:o.text,level:o.level,count:o.count,
   severity:style==="classical"&&o.level==="classical-warning"?"warning":"review"
  })));
- return {...base,count,voicings,voiceOrder,transitions,diagnostics,warnings,
+ const expressiveNotes=diagnostics.flatMap((d,i)=>d.harmonic.observations.filter(o=>o.level==="contextual-info").map(o=>({index:i,text:o.text})));
+ return {...base,count,voicings,voiceOrder,transitions,diagnostics,warnings,expressiveNotes,
   warning:style==="classical"?"Las quintas y octavas paralelas se señalan según criterios contrapuntísticos tradicionales; el contexto puede justificar excepciones.":"Las observaciones no son errores automáticos: comprueba su efecto expresivo, textura e instrumentación."};
 }
 
