@@ -505,8 +505,13 @@ function minorDominantEvidence(chords,tonic){
 }
 // Prefer conventional readable keys for tonal labels. These are display spellings,
 // not a full double-accidental-aware engraving system.
-function tonalCenterSpelling(tonic,minor=false){
- const pc=mod(tonic),preferFlat=minor?[3,10].includes(pc):[1,3,8,10].includes(pc);
+function tonalCenterSpelling(tonic,minor=false,chords=[]){
+ const pc=mod(tonic);
+ // Preserve the composer's chosen root spelling when that tonic actually appears.
+ const source=Array.isArray(chords)?chords.find(c=>c&&mod(c.root)===pc&&typeof c.label==="string"):null;
+ const match=source&&/^([A-Ga-g])([#♯b♭]?)/.exec(source.label);
+ if(match)return match[1].toUpperCase()+(match[2]==="♯"?"#":match[2]==="♭"?"b":match[2]);
+ const preferFlat=minor?[3,10].includes(pc):[1,3,8,10].includes(pc);
  return spell(pc,!preferFlat);
 }
 // Conservative tonal hypotheses: compatibility is not proof of a tonic.
@@ -528,7 +533,7 @@ function tonalHypotheses(chords){
   const cadences=cadenceEvidence(chords,tonic,pattern.mode);const cadenceScore=cadences.reduce((sum,x)=>sum+x.weight*(x.index===chords.length-1?1:.45),0);
   const terminalDominantArrival=cadences.some(x=>x.index===chords.length-1&&x.kind==="V–I/i")?.7:0;
   const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8+cadenceScore+terminalDominantArrival;
-  candidates.push({tonic,mode:pattern.mode,label:tonalCenterSpelling(tonic,pattern.mode==="menor natural")+" "+pattern.mode,displayLabel:tonalCenterSpelling(tonic,pattern.mode==="menor natural")+" "+(pattern.mode==="menor natural"?"menor":"mayor"),score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences,minorDominant:pattern.mode==="menor natural"?minorDominantEvidence(chords,tonic):null});
+  candidates.push({tonic,mode:pattern.mode,label:tonalCenterSpelling(tonic,pattern.mode==="menor natural",chords)+" "+pattern.mode,displayLabel:tonalCenterSpelling(tonic,pattern.mode==="menor natural",chords)+" "+(pattern.mode==="menor natural"?"menor":"mayor"),score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences,minorDominant:pattern.mode==="menor natural"?minorDominantEvidence(chords,tonic):null});
  }
  candidates.sort((a,b)=>b.score-a.score||a.tonic-b.tonic);
  const best=candidates[0],second=candidates[1],close=candidates.filter(x=>best.score-x.score<0.6);
@@ -797,7 +802,8 @@ function emotionalContinuations(chords,emotion){
   const intervals={M:[0,4,7],m:[0,3,7],dom:[0,4,7,10],maj7:[0,4,7,11],m7:[0,3,7,10],sus4:[0,5,7],add9:[0,4,7,14],madd9:[0,3,7,14],dim:[0,3,6]}[kind];
   if(!intervals)return null;
   const suffix={M:"",m:"m",dom:"7",maj7:"maj7",m7:"m7",sus4:"sus4",add9:"add9",madd9:"madd9",dim:"dim"}[kind];
-  const sharpKey=minor?[1,4,6,8,11].includes(tonic):[2,4,6,7,9,11].includes(tonic);
+  const writtenTonic=chords.find(c=>mod(c.root)===tonic)?.label||"";
+   const sharpKey=/#|♯/.test(writtenTonic)?true:/b|♭/.test(writtenTonic)?false:(minor?[1,4,6,8,11].includes(tonic):[2,4,6,7,9,11].includes(tonic));
    const useSharp=minor&&r===mod(tonic+11)?true:sharpKey;
    return {root:r,bass:r,type:suffix,notes:[...new Set(intervals.map(n=>mod(r+n)))],label:spell(r,useSharp)+suffix};
  };
@@ -843,7 +849,7 @@ function emotionalContinuations(chords,emotion){
   const movement=full.slice(1).map((c,i)=>pitchClassMotionEstimate(full[i],c).distance);
   const familiarity=path[0].notes.filter(n=>context.has(mod(n))).length;
   const cadenceFit=plausible.length?Math.max(...plausible.map(c=>cadenceEvidence([...chords,...path],c.tonic,c.mode).filter(x=>x.index>=chords.length).reduce((sum,x)=>sum+x.weight,0))):0;const contextFit=path.reduce((sum,c)=>sum+c.notes.filter(n=>context.has(mod(n))).length,0);const score=shared.reduce((a,b)=>a+b,0)*2+familiarity*2+contextFit*.5+cadenceFit*2-movement.reduce((a,b)=>a+b,0);const lastRoot=mod(path[path.length-1].root);const resolves=lastRoot===tonic||plausible.some(c=>lastRoot===c.tonic);const dominantEnding=lastRoot===mod(tonic+7)||plausible.some(c=>lastRoot===mod(c.tonic+7));const direction=resolves?"resolver":dominantEnding?"mantener tensión":cadenceFit>0?"tonicizar":"cambiar dirección";
-  const center=tonalCenterSpelling(tonic,minor)+(minor?" menor":" mayor");
+  const center=tonalCenterSpelling(tonic,minor,chords)+(minor?" menor":" mayor");
   const startLink=shared[0]||0;
   const continuity=startLink>=2?"El primer acorde propuesto conserva "+startLink+" notas con tu último acorde.":startLink===1?"El primer acorde propuesto conserva una nota con tu último acorde.":"El primer acorde propuesto cambia todas las notas del último acorde.";
   const directionText=direction==="resolver"?"La secuencia termina sobre una posible tónica"+(center?" ("+center+")":"")+".":direction==="mantener tensión"?"La secuencia termina sobre una posible dominante y deja abierta la resolución.":direction==="tonicizar"?"Aparece una relación de dominante que puede sugerir un centro local.":"La secuencia se aleja de una llegada tonal clara y permite explorar otro recorrido.";
