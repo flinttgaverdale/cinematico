@@ -79,5 +79,7 @@ jobs:
           if ! gh release view "$tag" >/dev/null 2>&1; then
             gh release create "$tag" --target "$GITHUB_SHA" --title "Cinemático Android · Beta 0.1" --notes "APK de pruebas para Android, auto-contenido y sin Chrome. Firmado con clave temporal de depuración. No es todavía una versión comercial." --prerelease
           fi
-          gh release upload "$tag" "android/app/build/outputs/apk/debug/app-debug.apk#Cinematico-Android-Beta.apk" --clobber
+          cp android/app/build/outputs/apk/debug/app-debug.apk Cinematico-Android-Beta.apk
+          gh release upload "$tag" Cinematico-Android-Beta.apk --clobber
+          gh release delete-asset "$tag" app-debug.apk --yes >/dev/null 2>&1 || true
           echo "APK publicado en: https://github.com/$GITHUB_REPOSITORY/releases/download/$tag/Cinematico-Android-Beta.apk"
