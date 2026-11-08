@@ -19,6 +19,12 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       assert.ok(!(await page.locator('#circle').isVisible()), 'Reference study is hidden while composing');
       assert.equal(await page.locator('[data-quick-intent]').count(), 4, 'Only four quick directions');
       assert.equal(await page.locator('[data-quick-intent="esperanza"]').getAttribute('aria-pressed'), 'true');
+      assert.equal((await page.locator('[data-quick-intent="esperanza"]').innerText()).trim(),'Apertura / esperanza','Initial action must convey a musical intention rather than opening a file');
+      assert.ok((await page.locator('#simpleIntentHelp').innerText()).includes('no una orden para abrir algo'),'A short explanation must be available without opening help');
+      await page.locator('[data-quick-intent="suspense"]').click();
+      assert.ok((await page.locator('#simpleIntentHelp').innerText()).includes('Aplaza'),'Short meaning updates with the selected intention');
+      await page.locator('[data-quick-intent="esperanza"]').click();
+      assert.equal(await page.locator('[data-quick-intent="esperanza"]').getAttribute('aria-pressed'),'true');
       assert.ok(!(await page.locator('#simpleMood').isVisible()), 'Fifteen detailed nuances are progressive disclosure');
       assert.deepEqual(await page.locator('#simpleMood optgroup').evaluateAll(groups=>groups.map(g=>g.label)),
         ['Luz y expansión','Calma y cercanía','Melancolía y sombra','Tensión e incertidumbre','Cambio y asombro'],
