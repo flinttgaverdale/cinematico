@@ -1,6 +1,8 @@
 // Static release checks: public shell integrity and missing UI bindings.
 const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const engine=fs.readFileSync(path.join(__dirname,'../engine.js'),'utf8');new Function(engine);const ids=[...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]);const present=new Set(ids);assert.equal(ids.length,present.size,'Duplicate HTML IDs');for(const m of html.matchAll(/\$\("([^"]+)"\)/g))assert.ok(present.has(m[1]),'Missing UI element '+m[1]);for(const m of html.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g))new Function(m[1]);for(const id of ['circle','userChords','simpleChords','workspaceExplore','workspaceAdvanced','referenceScopeNote'])assert.ok(present.has(id),'Missing core panel '+id);assert.ok(html.includes('setWorkspace(openingWorkspace)'),'Landing must restore the selected workspace');
 assert.ok(html.includes('let openingWorkspace="explore"'),'New users land in Create');
-assert.ok(html.includes('setStudyTab("chords")'),'Advanced study must focus on own chords first');
+assert.ok(html.includes('setStudyTab("home")'),'Advanced study opens with a neutral area chooser');
+assert.ok(html.includes('simpleOpenAdvanced("chords")'),'Only explicitly analyzed suggestions navigate to the progression');
+assert.ok(!html.includes('$("userChords").focus()'),'Do not automatically focus the progression input');
 assert.ok(!html.includes('id="save"')&&!html.includes('id="savedList"'),'Notebook UI should not distract composition');
 assert.ok(!html.includes('function readNotebook()'),'Notebook code must not run');assert.ok(html.includes('src="engine.js"'),'Engine script missing');console.log('PASS: public shell, UI bindings, syntax and full studio startup');
