@@ -1,0 +1,132 @@
+{
+  "version": "2026-11-08-deep-validation-1",
+  "methodology": {
+    "purpose": "Trazabilidad de fuentes y falsación de afirmaciones; no inferencia de autoría ni de emoción.",
+    "levels": {
+      "A": "Ejemplo musical notado publicado y contextualizado. No implica cotejo completo del manuscrito original.",
+      "B": "Análisis académico especializado; lectura teórica que requiere contextualización.",
+      "C": "Testimonio directo del creador o de colaboradores sobre el proceso. No equivale a partitura transcrita.",
+      "X": "Ejercicio original de Cinemático; no atribución histórica."
+    },
+    "sharedRestrictions": [
+      "Un cifrado no contiene tempo, articulación, timbre, dinámica, melodía ni forma.",
+      "Un enlace V–I no prueba una cadencia formal sin frase, metro y voz superior.",
+      "Un perfil es una lente creativa; ningún acorde tiene autor o emoción exclusivos.",
+      "Las rutas de Cinemático son ejemplos originales y no transcripciones de estas fuentes."
+    ],
+    "independentHumanListeners": 0,
+    "independentlyScoredCompleteFilmScores": 0
+  },
+  "profiles": [
+    {
+      "id": "williams",
+      "level": "A/B",
+      "work": "Star Wars: Binary Sunset",
+      "locator": "Lehman (2026), The Skywalker Symphonies, Introducción, figura I.1, cc. 1–19",
+      "source": "https://academic.oup.com/book/63100/chapter/567207145",
+      "observed": "En sol menor, hitos de semicadencia (c. 7), semicadencia plagal sobre IV mayor (c. 13) y proceso de cadencia auténtica (cc. 17–19), dependientes de frase y orquestación.",
+      "transfer": "Examinar si conviene preparar, aplazar o debilitar una llegada sin confundir fórmula de acordes con cadencia formal.",
+      "limit": "El motor web no reconoce esos compases, la melodía ni la retórica cadencial exacta de Williams."
+    },
+    {
+      "id": "herrmann",
+      "level": "A/B",
+      "work": "Vertigo: Prelude",
+      "locator": "Scott Murphy, Music Theory Online 28/1 (2022), ejemplos 1–2 y sección 1",
+      "source": "https://mtosmt.org/issues/mto.22.28.1/mto.22.28.1.murphy.html",
+      "observed": "Reducción armónica y formal con estructura A–B, reaparición truncada y coda; considera arpegios y notas no simultáneas con el acorde.",
+      "transfer": "Contrastar repetición, recurrencia y fricción entre clases de altura sin asumir que toda repetición es un ostinato.",
+      "limit": "Sin duración, notas melódicas y montaje no se confirma la estructura A–B ni la relación imagen-música."
+    },
+    {
+      "id": "zimmer",
+      "level": "C",
+      "work": "Interstellar: gestación de la música",
+      "locator": "Christopher Nolan, BAFTA A Life in Pictures, relato del encargo inicial sin género de ciencia ficción",
+      "source": "https://www.bafta.org/media-centre/press-releases/a-life-in-pictures-christopher-nolan/",
+      "observed": "El material musical surgió de un encargo centrado en el corazón emocional de la historia, antes de explicitar el género; posteriormente se desarrolló para la película.",
+      "transfer": "Probar expansión de densidad, registro o color sobre un núcleo armónico mínimo.",
+      "limit": "El testimonio no identifica acordes característicos ni garantiza ostinatos a partir de cifras."
+    },
+    {
+      "id": "giacchino",
+      "level": "C",
+      "work": "Up: Married Life",
+      "locator": "Michael Giacchino, comentario en su página oficial del proyecto Up",
+      "source": "https://michaelgiacchino.com/projects/up/",
+      "observed": "El tema de Ellie conserva identidad narrativa más allá del inicio de la película; Giacchino describe una elección melódica y dramática, no un patrón obligatorio de maj7.",
+      "transfer": "Conservar material reconocible variando su presentación; decidir si una llegada debe resultar contenida.",
+      "limit": "Sin motivo escrito y desarrollo temporal no puede validarse continuidad temática de la pieza del usuario."
+    },
+    {
+      "id": "elfman",
+      "level": "C",
+      "work": "Edward Scissorhands",
+      "locator": "Danny Elfman, entrevista con The A.V. Club (Grand Finale)",
+      "source": "https://www.avclub.com/danny-elfman-on-oingo-boingo-film-scores-and-the-beat-1798274010",
+      "observed": "Elfman cita influencias de Chaikovski y Prokófiev y el uso de coro, fragilidad y materiales temáticos sembrados para un retorno posterior.",
+      "transfer": "Explorar dos tratamientos contrastantes de una célula: ligereza tímbrica frente a fricción armónica.",
+      "limit": "Una tríada cromática no demuestra coro, vals, fragilidad ni influencia concreta."
+    },
+    {
+      "id": "silvestri",
+      "level": "A/B",
+      "work": "Back to the Future",
+      "locator": "Back to the Future: An Analysis of the Score, figuras 1a, 6, 8a y 9; el texto analiza gestos lidios, octatónicos y cambios métricos",
+      "source": "https://www.blogs.berklee.edu/wp-content/uploads/2017/09/BTTF-Analysis.pdf",
+      "observed": "El estudio notado describe #4 lidia en un tema, dos tríadas mayores a tritono relacionadas con una colección octatónica y un ostinato de compases cambiantes.",
+      "transfer": "Separar el gesto lidio del recurso octatónico; no inferir uno del otro ni desde un único acorde.",
+      "limit": "Una sonoridad maj7#11 no prueba que el tema completo sea lidio; la colección octatónica requiere más material real."
+    },
+    {
+      "id": "horner",
+      "level": "A/B",
+      "work": "A Beautiful Mind",
+      "locator": "Frank Lehman, Music Theory Spectrum 35/1 (2013), resumen y análisis de tres cues mediante L, R y S, con célula LRLS",
+      "source": "https://franklehman.com/wp-content/uploads/2020/02/MTS-Article.pdf",
+      "observed": "Lehman interpreta un espacio de transformaciones triádicas L/R/S ligado al relato de la actividad intelectual; el recorrido experimental P–L–R de Cinemático NO es esa transcripción.",
+      "transfer": "Probar cadenas originales de tríadas que comparten dos clases de altura y comparar su orden.",
+      "limit": "La función S documentada no es igual a P; el ejercicio P–L–R no debe etiquetarse como la red real del cue."
+    },
+    {
+      "id": "shore",
+      "level": "C",
+      "work": "The Lord of the Rings",
+      "locator": "Howard Shore, entrevista publicada por Soundtrack World (2020)",
+      "source": "https://soundtrackworld.com/2020/01/interview-howard-shore/",
+      "observed": "Shore explica investigación narrativa, temas escritos temprano y desarrollo del material temático a través de la trilogía.",
+      "transfer": "Explorar retorno de una identidad y variación modal de la misma idea.",
+      "limit": "No puede asegurarse que un acorde concreto transforma un leitmotiv sin notas melódicas ni contexto narrativo."
+    },
+    {
+      "id": "morricone",
+      "level": "C",
+      "work": "The Mission",
+      "locator": "Ennio Morricone, entrevista en Sight and Sound/BFI (2006; reproducida después)",
+      "source": "https://www.bfi.org.uk/sight-and-sound/interviews/if-you-want-call-yourself-composer-you-follow-every-step-instrumentation-ennio-morricone-interviewed-2006",
+      "observed": "El compositor relata tres estratos relacionados: oboe del padre Gabriel, escritura sacra histórica y materiales creados para el ámbito indígena de la película.",
+      "transfer": "Conservar módulos reconocibles y proponer su contraste o ensamblaje.",
+      "limit": "Las identidades tímbricas, la cultura y la historia no son propiedades deducibles de progresiones de acordes."
+    },
+    {
+      "id": "newman",
+      "level": "C",
+      "work": "Saving Mr. Banks",
+      "locator": "Thomas Newman, entrevista BFI, 2 diciembre 2013",
+      "source": "https://www.bfi.org.uk/interviews/scoring-mr-banks-composers-life-hollywood",
+      "observed": "Newman describe finales de cues que evitan una resolución dramática explícita y el papel de silencios, texturas reducidas y entradas discretas.",
+      "transfer": "Comparar cierre tonal con final abierto; valorar el silencio como decisión de frase.",
+      "limit": "Un acorde fuera de la fundamental inicial no prueba que el cue musical carezca de cierre."
+    },
+    {
+      "id": "goransson",
+      "level": "C",
+      "work": "Oppenheimer: Can You Hear the Music",
+      "locator": "Ludwig Göransson, entrevista técnica Sound on Sound y descripción directa",
+      "source": "https://www.soundonsound.com/people/ludwig-goransson",
+      "observed": "La grabación de cuerda del cue se realizó con 21 cambios de tempo; el proceso contrapone subdivisión, métrica percibida e interpretación.",
+      "transfer": "Mantener armonía e imaginar transformaciones graduales de energía, acento y velocidad.",
+      "limit": "El cifrado no verifica polirritmos, velocidad, violín interpretado ni los 21 cambios de tempo."
+    }
+  ]
+}

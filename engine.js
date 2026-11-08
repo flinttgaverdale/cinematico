@@ -469,7 +469,37 @@ function laboratoryVoices(chords,options={}){
   warning:style==="classical"?"Las quintas y octavas paralelas se señalan según criterios contrapuntísticos tradicionales; el contexto puede justificar excepciones.":"Las observaciones no son errores automáticos: comprueba su efecto expresivo, textura e instrumentación."};
 }
 
-function parseUserProgression(input){const tokens=String(input||"").trim().split(/[\s,;|]+/).filter(Boolean);if(!tokens.length)return {chords:[],errors:[]};if(tokens.length>8)return {chords:[],errors:["Máximo 8 acordes por análisis."]};const names={"C":0,"D":2,"E":4,"F":5,"G":7,"A":9,"B":11};const shapes={"":{intervals:[0,4,7],type:""},"m":{intervals:[0,3,7],type:"m"},"dim":{intervals:[0,3,6],type:"dim"},"aug":{intervals:[0,4,8],type:"aug"},"7":{intervals:[0,4,7,10],type:"7"},"maj7":{intervals:[0,4,7,11],type:"maj7"},"m7":{intervals:[0,3,7,10],type:"m7"},"sus4":{intervals:[0,5,7],type:"sus4"},"add9":{intervals:[0,4,7,14],type:"add9"},"madd9":{intervals:[0,3,7,14],type:"madd9"}};const chords=[],errors=[];for(const token of tokens){const match=/^([A-Ga-g])([#♯b♭]?)(maj7|madd9|add9|sus4|dim|aug|m7|m|7)?(?:\/([A-Ga-g])([#♯b♭]?))?$/.exec(token);if(!match){errors.push("Acorde no reconocido: "+token);continue;}const pc=(letter,acc)=>((names[letter.toUpperCase()]+(acc==="#"||acc==="♯"?1:acc==="b"||acc==="♭"?-1:0))%12+12)%12;const root=pc(match[1],match[2]),shape=shapes[match[3]||""],bass=match[4]?pc(match[4],match[5]):root;const notes=[...new Set(shape.intervals.map(i=>(root+i)%12))];if(!notes.includes(bass)){errors.push("El bajo de "+token+" no pertenece al acorde; usa una inversión.");continue;}chords.push({root,bass,notes,type:shape.type,quality:shape.type==="m"?"minor":shape.type===""?"major":"other",intervals:shape.intervals,label:token,roman:"—"});}return {chords:errors.length?[]:chords,errors};}
+function parseUserProgression(input){
+ const tokens=String(input||"").trim().split(/[\s,;|]+/).filter(Boolean);
+ if(!tokens.length)return {chords:[],errors:[]};
+ if(tokens.length>8)return {chords:[],errors:["Máximo 8 acordes por análisis."]};
+ const names={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+ // Use the very same interval catalogue as the compositional engine. This
+ // prevents creative reference chords becoming impossible to analyse.
+ const supported=["maj7#11","mMaj7","m7b5","maj9","madd9","add9",
+  "sus4","sus2","dim7","maj7","m9","m7","m6","dim","aug","9","7","6","5","m",""];
+ const suffixRegex="("+supported.filter(Boolean).map(x=>x.replace(/[#]/g,"[#♯]").replace(/b(?=5$)/g,"[b♭]")).join("|")+")?";
+ const shape=new RegExp("^([A-Ga-g])([#♯b♭]?)"+suffixRegex+"(?:\\/([A-Ga-g])([#♯b♭]?))?$");
+ const pc=(letter,acc)=>mod(names[letter.toUpperCase()]+
+  (acc==="#"||acc==="♯"?1:acc==="b"||acc==="♭"?-1:0));
+ const chords=[],errors=[];
+ for(const token of tokens){
+  const match=shape.exec(token);
+  if(!match){errors.push("Acorde no reconocido: "+token);continue;}
+  const type=(match[3]||"").replaceAll("♯","#").replaceAll("♭","b");
+  if(!supported.includes(type)){errors.push("Tipo de acorde no reconocido: "+token);continue;}
+  const root=pc(match[1],match[2]),bass=match[4]?pc(match[4],match[5]):root;
+  const intervals=extensionIntervals(type);
+  const notes=[...new Set(intervals.map(i=>mod(root+i)))];
+  if(!notes.includes(bass)){
+   errors.push("El bajo de "+token+" no pertenece al acorde; usa una inversión.");
+   continue;
+  }
+  chords.push({root,bass,notes,type,quality:type==="m"?"minor":type===""?"major":"other",
+   intervals:intervals.slice(),label:token,roman:"—"});
+ }
+ return {chords:errors.length?[]:chords,errors};
+}
 // Symbolic cadence evidence. No claim about meter, melody, or phrase boundaries.
 function cadenceEvidence(chords,tonic,mode){
  const events=[];if(!Array.isArray(chords)||!chords.length)return events;
@@ -1084,7 +1114,7 @@ const COMPOSER_CREATIVE_LENSES={
   "focus": "Recurrencia y fricción cromática",
   "evidence": "A/B",
   "work": "Vertigo — Main Title; Scene d'amour",
-  "source": "https://mtosmt.org/issues/mto.22.28.1/mto.22.28.1.murphy.php",
+  "source": "https://mtosmt.org/issues/mto.22.28.1/mto.22.28.1.murphy.html",
   "limit": "Reiteración real, registro, duración y suspensión no se deducen de los acordes.",
   "routes": [
    {
@@ -1504,7 +1534,7 @@ const COMPOSER_CREATIVE_LENSES={
   "focus": "Retorno y relectura modal de una idea",
   "evidence": "B/C",
   "work": "The Lord of the Rings — transformaciones de temas",
-  "source": "https://howardshore.com/works/concert/the-two-towers-live-to-projection/",
+  "source": "https://soundtrackworld.com/2020/01/interview-howard-shore/",
   "limit": "Una transformación de leitmotiv no puede verificarse solo a partir de acordes.",
   "routes": [
    {
@@ -1586,7 +1616,7 @@ const COMPOSER_CREATIVE_LENSES={
   "focus": "Economía de materiales y módulos contrastantes",
   "evidence": "C",
   "work": "Once Upon a Time in the West; The Mission",
-  "source": "https://blog.oup.com/2019/03/maestro-speaks-ennio-morricone-life-music/",
+  "source": "https://www.bfi.org.uk/sight-and-sound/interviews/if-you-want-call-yourself-composer-you-follow-every-step-instrumentation-ennio-morricone-interviewed-2006",
   "limit": "La armónica, el oboe y el sentido narrativo no son propiedades de la progresión armónica.",
   "routes": [
    {
@@ -1726,7 +1756,7 @@ const COMPOSER_CREATIVE_LENSES={
   "focus": "Cambio de energía sobre material reconocible",
   "evidence": "C",
   "work": "Oppenheimer — Can You Hear the Music",
-  "source": "https://www.nme.com/features/film-interviews/oppenheimer-score-soundtrack-ludwig-goransson-christopher-nolan-3471661",
+  "source": "https://www.soundonsound.com/people/ludwig-goransson",
   "limit": "Velocidad, vibrato, acentos y articulación requieren decisiones temporales e instrumentales.",
   "routes": [
    {
@@ -1912,7 +1942,7 @@ function composerCreativePaths(composerId,tonic,keyName){
 /* Explainable composition assistance: observations and optional experiments, never edits. */
 const COMPOSER_TECHNIQUES={
  williams:[{id:"sequence",name:"Secuencia motívica",domain:"Desarrollo",reason:"Traslada un motivo por grados sucesivos para construir dirección, conservando su identidad rítmica.",action:"Prueba una secuencia ascendente o descendente de tu motivo; decide tú dónde interrumpirla.",source:"Lenguaje sinfónico y desarrollo temático; recurso compartido con la tradición romántica."},{id:"dominant",name:"Preparación de dominante",domain:"Armonía",reason:"Una dominante preparada puede reforzar la llegada sin reemplazar tu tema.",action:"Examina si el penúltimo acorde admite una dominante secundaria o una cadencia más dirigida.",source:"Sintaxis tonal sinfónica; no exclusiva de Williams."},{id:"counterpoint",name:"Contramelodía",domain:"Textura",reason:"Una segunda línea puede intensificar el desarrollo sin modificar la melodía principal.",action:"Busca notas comunes y movimiento contrario en una voz secundaria.",source:"Escritura contrapuntística sinfónica."}],
- herrmann:[{id:"chromatic",name:"Desplazamiento cromático",domain:"Armonía",reason:"Pequeños cambios de una voz pueden alterar la percepción de estabilidad.",action:"Mantén dos notas y prueba un desplazamiento cromático de la tercera en una tríada.",source:"Daniel Moreira (2025), análisis de superposiciones de tríadas en Vertigo; el desplazamiento cromático propuesto aquí es un ejercicio distinto, no una transcripción."},{id:"cell",name:"Célula reiterada",domain:"Motivo",reason:"La repetición con cambios mínimos permite sostener tensión sin una gran progresión.",action:"Aísla dos o tres notas de tu motivo y experimenta con su reiteración y registro.",source:"Economía motívica y repetición en música dramática."},{id:"delay",name:"Resolución aplazada",domain:"Tensión",reason:"Retener una disonancia puede prolongar la expectativa.",action:"Localiza una nota de tendencia y compara resolverla ahora o prolongarla un compás.",source:"Suspensión y ambigüedad armónica."}],
+ herrmann:[{id:"minorMajorSeventh",name:"Menor con séptima mayor",domain:"Color armónico",reason:"Una tríada menor y su séptima mayor forman una sonoridad de fricción característica del análisis publicado sobre el preludio de Vertigo; no es una firma exclusiva.",action:"Prueba un acorde mMaj7 como color opcional sobre una tónica menor, y compara sin reescribir tu progresión.",source:"Scott Murphy (2022), Music Theory Online 28/1, ejemplo 1: acorde menor con séptima mayor en Vertigo; ejercicio original, no transcripción."},{id:"cell",name:"Célula reiterada",domain:"Motivo",reason:"La repetición con cambios mínimos permite sostener tensión sin una gran progresión.",action:"Aísla dos o tres notas de tu motivo y experimenta con su reiteración y registro.",source:"Economía motívica y repetición en música dramática."},{id:"delay",name:"Resolución aplazada",domain:"Tensión",reason:"Retener una disonancia puede prolongar la expectativa.",action:"Localiza una nota de tendencia y compara resolverla ahora o prolongarla un compás.",source:"Suspensión y ambigüedad armónica."}],
  zimmer:[{id:"pedal",name:"Pedal armónico",domain:"Textura",reason:"Una nota grave sostenida unifica acordes cambiantes y concentra la tensión.",action:"Prueba mantener la tónica o dominante en el bajo mientras evolucionan las voces superiores.",source:"Pedales y construcción por capas; no exclusivos de Zimmer."},{id:"ostinato",name:"Ostinato gradual",domain:"Ritmo",reason:"La repetición rítmica permite aumentar energía sin aumentar el ritmo de cambio armónico.",action:"Extrae una célula rítmica y cambia su registro, acentuación o densidad gradualmente.",source:"Recursos minimalistas y postminimalistas."},{id:"density",name:"Escala desde un núcleo íntimo",domain:"Orquestación",reason:"Una idea íntima puede adquirir escala mediante timbre, registro y densidad sin cambiar su identidad.",action:"Conserva la misma célula en piano y después compárala con órgano y conjunto amplio; escucha qué cambia sin reharmonizar.",source:"Hans Zimmer y Christopher Nolan, entrevistas sobre Interstellar: tema inicial íntimo y posterior uso expresivo del órgano."}],
  giacchino:[
  {id:"motif",name:"Motivo reconocible con variación",domain:"Desarrollo",reason:"Un motivo breve conserva identidad aunque cambien armonía, registro o instrumentación.",action:"Extrae tres o cuatro notas de tu idea y repítelas con un nuevo acompañamiento; comprueba qué rasgo mantiene su identidad.",source:"Trabajo temático y variación orquestal; referencia estilística, no transcripción."},
@@ -1956,6 +1986,11 @@ function composerAssistance(composerId,progression=[]){
   if(t.id==="chromatic"&&chords.length){
    const c=chords.find(c=>c.type===""||c.type==="m");
    if(c)observation="En "+c.label+" puedes desplazar una sola nota un semitono, conservando las otras dos. Es una exploración de fricción cromática, no una técnica exclusiva ni una secuencia detectada.";
+  }else if(t.id==="minorMajorSeventh"&&chords.length){
+   const minorChord=chords.find(c=>c.type==="m");
+   observation=minorChord
+    ?"Sobre "+minorChord.label+" puedes probar una séptima mayor como opción de color (mMaj7), sin cambiar tu progresión. La referencia a Vertigo no implica imitación exacta."
+    :"Elige una tríada menor para comparar su versión mMaj7. No se ha detectado esa sonoridad en tu material.";
   }else if(t.id==="dominant"&&chords.length>1){
    observation="Revisa la llegada de "+chords[chords.length-2].label+" a "+chords[chords.length-1].label+" y escucha si pide una preparación más dirigida.";
   }else if(t.id==="pedal"&&chords.length){
@@ -1981,7 +2016,7 @@ function composerAssistance(composerId,progression=[]){
   }
   const requiresMelody=["sequence","motif","leitmotif","longline","fanfare","cell","counterpoint"].includes(t.id);
   const requiresTiming=["dance","rhythm","tempo","pulse","ostinato","rhythmic","space","delay"].includes(t.id);
-  const harmonicOnly=["dominant","cadence","chromatic","modal","triadic"].includes(t.id);
+  const harmonicOnly=["dominant","cadence","chromatic","modal","triadic","minorMajorSeventh"].includes(t.id);
   return {...t,observation,requiresMelody,requiresTiming,harmonicOnly,
    evidenceLevel:"orientative",changesOriginal:false};
  });
