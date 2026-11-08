@@ -6,6 +6,7 @@
 ## Resumen de hallazgos
 
 1. **Defecto funcional comprobable:** el motor podía construir acordes como `maj7#11`, `m7b5`, `m9` y `maj9`, pero el campo de análisis no aceptaba todas estas mismas sonoridades. Se ha unificado el repertorio de intervalos mediante `extensionIntervals`, con comprobación de inversiones, grafía del usuario y entradas inválidas. Esto aumenta la coherencia entre «Lenguaje de referencia» y «Tu progresión».
+1 bis. **Calibración histórica aplicada:** el estudio de Murphy sobre *Vertigo* describe un acorde menor con séptima mayor en el preludio. El perfil Herrmann incorpora ahora la exploración opcional mMaj7 y sustituye etiquetas generales como «politonalidad» por un recurso concreto respaldado por la fuente, sin convertirlo en firma exclusiva.
 2. **11 dossiers rastreables:** cuatro casos cuentan con investigación publicada que incluye ejemplos musicales notados o reducciones (Williams, Herrmann, Silvestri, Horner); los demás aportan sobre todo testimonios directos sobre proceso, timbre, desarrollo o narración. No se han examinado de principio a fin once partituras orquestales completas ni se han atribuido las rutas originales de la app a esas partituras.
 3. **22 contraejemplos armónicos sintéticos:** están separados de los perfiles de compositor y se prueban en las 12 tónicas para detectar falsos positivos de dominantes aplicadas, sensible elevada, cadencias supuestas e intercambios ambiguos. Los 264 resultados son transposiciones de 22 hipótesis estructurales, no 264 fragmentos musicales independientes.
 4. **Diferencia entre estilo y procedimiento:** la evidencia documental se presenta como punto de partida creativo. El encadenamiento de acordes no permite confirmar una forma A–B, un motivo, ritmo, instrumento, interpretación, montaje ni intención emocional.
@@ -42,6 +43,8 @@
 
 **Silvestri.** El análisis publicado relaciona una cuarta elevada melódica, un tema concreto y una colección octatónica en otros fragmentos. Estas tres capas deben mantenerse diferenciadas: `Cmaj7#11` solo caracteriza una sonoridad, no demuestra por sí solo un discurso lidio ni una escala octatónica. El documento alojado en Berklee no se toma automáticamente como edición crítica completa.
 
+**Herrmann.** Murphy documenta en el preludio de *Vertigo* un acorde menor con séptima mayor, a veces llamado «Hitchcock chord», pero también explica su contexto de arpegios, notas extrañas y relaciones audiovisuales. Se convierte en un **experimento de color** mMaj7, no en una transcripción del fragmento ni una marca exclusiva de autor.
+
 **Williams.** El comentario musicológico sobre *Binary Sunset* incluye función formal de compases concretos. Una secuencia V–I computable sin melodía, bajo realizado y fin de frase no da derecho a afirmar una **cadencia auténtica perfecta**; solo indica potencial de llegada armónica.
 
 **Morricone.** El propio compositor explica que los materiales asociados a indígenas en *The Mission* fueron construidos para la ficción. La herramienta no debe presentarlos como una transcripción fiel de una tradición local.
@@ -60,6 +63,8 @@ Prueba: `tests/deep-musicology-validation.cjs`.
 - Casos con incertidumbre: `C Fm C` admite hipótesis de mezcla modal; `Cm F Cm` puede analizarse como color modal sin confirmar modulación; `C F G7` permite una semicadencia **posible**, no una frase musical analizada.
 - Contrapunto contextual: `G7 → Cmaj7` puede conservar Si como séptima mayor de llegada en un lenguaje contemporáneo. Esto no invalida que la escritura clásica más estricta prefiera Si→Do en ciertos contextos.
 - Invariancia: las comprobaciones se repiten por transposición cromática; no se extrapola igual facilidad instrumental ni percepción en todos los registros.
+
+La trazabilidad entre las once fichas de investigación y el motor se comprueba también sobre sus enlaces directos: se han alineado los perfiles Herrmann, Shore, Morricone y Göransson con las fuentes específicas revisadas.
 
 El objetivo de estas pruebas es **falsar afirmaciones específicas** (falso positivo/falso negativo), no cuantificar «acierto emocional», autoría, calidad artística ni originalidad. Los contraejemplos están diseñados con conocimiento de las reglas, por lo que **no** constituyen un conjunto independiente ciego de partituras.
 
