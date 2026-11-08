@@ -61,14 +61,14 @@ function romanFor(degree,alter,type){
  if(alter===-2)numeral="𝄫"+numeral;else if(alter===-1)numeral="♭"+numeral;
  else if(alter===1)numeral="♯"+numeral;else if(alter===2)numeral="𝄪"+numeral;
  if(half)numeral+="ø";else if(dim)numeral+="°";else if(type==="aug")numeral+="+";
- const suffix={"7":"7","maj7":"maj7","m7":"7","m9":"9","maj9":"maj9","9":"9","add9":"(add9)","6":"6","m6":"6","dim7":"7","m7b5":"7","mMaj7":"(maj7)","maj7#11":"maj7(♯11)","sus2":"(sus2)","sus4":"(sus4)","5":"5"}[type]||"";
+ const suffix={"7":"7","maj7":"maj7","m7":"7","m9":"9","maj9":"maj9","9":"9","add9":"(add9)","madd9":"(add9)","7sus4":"7(sus4)","6":"6","m6":"6","dim7":"7","m7b5":"7","mMaj7":"(maj7)","maj7#11":"maj7(♯11)","sus2":"(sus2)","sus4":"(sus4)","5":"5"}[type]||"";
  return numeral+suffix;
 }
 function identifyType(ints){
  const normalized=[...new Set(ints.map(mod))].sort((a,b)=>a-b);
  const defs=TYPE_DEFS.concat([
   {id:"sus2",label:"sus2",int:[0,2,7]},{id:"sus4",label:"sus4",int:[0,5,7]},{id:"5",label:"5",int:[0,7]},
-  ...["m9","maj9","9","add9","6","m6","maj7#11"].map(id=>({id,label:id,int:extensionIntervals(id)}))
+  ...["m9","maj9","9","add9","madd9","7sus4","6","m6","maj7#11"].map(id=>({id,label:id,int:extensionIntervals(id)}))
  ]);
  return defs.find(x=>x.int.length===normalized.length&&x.int.every(n=>normalized.includes(n)))||{id:"custom",label:"",int:normalized};
 }
@@ -100,7 +100,7 @@ function extensionIntervals(type){
  const map={"":[0,4,7],"m":[0,3,7],"dim":[0,3,6],"aug":[0,4,8],"7":[0,4,7,10],
  "maj7":[0,4,7,11],"m7":[0,3,7,10],"mMaj7":[0,3,7,11],"m9":[0,3,7,10,2],
  "maj9":[0,4,7,11,2],"9":[0,4,7,10,2],"add9":[0,4,7,2],"6":[0,4,7,9],
- "m6":[0,3,7,9],"dim7":[0,3,6,9],"m7b5":[0,3,6,10],"5":[0,7],"maj7#11":[0,4,7,11,6],"sus2":[0,2,7],"sus4":[0,5,7]};
+ "m6":[0,3,7,9],"madd9":[0,3,7,2],"7sus4":[0,5,7,10],"dim7":[0,3,6,9],"m7b5":[0,3,6,10],"5":[0,7],"maj7#11":[0,4,7,11,6],"sus2":[0,2,7],"sus4":[0,5,7]};
  return map[type]||[0,4,7];
 }
 function classifyProgressionChord(chord,tonic,mode,nextChord){
@@ -215,8 +215,11 @@ const VOICE_RANGES=[[36,60],[48,67],[55,74],[60,84]]; // bass, tenor, alto, sopr
 function midiName(n){return spell(n%12)+(Math.floor(n/12)-1);}
 function voicingCandidates(chord,style="cinematic"){
  const pcs=[...new Set(chord.notes.map(mod))];
+ const bassPc=mod(chord.bass??chord.root);
+ const independentBass=!pcs.includes(bassPc);
  const ranges=VOICE_RANGES;
- const possibilities=ranges.map(([lo,hi])=>Array.from({length:hi-lo+1},(_,i)=>lo+i).filter(n=>pcs.includes(n%12)));
+ const possibilities=ranges.map(([lo,hi],voice)=>Array.from({length:hi-lo+1},(_,i)=>lo+i)
+  .filter(n=>voice===0?n%12===bassPc:pcs.includes(n%12)));
  const out=[];
  // Assign each distinct chord tone at least once when possible; extensions beyond four tones are optional.
  // With five pitch classes and four voices, preserve the color-defining tones:
@@ -228,9 +231,13 @@ function voicingCandidates(chord,style="cinematic"){
   "9":[0,4,10,2]
  };
  const prioritized=colorIntervals[chord.type]?.map(n=>mod(chord.root+n)).filter(pc=>pcs.includes(pc));
- const required=pcs.length<=4?pcs:prioritized?.length===4?prioritized:
+ // An independent bass leaves three upper slots. Chord tones may be omitted,
+ // but the explicitly requested bass must never be silently replaced.
+ const priority=[mod(chord.root),...[3,4,10,11,9,2,5,6,7,8].map(x=>mod(chord.root+x))]
+  .filter(pc=>pcs.includes(pc));
+ const required=independentBass?[...new Set(priority)].slice(0,3):
+  pcs.length<=4?pcs:prioritized?.length===4?prioritized:
   pcs.filter(p=>[0,3,4,6,7,8,10,11].some(x=>mod(chord.root+x)===p)).slice(0,4);
- const bassPc=mod(chord.bass??chord.root);
  function walk(i,notes){
   if(out.length>=650)return;
   if(i===4){
@@ -249,7 +256,7 @@ function voicingCandidates(chord,style="cinematic"){
  return out.slice(0,300);
 }
 
-// Neo-Riemannian P/L/R apply to major/minor triads only (pitch-class sets).
+// Neo-Riemannian P/L/R and SLIDE (S) apply to major/minor triads only (pitch-class sets).
 function neoTriad(root,quality){
  const r=mod(root);
  if(quality!=="major"&&quality!=="minor")return null;
@@ -257,20 +264,25 @@ function neoTriad(root,quality){
 }
 function neoTransform(root,quality,operation){
  const source=neoTriad(root,quality);
- if(!source||!["P","L","R"].includes(operation))return null;
+ if(!source||!["P","L","R","S"].includes(operation))return null;
  const major=quality==="major";
- const targetRoot=mod(root+(operation==="P"?0:operation==="L"?(major?4:8):(major?9:3)));
+ const targetRoot=mod(root+(operation==="P"?0:operation==="L"?(major?4:8):operation==="R"?(major?9:3):(major?1:-1)));
  const targetQuality=major?"minor":"major";
  const target=neoTriad(targetRoot,targetQuality);
  const common=source.filter(p=>target.includes(p));
  const removed=source.filter(p=>!target.includes(p));
  const added=target.filter(p=>!source.includes(p));
- let movement=null;
- if(removed.length===1&&added.length===1){
+ let movement=null,movements=[];
+ if(operation==="S"){
+  const delta=major?1:-1;
+  movements=[{from:mod(root),to:mod(root+delta),semitones:delta},
+   {from:mod(root+7),to:mod(root+7+delta),semitones:delta}];
+ }else if(removed.length===1&&added.length===1){
   let delta=mod(added[0]-removed[0]);if(delta>6)delta-=12;
-  movement={from:removed[0],to:added[0],semitones:delta};
+  movement={from:removed[0],to:added[0],semitones:delta};movements=[movement];
  }
- return {operation,source:{root:mod(root),quality,notes:source},target:{root:targetRoot,quality:targetQuality,notes:target},common,movement,description:{P:"Paralela: conserva fundamental y quinta; cambia la tercera.",L:"Leittonwechsel: conserva dos notas y desplaza la tercera voz un semitono.",R:"Relativa: conserva dos notas y desplaza la tercera voz un tono."}[operation]};
+ return {operation,source:{root:mod(root),quality,notes:source},target:{root:targetRoot,quality:targetQuality,notes:target},common,movement,movements,
+  description:{P:"Paralela: conserva fundamental y quinta; cambia la tercera.",L:"Leittonwechsel: conserva dos notas y desplaza la tercera voz un semitono.",R:"Relativa: conserva dos notas y desplaza la tercera voz un tono.",S:"SLIDE: conserva la tercera y desplaza fundamental y quinta un semitono; exploración cromática, no identificación de una obra."}[operation]};
 }
 function tendencyResolution(a,b,fromChord,toChord,style="classical"){
  const blank=()=>({penalty:0,leadingTone:0,seventh:0,retainedLeadingTone:0,details:[],observations:[]});
@@ -312,10 +324,44 @@ function tendencyResolution(a,b,fromChord,toChord,style="classical"){
  }
  return {penalty,leadingTone,seventh:seventhCount,retainedLeadingTone,details,observations};
 }
-// One source of truth for both the three-voice laboratory and four-voice graph.
+// A 4-3 gesture is detectable, but without rhythm and accent a prepared
+// suspension cannot be established from chord symbols alone.
+function suspensionGestureDiagnostics(a,b,fromChord,toChord,style="cinematic"){
+ const blank={penalty:0,resolved:0,unresolved:0,details:[],observations:[]};
+ if(!fromChord||!toChord||a.length!==b.length||!["sus4","7sus4"].includes(fromChord.type)||
+  mod(fromChord.root)!==mod(toChord.root))return blank;
+ const root=mod(fromChord.root);
+ const third=[4,3].find(n=>(toChord.notes||[]).some(pc=>mod(pc)===mod(root+n)));
+ if(third===undefined)return blank;
+ const names=a.length===3?["Bajo","Intermedia","Superior"]:["Bajo","Tenor","Alto","Soprano"];
+ let penalty=0,resolved=0,unresolved=0;
+ const details=[],observations=[];
+ for(let i=1;i<a.length;i++){
+  if(mod(a[i])!==mod(root+5))continue;
+  if(b[i]-a[i]===-(5-third)){
+   resolved++;
+   observations.push({kind:"sus4-to-third",voice:i,level:"contextual-info",
+    text:names[i]+": gesto 4–3 ("+midiName(a[i])+" → "+midiName(b[i])+"), compatible con suspensión; preparación y acento no comprobados."});
+  }else{
+   unresolved++;penalty+=style==="classical"?6:0;
+   const msg=names[i]+": el sus4 no desciende a la tercera; puede ser una reinterpretación expresiva.";
+   details.push(msg);observations.push({kind:"sus4-gesture-review",voice:i,level:"review",text:msg});
+  }
+ }
+ return {penalty,resolved,unresolved,details,observations};
+}
+function contextualVoiceResolution(a,b,fromChord,toChord,style="classical"){
+ const functional=tendencyResolution(a,b,fromChord,toChord,style);
+ const suspension=suspensionGestureDiagnostics(a,b,fromChord,toChord,style);
+ return {...functional,penalty:functional.penalty+suspension.penalty,
+  details:[...functional.details,...suspension.details],
+  observations:[...functional.observations,...suspension.observations],
+  suspensionResolved:suspension.resolved,suspensionUnresolved:suspension.unresolved};
+}
 function harmonicResolutionDiagnostics(a,b,fromChord,toChord,style="classical"){
- const result=tendencyResolution(a,b,fromChord,toChord,style);
- return {observations:result.observations,penalty:result.penalty,retainedLeadingTone:result.retainedLeadingTone};
+ const result=contextualVoiceResolution(a,b,fromChord,toChord,style);
+ return {observations:result.observations,penalty:result.penalty,
+  retainedLeadingTone:result.retainedLeadingTone,suspensionResolved:result.suspensionResolved};
 }
 function voiceMotionDiagnostics(a,b){
  const diffs=a.map((n,i)=>b[i]-n),observations=[];
@@ -357,7 +403,7 @@ function transitionCost(a,b,style,fromChord=null,toChord=null){
   const from=mod(a[j]-a[i]),to=mod(b[j]-b[i]);
   if(from===to&&(from===0||from===7)&&diffs[i]*diffs[j]>0)parallels++;
  }
- const tendency=tendencyResolution(a,b,fromChord,toChord,style);
+ const tendency=contextualVoiceResolution(a,b,fromChord,toChord,style);
  const weights=style==="classical"?{motion:1,leap:2,parallel:12}:style==="minimal"||style==="sustained"?{motion:2,leap:1.5,parallel:1}:style==="contrary"?{motion:1,leap:1.3,parallel:5}:{motion:1,leap:.8,parallel:1.5};
  return {total:motion*weights.motion+leap*weights.leap+parallels*weights.parallel+tendency.penalty*(style==="minimal"||style==="sustained"?.2:style==="cinematic"?.6:1)+expressiveVoiceCost(a,b,style),motion,leap,parallels,diffs,tendency};
 }
@@ -400,18 +446,20 @@ function voiceLead(progression,style="cinematic",locks={}){
 function threeVoiceCandidates(chord,style="cinematic"){
  const pcs=[...new Set(chord.notes.map(mod))],bass=mod(chord.bass??chord.root);
  const ranges=[[36,60],[52,76],[60,84]];
- const choices=ranges.map(([lo,hi])=>Array.from({length:hi-lo+1},(_,i)=>lo+i).filter(n=>pcs.includes(n%12)));
+ const choices=ranges.map(([lo,hi],voice)=>Array.from({length:hi-lo+1},(_,i)=>lo+i)
+  .filter(n=>voice===0?n%12===bass:pcs.includes(n%12)));
  const out=[];
  // Three voices cannot contain all four distinct notes of a seventh chord.
  // Retain the specified bass and prioritize third and seventh; the fifth is optional.
  const third=pcs.find(p=>[3,4].includes(mod(p-chord.root)));
  const seventh=pcs.find(p=>[10,11].includes(mod(p-chord.root)));
  const ninth=pcs.find(p=>mod(p-chord.root)===2);
+ const fourth=pcs.find(p=>mod(p-chord.root)===5);
  const required=new Set([bass]);
- if(pcs.length<=3)pcs.forEach(p=>required.add(p));
+ if(pcs.length<=3&&pcs.includes(bass))pcs.forEach(p=>required.add(p));
  else {
-  // Keep the chord-defining color: seventh in seventh chords, ninth in add9 chords.
-  const color=seventh===undefined?ninth:seventh;
+  // With a chromatic bass only two upper harmony classes fit.
+  const color=seventh??ninth??fourth;
   for(const p of [third,color,mod(chord.root)]){
    if(p!==undefined&&pcs.includes(p)&&required.size<3)required.add(p);
   }
@@ -476,7 +524,7 @@ function parseUserProgression(input){
  const names={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
  // Use the very same interval catalogue as the compositional engine. This
  // prevents creative reference chords becoming impossible to analyse.
- const supported=["maj7#11","mMaj7","m7b5","maj9","madd9","add9",
+ const supported=["maj7#11","mMaj7","m7b5","maj9","madd9","add9","7sus4",
   "sus4","sus2","dim7","maj7","m9","m7","m6","dim","aug","9","7","6","5","m",""];
  const suffixRegex="("+supported.filter(Boolean).map(x=>x.replace(/[#]/g,"[#♯]").replace(/b(?=5$)/g,"[b♭]")).join("|")+")?";
  const shape=new RegExp("^([A-Ga-g])([#♯b♭]?)"+suffixRegex+"(?:\\/([A-Ga-g])([#♯b♭]?))?$");
@@ -491,11 +539,9 @@ function parseUserProgression(input){
   const root=pc(match[1],match[2]),bass=match[4]?pc(match[4],match[5]):root;
   const intervals=extensionIntervals(type);
   const notes=[...new Set(intervals.map(i=>mod(root+i)))];
-  if(!notes.includes(bass)){
-   errors.push("El bajo de "+token+" no pertenece al acorde; usa una inversión.");
-   continue;
-  }
-  chords.push({root,bass,notes,type,quality:type==="m"?"minor":type===""?"major":"other",
+  // Preserve a slash bass independently of chord tones, even if chromatic.
+  const bassKind=!match[4]?"root":notes.includes(bass)?"inversion":"independent";
+  chords.push({root,bass,bassKind,notes,type,quality:type==="m"||type==="madd9"?"minor":type===""?"major":"other",
    intervals:intervals.slice(),label:token,roman:"—"});
  }
  return {chords:errors.length?[]:chords,errors};
@@ -2265,5 +2311,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
