@@ -34,6 +34,7 @@ jobs:
           node tests/score-microanalysis-phase1.cjs
           node tests/harmonic-context-composer-comparison.cjs
           node tests/continuation-diversity.cjs
+          node tests/musician-journey-regression.cjs
           node tests/static-audit.cjs
           node tests/pwa-assets.cjs
       - name: Install browser runner
