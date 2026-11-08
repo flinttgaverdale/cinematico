@@ -469,7 +469,37 @@ function laboratoryVoices(chords,options={}){
   warning:style==="classical"?"Las quintas y octavas paralelas se señalan según criterios contrapuntísticos tradicionales; el contexto puede justificar excepciones.":"Las observaciones no son errores automáticos: comprueba su efecto expresivo, textura e instrumentación."};
 }
 
-function parseUserProgression(input){const tokens=String(input||"").trim().split(/[\s,;|]+/).filter(Boolean);if(!tokens.length)return {chords:[],errors:[]};if(tokens.length>8)return {chords:[],errors:["Máximo 8 acordes por análisis."]};const names={"C":0,"D":2,"E":4,"F":5,"G":7,"A":9,"B":11};const shapes={"":{intervals:[0,4,7],type:""},"m":{intervals:[0,3,7],type:"m"},"dim":{intervals:[0,3,6],type:"dim"},"aug":{intervals:[0,4,8],type:"aug"},"7":{intervals:[0,4,7,10],type:"7"},"maj7":{intervals:[0,4,7,11],type:"maj7"},"m7":{intervals:[0,3,7,10],type:"m7"},"sus4":{intervals:[0,5,7],type:"sus4"},"add9":{intervals:[0,4,7,14],type:"add9"},"madd9":{intervals:[0,3,7,14],type:"madd9"}};const chords=[],errors=[];for(const token of tokens){const match=/^([A-Ga-g])([#♯b♭]?)(maj7|madd9|add9|sus4|dim|aug|m7|m|7)?(?:\/([A-Ga-g])([#♯b♭]?))?$/.exec(token);if(!match){errors.push("Acorde no reconocido: "+token);continue;}const pc=(letter,acc)=>((names[letter.toUpperCase()]+(acc==="#"||acc==="♯"?1:acc==="b"||acc==="♭"?-1:0))%12+12)%12;const root=pc(match[1],match[2]),shape=shapes[match[3]||""],bass=match[4]?pc(match[4],match[5]):root;const notes=[...new Set(shape.intervals.map(i=>(root+i)%12))];if(!notes.includes(bass)){errors.push("El bajo de "+token+" no pertenece al acorde; usa una inversión.");continue;}chords.push({root,bass,notes,type:shape.type,quality:shape.type==="m"?"minor":shape.type===""?"major":"other",intervals:shape.intervals,label:token,roman:"—"});}return {chords:errors.length?[]:chords,errors};}
+function parseUserProgression(input){
+ const tokens=String(input||"").trim().split(/[\\s,;|]+/).filter(Boolean);
+ if(!tokens.length)return {chords:[],errors:[]};
+ if(tokens.length>8)return {chords:[],errors:["Máximo 8 acordes por análisis."]};
+ const names={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+ // Use the very same interval catalogue as the compositional engine. This
+ // prevents creative reference chords becoming impossible to analyse.
+ const supported=["maj7#11","mMaj7","m7b5","maj9","madd9","add9",
+  "sus4","sus2","dim7","maj7","m9","m7","m6","dim","aug","9","7","6","5","m",""];
+ const suffixRegex="("+supported.filter(Boolean).map(x=>x.replace(/[#]/g,"[#♯]").replace(/b(?=5$)/g,"[b♭]")).join("|")+")?";
+ const shape=new RegExp("^([A-Ga-g])([#♯b♭]?)"+suffixRegex+"(?:\\/([A-Ga-g])([#♯b♭]?))?$");
+ const pc=(letter,acc)=>mod(names[letter.toUpperCase()]+
+  (acc==="#"||acc==="♯"?1:acc==="b"||acc==="♭"?-1:0));
+ const chords=[],errors=[];
+ for(const token of tokens){
+  const match=shape.exec(token);
+  if(!match){errors.push("Acorde no reconocido: "+token);continue;}
+  const type=(match[3]||"").replaceAll("♯","#").replaceAll("♭","b");
+  if(!supported.includes(type)){errors.push("Tipo de acorde no reconocido: "+token);continue;}
+  const root=pc(match[1],match[2]),bass=match[4]?pc(match[4],match[5]):root;
+  const intervals=extensionIntervals(type);
+  const notes=[...new Set(intervals.map(i=>mod(root+i)))];
+  if(!notes.includes(bass)){
+   errors.push("El bajo de "+token+" no pertenece al acorde; usa una inversión.");
+   continue;
+  }
+  chords.push({root,bass,notes,type,quality:type==="m"?"minor":type===""?"major":"other",
+   intervals:intervals.slice(),label:token,roman:"—"});
+ }
+ return {chords:errors.length?[]:chords,errors};
+}
 // Symbolic cadence evidence. No claim about meter, melody, or phrase boundaries.
 function cadenceEvidence(chords,tonic,mode){
  const events=[];if(!Array.isArray(chords)||!chords.length)return events;
