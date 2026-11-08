@@ -1,0 +1,218 @@
+{
+  "schemaVersion": "1.0",
+  "studyDate": "2026-11-08",
+  "disclaimer": "Catalogue of evidence-grounded compositional lenses, NOT authentic transcriptions, copyrighted score material, nor probabilistic style recognition. Exercises are original.",
+  "entries": {
+    "williams": {
+      "name": "John Williams",
+      "evidenceGrade": "A",
+      "work": "Star Wars: A New Hope — Binary Sunset",
+      "source": "https://academic.oup.com/book/63100/chapter/567207145",
+      "centralProcess": "Articulación narrativa mediante cadencias, intercambio modal y desarrollo temático de largo alcance.",
+      "symbolicLens": "mezcla-modal-y-llegada",
+      "exercise": "C Fm Ab G7 C",
+      "chordObservable": [
+        "modal mixture",
+        "possible dominant arrival"
+      ],
+      "needs": [
+        "melody",
+        "phrase",
+        "orchestration"
+      ],
+      "avoid": "No inferir heroísmo ni un leitmotiv solo desde acordes."
+    },
+    "herrmann": {
+      "name": "Bernard Herrmann",
+      "evidenceGrade": "A",
+      "work": "Vertigo — Main Title / Scene d'amour",
+      "source": "https://mtosmt.org/issues/mto.22.28.1/mto.22.28.1.murphy.php",
+      "centralProcess": "Células de alturas y fricción cromática con retornos y resolución aplazada.",
+      "symbolicLens": "repeticion-cromatica-invariante",
+      "exercise": "Cm Bmaj7 Cm Db Cm",
+      "chordObservable": [
+        "chromatic motion",
+        "pitch-class recurrence"
+      ],
+      "needs": [
+        "duration",
+        "register",
+        "orchestration"
+      ],
+      "avoid": "No considerar cualquier semitono como una cita de Vertigo."
+    },
+    "zimmer": {
+      "name": "Hans Zimmer",
+      "evidenceGrade": "C",
+      "work": "Interstellar / Dunkirk",
+      "source": "https://www.bafta.org/media-centre/press-releases/a-life-in-pictures-christopher-nolan/",
+      "centralProcess": "Escalar una célula sencilla mediante textura, capas, pedal y diseño sonoro.",
+      "symbolicLens": "estabilidad-y-pedal-posible",
+      "exercise": "Am F C G",
+      "chordObservable": [
+        "common tones",
+        "root movement"
+      ],
+      "needs": [
+        "duration",
+        "orchestration",
+        "dynamics",
+        "sound design"
+      ],
+      "avoid": "No equivaler Zimmer a cuatro acordes menores ni ostinato obligatorio."
+    },
+    "giacchino": {
+      "name": "Michael Giacchino",
+      "evidenceGrade": "C",
+      "work": "Up — Married Life",
+      "source": "https://michaelgiacchino.com/projects/up/",
+      "centralProcess": "Identidad temática conservada y cambios de escala expresiva sin sobredimensionar la escena.",
+      "symbolicLens": "variacion-de-color-sin-reemplazar-tema",
+      "exercise": "Cmaj7 Am7 Fmaj7 G7",
+      "chordObservable": [
+        "color extensions",
+        "dominant approach"
+      ],
+      "needs": [
+        "melody",
+        "orchestration",
+        "film context"
+      ],
+      "avoid": "No presentar Imaj7–bIII como firma exclusiva de Giacchino."
+    },
+    "elfman": {
+      "name": "Danny Elfman",
+      "evidenceGrade": "C",
+      "work": "Edward Scissorhands — Grand Finale",
+      "source": "https://www.avclub.com/danny-elfman-on-oingo-boingo-film-scores-and-the-beat-1798274010",
+      "centralProcess": "Contraste teatral: fricción cromática, fragilidad coral y carácter",
+      "symbolicLens": "friccion-frente-a-fragilidad",
+      "exercise": "Cm Db G7 Cm",
+      "chordObservable": [
+        "chromatic neighbor",
+        "possible arrival"
+      ],
+      "needs": [
+        "meter",
+        "voices",
+        "orchestration"
+      ],
+      "avoid": "No llamar a todo cromatismo vals siniestro."
+    },
+    "silvestri": {
+      "name": "Alan Silvestri",
+      "evidenceGrade": "A",
+      "work": "Back to the Future — Score analysis",
+      "source": "https://www.blogs.berklee.edu/wp-content/uploads/2017/09/BTTF-Analysis.pdf",
+      "centralProcess": "Identidad breve de motivo, color lidio y tensión octatónica en persecución/acción.",
+      "symbolicLens": "lidia-con-contraste-octatonico-posible",
+      "exercise": "C D G7 C",
+      "chordObservable": [
+        "raised scale fourth as candidate",
+        "directed arrival"
+      ],
+      "needs": [
+        "motif",
+        "meter",
+        "orchestration"
+      ],
+      "avoid": "No confundir I–IV–V–I con una firma específica ni deducir heroísmo."
+    },
+    "horner": {
+      "name": "James Horner",
+      "evidenceGrade": "A",
+      "work": "A Beautiful Mind — three cues",
+      "source": "https://franklehman.com/wp-content/uploads/2020/02/MTS-Article.pdf",
+      "centralProcess": "Trayectorias entre tríadas por operaciones transformacionales con consecuencias narrativas.",
+      "symbolicLens": "transformaciones-P-L-R-demostracion",
+      "exercise": "Cm C Em G",
+      "chordObservable": [
+        "triadic parsimonious motion",
+        "transformational network"
+      ],
+      "needs": [
+        "narrative context",
+        "duration"
+      ],
+      "avoid": "No confundir el ejercicio P–L–R con la red L–R–S demostrada en A Beautiful Mind."
+    },
+    "shore": {
+      "name": "Howard Shore",
+      "evidenceGrade": "B",
+      "work": "The Lord of the Rings — themes and transformations",
+      "source": "https://books.google.com/books/about/The_Music_of_the_Lord_of_the_Rings_Films.html?id=-nOzcQAACAAJ",
+      "centralProcess": "Desarrollo y recontextualización de una red temática con cambios de color y escala.",
+      "symbolicLens": "retorno-modal-de-centro",
+      "exercise": "Em C E Am B7 Em",
+      "chordObservable": [
+        "parallel mode",
+        "harmonic return"
+      ],
+      "needs": [
+        "melody",
+        "orchestration",
+        "film context"
+      ],
+      "avoid": "Sin melodía no hay evidencia de cambio de leitmotiv."
+    },
+    "morricone": {
+      "name": "Ennio Morricone",
+      "evidenceGrade": "C",
+      "work": "Once Upon a Time in the West / The Mission",
+      "source": "https://blog.oup.com/2019/03/maestro-speaks-ennio-morricone-life-music/",
+      "centralProcess": "Economía, identidades tímbricas y articulación modular de materiales con significación narrativa.",
+      "symbolicLens": "pedal-y-modulos-posibles",
+      "exercise": "Am G F Am",
+      "chordObservable": [
+        "shared-tone potential",
+        "harmonic economy"
+      ],
+      "needs": [
+        "orchestration",
+        "melody",
+        "film context"
+      ],
+      "avoid": "No convertir instrumentos culturales o regionales en clichés ni asumir un pedal ejecutado."
+    },
+    "newman": {
+      "name": "Thomas Newman",
+      "evidenceGrade": "C",
+      "work": "Saving Mr. Banks / American Beauty",
+      "source": "https://www.bfi.org.uk/interviews/scoring-mr-banks-composers-life-hollywood",
+      "centralProcess": "Espacio textural, sonoridad abierta, fin no concluyente y uso expresivo del silencio.",
+      "symbolicLens": "extension-y-cierre-abierto",
+      "exercise": "Cadd9 Gsus4 Am7 Fmaj7",
+      "chordObservable": [
+        "added color",
+        "non-final-dominant closure"
+      ],
+      "needs": [
+        "duration",
+        "voicing",
+        "silence",
+        "film context"
+      ],
+      "avoid": "Una novena no garantiza el estilo Newman ni una sensación íntima."
+    },
+    "goransson": {
+      "name": "Ludwig Göransson",
+      "evidenceGrade": "C",
+      "work": "Oppenheimer — Can You Hear the Music; Black Panther",
+      "source": "https://www.nme.com/features/film-interviews/oppenheimer-score-soundtrack-ludwig-goransson-christopher-nolan-3471661",
+      "centralProcess": "Transformación de energía temporal, color tímbrico solista y diseños rítmicos culturalmente contextualizados.",
+      "symbolicLens": "armonia-constante-con-tension-variable",
+      "exercise": "Dm Bb C Dm",
+      "chordObservable": [
+        "root motion",
+        "modal stability"
+      ],
+      "needs": [
+        "tempo",
+        "meter",
+        "instrumental articulation",
+        "performer"
+      ],
+      "avoid": "No confundir el ciclo menor genérico con identidad artística o tradicional africana."
+    }
+  }
+}
