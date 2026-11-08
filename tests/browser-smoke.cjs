@@ -20,6 +20,10 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       assert.equal(await page.locator('[data-quick-intent]').count(), 4, 'Only four quick directions');
       assert.equal(await page.locator('[data-quick-intent="esperanza"]').getAttribute('aria-pressed'), 'true');
       assert.ok(!(await page.locator('#simpleMood').isVisible()), 'Fifteen detailed nuances are progressive disclosure');
+      assert.deepEqual(await page.locator('#simpleMood optgroup').evaluateAll(groups=>groups.map(g=>g.label)),
+        ['Luz y expansión','Calma y cercanía','Melancolía y sombra','Tensión e incertidumbre','Cambio y asombro'],
+        'Optional nuances are grouped by expressive proximity without adding more decisions');
+      assert.equal(await page.locator('#simpleMood option').count(),15,'All previous nuanced directions remain available');
       assert.equal(await page.locator('#simpleChords').inputValue(), '', 'Example chords are placeholders, not assumed user music');
       await page.locator('#workspaceAdvanced').click();
       assert.equal(await page.locator('body').getAttribute('data-workspace'), 'advanced');
