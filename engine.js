@@ -1014,7 +1014,7 @@ const COMPOSER_CREATIVE_LENSES={
      },
      {
       "d": 1,
-      "a": 0,
+      "a": -1,
       "q": "major",
       "e": ""
      },
@@ -1230,7 +1230,7 @@ const COMPOSER_CREATIVE_LENSES={
      },
      {
       "d": 1,
-      "a": 0,
+      "a": -1,
       "q": "major",
       "e": ""
      },
