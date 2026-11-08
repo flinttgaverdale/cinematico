@@ -39,6 +39,16 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       await page.locator('#composerHere').selectOption('horner');
       assert.ok((await page.locator('.composer-path-card').first().innerText()).includes('Em'),'Horner transforms a C triad to Em');
       assert.equal(await page.locator('#composer').inputValue(),'horner');
+      assert.equal(await page.locator('.composer-path-operator').count(),6,'Both Horner paths show three precise transformations');
+      assert.deepEqual(await page.locator('.composer-path-card').first().locator('.composer-path-operator').allTextContents(),['P','L','R']);
+      await page.locator('.composer-path-card').first().locator('.composer-path-analysis summary').click();
+      const detail=await page.locator('.composer-path-card').first().locator('.composer-path-analysis').innerText();
+      assert.ok(detail.includes('E♭ → E'),'Paralela moves only minor to major third');
+      assert.ok(detail.includes('C → B'),'L moves only a semitone');
+      assert.ok(detail.includes('E → D'),'R moves only a whole tone');
+      assert.ok(detail.includes('no se han supuesto octavas'),'Do not invent real voicings');
+      assert.ok((await page.locator('.composer-path-contrast').innerText()).length>30);
+
       assert.equal(await page.locator('#userChords').inputValue(),'',"Reference exercises must not overwrite the user progression");
 
       await page.locator('#workspaceExplore').click();
