@@ -1,0 +1,324 @@
+{
+  "version": "2026-11-08-microanalysis-1",
+  "methodology": {
+    "objective": "Contrast specific notated academic examples against semantic assumptions in Cinemático, not classify composer identity.",
+    "evidenceGrades": {
+      "A": "Visible published score/transcription example personally inspected",
+      "B": "Academic prose and named figure; visual figure not independently inspected in this step",
+      "X": "Original hypothetical exercise used to test the engine"
+    },
+    "limitations": [
+      "Only the cited fragment, not complete original studio scores",
+      "No independent complete listening evaluation",
+      "Chord symbols lack melody, tempo, meter and orchestration",
+      "Visual examples and academic transcriptions are not always the composer's autograph score"
+    ],
+    "originality": "Transcriptions and score pages stay at their originating URLs. Stored test fixtures are small analytical pitch-class abstractions, not copied passage notation."
+  },
+  "caseStudies": [
+    {
+      "id": "silvestri-back-to-the-future",
+      "composer": "Alan Silvestri",
+      "work": "Back to the Future",
+      "evidence": "A",
+      "source": {
+        "url": "https://www.blogs.berklee.edu/wp-content/uploads/2017/09/BTTF-Analysis.pdf",
+        "pageIndex": [
+          0,
+          1,
+          2
+        ],
+        "locators": [
+          "figure 1a, printed p. i",
+          "figure 4, printed p. ii",
+          "figures 6, 8a, 9, printed p. iii"
+        ],
+        "kind": "secondary academic/pedagogical score excerpts"
+      },
+      "observed": [
+        {
+          "tag": "lydian-melodic-inflection",
+          "tonalCenterPc": 10,
+          "melodicRaisedFourthPc": 4,
+          "followingFifthPc": 5,
+          "interpretation": "E natural to F above B-flat: raised fourth moves up semitone to fifth. This is a melodic gesture; it cannot be inferred from Bbmaj7#11 alone."
+        },
+        {
+          "tag": "melodic-variant",
+          "sourceLocation": "figure 4, page ii",
+          "intervalChange": "Melodic raised fourth lowered a semitone in the varied theme",
+          "interpretation": "Compare pitch alteration with maintained motivic identity, not an automatic mood label."
+        },
+        {
+          "tag": "triads-a-tritone",
+          "triads": [
+            {
+              "root": 10,
+              "quality": "major"
+            },
+            {
+              "root": 4,
+              "quality": "major"
+            }
+          ],
+          "unionPcs": [
+            2,
+            4,
+            5,
+            8,
+            10,
+            11
+          ],
+          "interpretation": "Bb-major and E-major triads are six semitone roots apart; simultaneous triadic layering is distinct from successive harmonies."
+        },
+        {
+          "tag": "octatonic",
+          "model": "Alternating semitone/whole-tone eight-note pitch collection",
+          "sourceLocation": "figures 8a and 9, page iii",
+          "interpretation": "The union of the two major triads fits a six-note subset of one octatonic collection; this alone does not prove an octatonic passage, and meter cannot be inferred from chord labels."
+        },
+        {
+          "tag": "rhythmic-ostinato",
+          "sourceLocation": "figure 9, page iii",
+          "observedMeterTokens": [
+            "2/4",
+            "3/8",
+            "2/4",
+            "3/8",
+            "2/4"
+          ],
+          "interpretation": "Changes of meter make ostinato accents slide relative to bars. The web chord engine has no event timing."
+        }
+      ],
+      "cannotAssert": [
+        "A #11 chord by itself constitutes a Lydian theme",
+        "Two consecutive tritone-related triads were simultanously layered",
+        "Octatonic provenance or instrumentation from six pitch classes alone",
+        "The precise emotional character of the theme without a listening task"
+      ]
+    },
+    {
+      "id": "horner-beautiful-mind",
+      "composer": "James Horner",
+      "work": "A Beautiful Mind",
+      "evidence": "A",
+      "source": {
+        "url": "https://franklehman.com/wp-content/uploads/2020/02/MTS-Article.pdf",
+        "pageIndex": [
+          11,
+          12,
+          13,
+          14
+        ],
+        "locators": [
+          "example 8, printed p. 11",
+          "example 10(a,b), printed p. 13, passage mm. 25–34",
+          "example 12(a,b), printed p. 15, mm. 50–65"
+        ],
+        "kind": "scholarly analytic transcription and transformations"
+      },
+      "observed": [
+        {
+          "tag": "SLIDE-sequential",
+          "from": {
+            "root": 9,
+            "quality": "minor",
+            "pcs": [
+              9,
+              0,
+              4
+            ]
+          },
+          "to": {
+            "root": 8,
+            "quality": "major",
+            "pcs": [
+              8,
+              0,
+              3
+            ]
+          },
+          "operation": "S",
+          "commonPcs": [
+            0
+          ],
+          "changes": [
+            {
+              "from": 9,
+              "to": 8
+            },
+            {
+              "from": 4,
+              "to": 3
+            }
+          ],
+          "sourceLocation": "pass 2, approximately mm. 27–33, figure 10",
+          "interpretation": "A minor to A-flat major conserves C and moves two other notes a semitone."
+        },
+        {
+          "tag": "SLIDEJOIN-simultaneous",
+          "triads": [
+            {
+              "root": 9,
+              "quality": "minor"
+            },
+            {
+              "root": 8,
+              "quality": "major"
+            }
+          ],
+          "unionPcs": [
+            0,
+            3,
+            4,
+            8,
+            9
+          ],
+          "sourceLocation": "pass 4, mm. 60–65, example 12",
+          "interpretation": "Lehman labels a later five-class simultaneous combination SLIDEJOIN; unlike sequential S, it contains simultaneous notes from both triads."
+        },
+        {
+          "tag": "multi-stage-transformational-arc",
+          "sourceLocation": "examples 8, 10–12",
+          "interpretation": "The paper treats the sequence of L/R/S and other operators as a larger organized network. Single S operations cannot identify the film or composer."
+        }
+      ],
+      "cannotAssert": [
+        "SLIDEJOIN is another spelling for a single S transition",
+        "The app's original P-L-R exercises reconstruct the published L/R/S route",
+        "One triad-to-triad move proves a specific film style",
+        "A transformation automatically creates the narrative meaning inferred by the analyst"
+      ]
+    },
+    {
+      "id": "herrmann-vertigo",
+      "composer": "Bernard Herrmann",
+      "work": "Vertigo: Prelude",
+      "evidence": "A",
+      "source": {
+        "url": "https://mtosmt.org/issues/mto.22.28.1/murphy_examples.pdf",
+        "analysisUrl": "https://mtosmt.org/issues/mto.22.28.1/mto.22.28.1.murphy.php",
+        "pageIndex": [
+          1,
+          2
+        ],
+        "locators": [
+          "Murphy example 1, PDF p. 2",
+          "Murphy example 2, PDF p. 3, original mm. 1–2"
+        ],
+        "kind": "music-theory reduction based on original manuscript, with interpretive choices"
+      },
+      "observed": [
+        {
+          "tag": "minor-major-seventh",
+          "root": 3,
+          "quality": "mMaj7",
+          "structuralPcs": [
+            2,
+            3,
+            6,
+            10
+          ],
+          "interpretation": "E-flat minor-major seventh, with D natural as seventh; not just E-flat minor triad."
+        },
+        {
+          "tag": "non-chord-neighbor",
+          "melodicPc": 0,
+          "neighborToPc": 10,
+          "sourceLocation": "C5 as upper neighbor of Bb, opening arpeggios, Murphy [1.1]",
+          "interpretation": "C5 sounds in the texture but the analyst does not include it in the structural E-flat-minor-major seventh chord."
+        },
+        {
+          "tag": "structure-binary",
+          "form": "A–B; partial repeated return and coda C",
+          "interpretation": "Requires observed timeline/melody/form, not recoverable from a short chord progression."
+        }
+      ],
+      "cannotAssert": [
+        "All audible pitches belong to a vertical chord",
+        "C5 automatically converts EbmMaj7 into an added-sixth chord",
+        "A minor-major seventh is exclusive to Herrmann",
+        "One chord implies a particular cinematic image"
+      ]
+    },
+    {
+      "id": "williams-binary-sunset",
+      "composer": "John Williams",
+      "work": "Star Wars: Binary Sunset",
+      "evidence": "B",
+      "source": {
+        "url": "https://academic.oup.com/book/63100/chapter/567207145",
+        "pageIndex": [],
+        "locators": [
+          "Lehman (2026), Introduction, figure I.1, first 19 measures; m. 7"
+        ],
+        "kind": "academic chapter; author notes notation combines by-ear film transcription with printed score sources"
+      },
+      "observed": [
+        {
+          "tag": "independent-bass-sonority",
+          "triadRoot": 1,
+          "bassPc": 7,
+          "upperTriadPcs": [
+            1,
+            5,
+            8
+          ],
+          "label": "Db/G",
+          "interpretation": "D-flat-major triad over G at m. 7, a 'Planets' sonority per Lehman."
+        },
+        {
+          "tag": "half-cadential-role",
+          "tonalContext": "G minor",
+          "sourceLocation": "m. 7 ends the first thematic unit",
+          "interpretation": "Lehman interprets a half cadence based on phrase and harmonic function. The Db/G symbol alone is not enough to prove a half cadence."
+        }
+      ],
+      "cannotAssert": [
+        "Db/G in any other work is a half cadence",
+        "The same harmonic sonority implies Williams or Holst influence",
+        "Bar count, phrase ending or cinematic timing can be inferred from the web input alone"
+      ]
+    }
+  ],
+  "negativeControls": [
+    {
+      "id": "distinct-lydian-chord-melody",
+      "input": "Bbmaj7#11",
+      "mustNotInfer": [
+        "melodicRaisedFourth",
+        "themeIdentity"
+      ]
+    },
+    {
+      "id": "successive-versus-simultaneous-tritone",
+      "input": "Bb E",
+      "mustNotInfer": [
+        "simultaneousLayering",
+        "octatonicPassage"
+      ]
+    },
+    {
+      "id": "slide-versus-slidejoin",
+      "input": "Am Ab",
+      "mustNotInfer": [
+        "simultaneity",
+        "fiveNoteSimultaneity"
+      ]
+    },
+    {
+      "id": "independent-bass-not-full-cadence",
+      "input": "Db/G",
+      "mustNotInfer": [
+        "formalHalfCadence"
+      ]
+    },
+    {
+      "id": "nonchord-neighbor-not-an-extension",
+      "input": "EbmMaj7",
+      "mustNotInfer": [
+        "melodicC5"
+      ]
+    }
+  ]
+}
