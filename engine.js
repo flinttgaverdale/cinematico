@@ -273,10 +273,14 @@ function neoTransform(root,quality,operation){
  return {operation,source:{root:mod(root),quality,notes:source},target:{root:targetRoot,quality:targetQuality,notes:target},common,movement,description:{P:"Paralela: conserva fundamental y quinta; cambia la tercera.",L:"Leittonwechsel: conserva dos notas y desplaza la tercera voz un semitono.",R:"Relativa: conserva dos notas y desplaza la tercera voz un tono."}[operation]};
 }
 function tendencyResolution(a,b,fromChord,toChord){
- // Only score an actual dominant-to-tonic root motion; avoid assuming function from chord color alone.
- if(!fromChord||!toChord||mod(fromChord.root+5)!==mod(toChord.root))return {penalty:0,leadingTone:0,seventh:0,details:[]};
+ // Without a demonstrated tonal center a plain major chord moving down a fifth may be I–IV.
+ // Require an explicit dominant seventh and fifth-related root movement before penalizing
+ // unresolved tendency tones. No function is inferred from an added ninth or maj7 chord.
+ if(!fromChord||!toChord||fromChord.type!=="7"||mod(fromChord.root+5)!==mod(toChord.root))
+  return {penalty:0,leadingTone:0,seventh:0,details:[]};
  const intervals=new Set(fromChord.notes.map(p=>mod(p-fromChord.root)));
- if(!intervals.has(4)||!intervals.has(7))return {penalty:0,leadingTone:0,seventh:0,details:[]};
+ if(!intervals.has(4)||!intervals.has(7)||!intervals.has(10))
+  return {penalty:0,leadingTone:0,seventh:0,details:[]};
  const target=mod(toChord.root),leading=mod(target-1),seventh=mod(fromChord.root+10);
  let penalty=0,leadingTone=0,seventhCount=0;const details=[];
  for(let i=1;i<4;i++){
