@@ -152,8 +152,10 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       assert.ok((await page.locator('#userChords').inputValue()).includes('C/Bb'));
       assert.ok(!(await page.locator('#userFeedback').innerText()).includes('Acorde no reconocido'),
         'An independent bass is valid, not a syntax error');
-      assert.ok((await page.locator('#labVoiceOutput').innerText()).includes('C/Bb'),
-        'The voice laboratory should display the original slash chord');
+      const actualLab=await page.locator('#labVoiceOutput').textContent();
+      const actualFeedback=await page.locator('#userFeedback').textContent();
+      assert.ok(actualLab.includes('C/Bb'),
+        'The voice laboratory should display the original slash chord. Actual lab: '+actualLab.slice(0,500)+' | Feedback: '+actualFeedback);
       await page.locator('#neoOperation').selectOption('S');
       assert.ok((await page.locator('#neoResult').innerText()).includes('SLIDE'),
         'SLIDE must render two voice movements without a browser exception');
