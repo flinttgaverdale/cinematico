@@ -29,6 +29,7 @@ jobs:
           node tests/harmonic-context-composer-comparison.cjs
           node tests/continuation-diversity.cjs
           node tests/static-audit.cjs
+          node tests/pwa-assets.cjs
       - name: Install browser runner
         run: |
           npm install --no-save playwright
