@@ -532,7 +532,10 @@ function parseUserProgression(input){
   (acc==="#"||acc==="♯"?1:acc==="b"||acc==="♭"?-1:0));
  const chords=[],errors=[];
  for(const token of tokens){
-  const match=shape.exec(token);
+  // Printed scores often spell suspensions G(sus4), while the editor uses Gsus4.
+  // Normalize only for parsing; preserve the user's exact chord symbol.
+  const normalizedToken=token.replace(/\(sus([24])\)/i,"sus$1");
+  const match=shape.exec(normalizedToken);
   if(!match){errors.push("Acorde no reconocido: "+token);continue;}
   const type=(match[3]||"").replaceAll("♯","#").replaceAll("♭","b");
   if(!supported.includes(type)){errors.push("Tipo de acorde no reconocido: "+token);continue;}
