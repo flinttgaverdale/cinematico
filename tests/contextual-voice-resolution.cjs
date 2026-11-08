@@ -27,6 +27,24 @@ assert.equal(E.harmonicResolutionDiagnostics(g,c,G7,Cmaj7,"cinematic").retainedL
 assert.equal(E.harmonicResolutionDiagnostics(g,c,G7,Cmaj7,"cinematic").penalty,0);
 assert.equal(E.harmonicResolutionDiagnostics(g,c,G7,Cmaj7,"classical").penalty,14);
 // The flexible treatment never forgives a leading tone that simply does not belong to the arrival.
+// Musical equivalence under transposition, not a claim of equal timbral effect.
+const keys=["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
+const ionian={int:[0,2,4,5,7,9,11]};
+for(let tonic=0;tonic<12;tonic++){
+ const chords=E.buildProfileProgression([
+  {d:4,q:"major",e:"7"},{d:0,q:"major",e:"maj7"}
+ ],tonic,ionian,keys[tonic]);
+ const shiftedFrom=g.map(n=>n+tonic),shiftedTo=c.map(n=>n+tonic);
+ const literal=chords.map(ch=>JSON.stringify(ch));
+ const liberal=E.tendencyResolution(shiftedFrom,shiftedTo,chords[0],chords[1],"cinematic");
+ const conservative=E.tendencyResolution(shiftedFrom,shiftedTo,chords[0],chords[1],"classical");
+ assert.equal(liberal.penalty,0,"Modern retained leading tone, "+keys[tonic]);
+ assert.equal(liberal.retainedLeadingTone,1,keys[tonic]);
+ assert.equal(conservative.leadingTone,1,keys[tonic]);
+ assert.equal(conservative.penalty,14,keys[tonic]);
+ assert.equal(JSON.stringify(chords[0]),literal[0]);
+ assert.equal(JSON.stringify(chords[1]),literal[1]);
+}
 const [G7b,Cb]=parse("G7 C");
 const violating=[43,53,59,62],arrival=[48,52,55,64]; // B3 -> G3, not C4
 assert.ok(E.tendencyResolution(violating,arrival,G7b,Cb,"cinematic").penalty>0);
@@ -60,6 +78,7 @@ const three=E.laboratoryVoices([G7,Cmaj7],{count:3,style:"cinematic"});
 const threeStrict=E.laboratoryVoices([G7,Cmaj7],{count:3,style:"classical"});
 assert.ok(three.voicings.length>0&&threeStrict.voicings.length>0);
 assert.ok(three.expressiveNotes.some(n=>n.text.includes("séptima mayor")));
+assert.ok(three.expressiveNotes.some(n=>n.text.startsWith("Superior:")),"Three-voice label matches the upper voice");
 assert.equal(three.warnings.filter(x=>x.kind.includes("sensible")).length,0,"An accepted color note is informational, not a false warning");
 assert.ok(threeStrict.warnings.some(x=>x.kind.includes("sensible")),"Strict mode highlights tension against its preferences");
 const four=E.laboratoryVoices([G7,Cmaj7],{count:4,style:"cinematic"});
