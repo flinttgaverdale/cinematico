@@ -1714,6 +1714,48 @@ const COMPOSER_CREATIVE_LENSES={
  }
 };
 
+/* Distinguish observable pitch-class continuity from performed voice leading.
+   These are equivalence classes, not register-specific melodic trajectories. */
+function composerMemberName(chord,pc){
+ const distance=mod(pc-chord.root);
+ const degree=distance===0?0:[1,2].includes(distance)?1:[3,4].includes(distance)?2:[5,6].includes(distance)?3:[7,8].includes(distance)?4:distance===9?5:6;
+ return spellDegreePc(chord.root,degree,mod(pc),chord.label);
+}
+function composerRouteInsights(chords,tonic){
+ if(!Array.isArray(chords)||chords.length<2)return {transitions:[],sharedLinkCount:0,chromaticCount:0,returnToCenter:false,ending:"Sin enlace suficiente."};
+ const transitions=chords.slice(1).map((target,i)=>{
+  const source=chords[i],a=[...new Set(source.notes.map(mod))],b=[...new Set(target.notes.map(mod))];
+  const common=a.filter(pc=>b.includes(pc)),removed=a.filter(pc=>!b.includes(pc)),added=b.filter(pc=>!a.includes(pc));
+  const sourceTriad=a.length===3&&["major","minor"].includes(source.quality);
+  const targetTriad=b.length===3&&["major","minor"].includes(target.quality);
+  const operator=(sourceTriad&&targetTriad?["P","L","R"].find(op=>{
+   const candidate=neoTransform(source.root,source.quality,op);
+   return candidate?.target.root===target.root&&candidate?.target.quality===target.quality&&
+    candidate.target.notes.every(pc=>b.includes(pc));
+  }):null)||null;
+  let motion=null;
+  if(removed.length===1&&added.length===1&&common.length>=2){
+   let semitones=mod(added[0]-removed[0]);if(semitones>6)semitones-=12;
+   motion={from:composerMemberName(source,removed[0]),to:composerMemberName(target,added[0]),semitones};
+  }
+  const operatorName={P:"Paralela",L:"Leittonwechsel",R:"Relativa"}[operator]||null;
+  const explanation=operator
+   ?operator+" · "+operatorName+": "+common.length+" notas comunes, "+motion.from+" → "+motion.to+" ("+Math.abs(motion.semitones)+" semitono"+(Math.abs(motion.semitones)===1?"":"s")+")."
+   :motion
+    ?"Conserva "+common.length+" notas; una clase de altura pasa de "+motion.from+" a "+motion.to+"."
+    :common.length
+     ?"Comparte "+common.length+" nota"+(common.length===1?"":"s")+"; no se ha determinado una conducción de voces."
+     :"Sin notas comunes; comprobar la distancia y la disposición de voces antes de decidir.";
+  return {from:source.label,to:target.label,common:common.map(pc=>composerMemberName(source,pc)),commonCount:common.length,operator,operatorName,motion,explanation};
+ });
+ const sharedLinkCount=transitions.filter(x=>x.commonCount>=2).length;
+ const chromaticCount=chords.filter(c=>c.chromatic===true).length;
+ const returnToCenter=mod(chords[chords.length-1].root)===mod(tonic);
+ const ending=returnToCenter?"Regresa a la fundamental de partida. No demuestra por sí solo una cadencia.":
+   "Termina fuera de la fundamental de partida; no implica necesariamente una modulación.";
+ return {transitions,sharedLinkCount,chromaticCount,returnToCenter,ending,
+  scope:"Notas comunes por clases de altura: no se han supuesto octavas, voces, duraciones ni una interpretación real."};
+}
 function composerCreativePaths(composerId,tonic,keyName){
  const profile=COMPOSER_CREATIVE_LENSES[composerId];
  if(!profile||!Number.isInteger(tonic)||tonic<0||tonic>11)return null;
@@ -1725,6 +1767,7 @@ function composerCreativePaths(composerId,tonic,keyName){
   const chromatic=chords.filter(c=>c.chromatic).length;
   const commonTransitions=chords.slice(1).map((c,i)=>chords[i].commonWithNext.length);
   return {id:r.name,name:r.name,intention:r.intention,chords,
+   insights:composerRouteInsights(chords,tonic),
    chromaticChords:chromatic,commonTransitions,
    note:"Ejercicio creativo original. Ninguna de estas cifras equivale a una transcripción o una predicción de estilo."};
  });
@@ -2044,5 +2087,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
