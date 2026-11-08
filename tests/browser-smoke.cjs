@@ -48,6 +48,36 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       assert.ok(detail.includes('E → D'),'R moves only a whole tone');
       assert.ok(detail.includes('no se han supuesto octavas'),'Do not invent real voicings');
       assert.ok((await page.locator('.composer-path-contrast').innerText()).length>30);
+      // Deterministic Web Audio adapter: verifies user-initiated play/stop, not acoustic realism.
+      await page.evaluate(()=>{
+        window.__previewStats={opened:0,closed:0,notes:0};
+        window.AudioContext=class FakeAudioContext{
+          currentTime=0;destination={};
+          constructor(){window.__previewStats.opened++;}
+          createGain(){return {gain:{value:0,setValueAtTime(){},linearRampToValueAtTime(){}},connect(){}};}
+          createOscillator(){window.__previewStats.notes++;return {type:'',frequency:{value:0},connect(){},start(){},stop(){}};}
+          resume(){return Promise.resolve();}
+          close(){window.__previewStats.closed++;return Promise.resolve();}
+        };
+      });
+      assert.equal(await page.locator('.composer-audio-button').count(),2);
+      await page.locator('[data-composer-preview="0"]').click();
+      assert.equal(await page.locator('[data-composer-preview="0"]').getAttribute('aria-pressed'),'true');
+      assert.ok((await page.locator('#composerListenStatus').innerText()).includes('Escuchando camino 1'));
+      assert.equal(await page.evaluate(()=>window.__previewStats.notes),16,'Four chords, four simultaneous tones per event');
+      await page.locator('[data-composer-preview="1"]').click();
+      assert.equal(await page.locator('[data-composer-preview="0"]').getAttribute('aria-pressed'),'false');
+      assert.equal(await page.locator('[data-composer-preview="1"]').getAttribute('aria-pressed'),'true');
+      assert.equal(await page.evaluate(()=>window.__previewStats.closed),1);
+      await page.locator('[data-composer-preview="1"]').click();
+      assert.equal(await page.locator('[data-composer-preview="1"]').getAttribute('aria-pressed'),'false');
+      assert.equal(await page.evaluate(()=>window.__previewStats.closed),2);
+      await page.locator('[data-composer-preview="0"]').click();
+      await page.locator('#quickKey').selectOption('G');
+      assert.equal(await page.evaluate(()=>window.__previewStats.closed),3,'Reference changes must stop old preview');
+      assert.equal(await page.locator('[data-composer-preview="0"]').getAttribute('aria-pressed'),'false');
+      await page.locator('#quickKey').selectOption('C');
+
       assert.ok((await page.locator('.composer-path-contrast').innerText()).includes('P–L–R frente a R–L–P'),'Horner A/B must reveal transformation order');
       await page.locator('#composer').selectOption('giacchino');
       const giacchinoContrast=await page.locator('.composer-path-contrast').innerText();
