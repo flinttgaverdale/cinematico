@@ -898,7 +898,27 @@ function emotionalContinuations(chords,emotion){
   options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,cadenceFit,direction,explanation,suggestedCenter:center,anchorBasis,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
  }
  options.sort((a,b)=>b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
- const distinct=[],used=new Set();for(const o of options){if(!used.has(o.direction)){distinct.push(o);used.add(o.direction);}}for(const o of options){if(distinct.length>=3)break;if(!distinct.includes(o))distinct.push(o);}return distinct.slice(0,3).map((o,i)=>({...o,variant:i+1,title:i===0?spec.title:spec.title+" · alternativa "+(i+1)}));
+ if(!options.length)return [];
+ // Preserve the strongest context fit as the first idea. For the remaining
+ // variants, prefer a different harmonic path instead of three almost identical
+ // suggestions. These are symbolic distances, never aesthetic scores.
+ const distinct=[options[0]],remaining=options.slice(1);
+ const distance=(a,b)=>a.chords.reduce((sum,ch,i)=>sum+(ch!==b.chords[i]?1:0),0);
+ while(distinct.length<3&&remaining.length){
+  remaining.sort((a,b)=>{
+   const novelty=o=>Math.min(...distinct.map(reference=>distance(o,reference)));
+   const diversity=o=>novelty(o)*2+(distinct.every(x=>x.direction!==o.direction)?1.5:0);
+   return diversity(b)-diversity(a)||b.contextScore-a.contextScore||
+    a.chords.join(" ").localeCompare(b.chords.join(" "));
+  });
+  distinct.push(remaining.shift());
+ }
+ return distinct.map((o,i)=>({...o,variant:i+1,
+  title:i===0?spec.title:spec.title+" · alternativa "+(i+1),
+  variantDescription:i===0
+   ?"Primer camino por ajuste armónico estructural, no por calidad artística."
+   :"Frente a la primera opción, cambia "+distance(o,distinct[0])+
+    " de "+o.chords.length+" acordes propuestos; compara ambos antes de elegir."}));
 }
 // Validate a complete continuation without dropping or altering the user's chords.
 // This helper is shared by the web interface and future hosts.
