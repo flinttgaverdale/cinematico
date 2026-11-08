@@ -1,7 +1,7 @@
 name: Cinematico reliability checks
 on:
   push:
-    branches: [main, feature/simple-create-trial, research/musicology-audit-2026-11, research/musicology-precision-2026-11-08]
+    branches: [main, feature/simple-create-trial, research/musicology-audit-2026-11, research/musicology-precision-2026-11-08, research/composer-profiles-2026-11-08]
   pull_request:
   workflow_dispatch:
 jobs:
@@ -19,6 +19,7 @@ jobs:
           node tests/cadence-regression.cjs
           node tests/musicology-regression.cjs
           node tests/musicology-precision.cjs
+          node tests/composer-research-regression.cjs
           node tests/static-audit.cjs
       - name: Install browser runner
         run: |
