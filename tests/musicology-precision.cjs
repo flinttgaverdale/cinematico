@@ -46,6 +46,16 @@ for(const [source,mood,target] of [
  assert.equal(base.map(x=>x.label).join(' '),source,"Never mutate the composer’s input");
 }
 assert.equal(center('C F G7','alegria')[0].chords.at(-1),'C');
+for(const mood of ['calma','ternura','nostalgia']){
+ const minorIdeas=center('Cm Abmaj7 Fm7 G7',mood);
+ assert.equal(minorIdeas.length,3,mood);
+ assert.ok(minorIdeas.every(x=>['Cmadd9','Cm7'].includes(x.chords.at(-1))),
+  mood+' in C minor should not silently end in C major');
+ const majorIdeas=center('C F G7',mood);
+ assert.equal(majorIdeas.length,3,mood);
+ assert.ok(majorIdeas.every(x=>['Cmaj7','Cadd9'].includes(x.chords.at(-1))),
+  mood+' in C major should stay available');
+}
 for(let shift=0;shift<12;shift++){
  const chords=parse('Dm G7 C').map(ch=>({...ch,root:(ch.root+shift)%12,bass:(ch.bass+shift)%12,notes:ch.notes.map(n=>(n+shift)%12)}));
  assert.equal(E.tonalHypotheses(chords).candidates[0].tonic,shift,'Transposition invariant tonal reading');
