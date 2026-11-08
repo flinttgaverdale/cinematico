@@ -1,0 +1,120 @@
+{
+  "version": 1,
+  "method": "Escenarios ficticios con requisitos armónicos expresos; no son etiquetas de emoción inferidas de acordes ni juicios estéticos.",
+  "transpositionRoots": [
+    "C",
+    "Db",
+    "D",
+    "Eb",
+    "E",
+    "F",
+    "Gb",
+    "G",
+    "Ab",
+    "A",
+    "Bb",
+    "B"
+  ],
+  "briefs": [
+    {
+      "id": "intimidad",
+      "title": "Intimidad sin cierre impuesto",
+      "brief": "Quiero extensiones de color, enlaces con notas comunes y evitar una llegada V–I final.",
+      "criteria": [
+        "colorAdd",
+        "smoothMajority",
+        "noVClosing"
+      ]
+    },
+    {
+      "id": "perdida",
+      "title": "Pérdida sin regreso",
+      "brief": "Empieza en menor, no regreses a la fundamental inicial y no termines con V–i.",
+      "criteria": [
+        "minor",
+        "openRoot",
+        "noVClosing"
+      ]
+    },
+    {
+      "id": "maravilla",
+      "title": "Maravilla con posibilidad lidia",
+      "brief": "Quiero punto de partida mayor, una #11 sobre la tónica y contraste cromático.",
+      "criteria": [
+        "major",
+        "tonicSharp11",
+        "nonmodal"
+      ]
+    },
+    {
+      "id": "peligro",
+      "title": "Peligro cromático",
+      "brief": "Quiero menor, color ajeno al modo y algún enlace sin notas comunes.",
+      "criteria": [
+        "minor",
+        "nonmodal",
+        "disjoint"
+      ]
+    },
+    {
+      "id": "reencuentro",
+      "title": "Reencuentro con llegada explícita",
+      "brief": "Quiero regreso a la fundamental, dominante mayor hacia ella y contraste interno.",
+      "criteria": [
+        "returnRoot",
+        "vClosing",
+        "severalRoots"
+      ]
+    },
+    {
+      "id": "transformacion",
+      "title": "Transformación entre tríadas",
+      "brief": "Quiero dos o más transformaciones P/L/R, tres sonoridades diferentes y continuidad de notas.",
+      "criteria": [
+        "twoOperators",
+        "threeDistinctChords",
+        "smoothMajority"
+      ]
+    },
+    {
+      "id": "espera",
+      "title": "Espera y economía de acordes",
+      "brief": "Quiero centro menor, dos regiones armónicas como máximo y ningún V–i final.",
+      "criteria": [
+        "minor",
+        "fewRoots",
+        "noVClosing"
+      ]
+    },
+    {
+      "id": "heroismo_ambiguo",
+      "title": "Afirmación tonal con ambigüedad",
+      "brief": "Quiero un centro mayor, un acorde fuera del modo y regreso sin V–I final.",
+      "criteria": [
+        "major",
+        "nonmodal",
+        "returnNoV"
+      ]
+    },
+    {
+      "id": "soledad",
+      "title": "Soledad con pocos acordes y salida abierta",
+      "brief": "Quiero empezar en menor, usar como máximo dos regiones de fundamentales y dejar la salida abierta.",
+      "criteria": [
+        "minor",
+        "fewRoots",
+        "openRoot"
+      ]
+    },
+    {
+      "id": "humor_inquietante",
+      "title": "Extrañeza en torno a la tónica",
+      "brief": "Quiero centro menor, ♭II mayor y retorno a la fundamental.",
+      "criteria": [
+        "minor",
+        "flatII",
+        "returnRoot"
+      ]
+    }
+  ]
+}
