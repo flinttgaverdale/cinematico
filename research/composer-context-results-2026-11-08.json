@@ -1,0 +1,1637 @@
+{
+  "date": "2026-11-08",
+  "version": "1.0",
+  "type": "structural-simulation-not-human-aesthetic-evaluation",
+  "sources": [
+    "https://doi.org/10.1145/3769106",
+    "https://doi.org/10.1007/s10462-026-11582-x",
+    "https://pubmed.ncbi.nlm.nih.gov/39793277/"
+  ],
+  "methodology": "Three binary harmonic requirements per brief, no emotion or composer-authenticity predictor. 22 original routes + 2 generic baseline controls, each in 12 keys and 10 fictional briefs.",
+  "totals": {
+    "profiles": 11,
+    "originalRoutes": 22,
+    "baselines": 2,
+    "briefs": 10,
+    "tonics": 12,
+    "routeBriefSimulations": 2880,
+    "originalSimulations": 2640,
+    "baselineSimulations": 240
+  },
+  "contexts": [
+    {
+      "id": "intimidad",
+      "title": "Intimidad sin cierre impuesto",
+      "requirements": [
+        "colorAdd",
+        "smoothMajority",
+        "noVClosing"
+      ],
+      "fullyMatchingRoutes": 3,
+      "partiallyMatchingRoutes": 6,
+      "zeroMatchRoutes": 5,
+      "fullProfiles": [
+        "elfman",
+        "newman"
+      ],
+      "fullExamples": [
+        "elfman#2",
+        "newman#1",
+        "newman#2"
+      ],
+      "baseline": [
+        {
+          "control": "control-major-functional",
+          "met": 0
+        },
+        {
+          "control": "control-minor-modal",
+          "met": 1
+        }
+      ]
+    },
+    {
+      "id": "perdida",
+      "title": "Pérdida sin regreso",
+      "requirements": [
+        "minor",
+        "openRoot",
+        "noVClosing"
+      ],
+      "fullyMatchingRoutes": 5,
+      "partiallyMatchingRoutes": 7,
+      "zeroMatchRoutes": 3,
+      "fullProfiles": [
+        "herrmann",
+        "horner",
+        "zimmer"
+      ],
+      "fullExamples": [
+        "herrmann#1",
+        "horner#1",
+        "horner#2",
+        "zimmer#1",
+        "zimmer#2"
+      ],
+      "baseline": [
+        {
+          "control": "control-major-functional",
+          "met": 0
+        },
+        {
+          "control": "control-minor-modal",
+          "met": 2
+        }
+      ]
+    },
+    {
+      "id": "maravilla",
+      "title": "Maravilla con posibilidad lidia",
+      "requirements": [
+        "major",
+        "tonicSharp11",
+        "nonmodal"
+      ],
+      "fullyMatchingRoutes": 1,
+      "partiallyMatchingRoutes": 3,
+      "zeroMatchRoutes": 6,
+      "fullProfiles": [
+        "silvestri"
+      ],
+      "fullExamples": [
+        "silvestri#1"
+      ],
+      "baseline": [
+        {
+          "control": "control-major-functional",
+          "met": 1
+        },
+        {
+          "control": "control-minor-modal",
+          "met": 0
+        }
+      ]
+    },
+    {
+      "id": "peligro",
+      "title": "Peligro cromático",
+      "requirements": [
+        "minor",
+        "nonmodal",
+        "disjoint"
+      ],
+      "fullyMatchingRoutes": 3,
+      "partiallyMatchingRoutes": 11,
+      "zeroMatchRoutes": 4,
+      "fullProfiles": [
+        "elfman",
+        "herrmann",
+        "morricone"
+      ],
+      "fullExamples": [
+        "elfman#1",
+        "herrmann#1",
+        "morricone#2"
+      ],
+      "baseline": [
+        {
+          "control": "control-major-functional",
+          "met": 0
+        },
+        {
+          "control": "control-minor-modal",
+          "met": 2
+        }
+      ]
+    },
+    {
+      "id": "reencuentro",
+      "title": "Reencuentro con llegada explícita",
+      "requirements": [
+        "returnRoot",
+        "vClosing",
+        "severalRoots"
+      ],
+      "fullyMatchingRoutes": 6,
+      "partiallyMatchingRoutes": 7,
+      "zeroMatchRoutes": 1,
+      "fullProfiles": [
+        "elfman",
+        "giacchino",
+        "shore",
+        "williams"
+      ],
+      "fullExamples": [
+        "elfman#1",
+        "giacchino#1",
+        "giacchino#2",
+        "shore#1",
+        "shore#2",
+        "williams#2"
+      ],
+      "baseline": [
+        {
+          "control": "control-major-functional",
+          "met": 3
+        },
+        {
+          "control": "control-minor-modal",
+          "met": 2
+        }
+      ]
+    },
+    {
+      "id": "transformacion",
+      "title": "Transformación entre tríadas",
+      "requirements": [
+        "twoOperators",
+        "threeDistinctChords",
+        "smoothMajority"
+      ],
+      "fullyMatchingRoutes": 2,
+      "partiallyMatchingRoutes": 8,
+      "zeroMatchRoutes": 2,
+      "fullProfiles": [
+        "horner"
+      ],
+      "fullExamples": [
+        "horner#1",
+        "horner#2"
+      ],
+      "baseline": [
+        {
+          "control": "control-major-functional",
+          "met": 1
+        },
+        {
+          "control": "control-minor-modal",
+          "met": 1
+        }
+      ]
+    },
+    {
+      "id": "espera",
+      "title": "Espera y economía de acordes",
+      "requirements": [
+        "minor",
+        "fewRoots",
+        "noVClosing"
+      ],
+      "fullyMatchingRoutes": 2,
+      "partiallyMatchingRoutes": 11,
+      "zeroMatchRoutes": 3,
+      "fullProfiles": [
+        "herrmann",
+        "zimmer"
+      ],
+      "fullExamples": [
+        "herrmann#2",
+        "zimmer#1"
+      ],
+      "baseline": [
+        {
+          "control": "control-major-functional",
+          "met": 0
+        },
+        {
+          "control": "control-minor-modal",
+          "met": 2
+        }
+      ]
+    },
+    {
+      "id": "heroismo_ambiguo",
+      "title": "Afirmación tonal con ambigüedad",
+      "requirements": [
+        "major",
+        "nonmodal",
+        "returnNoV"
+      ],
+      "fullyMatchingRoutes": 3,
+      "partiallyMatchingRoutes": 4,
+      "zeroMatchRoutes": 2,
+      "fullProfiles": [
+        "silvestri",
+        "williams"
+      ],
+      "fullExamples": [
+        "silvestri#1",
+        "silvestri#2",
+        "williams#1"
+      ],
+      "baseline": [
+        {
+          "control": "control-major-functional",
+          "met": 1
+        },
+        {
+          "control": "control-minor-modal",
+          "met": 1
+        }
+      ]
+    },
+    {
+      "id": "soledad",
+      "title": "Soledad con pocos acordes y salida abierta",
+      "requirements": [
+        "minor",
+        "fewRoots",
+        "openRoot"
+      ],
+      "fullyMatchingRoutes": 1,
+      "partiallyMatchingRoutes": 5,
+      "zeroMatchRoutes": 5,
+      "fullProfiles": [
+        "zimmer"
+      ],
+      "fullExamples": [
+        "zimmer#1"
+      ],
+      "baseline": [
+        {
+          "control": "control-major-functional",
+          "met": 0
+        },
+        {
+          "control": "control-minor-modal",
+          "met": 1
+        }
+      ]
+    },
+    {
+      "id": "humor_inquietante",
+      "title": "Extrañeza en torno a la tónica",
+      "requirements": [
+        "minor",
+        "flatII",
+        "returnRoot"
+      ],
+      "fullyMatchingRoutes": 1,
+      "partiallyMatchingRoutes": 9,
+      "zeroMatchRoutes": 1,
+      "fullProfiles": [
+        "elfman"
+      ],
+      "fullExamples": [
+        "elfman#1"
+      ],
+      "baseline": [
+        {
+          "control": "control-major-functional",
+          "met": 1
+        },
+        {
+          "control": "control-minor-modal",
+          "met": 2
+        }
+      ]
+    }
+  ],
+  "pairs": [
+    {
+      "id": "elfman",
+      "changedContextCount": 8,
+      "firstWins": 4,
+      "secondWins": 4,
+      "ties": 2
+    },
+    {
+      "id": "giacchino",
+      "changedContextCount": 1,
+      "firstWins": 0,
+      "secondWins": 1,
+      "ties": 9
+    },
+    {
+      "id": "goransson",
+      "changedContextCount": 1,
+      "firstWins": 1,
+      "secondWins": 0,
+      "ties": 9
+    },
+    {
+      "id": "herrmann",
+      "changedContextCount": 6,
+      "firstWins": 3,
+      "secondWins": 3,
+      "ties": 4
+    },
+    {
+      "id": "horner",
+      "changedContextCount": 0,
+      "firstWins": 0,
+      "secondWins": 0,
+      "ties": 10
+    },
+    {
+      "id": "morricone",
+      "changedContextCount": 3,
+      "firstWins": 0,
+      "secondWins": 3,
+      "ties": 7
+    },
+    {
+      "id": "newman",
+      "changedContextCount": 5,
+      "firstWins": 3,
+      "secondWins": 2,
+      "ties": 5
+    },
+    {
+      "id": "shore",
+      "changedContextCount": 1,
+      "firstWins": 0,
+      "secondWins": 1,
+      "ties": 9
+    },
+    {
+      "id": "silvestri",
+      "changedContextCount": 5,
+      "firstWins": 4,
+      "secondWins": 1,
+      "ties": 5
+    },
+    {
+      "id": "williams",
+      "changedContextCount": 8,
+      "firstWins": 5,
+      "secondWins": 3,
+      "ties": 2
+    },
+    {
+      "id": "zimmer",
+      "changedContextCount": 5,
+      "firstWins": 4,
+      "secondWins": 1,
+      "ties": 5
+    }
+  ],
+  "exampleRoutes": [
+    {
+      "id": "elfman",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "D♭",
+        "G7",
+        "Cm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": false,
+        "minor": true,
+        "openRoot": false,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": true,
+        "returnRoot": true,
+        "vClosing": true,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": true,
+        "numOperators": 0,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 0,
+        "totalLinks": 3,
+        "chromaticCount": 2
+      },
+      "briefMatch": {
+        "intimidad": 0,
+        "perdida": 1,
+        "maravilla": 1,
+        "peligro": 3,
+        "reencuentro": 3,
+        "transformacion": 1,
+        "espera": 1,
+        "heroismo_ambiguo": 1,
+        "soledad": 1,
+        "humor_inquietante": 3
+      }
+    },
+    {
+      "id": "elfman",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "A♭maj7",
+        "E♭",
+        "Cm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": true,
+        "smoothMajority": true,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": false,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": false,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 1,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 3,
+        "totalLinks": 3,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 3,
+        "perdida": 2,
+        "maravilla": 0,
+        "peligro": 1,
+        "reencuentro": 2,
+        "transformacion": 2,
+        "espera": 2,
+        "heroismo_ambiguo": 1,
+        "soledad": 1,
+        "humor_inquietante": 2
+      }
+    },
+    {
+      "id": "giacchino",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "ionian",
+      "chords": [
+        "C",
+        "Am",
+        "F",
+        "G7",
+        "C"
+      ],
+      "features": {
+        "modeKey": "ionian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": false,
+        "minor": false,
+        "openRoot": false,
+        "major": true,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": false,
+        "returnRoot": true,
+        "vClosing": true,
+        "severalRoots": true,
+        "twoOperators": true,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 2,
+        "numChordKinds": 4,
+        "numRoots": 4,
+        "smoothLinks": 2,
+        "totalLinks": 4,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 0,
+        "perdida": 0,
+        "maravilla": 1,
+        "peligro": 0,
+        "reencuentro": 3,
+        "transformacion": 2,
+        "espera": 0,
+        "heroismo_ambiguo": 1,
+        "soledad": 0,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "giacchino",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "ionian",
+      "chords": [
+        "Cmaj7",
+        "Am7",
+        "Fmaj7",
+        "G7",
+        "Cmaj7"
+      ],
+      "features": {
+        "modeKey": "ionian",
+        "tonic": 0,
+        "colorAdd": true,
+        "smoothMajority": true,
+        "noVClosing": false,
+        "minor": false,
+        "openRoot": false,
+        "major": true,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": false,
+        "returnRoot": true,
+        "vClosing": true,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 4,
+        "numRoots": 4,
+        "smoothLinks": 3,
+        "totalLinks": 4,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 2,
+        "perdida": 0,
+        "maravilla": 1,
+        "peligro": 0,
+        "reencuentro": 3,
+        "transformacion": 2,
+        "espera": 0,
+        "heroismo_ambiguo": 1,
+        "soledad": 0,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "goransson",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "A♭",
+        "Cm",
+        "B♭",
+        "Cm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": false,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": true,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": true,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 2,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 2,
+        "totalLinks": 4,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 1,
+        "perdida": 2,
+        "maravilla": 0,
+        "peligro": 2,
+        "reencuentro": 2,
+        "transformacion": 2,
+        "espera": 2,
+        "heroismo_ambiguo": 1,
+        "soledad": 1,
+        "humor_inquietante": 2
+      }
+    },
+    {
+      "id": "goransson",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "Fm",
+        "B♭",
+        "Cm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": false,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": true,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 0,
+        "totalLinks": 3,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 1,
+        "perdida": 2,
+        "maravilla": 0,
+        "peligro": 2,
+        "reencuentro": 2,
+        "transformacion": 1,
+        "espera": 2,
+        "heroismo_ambiguo": 1,
+        "soledad": 1,
+        "humor_inquietante": 2
+      }
+    },
+    {
+      "id": "herrmann",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "D♭",
+        "Cm",
+        "Gm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": true,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": true,
+        "returnRoot": false,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": true,
+        "numOperators": 0,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 0,
+        "totalLinks": 3,
+        "chromaticCount": 1
+      },
+      "briefMatch": {
+        "intimidad": 1,
+        "perdida": 3,
+        "maravilla": 1,
+        "peligro": 3,
+        "reencuentro": 1,
+        "transformacion": 1,
+        "espera": 2,
+        "heroismo_ambiguo": 1,
+        "soledad": 2,
+        "humor_inquietante": 2
+      }
+    },
+    {
+      "id": "herrmann",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "Bmaj7",
+        "Cm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": true,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": false,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": false,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": false,
+        "twoOperators": false,
+        "threeDistinctChords": false,
+        "fewRoots": true,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 2,
+        "numRoots": 2,
+        "smoothLinks": 0,
+        "totalLinks": 2,
+        "chromaticCount": 1
+      },
+      "briefMatch": {
+        "intimidad": 2,
+        "perdida": 2,
+        "maravilla": 1,
+        "peligro": 2,
+        "reencuentro": 1,
+        "transformacion": 0,
+        "espera": 3,
+        "heroismo_ambiguo": 2,
+        "soledad": 2,
+        "humor_inquietante": 2
+      }
+    },
+    {
+      "id": "horner",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "C",
+        "Em",
+        "G"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": true,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": true,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": false,
+        "returnRoot": false,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": true,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 3,
+        "numChordKinds": 4,
+        "numRoots": 3,
+        "smoothLinks": 3,
+        "totalLinks": 3,
+        "chromaticCount": 3
+      },
+      "briefMatch": {
+        "intimidad": 2,
+        "perdida": 3,
+        "maravilla": 1,
+        "peligro": 2,
+        "reencuentro": 1,
+        "transformacion": 3,
+        "espera": 2,
+        "heroismo_ambiguo": 1,
+        "soledad": 2,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "horner",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "E♭",
+        "Gm",
+        "G"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": true,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": true,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": false,
+        "returnRoot": false,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": true,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 3,
+        "numChordKinds": 4,
+        "numRoots": 3,
+        "smoothLinks": 3,
+        "totalLinks": 3,
+        "chromaticCount": 1
+      },
+      "briefMatch": {
+        "intimidad": 2,
+        "perdida": 3,
+        "maravilla": 1,
+        "peligro": 2,
+        "reencuentro": 1,
+        "transformacion": 3,
+        "espera": 2,
+        "heroismo_ambiguo": 1,
+        "soledad": 2,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "morricone",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "B♭",
+        "A♭",
+        "Cm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": false,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": true,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 1,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 1,
+        "totalLinks": 3,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 1,
+        "perdida": 2,
+        "maravilla": 0,
+        "peligro": 2,
+        "reencuentro": 2,
+        "transformacion": 1,
+        "espera": 2,
+        "heroismo_ambiguo": 1,
+        "soledad": 1,
+        "humor_inquietante": 2
+      }
+    },
+    {
+      "id": "morricone",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "F",
+        "B♭",
+        "Cm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": false,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": true,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 0,
+        "totalLinks": 3,
+        "chromaticCount": 1
+      },
+      "briefMatch": {
+        "intimidad": 1,
+        "perdida": 2,
+        "maravilla": 1,
+        "peligro": 3,
+        "reencuentro": 2,
+        "transformacion": 1,
+        "espera": 2,
+        "heroismo_ambiguo": 2,
+        "soledad": 1,
+        "humor_inquietante": 2
+      }
+    },
+    {
+      "id": "newman",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "ionian",
+      "chords": [
+        "Cadd9",
+        "Fmaj7",
+        "Dm7",
+        "Cadd9"
+      ],
+      "features": {
+        "modeKey": "ionian",
+        "tonic": 0,
+        "colorAdd": true,
+        "smoothMajority": true,
+        "noVClosing": true,
+        "minor": false,
+        "openRoot": false,
+        "major": true,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": false,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 3,
+        "totalLinks": 3,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 3,
+        "perdida": 1,
+        "maravilla": 1,
+        "peligro": 0,
+        "reencuentro": 2,
+        "transformacion": 2,
+        "espera": 1,
+        "heroismo_ambiguo": 2,
+        "soledad": 0,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "newman",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "ionian",
+      "chords": [
+        "Cadd9",
+        "Gsus4",
+        "Am7",
+        "Fmaj7"
+      ],
+      "features": {
+        "modeKey": "ionian",
+        "tonic": 0,
+        "colorAdd": true,
+        "smoothMajority": true,
+        "noVClosing": true,
+        "minor": false,
+        "openRoot": true,
+        "major": true,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": false,
+        "returnRoot": false,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 4,
+        "numRoots": 4,
+        "smoothLinks": 3,
+        "totalLinks": 3,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 3,
+        "perdida": 2,
+        "maravilla": 1,
+        "peligro": 0,
+        "reencuentro": 1,
+        "transformacion": 2,
+        "espera": 1,
+        "heroismo_ambiguo": 1,
+        "soledad": 1,
+        "humor_inquietante": 0
+      }
+    },
+    {
+      "id": "shore",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "Fm",
+        "F",
+        "G7",
+        "Cm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": false,
+        "minor": true,
+        "openRoot": false,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": false,
+        "returnRoot": true,
+        "vClosing": true,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 1,
+        "numChordKinds": 4,
+        "numRoots": 3,
+        "smoothLinks": 1,
+        "totalLinks": 4,
+        "chromaticCount": 2
+      },
+      "briefMatch": {
+        "intimidad": 0,
+        "perdida": 1,
+        "maravilla": 1,
+        "peligro": 2,
+        "reencuentro": 3,
+        "transformacion": 1,
+        "espera": 1,
+        "heroismo_ambiguo": 1,
+        "soledad": 1,
+        "humor_inquietante": 2
+      }
+    },
+    {
+      "id": "shore",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "A♭",
+        "Fm",
+        "G7",
+        "Cm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": false,
+        "minor": true,
+        "openRoot": false,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": false,
+        "returnRoot": true,
+        "vClosing": true,
+        "severalRoots": true,
+        "twoOperators": true,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 2,
+        "numChordKinds": 4,
+        "numRoots": 4,
+        "smoothLinks": 2,
+        "totalLinks": 4,
+        "chromaticCount": 1
+      },
+      "briefMatch": {
+        "intimidad": 0,
+        "perdida": 1,
+        "maravilla": 1,
+        "peligro": 2,
+        "reencuentro": 3,
+        "transformacion": 2,
+        "espera": 1,
+        "heroismo_ambiguo": 1,
+        "soledad": 1,
+        "humor_inquietante": 2
+      }
+    },
+    {
+      "id": "silvestri",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "ionian",
+      "chords": [
+        "Cmaj7#11",
+        "D",
+        "C"
+      ],
+      "features": {
+        "modeKey": "ionian",
+        "tonic": 0,
+        "colorAdd": true,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": false,
+        "openRoot": false,
+        "major": true,
+        "tonicSharp11": true,
+        "nonmodal": true,
+        "disjoint": true,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": false,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": true,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 3,
+        "numRoots": 2,
+        "smoothLinks": 0,
+        "totalLinks": 2,
+        "chromaticCount": 2
+      },
+      "briefMatch": {
+        "intimidad": 2,
+        "perdida": 1,
+        "maravilla": 3,
+        "peligro": 2,
+        "reencuentro": 1,
+        "transformacion": 1,
+        "espera": 2,
+        "heroismo_ambiguo": 3,
+        "soledad": 1,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "silvestri",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "ionian",
+      "chords": [
+        "C",
+        "G♭",
+        "F",
+        "C"
+      ],
+      "features": {
+        "modeKey": "ionian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": false,
+        "openRoot": false,
+        "major": true,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": true,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 0,
+        "totalLinks": 3,
+        "chromaticCount": 1
+      },
+      "briefMatch": {
+        "intimidad": 1,
+        "perdida": 1,
+        "maravilla": 2,
+        "peligro": 2,
+        "reencuentro": 2,
+        "transformacion": 1,
+        "espera": 1,
+        "heroismo_ambiguo": 3,
+        "soledad": 0,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "williams",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "ionian",
+      "chords": [
+        "C",
+        "Fm",
+        "C"
+      ],
+      "features": {
+        "modeKey": "ionian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": false,
+        "openRoot": false,
+        "major": true,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": false,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": false,
+        "twoOperators": false,
+        "threeDistinctChords": false,
+        "fewRoots": true,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 2,
+        "numRoots": 2,
+        "smoothLinks": 0,
+        "totalLinks": 2,
+        "chromaticCount": 1
+      },
+      "briefMatch": {
+        "intimidad": 1,
+        "perdida": 1,
+        "maravilla": 2,
+        "peligro": 1,
+        "reencuentro": 1,
+        "transformacion": 0,
+        "espera": 2,
+        "heroismo_ambiguo": 3,
+        "soledad": 1,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "williams",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "ionian",
+      "chords": [
+        "C",
+        "A♭",
+        "G7",
+        "C"
+      ],
+      "features": {
+        "modeKey": "ionian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": false,
+        "minor": false,
+        "openRoot": false,
+        "major": true,
+        "tonicSharp11": false,
+        "nonmodal": true,
+        "disjoint": true,
+        "returnRoot": true,
+        "vClosing": true,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 0,
+        "totalLinks": 3,
+        "chromaticCount": 1
+      },
+      "briefMatch": {
+        "intimidad": 0,
+        "perdida": 0,
+        "maravilla": 2,
+        "peligro": 2,
+        "reencuentro": 3,
+        "transformacion": 1,
+        "espera": 0,
+        "heroismo_ambiguo": 2,
+        "soledad": 0,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "zimmer",
+      "routeIndex": 1,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "A♭",
+        "Cm",
+        "A♭"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": true,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": true,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": false,
+        "returnRoot": false,
+        "vClosing": false,
+        "severalRoots": false,
+        "twoOperators": true,
+        "threeDistinctChords": false,
+        "fewRoots": true,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 3,
+        "numChordKinds": 2,
+        "numRoots": 2,
+        "smoothLinks": 3,
+        "totalLinks": 3,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 2,
+        "perdida": 3,
+        "maravilla": 0,
+        "peligro": 1,
+        "reencuentro": 0,
+        "transformacion": 2,
+        "espera": 3,
+        "heroismo_ambiguo": 0,
+        "soledad": 3,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "zimmer",
+      "routeIndex": 2,
+      "control": false,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "A♭",
+        "E♭",
+        "B♭"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": true,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": false,
+        "returnRoot": false,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 1,
+        "numChordKinds": 4,
+        "numRoots": 4,
+        "smoothLinks": 1,
+        "totalLinks": 3,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 1,
+        "perdida": 3,
+        "maravilla": 0,
+        "peligro": 1,
+        "reencuentro": 1,
+        "transformacion": 1,
+        "espera": 2,
+        "heroismo_ambiguo": 0,
+        "soledad": 2,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "control-major-functional",
+      "routeIndex": 0,
+      "control": true,
+      "mode": "ionian",
+      "chords": [
+        "C",
+        "F",
+        "G7",
+        "C"
+      ],
+      "features": {
+        "modeKey": "ionian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": false,
+        "minor": false,
+        "openRoot": false,
+        "major": true,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": false,
+        "returnRoot": true,
+        "vClosing": true,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": false,
+        "flatII": false,
+        "numOperators": 0,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 0,
+        "totalLinks": 3,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 0,
+        "perdida": 0,
+        "maravilla": 1,
+        "peligro": 0,
+        "reencuentro": 3,
+        "transformacion": 1,
+        "espera": 0,
+        "heroismo_ambiguo": 1,
+        "soledad": 0,
+        "humor_inquietante": 1
+      }
+    },
+    {
+      "id": "control-minor-modal",
+      "routeIndex": 0,
+      "control": true,
+      "mode": "aeolian",
+      "chords": [
+        "Cm",
+        "A♭",
+        "B♭",
+        "Cm"
+      ],
+      "features": {
+        "modeKey": "aeolian",
+        "tonic": 0,
+        "colorAdd": false,
+        "smoothMajority": false,
+        "noVClosing": true,
+        "minor": true,
+        "openRoot": false,
+        "major": false,
+        "tonicSharp11": false,
+        "nonmodal": false,
+        "disjoint": true,
+        "returnRoot": true,
+        "vClosing": false,
+        "severalRoots": true,
+        "twoOperators": false,
+        "threeDistinctChords": true,
+        "fewRoots": false,
+        "returnNoV": true,
+        "flatII": false,
+        "numOperators": 1,
+        "numChordKinds": 3,
+        "numRoots": 3,
+        "smoothLinks": 1,
+        "totalLinks": 3,
+        "chromaticCount": 0
+      },
+      "briefMatch": {
+        "intimidad": 1,
+        "perdida": 2,
+        "maravilla": 0,
+        "peligro": 2,
+        "reencuentro": 2,
+        "transformacion": 1,
+        "espera": 2,
+        "heroismo_ambiguo": 1,
+        "soledad": 1,
+        "humor_inquietante": 2
+      }
+    }
+  ]
+}
