@@ -519,7 +519,9 @@ function tonalHypotheses(chords){
    if(scaleSet.has(mod(chord.root)))roots+=weight;
    if(mod(chord.root)===tonic)tonicRoots+=i===chords.length-1?1.3:1;
   }
-  const cadences=cadenceEvidence(chords,tonic,pattern.mode);const cadenceScore=cadences.reduce((sum,x)=>sum+x.weight*(x.index===chords.length-1?1:.45),0);const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8+cadenceScore;
+  const cadences=cadenceEvidence(chords,tonic,pattern.mode);const cadenceScore=cadences.reduce((sum,x)=>sum+x.weight*(x.index===chords.length-1?1:.45),0);
+  const terminalDominantArrival=cadences.some(x=>x.index===chords.length-1&&x.kind==="V–I/i")?.7:0;
+  const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8+cadenceScore+terminalDominantArrival;
   candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,displayLabel:spell(tonic)+" "+(pattern.mode==="menor natural"?"menor":"mayor"),score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences,minorDominant:pattern.mode==="menor natural"?minorDominantEvidence(chords,tonic):null});
  }
  candidates.sort((a,b)=>b.score-a.score||a.tonic-b.tonic);
@@ -780,7 +782,7 @@ function emotionalContinuations(chords,emotion){
   const dominantGoal=mod(root+5);
   // Prefer a root already stated earlier when the final V7 targets it.
   const tonicInHistory=last.type==="7"?chords.slice(0,-1).find(c=>mod(c.root)===dominantGoal&&["","m","maj7","m7","add9","madd9"].includes(c.type)):null;
-  const reliableCenter=tonal.status==="suggestive"&&gap>=0.9&&chords.length>=3;
+  const reliableCenter=tonal.status==="suggestive"&&gap>=0.65&&chords.length>=3;
   const tonic=tonicInHistory?dominantGoal:(reliableCenter?leading.tonic:root);
   const minor=tonicInHistory?["m","m7","madd9"].includes(tonicInHistory.type):(reliableCenter?leading.mode==="menor natural":["m","m7","madd9"].includes(last.type));
   const anchorBasis=tonicInHistory?"dominante dirigida a una tónica anterior":reliableCenter?"principal hipótesis tonal":"último acorde (sin centro confirmado)";
