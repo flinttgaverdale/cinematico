@@ -993,7 +993,10 @@ function harmonicTrajectories(chords,start=0){
 function composerListeningPlan(chords,options={}){
  if(!Array.isArray(chords)||chords.length<2||chords.length>8)
   return {status:"invalid",steps:[],warning:"Se necesitan entre 2 y 8 acordes para escuchar el ejemplo."};
- const totalSeconds=8;
+ const equalChordDuration=options.equalChordDuration===true;
+ // Two honest comparison controls: equal total phrase duration (default),
+ // or an equal 2-second harmonic pulse per chord across routes.
+ const totalSeconds=equalChordDuration?chords.length*2:8;
  const choice=voiceLead(chords,"cinematic");
  if(choice.voicings.length!==chords.length)
   return {status:"unavailable",steps:[],warning:"No hay una disposición de cuatro voces para estos acordes."};
@@ -1004,7 +1007,10 @@ function composerListeningPlan(chords,options={}){
    frequencies:pitches.map(note=>440*Math.pow(2,(note-69)/12))
   })),
   totalSeconds,voicingStyle:"cinematic",fixedInstrumentation:true,
-  warning:"Maqueta de cuatro voces sintetizadas: mismo sonido, volumen por voz y duración total. La cantidad de acordes cambia el ritmo armónico; no se han simulado instrumentos, melodías ni dinámica real."};
+  timingBasis:equalChordDuration?"equal-chord":"equal-total",
+  warning:equalChordDuration
+   ?"Maqueta con 2 segundos por acorde: pulso armónico igual entre rutas, pero duración total distinta si cambia la cantidad de acordes. No se han simulado instrumentos ni fraseo real."
+   :"Maqueta de cuatro voces sintetizadas: mismo sonido, volumen por voz y duración total. La cantidad de acordes cambia el ritmo armónico; no se han simulado instrumentos, melodías ni dinámica real."};
 }
 
 /* Evidence-informed composer exploration: non-destructive, original harmonic experiments. */
