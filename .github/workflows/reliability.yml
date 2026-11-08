@@ -42,6 +42,7 @@ jobs:
           node tests/static-audit.cjs
           node tests/pwa-assets.cjs
           node tests/live-generator-regression.cjs
+          node tests/live-package-regression.cjs
       - name: Install browser runner
         run: |
           npm install --no-save playwright

@@ -1,0 +1,12 @@
+'use strict';
+const assert=require('node:assert/strict');
+const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
+const root=path.join(__dirname,'..');
+const archive=path.join(root,'downloads/Cinematico-Live-Preview.zip');
+assert.ok(fs.existsSync(archive),'Release zip must be committed');
+const size=fs.statSync(archive).size;
+assert.ok(size>150000&&size<400000,'Unexpected archive size '+size);
+const check="import zipfile,pathlib,sys\np=pathlib.Path(sys.argv[1])\nwith zipfile.ZipFile(p) as z:\n assert z.testzip() is None\n entries=z.namelist()\n assert len(entries)==8,entries\n assert all(n.startswith('Cinematico-Live-Preview/') for n in entries)\n assert sum(n.endswith('.mid') for n in entries)==3\n assert z.read('Cinematico-Live-Preview/cinematico-core.js').decode('utf8').startswith(pathlib.Path(sys.argv[2]).read_text())\n assert z.read('Cinematico-Live-Preview/Cinematico-Generator.maxpat').startswith(b'{')\n for name in entries:\n  if name.endswith('.mid'): assert z.read(name)[:4]==b'MThd'\n print('PASS ZIP integrity: 8 files, web engine parity, 3 MIDI demos')";
+const run=cp.spawnSync('python3',['-c',check,archive,path.join(root,'engine.js')],{encoding:'utf8'});
+assert.equal(run.status,0,run.stderr||run.stdout);
+console.log(run.stdout.trim());
