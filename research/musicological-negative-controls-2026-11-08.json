@@ -1,0 +1,245 @@
+{
+  "version": "2026-11-08",
+  "designation": "Controles adversariales sintéticos — NO transcripciones de bandas sonoras",
+  "method": "Comprobaciones de consecuencias de la armonía cifrada en una tonalidad supuesta; no etiquetas de emoción, autoría ni cadencia formal.",
+  "cases": [
+    {
+      "id": "major-authentic-harmonic",
+      "progression": "Dm G7 C",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "V–I/i",
+        "predominante–V–I/i"
+      ],
+      "expectedTop": "mayor",
+      "note": "El enlace armónico y su preparación no prueban una cadencia formal."
+    },
+    {
+      "id": "major-structural",
+      "progression": "C F G7 C",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "V–I/i"
+      ],
+      "expectedTop": "mayor"
+    },
+    {
+      "id": "major-half-ending",
+      "progression": "C F G7",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "semicadencia posible",
+        "tónica–predominante–V posible"
+      ],
+      "forbidden": [
+        "V–I/i"
+      ],
+      "expectedTop": "mayor"
+    },
+    {
+      "id": "plagal-not-applied",
+      "progression": "C F C",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "IV–I / iv–i"
+      ],
+      "forbidden": [
+        "V7/"
+      ],
+      "note": "I–IV no es por defecto V/IV."
+    },
+    {
+      "id": "applied-dominant-of-five",
+      "progression": "C D7 G C",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "V7/G",
+        "V–I/i"
+      ],
+      "expectedTop": "mayor"
+    },
+    {
+      "id": "applied-dominant-of-four",
+      "progression": "C C7 F C",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "V7/F"
+      ],
+      "note": "El Bb cromático de C7 permite la lectura V7/IV."
+    },
+    {
+      "id": "applied-dominant-of-six",
+      "progression": "C E7 Am G7 C",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "V7/A",
+        "V–I/i"
+      ],
+      "note": "Distingue tonicización de vi y retorno a I."
+    },
+    {
+      "id": "false-applied-target",
+      "progression": "C F#7 Bm",
+      "tonic": 0,
+      "mode": "mayor",
+      "forbidden": [
+        "V7/"
+      ],
+      "note": "El acorde destino no justifica esa dominante aplicada en Do."
+    },
+    {
+      "id": "secondary-target-chromatic",
+      "progression": "C F7 Bb",
+      "tonic": 0,
+      "mode": "mayor",
+      "forbidden": [
+        "V7/"
+      ],
+      "note": "Un acorde cromático no confirma una tonicización diatónica."
+    },
+    {
+      "id": "minor-harmonic-practice",
+      "progression": "Am Dm E7 Am",
+      "tonic": 9,
+      "mode": "menor natural",
+      "required": [
+        "V–I/i"
+      ],
+      "raisedLeadingTone": true,
+      "expectedTop": "menor natural"
+    },
+    {
+      "id": "minor-harmonic-c",
+      "progression": "Cm Fm G7 Cm",
+      "tonic": 0,
+      "mode": "menor natural",
+      "required": [
+        "V–I/i"
+      ],
+      "raisedLeadingTone": true,
+      "expectedTop": "menor natural"
+    },
+    {
+      "id": "minor-natural-not-raised",
+      "progression": "Am Dm Em Am",
+      "tonic": 9,
+      "mode": "menor natural",
+      "raisedLeadingTone": false
+    },
+    {
+      "id": "major-not-minor",
+      "progression": "C G7 C",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "V–I/i"
+      ],
+      "raisedLeadingTone": false,
+      "note": "Una dominante diatónica de Do mayor no es sensible elevada de Do menor."
+    },
+    {
+      "id": "deceptive-major",
+      "progression": "C G7 Am",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "V–vi"
+      ],
+      "forbidden": [
+        "V–I/i"
+      ]
+    },
+    {
+      "id": "inverted-dominant",
+      "progression": "C G7/B C",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "V–I/i"
+      ],
+      "note": "Indicio más débil al tener el V7 en inversión."
+    },
+    {
+      "id": "maj7-color-arrival",
+      "progression": "Cmaj7 G7 Cmaj7",
+      "tonic": 0,
+      "mode": "mayor",
+      "required": [
+        "V–I/i"
+      ],
+      "note": "La sensible retenida en Imaj7 puede ser color válido, pero no se confirma PAC."
+    },
+    {
+      "id": "not-applied-plain",
+      "progression": "Cadd9 Fmaj7",
+      "tonic": 0,
+      "mode": "mayor",
+      "forbidden": [
+        "V7/"
+      ],
+      "note": "El enlace I(add9)–IVmaj7 no exige resolución de dominante."
+    },
+    {
+      "id": "chromatic-mediant-not-cadence",
+      "progression": "C Ab C",
+      "tonic": 0,
+      "mode": "mayor",
+      "forbidden": [
+        "V–I/i",
+        "V7/"
+      ],
+      "note": "Una medianta cromática no produce por sí sola cadencia ni modulación."
+    },
+    {
+      "id": "modal-iv-ambiguous",
+      "progression": "C Fm C",
+      "tonic": 0,
+      "mode": "mayor",
+      "forbidden": [
+        "V–I/i",
+        "V7/"
+      ],
+      "note": "iv prestado es hipótesis de intercambio modal; no hay V."
+    },
+    {
+      "id": "minor-modal-iv",
+      "progression": "Cm F Cm",
+      "tonic": 0,
+      "mode": "menor natural",
+      "forbidden": [
+        "V–I/i",
+        "V7/"
+      ],
+      "note": "IV mayor puede ser color dórico sin demostrar un nuevo centro."
+    },
+    {
+      "id": "diminished-leading-sonority",
+      "progression": "C Bdim C",
+      "tonic": 0,
+      "mode": "mayor",
+      "forbidden": [
+        "V–I/i",
+        "V7/"
+      ],
+      "note": "vii°–I no es un enlace V–I literal."
+    },
+    {
+      "id": "short-harmonic-minor",
+      "progression": "Cm G7",
+      "tonic": 0,
+      "mode": "menor natural",
+      "raisedLeadingTone": true,
+      "required": [
+        "semicadencia posible"
+      ],
+      "note": "Dos acordes no determinan una cadencia formal."
+    }
+  ]
+}
