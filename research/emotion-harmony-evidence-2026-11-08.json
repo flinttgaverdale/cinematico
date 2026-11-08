@@ -14,7 +14,8 @@
       "A": "Full open-access academic article/primary abstract and verified bibliographic record",
       "B": "Publisher book description or chapter abstract only",
       "C": "Design hypothesis requiring behavioral validation"
-    }
+    },
+    "revision": "Five fuzzy creative neighborhoods in UI; explicitly separate listener affect constructs from compositional intents. Valence/arousal research informs the simplification, but no quantitative emotion coordinates are inferred from bare chords."
   },
   "sources": [
     {
@@ -165,6 +166,46 @@
       "access": "systematic review abstract",
       "level": "A",
       "claim": "Major/minor expression is culturally, experientially and contextually modulated."
+    },
+    {
+      "id": "eerola_vuoskoski_2011_perceived",
+      "title": "A comparison of the discrete and dimensional models of emotion in music",
+      "authors": "Tuomas Eerola & Jonna K. Vuoskoski",
+      "year": 2011,
+      "url": "https://doi.org/10.1177/0305735610362821",
+      "access": "publisher abstract only",
+      "level": "A",
+      "claim": "In 116 non-musician listeners assessing film-music excerpts, categorical and dimensional reports broadly corresponded, but discrete categories had poorer resolution for ambiguous examples."
+    },
+    {
+      "id": "vuoskoski_eerola_2011_induced",
+      "title": "Measuring music-induced emotion: A comparison of emotion models, personality biases, and intensity of experiences",
+      "authors": "Jonna K. Vuoskoski & Tuomas Eerola",
+      "year": 2011,
+      "url": "https://doi.org/10.1177/1029864911403367",
+      "access": "publisher abstract only",
+      "level": "A",
+      "claim": "In 148 participants listening to 16 film cues, dimensional valence/arousal models gave high consistency; personality and mood influenced reports."
+    },
+    {
+      "id": "eerola_saari_2025_expressed",
+      "title": "What emotions does music express? Structure of affect terms in music using iterative crowdsourcing paradigm",
+      "authors": "Tuomas Eerola & Pasi Saari",
+      "year": 2025,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11753638/",
+      "access": "open full text",
+      "level": "A",
+      "claim": "Study of music-expressed affect found valid 7- and compact 4-factor structures; music-expressed categories differed from those of music-induced emotion. No unique fixed number of musical emotions."
+    },
+    {
+      "id": "juslin_2013_expressed",
+      "title": "What does music express? Basic emotions and beyond",
+      "authors": "Patrik N. Juslin",
+      "year": 2013,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3764399/",
+      "access": "open full text",
+      "level": "A",
+      "claim": "Emotion conveyed by music has multiple layers and may vary with context, associations and listener; distinguish conveyed from personally felt emotion."
     }
   ],
   "gems": {
@@ -210,7 +251,88 @@
       "change between major/minor sonority",
       "added ninth and major seventh"
     ],
-    "ranking": "Context continuity plus modest gesture-bias, no fitted statistical parameters or trained model"
+    "ranking": "Context continuity plus modest gesture-bias, no fitted statistical parameters or trained model",
+    "neighborhoods": {
+      "scope": "Five flexible creative neighborhoods chosen for Cinemático usability, NOT validated listener clusters or a GEMS factor model.",
+      "categories": [
+        {
+          "id": "luz",
+          "label": "Luz y expansión",
+          "members": [
+            "esperanza",
+            "alegria",
+            "epica"
+          ]
+        },
+        {
+          "id": "cercania",
+          "label": "Calma y cercanía",
+          "members": [
+            "calma",
+            "ternura",
+            "nostalgia"
+          ]
+        },
+        {
+          "id": "sombra",
+          "label": "Melancolía y sombra",
+          "members": [
+            "melancolia",
+            "tristeza",
+            "oscuridad"
+          ]
+        },
+        {
+          "id": "incertidumbre",
+          "label": "Tensión e incertidumbre",
+          "members": [
+            "tension",
+            "suspense",
+            "inquietud",
+            "misterio"
+          ]
+        },
+        {
+          "id": "asombro",
+          "label": "Cambio y asombro",
+          "members": [
+            "contraste",
+            "asombro"
+          ]
+        }
+      ],
+      "crossLinks": [
+        [
+          "nostalgia",
+          "melancolia"
+        ],
+        [
+          "misterio",
+          "asombro"
+        ],
+        [
+          "misterio",
+          "oscuridad"
+        ],
+        [
+          "oscuridad",
+          "inquietud"
+        ],
+        [
+          "asombro",
+          "esperanza"
+        ],
+        [
+          "contraste",
+          "inquietud"
+        ],
+        [
+          "epica",
+          "tension"
+        ]
+      ],
+      "operationalPrinciple": "Preserve existing individual creative intent if selected; the group is navigation and soft context, not a forced emotional judgment."
+    }
   },
   "negativeControls": [
     {

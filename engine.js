@@ -941,11 +941,42 @@ const EMOTION_CREATIVE_PROFILES=Object.freeze({
  calma:{family:"sublimity",gems:["peacefulness"],gesture:"continuity",aim:"Favorecer el movimiento próximo entre acordes"},
  contraste:{family:null,gems:[],gesture:"contrast",aim:"Cambiar deliberadamente de región o modo"}
 });
+// Practical neighborhoods, *not* diagnostic emotion categories.
+// Their borders are intentionally porous: nearby terms may share expressive
+// goals without requiring unique harmonic recipes or inferred listener feelings.
+const EXPRESSION_NEIGHBORHOODS=Object.freeze({
+ luz:{label:"Luz y expansión",members:["esperanza","alegria","epica"],focus:"Abrir o ampliar la dirección armónica"},
+ cercania:{label:"Calma y cercanía",members:["calma","ternura","nostalgia"],focus:"Conservar continuidad con pequeños cambios de color"},
+ sombra:{label:"Melancolía y sombra",members:["melancolia","tristeza","oscuridad"],focus:"Explorar colores recogidos o en sombra"},
+ incertidumbre:{label:"Tensión e incertidumbre",members:["tension","suspense","inquietud","misterio"],focus:"Aplazar o desviar una expectativa tonal"},
+ asombro:{label:"Cambio y asombro",members:["contraste","asombro"],focus:"Probar cambios de región o de color"}
+});
+// Explicitly porous boundaries. A secondary affinity does not overwrite
+// the user's requested intention or tell us which emotion they will feel.
+const EXPRESSION_BRIDGES=Object.freeze([
+ ["nostalgia","melancolia"],["nostalgia","ternura"],["misterio","asombro"],
+ ["misterio","oscuridad"],["oscuridad","inquietud"],["asombro","esperanza"],
+ ["contraste","inquietud"],["alegria","ternura"],["epica","tension"]
+]);
+function emotionNeighborhood(id){
+ const actual=EMOTION_CREATIVE_PROFILES[id]?id:"misterio";
+ const entry=Object.entries(EXPRESSION_NEIGHBORHOODS).find(([,group])=>group.members.includes(actual));
+ if(!entry)throw Error("Intención sin familia expresiva: "+actual);
+ const [neighborhoodId,group]=entry;
+ const bridges=EXPRESSION_BRIDGES.filter(pair=>pair.includes(actual))
+  .map(pair=>pair.find(other=>other!==actual));
+ const nearby=[...new Set([...group.members.filter(x=>x!==actual),...bridges])];
+ return {id:neighborhoodId,label:group.label,focus:group.focus,relatedIntents:nearby,
+  secondaryAffinities:bridges.filter(x=>!group.members.includes(x)),
+  scope:"Agrupación compositiva orientativa, con límites solapados; no equivale a una clasificación psicométrica validada."};
+}
 function emotionCreativeProfile(id){
  const actual=EMOTION_CREATIVE_PROFILES[id]?id:"misterio";
- const spec=EMOTION_CREATIVE_PROFILES[actual];
+ const spec=EMOTION_CREATIVE_PROFILES[actual],neighborhood=emotionNeighborhood(actual);
  return {id:actual,family:spec.family,gemsAffinities:spec.gems.slice(),
   creativeGesture:spec.gesture,creativeAim:spec.aim,
+  neighborhoodId:neighborhood.id,neighborhoodLabel:neighborhood.label,
+  nearbyIntents:neighborhood.relatedIntents,
   scope:"Mapa de diseño interpretativo, no clasificación GEMS validada, ni predicción de la emoción que sentirá el oyente."};
 }
 function emotionalContinuations(chords,emotion){
@@ -2398,5 +2429,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={emotionCreativeProfile,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
