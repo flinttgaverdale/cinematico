@@ -647,7 +647,7 @@ function renderComposerExplorations(){
    '<article class="composer-path-card"><div class="composer-path-number">0'+(i+1)+' · '+esc(route.name)+'</div>'+
    '<div class="composer-path-progression" aria-label="'+esc(route.chords.map(c=>c.label).join(" a "))+'">'+chordRoute(route)+'</div>'+
    '<p>'+esc(route.intention)+'</p>'+compactInsights(route)+
-   '<div class="composer-audio-actions"><button type="button" class="composer-audio-button" data-composer-preview="'+i+'" aria-label="Escuchar maqueta armónica '+(i+1)+'">▶ Escuchar</button><span>Maqueta neutra · 8 s</span></div>'+
+   '<div class="composer-audio-actions"><button type="button" class="composer-audio-button" data-composer-preview="'+i+'" aria-pressed="false" aria-label="Escuchar maqueta armónica '+(i+1)+'">▶ Escuchar</button><span>Maqueta neutra · 8 s</span></div>'+
    analysis(route)+'</article>').join("")+'</div>'+
   '<p class="composer-path-contrast"><strong>Para elegir:</strong> '+esc(contrast)+'</p>'+
   '<p class="composer-listen-note">Comparación A/B orientativa: idéntico sonido sintetizado y duración total; diferente número de acordes puede implicar distinto ritmo armónico. Sin MIDI ni orquestación.</p>'+
