@@ -455,7 +455,7 @@ function parseUserProgression(input){const tokens=String(input||"").trim().split
 function cadenceEvidence(chords,tonic,mode){
  const events=[];if(!Array.isArray(chords)||!chords.length)return events;
  const minor=mode==="menor natural",t=mod(tonic),v=mod(t+7),ii=mod(t+2),iv=mod(t+5);
- const tonicQuality=minor?["m","m7"]:["","maj7","add9"];
+ const tonicQuality=minor?["m","m7","madd9"]:["","maj7","add9"];
  const isTonic=c=>mod(c.root)===t&&tonicQuality.includes(c.type);
  const isDominant=c=>mod(c.root)===v&&(c.type===""||c.type==="7");
  const isPredominant=c=>(mod(c.root)===ii&&(minor?["dim","m7b5","m"].includes(c.type):["m","m7"].includes(c.type)))||(mod(c.root)===iv&&(minor?["m","m7"].includes(c.type):["","maj7"].includes(c.type)));
@@ -463,20 +463,56 @@ function cadenceEvidence(chords,tonic,mode){
  for(let i=1;i<chords.length;i++){
   const prev=chords[i-1],cur=chords[i],prevRoot=mod(prev.root),curRoot=mod(cur.root);
   if(isDominant(prev)&&isTonic(cur)){
-   events.push({kind:"V–I/i",index:i,weight:2.5,description:"Dominante hacia tónica; llegada armónica, no cadencia formal confirmada"});
+   const rootPositions=mod(prev.bass??prev.root)===v&&mod(cur.bass??cur.root)===t;
+    events.push({kind:"V–I/i",index:i,weight:rootPositions?2.5:1.5,description:"Dominante hacia tónica; "+(rootPositions?"bajos en posición fundamental":"al menos una inversión")+"; llegada armónica, no cadencia formal confirmada"});
    if(i>=2&&isPredominant(chords[i-2]))events.push({kind:"predominante–V–I/i",index:i,weight:2.3,description:"Preparación predominante, dominante y llegada"});
   }
   if(prevRoot===iv&&isTonic(cur)&&isPredominant(prev))events.push({kind:"IV–I / iv–i",index:i,weight:.8,description:"Movimiento plagal posible"});
   if(isDominant(prev)&&curRoot===mod(t+(minor?8:9))&&((minor&&cur.type==="")||(!minor&&cur.type==="m")))
    events.push({kind:minor?"V–VI":"V–vi",index:i,weight:.7,description:"Resolución interrumpida posible"});
   // Applied V7: a major dominant seventh resolves down a fifth to a diatonic chord other than the tonic.
-  if(prev.type==="7"&&curRoot===mod(prevRoot+5)&&diatonic.has(curRoot)&&curRoot!==t&&prevRoot!==v)
+  if(prev.type==="7"&&curRoot===mod(prevRoot+5)&&diatonic.has(curRoot)&&curRoot!==t&&prevRoot!==v
+    &&["","m","maj7","m7","add9","madd9"].includes(cur.type)
+    &&cur.notes.filter(pc=>diatonic.has(mod(pc))).length>=3)
    events.push({kind:"V7/"+spell(curRoot),index:i,weight:.65,description:"Dominante secundaria con resolución local; posible tonicización"});
  }
  // Ending on a dominant is a harmonic half-cadence clue, not proof of a phrase ending.
- if(chords.length>=2&&isDominant(chords[chords.length-1])&&!isDominant(chords[chords.length-2]))
+ if(chords.length>=2&&isDominant(chords[chords.length-1])&&!isDominant(chords[chords.length-2])){
   events.push({kind:"semicadencia posible",index:chords.length-1,weight:.4,description:"Final del fragmento sobre dominante; requiere comprobar frase y métrica"});
+  const preceding=chords[chords.length-2];
+  const earlierTonic=chords.slice(0,-2).some(c=>isTonic(c));
+  if(earlierTonic&&isPredominant(preceding))
+   events.push({kind:"tónica–predominante–V posible",index:chords.length-1,weight:1.5,description:"Dirección T–PD–V hacia la dominante; no confirma una semicadencia formal"});
+ }
  return events;
+}
+// Evidence for chromatic dominant practice in minor. This describes harmonic
+// vocabulary, not a claim that a complete passage uses one fixed minor scale.
+function minorDominantEvidence(chords,tonic){
+ const empty=description=>({raisedLeadingTone:false,dominantMajor:false,indices:[],minorContext:false,description});
+ if(!Array.isArray(chords)||!chords.length)return empty("No hay acordes para evaluar una dominante en menor.");
+ const t=mod(tonic),leading=mod(t+11),dominantRoot=mod(t+7);
+ // A major V7 implies a raised leading tone in minor only if the minor tonic is evidenced.
+ const minorContext=chords.some(ch=>ch&&mod(ch.root)===t&&["m","m7","madd9"].includes(ch.type));
+ if(!minorContext)return empty("No hay tónica menor que justifique atribuir a este centro una sensible elevada.");
+ const indices=[];
+ for(let i=0;i<chords.length;i++){
+  const ch=chords[i];if(!ch||!Array.isArray(ch.notes))continue;
+  if(mod(ch.root)===dominantRoot&&["","7"].includes(ch.type)&&ch.notes.some(n=>mod(n)===leading))indices.push(i);
+ }
+ return {raisedLeadingTone:indices.length>0,dominantMajor:indices.length>0,minorContext:true,indices,
+  description:indices.length?"Se observan tónica menor y dominante mayor con sensible elevada; es práctica tonal menor, no prueba de una escala fija.":"Hay tónica menor, pero no se observa su dominante mayor con sensible elevada."};
+}
+// Prefer conventional readable keys for tonal labels. These are display spellings,
+// not a full double-accidental-aware engraving system.
+function tonalCenterSpelling(tonic,minor=false,chords=[]){
+ const pc=mod(tonic);
+ // Preserve the composer's chosen root spelling when that tonic actually appears.
+ const source=Array.isArray(chords)?chords.find(c=>c&&mod(c.root)===pc&&typeof c.label==="string"):null;
+ const match=source&&/^([A-Ga-g])([#♯b♭]?)/.exec(source.label);
+ if(match)return match[1].toUpperCase()+(match[2]==="♯"?"#":match[2]==="♭"?"b":match[2]);
+ const preferFlat=minor?[3,10].includes(pc):[1,3,8,10].includes(pc);
+ return spell(pc,!preferFlat);
 }
 // Conservative tonal hypotheses: compatibility is not proof of a tonic.
 function tonalHypotheses(chords){
@@ -485,20 +521,25 @@ function tonalHypotheses(chords){
  const candidates=[];
  for(let tonic=0;tonic<12;tonic++)for(const pattern of patterns){
   const scaleSet=new Set(pattern.steps.map(x=>mod(x+tonic)));
+  const minorContext=pattern.mode==="menor natural"&&chords.some(ch=>mod(ch.root)===tonic&&["m","m7","madd9"].includes(ch.type));
   let coverage=0,roots=0,tonicRoots=0,totalWeight=0;
   for(let i=0;i<chords.length;i++){
    const chord=chords[i],weight=i===chords.length-1?1.15:1;totalWeight+=weight;
-   coverage+=weight*(chord.notes.filter(pc=>scaleSet.has(mod(pc))).length/chord.notes.length);
+   const majorV=minorContext&&mod(chord.root)===mod(tonic+7)&&["","7"].includes(chord.type);
+   coverage+=weight*(chord.notes.filter(pc=>scaleSet.has(mod(pc))||(majorV&&mod(pc)===mod(tonic+11))).length/chord.notes.length);
    if(scaleSet.has(mod(chord.root)))roots+=weight;
    if(mod(chord.root)===tonic)tonicRoots+=i===chords.length-1?1.3:1;
   }
-  const cadences=cadenceEvidence(chords,tonic,pattern.mode);const cadenceScore=cadences.reduce((sum,x)=>sum+x.weight,0);const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8+cadenceScore;
-  candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences});
+  const cadences=cadenceEvidence(chords,tonic,pattern.mode);const cadenceScore=cadences.reduce((sum,x)=>sum+x.weight*(x.index===chords.length-1?1:.45),0);
+  const terminalDominantArrival=cadences.some(x=>x.index===chords.length-1&&x.kind==="V–I/i")?.7:0;
+  const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8+cadenceScore+terminalDominantArrival;
+  candidates.push({tonic,mode:pattern.mode,label:tonalCenterSpelling(tonic,pattern.mode==="menor natural",chords)+" "+pattern.mode,displayLabel:tonalCenterSpelling(tonic,pattern.mode==="menor natural",chords)+" "+(pattern.mode==="menor natural"?"menor":"mayor"),score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences,minorDominant:pattern.mode==="menor natural"?minorDominantEvidence(chords,tonic):null});
  }
  candidates.sort((a,b)=>b.score-a.score||a.tonic-b.tonic);
  const best=candidates[0],second=candidates[1],close=candidates.filter(x=>best.score-x.score<0.6);
+ const minorCaveat=best.mode==="menor natural"&&best.minorDominant?.raisedLeadingTone?" Aparece una dominante con sensible elevada, habitual en la tonalidad menor; «menor natural» aquí es solo la escala de referencia.":"";
  return {status:chords.length<3?"insufficient":close.length>1?"ambiguous":"suggestive",
-  candidates:candidates.slice(0,3),explanation:chords.length<3?"Hay pocos acordes para sugerir un centro tonal fiable.":close.length>1?"Varias tonalidades explican estos acordes de forma parecida; no se puede asegurar una tónica solo con sus símbolos.":"Esta es una posibilidad armónica, no una tonalidad confirmada. El ritmo, la melodía y las cadencias pueden cambiar la percepción."};
+  candidates:candidates.slice(0,3),explanation:(chords.length<3?"Hay pocos acordes para sugerir un centro tonal fiable.":close.length>1?"Varias tonalidades explican estos acordes de forma parecida; no se puede asegurar una tónica solo con sus símbolos.":"Esta es una posibilidad armónica, no una tonalidad confirmada. El ritmo, la melodía y las cadencias pueden cambiar la percepción.")+minorCaveat};
 }
 function progressionInsights(chords){return chords.map((ch,i)=>{const next=chords[i+1],prev=chords[i-1];const shared=next?ch.notes.filter(n=>next.notes.includes(n)):[];const bassMotion=next?((next.bass-ch.bass+18)%12)-6:null;return {index:i,label:ch.label,notes:ch.notes.map(n=>spell(n)),previous:prev?.label||null,next:next?.label||null,shared:shared.map(n=>spell(n)),bassMotion,description:next?(shared.length?shared.length+" nota(s) común(es) con "+next.label+": "+shared.map(n=>spell(n)).join(", ")+".":"Sin notas comunes con "+next.label+"."):"Final de la progresión; puedes estudiar su función de llegada."};});}
 // Detects an observable interval relationship, not a film-composer attribution.
@@ -740,19 +781,31 @@ function harmonicContinuations(chords){
 
 // Emotion-specific continuation studies. All proposals are non-destructive and
 // describe harmonic devices, not a reliable prediction of perceived emotion.
-// Degrees are relative to the last chord root; no global key is presumed.
+// Degrees use a tentative tonal center, falling back to the last chord root.
+ // A final V7 can point toward a previously stated tonic, without establishing a cadence.
 function emotionalContinuations(chords,emotion){
  if(!Array.isArray(chords)||!chords.length)return [];
  const last=chords[chords.length-1];
  if(!last||!Number.isFinite(last.root)||!Array.isArray(last.notes))return [];
- const root=mod(last.root),minor=last.type==="m"||last.type==="m7";
- const tonic=mod(root+(minor?0:0));
+ const root=mod(last.root);
+  const tonal=tonalHypotheses(chords),leading=tonal.candidates[0];
+  const gap=leading&&tonal.candidates[1]?leading.score-tonal.candidates[1].score:0;
+  const dominantGoal=mod(root+5);
+  // Prefer a root already stated earlier when the final V7 targets it.
+  const tonicInHistory=last.type==="7"?chords.slice(0,-1).find(c=>mod(c.root)===dominantGoal&&["","m","maj7","m7","add9","madd9"].includes(c.type)):null;
+  const reliableCenter=tonal.status==="suggestive"&&gap>=0.65&&chords.length>=3;
+  const tonic=tonicInHistory?dominantGoal:(reliableCenter?leading.tonic:root);
+  const minor=tonicInHistory?["m","m7","madd9"].includes(tonicInHistory.type):(reliableCenter?leading.mode==="menor natural":["m","m7","madd9"].includes(last.type));
+  const anchorBasis=tonicInHistory?"dominante dirigida a una tónica anterior":reliableCenter?"principal hipótesis tonal":"último acorde (sin centro confirmado)";
  const make=(offset,kind="M")=>{
   const r=mod(tonic+offset);
   const intervals={M:[0,4,7],m:[0,3,7],dom:[0,4,7,10],maj7:[0,4,7,11],m7:[0,3,7,10],sus4:[0,5,7],add9:[0,4,7,14],madd9:[0,3,7,14],dim:[0,3,6]}[kind];
   if(!intervals)return null;
   const suffix={M:"",m:"m",dom:"7",maj7:"maj7",m7:"m7",sus4:"sus4",add9:"add9",madd9:"madd9",dim:"dim"}[kind];
-  return {root:r,bass:r,type:suffix,notes:[...new Set(intervals.map(n=>mod(r+n)))],label:spell(r,[1,6,8].includes(r))+suffix};
+  const writtenTonic=chords.find(c=>mod(c.root)===tonic)?.label||"";
+   const sharpKey=/#|♯/.test(writtenTonic)?true:/b|♭/.test(writtenTonic)?false:(minor?[1,4,6,8,11].includes(tonic):[2,4,6,7,9,11].includes(tonic));
+   const useSharp=minor&&r===mod(tonic+11)?true:sharpKey;
+   return {root:r,bass:r,type:suffix,notes:[...new Set(intervals.map(n=>mod(r+n)))],label:spell(r,useSharp)+suffix};
  };
  const recipes={
  misterio:{title:"Misterio",device:"Desplazamiento cromático y llegada ambigua",why:"El semitono altera el centro percibido; la llegada menor evita una confirmación tonal evidente.",patterns:[[[1,"M"],[6,"m"],[8,"m"]],[[6,"M"],[1,"m"],[8,"m"]],[[8,"M"],[1,"m"],[6,"m"]]]},
@@ -771,10 +824,22 @@ function emotionalContinuations(chords,emotion){
  calma:{title:"Calma",device:"Continuidad por notas comunes",why:"Séptimas mayores, novenas y acordes próximos favorecen enlaces graduales si se interpretan sin acentos bruscos.",patterns:[[[5,"maj7"],[2,"m7"],[0,"maj7"]],[[9,"m7"],[5,"maj7"],[0,"add9"]],[[4,"m7"],[5,"maj7"],[0,"maj7"]]]},
  contraste:{title:"Contraste inesperado",device:"Mediantes cromáticas y cambio de modo",why:"El cambio de calidad y las relaciones cromáticas separan claramente esta continuación del recorrido anterior.",patterns:[[[6,"M"],[8,"m"],[0,minor?"M":"m"]],[[4,"M"],[8,"M"],[0,minor?"M":"m"]],[[1,"M"],[6,"m"],[0,minor?"M":"m"]]]}
  };
- const spec=recipes[emotion]||recipes.misterio;
+ // Preserve a minor tonic in gentle/reflective lenses unless the user chose a
+ // deliberately bright or contrasting intent. Emotions remain creative hypotheses.
+ const gentleMinor={
+  calma:{why:"En contexto menor, enlaces con notas comunes y novena añadida conservan la sonoridad íntima sin forzar una llegada mayor.",patterns:[
+   [[8,"maj7"],[5,"m7"],[0,"madd9"]],[[3,"M"],[8,"maj7"],[0,"madd9"]],[[5,"m7"],[3,"M"],[0,"madd9"]]]},
+  ternura:{why:"Las sonoridades relativas, las notas comunes y una tónica menor con novena permiten una continuidad cálida sin cambiar involuntariamente de modo.",patterns:[
+   [[8,"maj7"],[5,"m7"],[0,"madd9"]],[[3,"maj7"],[8,"maj7"],[0,"madd9"]],[[5,"m7"],[10,"M"],[0,"madd9"]]]},
+  nostalgia:{why:"En un centro menor, los acordes relativos y la novena de tónica pueden mantener la ambivalencia sin imponer una tónica mayor.",patterns:[
+   [[8,"maj7"],[3,"M"],[0,"madd9"]],[[5,"m7"],[10,"M"],[0,"m7"]],[[3,"maj7"],[8,"maj7"],[0,"madd9"]]]}
+ };
+ const spec=minor&&gentleMinor[emotion]?{...recipes[emotion],...gentleMinor[emotion]}:(recipes[emotion]||recipes.misterio);
  const context=new Set(chords.slice(-4).flatMap(c=>c.notes.map(mod)));
  const fingerprint=c=>[...new Set(c.notes.map(mod))].sort((a,b)=>a-b).join(",");
- const seen=new Set(),options=[];const tonal=tonalHypotheses(chords),leading=tonal.candidates[0];const plausible=tonal.candidates.filter(c=>leading.score-c.score<0.65);
+ const seen=new Set(),options=[];
+  const plausible=tonal.candidates.filter(c=>leading.score-c.score<0.65);
+  if(!plausible.some(c=>c.tonic===tonic))plausible.unshift({tonic,mode:minor?"menor natural":"mayor",label:spell(tonic)+(minor?" menor":" mayor")});
  for(const pattern of spec.patterns){
   const path=pattern.map(([offset,kind])=>make(offset,kind));
   if(path.some((c,i)=>!c||fingerprint(c)===fingerprint(i?path[i-1]:last)))continue;
@@ -783,13 +848,13 @@ function emotionalContinuations(chords,emotion){
   const full=[last,...path],shared=full.slice(1).map((c,i)=>c.notes.filter(n=>full[i].notes.some(p=>mod(p)===mod(n))).length);
   const movement=full.slice(1).map((c,i)=>pitchClassMotionEstimate(full[i],c).distance);
   const familiarity=path[0].notes.filter(n=>context.has(mod(n))).length;
-  const cadenceFit=plausible.length?Math.max(...plausible.map(c=>cadenceEvidence([...chords,...path],c.tonic,c.mode).filter(x=>x.index>=chords.length).reduce((sum,x)=>sum+x.weight,0))):0;const contextFit=path.reduce((sum,c)=>sum+c.notes.filter(n=>context.has(mod(n))).length,0);const score=shared.reduce((a,b)=>a+b,0)*2+familiarity*2+contextFit*.5+cadenceFit*2-movement.reduce((a,b)=>a+b,0);const lastRoot=mod(path[path.length-1].root);const resolves=plausible.some(c=>lastRoot===c.tonic);const dominantEnding=plausible.some(c=>lastRoot===mod(c.tonic+7));const direction=resolves?"resolver":dominantEnding?"mantener tensión":cadenceFit>0?"tonicizar":"cambiar dirección";
-  const lead=plausible[0],center=lead?lead.label:null;
+  const cadenceFit=plausible.length?Math.max(...plausible.map(c=>cadenceEvidence([...chords,...path],c.tonic,c.mode).filter(x=>x.index>=chords.length).reduce((sum,x)=>sum+x.weight,0))):0;const contextFit=path.reduce((sum,c)=>sum+c.notes.filter(n=>context.has(mod(n))).length,0);const score=shared.reduce((a,b)=>a+b,0)*2+familiarity*2+contextFit*.5+cadenceFit*2-movement.reduce((a,b)=>a+b,0);const lastRoot=mod(path[path.length-1].root);const resolves=lastRoot===tonic||plausible.some(c=>lastRoot===c.tonic);const dominantEnding=lastRoot===mod(tonic+7)||plausible.some(c=>lastRoot===mod(c.tonic+7));const direction=resolves?"resolver":dominantEnding?"mantener tensión":cadenceFit>0?"tonicizar":"cambiar dirección";
+  const center=tonalCenterSpelling(tonic,minor,chords)+(minor?" menor":" mayor");
   const startLink=shared[0]||0;
   const continuity=startLink>=2?"El primer acorde propuesto conserva "+startLink+" notas con tu último acorde.":startLink===1?"El primer acorde propuesto conserva una nota con tu último acorde.":"El primer acorde propuesto cambia todas las notas del último acorde.";
   const directionText=direction==="resolver"?"La secuencia termina sobre una posible tónica"+(center?" ("+center+")":"")+".":direction==="mantener tensión"?"La secuencia termina sobre una posible dominante y deja abierta la resolución.":direction==="tonicizar"?"Aparece una relación de dominante que puede sugerir un centro local.":"La secuencia se aleja de una llegada tonal clara y permite explorar otro recorrido.";
-  const explanation=continuity+" "+directionText+" "+spec.why+" Es una lectura de acordes: la melodía y el ritmo pueden modificarla.";
-  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,cadenceFit,direction,explanation,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
+  const explanation=continuity+" "+directionText+" "+spec.why+" Centro de referencia: "+center+" ("+anchorBasis+"). No se confirma tonalidad ni cadencia sin frase, melodía y ritmo.";
+  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,cadenceFit,direction,explanation,suggestedCenter:center,anchorBasis,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
  }
  options.sort((a,b)=>b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
  const distinct=[],used=new Set();for(const o of options){if(!used.has(o.direction)){distinct.push(o);used.add(o.direction);}}for(const o of options){if(distinct.length>=3)break;if(!distinct.includes(o))distinct.push(o);}return distinct.slice(0,3).map((o,i)=>({...o,variant:i+1,title:i===0?spec.title:spec.title+" · alternativa "+(i+1)}));
@@ -1169,5 +1234,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
