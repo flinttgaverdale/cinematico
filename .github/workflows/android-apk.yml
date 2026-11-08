@@ -1,0 +1,80 @@
+name: Build standalone Android beta
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'index.html'
+      - 'engine.js'
+      - 'manifest.json'
+      - 'icon-*.png'
+      - '.github/workflows/android-apk.yml'
+permissions:
+  contents: write
+concurrency:
+  group: cinematico-android-beta
+  cancel-in-progress: false
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK 35
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Bundle the current offline website
+        run: |
+          mkdir -p android/app/src/main/assets
+          cp index.html engine.js manifest.json icon-192.png icon-512.png android/app/src/main/assets/
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('android/app/src/main/assets/index.html')
+          content=p.read_text(encoding='utf-8')
+          content=content.replace('<link rel="preconnect" href="https://fonts.googleapis.com">','')
+          content=content.replace('<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">','')
+          p.write_text(content, encoding='utf-8')
+          assert 'src="engine.js"' in content
+          assert 'fonts.googleapis.com' not in content
+          PY
+      - name: Compile independently installable APK
+        run: gradle --project-dir android :app:assembleDebug --no-daemon
+      - name: Verify installer and embedded music engine
+        run: |
+          python3 - <<'PY'
+          import zipfile, pathlib
+          p=pathlib.Path('android/app/build/outputs/apk/debug/app-debug.apk')
+          with zipfile.ZipFile(p) as apk:
+              assert apk.testzip() is None
+              names=set(apk.namelist())
+              assert 'assets/engine.js' in names
+              assert 'assets/index.html' in names
+              assert 'classes.dex' in names
+              assert b'emotionalContinuations' in apk.read('assets/engine.js')
+              assert b'Apertura / esperanza' in apk.read('assets/index.html')
+              assert b'fonts.googleapis.com' not in apk.read('assets/index.html')
+          print('PASS APK: content integrity, offline engine, current UI, Dex bytecode')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Cinematico-Android-Beta
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+      - name: Publish beta APK for phone installation
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=android-beta-0.1
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --target "$GITHUB_SHA" --title "Cinemático Android · Beta 0.1" --notes "APK de pruebas para Android, auto-contenido y sin Chrome. Firmado con clave temporal de depuración. No es todavía una versión comercial." --prerelease
+          fi
+          gh release upload "$tag" "android/app/build/outputs/apk/debug/app-debug.apk#Cinematico-Android-Beta.apk" --clobber
+          echo "APK publicado en: https://github.com/$GITHUB_REPOSITORY/releases/download/$tag/Cinematico-Android-Beta.apk"
