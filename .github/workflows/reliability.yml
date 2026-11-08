@@ -35,6 +35,7 @@ jobs:
           node tests/harmonic-context-composer-comparison.cjs
           node tests/continuation-diversity.cjs
           node tests/emotion-evidence-regression.cjs
+          node tests/emotion-neighborhoods.cjs
           node tests/musician-journey-regression.cjs
           node tests/static-audit.cjs
           node tests/pwa-assets.cjs
