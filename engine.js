@@ -1051,14 +1051,36 @@ function emotionalContinuations(chords,emotion){
   nostalgia:{why:"En un centro menor, los acordes relativos y la novena de tónica pueden mantener la ambivalencia sin imponer una tónica mayor.",patterns:[
    [[8,"maj7"],[3,"M"],[0,"madd9"]],[[5,"m7"],[10,"M"],[0,"m7"]],[[3,"maj7"],[8,"maj7"],[0,"madd9"]]]}
  };
+ // Alternative destinations add expressive options without random chromatic novelty.
+ // The first path is still selected from the established original recipes.
+ const alternativeDestinations={
+  melancolia:[[[5,"m"],[7,"dom"],[8,"M"]],[[8,"M"],[10,"M"],[3,"M"]]],
+  nostalgia:[[[9,"m7"],[2,"m7"],[5,"maj7"]],[[4,"m"],[9,"m7"],[5,"maj7"]]],
+  epica:[[[8,"M"],[10,"M"],[5,"M"]],[[5,"M"],[10,"M"],[7,"sus4"]]],
+  tristeza:[[[8,"M"],[5,"m"],[3,"M"]],[[10,"M"],[5,"m"],[7,"dom"]]],
+  alegria:[[[2,"m"],[5,"M"],[9,"m"]],[[5,"M"],[0,"M"],[7,"sus4"]]],
+  ternura:[[[9,"m7"],[5,"maj7"],[9,"m7"]],[[4,"m7"],[5,"maj7"],[2,"m7"]]],
+  inquietud:[[[11,"dim"],[1,"m"],[7,"sus4"]],[[6,"dim"],[1,"M"],[6,"dim"]]],
+  oscuridad:[[[3,"m"],[6,"M"],[1,"M"]],[[8,"m"],[1,"M"],[6,"m"]]],
+  calma:[[[5,"maj7"],[2,"m7"],[5,"maj7"]],[[9,"m7"],[5,"maj7"],[9,"m7"]]]
+ };
+ // For reflective intentions, minor-mode alternatives keep a nearby palette.
+ const gentleMinorDestinations={
+  nostalgia:[[[8,"maj7"],[3,"M"],[8,"maj7"]],[[5,"m7"],[10,"M"],[3,"M"]]],
+  ternura:[[[8,"maj7"],[5,"m7"],[3,"M"]],[[3,"M"],[8,"maj7"],[5,"m7"]]],
+  calma:[[[8,"maj7"],[5,"m7"],[3,"M"]],[[5,"m7"],[10,"M"],[8,"maj7"]]]
+ };
  const creativeProfile=emotionCreativeProfile(emotion);
- const spec=minor&&gentleMinor[emotion]?{...recipes[emotion],...gentleMinor[emotion]}:(recipes[emotion]||recipes.misterio);
+ const baseSpec=minor&&gentleMinor[emotion]?{...recipes[emotion],...gentleMinor[emotion]}:(recipes[emotion]||recipes.misterio);
+ const extraPatterns=minor&&gentleMinorDestinations[emotion]?gentleMinorDestinations[emotion]:(alternativeDestinations[emotion]||[]);
+ const spec={...baseSpec,patterns:[...baseSpec.patterns,...extraPatterns]};
  const context=new Set(chords.slice(-4).flatMap(c=>c.notes.map(mod)));
  const fingerprint=c=>[...new Set(c.notes.map(mod))].sort((a,b)=>a-b).join(",");
  const seen=new Set(),options=[];
   const plausible=tonal.candidates.filter(c=>leading.score-c.score<0.65);
   if(!plausible.some(c=>c.tonic===tonic))plausible.unshift({tonic,mode:minor?"menor natural":"mayor",label:spell(tonic)+(minor?" menor":" mayor")});
- for(const pattern of spec.patterns){
+ for(let recipeIndex=0;recipeIndex<spec.patterns.length;recipeIndex++){
+  const pattern=spec.patterns[recipeIndex];
   const path=pattern.map(([offset,kind])=>make(offset,kind));
   if(path.some((c,i)=>!c||fingerprint(c)===fingerprint(i?path[i-1]:last)))continue;
   const key=path.map(fingerprint).join("|");
@@ -1119,20 +1141,31 @@ function emotionalContinuations(chords,emotion){
     suspendedEnding:suspended,dominantEnding,tonalArrival,modeChange:majorMinorTurn};
   const harmonicArc=harmonicArcPreview(shared,expressiveEvidence,Boolean(tonicInHistory||reliableCenter));
   const explanation=continuity+" "+directionText+" "+spec.why+" Centro de referencia: "+center+" ("+anchorBasis+"). No se confirma tonalidad ni cadencia sin frase, melodía y ritmo.";
-  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,creativeScore,gestureFit,gestureSummary,harmonicArc,arcSummary:harmonicArc.summary,expressiveEvidence,expressiveProfile:creativeProfile,cadenceFit,direction,explanation,suggestedCenter:center,anchorBasis,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
+  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,creativeScore,gestureFit,gestureSummary,harmonicArc,arcSummary:harmonicArc.summary,
+   destinationRoot:lastRoot,destinationType:ending.type,rootPath:path.map(c=>c.root),isExploratory:recipeIndex>=baseSpec.patterns.length,
+   expressiveEvidence,expressiveProfile:creativeProfile,cadenceFit,direction,explanation,suggestedCenter:center,anchorBasis,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
  }
  options.sort((a,b)=>b.creativeScore-a.creativeScore||b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
  if(!options.length)return [];
  // Preserve the strongest context fit as the first idea. For the remaining
  // variants, prefer a different harmonic path instead of three almost identical
  // suggestions. These are symbolic distances, never aesthetic scores.
- const distinct=[options[0]],remaining=options.slice(1);
+ // Preserve the established first suggestion. Diversify subsequent suggestions,
+ // excluding low-scoring alternatives when there are enough nearby candidates.
+ const primary=options.find(o=>!o.isExploratory)||options[0];
+ const distinct=[primary];
+ const near=options.filter(o=>o!==primary&&o.creativeScore>=primary.creativeScore-14);
+ const remaining=near.length>=2?near:options.filter(o=>o!==primary);
  const distance=(a,b)=>a.chords.reduce((sum,ch,i)=>sum+(ch!==b.chords[i]?1:0),0);
  while(distinct.length<3&&remaining.length){
   remaining.sort((a,b)=>{
    const novelty=o=>Math.min(...distinct.map(reference=>distance(o,reference)));
-   const diversity=o=>novelty(o)*2+(distinct.every(x=>x.direction!==o.direction)?1.5:0)+
-    (distinct.every(x=>x.harmonicArc.pattern!==o.harmonicArc.pattern)?.65:0)+o.gestureFit*.65;
+   const diversity=o=>novelty(o)*1.3+
+    (distinct.every(x=>x.destinationRoot!==o.destinationRoot)?5:0)+
+    (distinct.every(x=>x.direction!==o.direction)?1.25:0)+
+    (distinct.every(x=>x.harmonicArc.pattern!==o.harmonicArc.pattern)?.6:0)+
+    (distinct.every(x=>x.destinationType!==o.destinationType)?.45:0)+
+    o.gestureFit*.48-Math.max(0,primary.creativeScore-o.creativeScore)*.16;
    return diversity(b)-diversity(a)||b.creativeScore-a.creativeScore||b.contextScore-a.contextScore||
     a.chords.join(" ").localeCompare(b.chords.join(" "));
   });
@@ -1143,7 +1176,9 @@ function emotionalContinuations(chords,emotion){
   variantDescription:i===0
    ?"Primer camino por ajuste armónico estructural, no por calidad artística."
    :"Frente a la primera opción, cambia "+distance(o,distinct[0])+
-    " de "+o.chords.length+" acordes propuestos; compara ambos antes de elegir."}));
+    " de "+o.chords.length+" acordes propuestos; "+
+    (o.destinationRoot===primary.destinationRoot?"conserva la fundamental final":"termina en otra fundamental")+
+    ". Compara ambos antes de elegir."}));
 }
 // Validate a complete continuation without dropping or altering the user's chords.
 // This helper is shared by the web interface and future hosts.
