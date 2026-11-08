@@ -284,7 +284,7 @@ function tendencyResolution(a,b,fromChord,toChord,style="classical"){
  const target=mod(toChord.root),leading=mod(target-1),seventh=mod(fromChord.root+10);
  const retainedColor=["maj7","maj9","maj7#11"].includes(toChord.type)&&
   (toChord.notes||[]).some(pc=>mod(pc)===leading);
- const names=["Bajo","Tenor","Alto","Soprano"];
+ const names=a.length===3?["Bajo","Intermedia","Superior"]:["Bajo","Tenor","Alto","Soprano"];
  let penalty=0,leadingTone=0,seventhCount=0,retainedLeadingTone=0;
  const details=[],observations=[];
  for(let i=1;i<a.length;i++){
@@ -294,11 +294,11 @@ function tendencyResolution(a,b,fromChord,toChord,style="classical"){
    if(heldAsMajorSeventh){
     retainedLeadingTone++;
     observations.push({kind:"retained-leading-tone",voice:i,
-     text:names[a.length===3&&i===2?3:i]+": sensible mantenida como séptima mayor del acorde de llegada; opción de color, no resolución clásica.",
+     text:names[i]+": sensible mantenida como séptima mayor del acorde de llegada; opción de color, no resolución clásica.",
      level:"contextual-info"});
    }else if(!resolved){
     penalty+=14;leadingTone++;
-    const msg=names[a.length===3&&i===2?3:i]+": sensible sin resolución ascendente";
+    const msg=names[i]+": sensible sin resolución ascendente";
     details.push(msg);
     observations.push({kind:"leading-tone",voice:i,text:msg,level:"classical-warning"});
    }
@@ -307,7 +307,7 @@ function tendencyResolution(a,b,fromChord,toChord,style="classical"){
    const resolved=b[i]-a[i]===-1||b[i]-a[i]===-2;
    if(!resolved){
     penalty+=10;seventhCount++;
-    const msg=names[a.length===3&&i===2?3:i]+": séptima de dominante sin resolución descendente";
+    const msg=names[i]+": séptima de dominante sin resolución descendente";
     details.push(msg);
     observations.push({kind:"chordal-seventh",voice:i,text:msg,level:"classical-warning"});
    }
