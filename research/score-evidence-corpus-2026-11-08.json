@@ -1,0 +1,198 @@
+{
+  "version": "2026-11-08-score-evidence-1",
+  "purpose": "Corpus de contraste, no entrenamiento ni reconocimiento automático de autoría. No reproduce páginas ni motivos originales.",
+  "coverage": {
+    "composers": 11,
+    "originalFilmScoresReadInFull": 0,
+    "independentHumanListeningTests": 0
+  },
+  "provenanceLevels": {
+    "A": "Fragmento notado o reducción publicado y cotejable en fuente abierta. Puede ser transcripción del investigador, no partitura de sesión.",
+    "B": "Estudio académico con observaciones de obra e indicaciones sobre material; las notas pueden requerir acceso a imagen o impreso.",
+    "C": "Edición autorizada/comercial localizada, no se ha leído completa en esta fase.",
+    "D": "Transcripción propia o arreglo de tercero; no implica fidelidad a partitura original."
+  },
+  "profiles": [
+    {
+      "id": "silvestri",
+      "work": "Back to the Future",
+      "evidence": "A",
+      "access": "academic_notated_excerpt_open",
+      "source": "https://www.blogs.berklee.edu/wp-content/uploads/2017/09/BTTF-Analysis.pdf",
+      "locator": "p. i, fig. 1a; p. iii, figs. 6–9",
+      "verified": "C/Bb and F/A slash harmony, written G(sus4) and C(sus4), raised fourth in first theme; Bb and E major triads as tritone relation; octatonic ostinato with metric shifts",
+      "notVerified": "Full session manuscript or complete cue-by-cue orchestration",
+      "scoreEdition": "https://omnimusicpublishing.com/product/alan-silvestri-back-to-the-future-full-orchestral-score/"
+    },
+    {
+      "id": "horner",
+      "work": "A Beautiful Mind",
+      "evidence": "A",
+      "access": "academic_transcription_open",
+      "source": "https://franklehman.com/wp-content/uploads/2020/02/MTS-Article.pdf",
+      "locator": "Lehman (2013), pp. 10–13, ex. 7, 8, 9(a), 10(a,b)",
+      "verified": "A minor to A-flat major is S in the second pass; L/R/S generate transformational routes; emphasis is triadic motion rather than isolated chord color",
+      "notVerified": "Own examination of original complete studio score",
+      "scoreEdition": "https://omnimusicpublishing.com/product/horners-star-trek-ii-full-orchestral-score/"
+    },
+    {
+      "id": "herrmann",
+      "work": "Vertigo: Prelude",
+      "evidence": "A",
+      "access": "academic_notated_excerpt_open",
+      "source": "https://mtosmt.org/issues/mto.22.28.1/murphy_examples.pdf",
+      "locator": "Scott Murphy (2022), ex. 1 reduction and ex. 2 mm. 1–2",
+      "verified": "Reduction of A–B truncated return, mMaj7 (Hitchcock chord) in A material, C5 as upper neighbor in repeated arpeggiation",
+      "notVerified": "Own complete original score; source reduction may omit non-chord notes or have interpretive choices",
+      "scoreEdition": "https://omnimusicpublishing.com/product/bernard-herrmanns-north-by-northwest-full-orchestral-score/"
+    },
+    {
+      "id": "williams",
+      "work": "Star Wars: Binary Sunset",
+      "evidence": "B",
+      "access": "academic_notated_excerpt_open",
+      "source": "https://academic.oup.com/book/63100/chapter/567207145",
+      "locator": "Lehman (2026), Introduction fig. I.1, mm. 1–19; m. 7",
+      "verified": "D-flat-major triad above G in half-cadence context; differentiated cadence functions and thematic units across phrase",
+      "notVerified": "Original studio manuscript for entire cue; fig. based on score-as-heard and printed sources",
+      "scoreEdition": "https://johnwilliams.org/reference/sheet-music/conductor-scores"
+    },
+    {
+      "id": "newman",
+      "work": "American Beauty",
+      "evidence": "B",
+      "access": "doctoral_thesis_score_examples",
+      "source": "https://researchonline.rcm.ac.uk/382/1/Hexel%252C%20Vasco%20%20-%20PhD.pdf",
+      "locator": "Hexel (2014), pp. 150–151, figure 4(a,b); also opening cue American Dream fig. 2 p. 73",
+      "verified": "C-Dorian, C/G pedal drone, A-natural highlighted in short piano line, progressive layering and restraint",
+      "notVerified": "Entire original cue; score image could not be independently inspected in this search",
+      "scoreEdition": null
+    },
+    {
+      "id": "goransson",
+      "work": "Oppenheimer: Can You Hear the Music",
+      "evidence": "D",
+      "access": "third_party_incomplete_transcription",
+      "source": "https://curdt.home.hdm-stuttgart.de/PDF/Oppenheimer.pdf",
+      "locator": "Wroblewski (2024), pp. 9–11; student partial score p. 11",
+      "verified": "Partial reconstruction shows tempo markings 100, 120, 140 and melodic/rhythmic change over a set of strings and synthesizers",
+      "notVerified": "Original full cue, all 21 changes of tempo or authorship of the published notes",
+      "scoreEdition": null
+    },
+    {
+      "id": "giacchino",
+      "work": "Up: Married Life",
+      "evidence": "C",
+      "access": "licensed_original_study_score_commercial",
+      "source": "https://omnimusicpublishing.com/product/michael-giacchinos-up-full-orchestral-score/",
+      "locator": "Licensed 263-page edition lists Married Life; Disney approved edition, published 2025",
+      "verified": "Original film-score study edition exists and includes Married Life",
+      "notVerified": "The bars of Married Life have not yet been individually inspected",
+      "scoreEdition": "https://www.schott-music.com/en/up-no787152.html"
+    },
+    {
+      "id": "elfman",
+      "work": "Edward Scissorhands",
+      "evidence": "C",
+      "access": "licensed_original_study_score_commercial",
+      "source": "https://omnimusicpublishing.com/product/danny-elfmans-edward-scissorhands-2nd-edition-full-orchestral-score/",
+      "locator": "Licensed 222-page edition, cue list includes Ice Dance and Finale",
+      "verified": "Published full orchestral film score exists",
+      "notVerified": "Specific harmonic claims on the inside of those cues without the printed pages",
+      "scoreEdition": null
+    },
+    {
+      "id": "shore",
+      "work": "The Lord of the Rings",
+      "evidence": "C",
+      "access": "composer_supported_book_with_manuscripts",
+      "source": "https://howerecords.com/the-lord-of-the-rings-rarities/",
+      "locator": "Doug Adams, The Music of the Lord of the Rings Films, examples and original manuscript pages",
+      "verified": "Book with manuscript reproductions and thematic score examples exists",
+      "notVerified": "Systematic transcription of original cue pages not present on the public listing",
+      "scoreEdition": null
+    },
+    {
+      "id": "morricone",
+      "work": "The Mission: Gabriel's Oboe",
+      "evidence": "B",
+      "access": "student_academic_analysis_and_published_arrangement",
+      "source": "https://premisrecerca.uvic.cat/sites/default/files/webform/5287989f111bbf7383ce2dc1c44c939cf926325f_The%20Mission_Premi%20EUMOGRAFIC.pdf",
+      "locator": "Student thesis, section 4, harmonic study p. 60; Hal Leonard score arranged by Mancini",
+      "verified": "Study describes D-major tonality, melodic and timbral properties; licensed arrangement exists",
+      "notVerified": "Original, unarranged film orchestration",
+      "scoreEdition": "https://www.halleonard.com/product/4491290/the-missiongabriels-oboe"
+    },
+    {
+      "id": "zimmer",
+      "work": "Interstellar",
+      "evidence": "D",
+      "access": "film_credits_and_arrangements_only",
+      "source": "https://hans-zimmer.com/product/interstellar/",
+      "locator": "Official-style project credits and cues; independent orchestrated arrangements exist",
+      "verified": "Specific cue names/organ and orchestral instrumentation documented",
+      "notVerified": "A licensed, complete original orchestral score or specific original harmony from a notated primary source",
+      "scoreEdition": null
+    }
+  ],
+  "validationFixtures": [
+    {
+      "id": "bttf-fig1a-slash-and-suspensions",
+      "composer": "silvestri",
+      "sourceRef": "fig. 1a, selected symbols in source order (not the complete exact passage)",
+      "input": "Bb C/Bb F/A G(sus4) G C(sus4) C",
+      "expectChordTypes": [
+        "",
+        "",
+        "",
+        "sus4",
+        "",
+        "sus4",
+        ""
+      ],
+      "kind": "score_symbol_alignment"
+    },
+    {
+      "id": "binary-sunset-polychord-bass",
+      "composer": "williams",
+      "sourceRef": "Introduction, fig I.1 m.7: D-flat triad atop G",
+      "input": "Db/G",
+      "expectBassKind": "independent",
+      "kind": "cited_harmonic_relation"
+    },
+    {
+      "id": "horner-slide-minor-to-major",
+      "composer": "horner",
+      "sourceRef": "Lehman, second pass (mm. 27–33): A minor -> A-flat major via S",
+      "from": {
+        "root": 9,
+        "quality": "minor"
+      },
+      "operation": "S",
+      "to": {
+        "root": 8,
+        "quality": "major"
+      },
+      "kind": "transformational_analysis"
+    },
+    {
+      "id": "herrmann-minor-major-seventh",
+      "composer": "herrmann",
+      "sourceRef": "Murphy, mm. 1–2 / A-section minor-major seventh; generic transposed typing test, NOT a quoted original chord",
+      "input": "CmMaj7",
+      "expectChordTypes": [
+        "mMaj7"
+      ],
+      "kind": "theoretical_equivalence"
+    },
+    {
+      "id": "newman-dorian-sixth",
+      "composer": "newman",
+      "sourceRef": "Hexel, American Beauty cue 59:30, C Dorian with A-natural",
+      "tonic": 0,
+      "mode": "dorian",
+      "mustContainPc": 9,
+      "kind": "theoretical_equivalence"
+    }
+  ]
+}

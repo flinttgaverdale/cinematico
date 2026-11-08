@@ -156,6 +156,12 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       const actualFeedback=await page.locator('#userFeedback').textContent();
       assert.ok(actualLab.includes('C/Bb'),
         'The voice laboratory should display the original slash chord. Actual lab: '+actualLab.slice(0,500)+' | Feedback: '+actualFeedback);
+      await page.locator('#userChords').fill('Bb C/Bb F/A G(sus4) G C(sus4) C');
+      await page.locator('#userAnalyze').click();
+      assert.ok(!(await page.locator('#userFeedback').innerText()).includes('Acorde no reconocido'),
+        'Printed score notation G(sus4) must be parsed, not treated as malformed');
+      assert.ok((await page.locator('#labVoiceOutput').textContent()).includes('G(sus4)'),
+        'The printed suspension symbol must survive exact notation round-trip');
       await page.locator('#neoOperation').selectOption('S');
       assert.ok((await page.locator('#neoResult').innerText()).includes('SLIDE'),
         'SLIDE must render two voice movements without a browser exception');
