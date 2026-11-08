@@ -1,0 +1,241 @@
+{
+  "version": "2026-11-08.phase1",
+  "scope": "Harmonic creativity, not measured perceived emotion",
+  "methodology": {
+    "reviewed": "Official publisher abstracts and open-access scholarly articles; no claim of reading paywalled full books",
+    "separate": [
+      "composition intent",
+      "symbolic harmonic gesture",
+      "heard expression",
+      "felt emotion"
+    ],
+    "limitation": "No melody, rhythm, tempo, timbre, register, dynamic, phrase or listener ratings captured by web harmonic input",
+    "evidenceLevels": {
+      "A": "Full open-access academic article/primary abstract and verified bibliographic record",
+      "B": "Publisher book description or chapter abstract only",
+      "C": "Design hypothesis requiring behavioral validation"
+    }
+  },
+  "sources": [
+    {
+      "id": "zentner2008",
+      "title": "Emotions Evoked by the Sound of Music: Characterization, Classification, and Measurement",
+      "authors": "Zentner, Grandjean & Scherer",
+      "year": 2008,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/18729581/",
+      "access": "abstract",
+      "level": "A",
+      "claim": "Four studies developed and supported the nine-factor GEMS instrument; GEMS measures music-induced emotional states, not harmony-only effects."
+    },
+    {
+      "id": "emma2024",
+      "title": "Emotion-to-Music Mapping Atlas (EMMA)",
+      "year": 2024,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11133078/",
+      "access": "open article",
+      "level": "A",
+      "claim": "GEMS dimensions and higher-order sublimity/vitality/unease; real listening ratings required."
+    },
+    {
+      "id": "juslin2008",
+      "title": "Emotional responses to music: the need to consider underlying mechanisms",
+      "authors": "Juslin & Västfjäll",
+      "year": 2008,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/18826699/",
+      "access": "abstract",
+      "level": "A",
+      "claim": "Musical expectancy is only one of several mechanisms of induced emotion."
+    },
+    {
+      "id": "meyer1956",
+      "title": "Emotion and Meaning in Music",
+      "authors": "Leonard B. Meyer",
+      "year": 1956,
+      "url": "https://press.uchicago.edu/ucp/books/book/chicago/E/bo28551887.html",
+      "access": "publisher contents and description only",
+      "level": "B",
+      "claim": "Pattern, expectation and completion are prominent topics, not a ready-made emotion/chord mapping."
+    },
+    {
+      "id": "huron2006",
+      "title": "Sweet Anticipation: Music and the Psychology of Expectation",
+      "authors": "David Huron",
+      "year": 2006,
+      "url": "https://mitpress.mit.edu/9780262582780/sweet-anticipation/",
+      "access": "publisher book description only",
+      "level": "B",
+      "claim": "Five expectation response systems and their possible role in music."
+    },
+    {
+      "id": "lerdahl2005",
+      "title": "Tonal Pitch Space",
+      "authors": "Fred Lerdahl",
+      "year": 2005,
+      "url": "https://academic.oup.com/book/32497",
+      "access": "publisher book abstract only",
+      "level": "B",
+      "claim": "Pitch-space distance, tonal tension and attraction models; not directly listener emotion."
+    },
+    {
+      "id": "lerdahl2007",
+      "title": "Modeling Tonal Tension",
+      "authors": "Lerdahl & Krumhansl",
+      "year": 2007,
+      "url": "https://doi.org/10.1525/mp.2007.24.4.329",
+      "access": "article abstract",
+      "level": "A",
+      "claim": "Prolongation, pitch space, surface tension and attraction tested against listeners' tension reports."
+    },
+    {
+      "id": "bigand1996",
+      "title": "Perception of musical tension in short chord sequences",
+      "authors": "Bigand, Parncutt & Lerdahl",
+      "year": 1996,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/8668513/",
+      "access": "abstract",
+      "level": "A",
+      "claim": "Tension judgments combine tonal, sensory and horizontal movement effects and differ by training."
+    },
+    {
+      "id": "zhang2025",
+      "title": "Moderating effects of chord progressions on the emotional experience of major and minor chords",
+      "authors": "Zhang, Li, Wei & Wang",
+      "year": 2025,
+      "url": "https://www.sciencedirect.com/science/article/pii/S0001691825000034",
+      "access": "abstract",
+      "level": "A",
+      "claim": "Major/minor differences in pleasantness, stability and tension depend on stability of progression endings."
+    },
+    {
+      "id": "daikoku2024",
+      "title": "Bodily maps of uncertainty and surprise in musical chord progression",
+      "authors": "Daikoku, Tanaka & Yamawaki",
+      "year": 2024,
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC11075058/",
+      "access": "full open-access article",
+      "level": "A",
+      "claim": "Chord-sequence uncertainty and prediction error relate to emotional response and bodily sensations; not individual deterministic prediction."
+    },
+    {
+      "id": "lehman2018",
+      "title": "Hollywood Harmony: Chapter 5 Pantriadic Wonder",
+      "authors": "Frank Lehman",
+      "year": 2018,
+      "url": "https://academic.oup.com/book/3654/chapter-abstract/144996319",
+      "access": "chapter abstract only",
+      "level": "B",
+      "claim": "In some film music, pantriadic chromaticism and wonder/awe/frisson have a theorized relationship; not universal."
+    },
+    {
+      "id": "lehman2019",
+      "title": "Hollywood Cadences: Music and the Structure of Cinematic Expectation",
+      "authors": "Frank Lehman",
+      "year": 2019,
+      "url": "https://doi.org/10.30535/MTO.19.4.2",
+      "access": "open article abstract",
+      "level": "A",
+      "claim": "Phrase-level cadential genres can shape narrative expectations; no cadence proven from lone chord."
+    },
+    {
+      "id": "gabrielsson2015",
+      "title": "The Relationship between Musical Structure and Perceived Expression",
+      "authors": "Alf Gabrielsson",
+      "year": 2015,
+      "url": "https://academic.oup.com/edited-volume/34489/chapter-abstract/292614599",
+      "access": "chapter abstract only",
+      "level": "B",
+      "claim": "Perceived expression depends on multiple interacting structural factors; typical musical variables show less clear effects than raw auditory cues."
+    },
+    {
+      "id": "farbood2006",
+      "title": "A Quantitative, Parametric Model of Musical Tension",
+      "authors": "Mary Farbood",
+      "year": 2006,
+      "url": "https://www-prod.media.mit.edu/publications/a-quantitative-parametric-model-of-musical-tension/",
+      "access": "MIT thesis abstract only",
+      "level": "B",
+      "claim": "Tension modeled with harmony, register, melody, dynamics, event density, tempo and rhythmic regularity."
+    },
+    {
+      "id": "carraturo2025",
+      "title": "The major-minor mode dichotomy in music perception",
+      "authors": "Carraturo et al.",
+      "year": 2025,
+      "url": "https://pubmed.ncbi.nlm.nih.gov/39721138/",
+      "access": "systematic review abstract",
+      "level": "A",
+      "claim": "Major/minor expression is culturally, experientially and contextually modulated."
+    }
+  ],
+  "gems": {
+    "source": "zentner2008",
+    "factors": {
+      "sublimity": [
+        "wonder",
+        "transcendence",
+        "tenderness",
+        "nostalgia",
+        "peacefulness"
+      ],
+      "vitality": [
+        "power",
+        "joyful_activation"
+      ],
+      "unease": [
+        "tension",
+        "sadness"
+      ]
+    },
+    "warning": "No validated mapping to harmonic symbols or fifteen Cinemático intents."
+  },
+  "creativeDesign": {
+    "gestureFamilies": [
+      "arrival",
+      "opening",
+      "delay",
+      "continuity",
+      "contrast",
+      "uncertainty",
+      "expansion",
+      "darkening"
+    ],
+    "mappingStatus": "C: internal exploratory design hypotheses, not experimental GEMS classification",
+    "objectiveSignals": [
+      "suspended ending",
+      "possible dominant ending",
+      "cadential hypothesis",
+      "shared pitch classes",
+      "root-distance class",
+      "foreign pitch classes",
+      "change between major/minor sonority",
+      "added ninth and major seventh"
+    ],
+    "ranking": "Context continuity plus modest gesture-bias, no fitted statistical parameters or trained model"
+  },
+  "negativeControls": [
+    {
+      "input": "Am",
+      "rule": "Do not infer a confirmed A minor key or a specific felt emotion from isolated Am."
+    },
+    {
+      "input": "Am F Dm",
+      "rule": "Ambiguous key; D major added later is a mode-color change, not automatically uplift."
+    },
+    {
+      "input": "Dm G7 C",
+      "rule": "Functional cadence hypothesis supports a tonal arrival but not necessarily joy."
+    },
+    {
+      "input": "Am F C G",
+      "rule": "Suspended Csus4 ending is not a resolved C chord despite root identity."
+    },
+    {
+      "input": "C G Am F",
+      "rule": "Same relative pitch-class material may be heard differently according to tonality/phrase/tempo."
+    },
+    {
+      "input": "Cmaj7 Fmaj7 G7 C",
+      "rule": "Maj7 does not imply nostalgia or tenderness without additional structure and listening."
+    }
+  ]
+}
