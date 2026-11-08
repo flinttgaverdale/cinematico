@@ -818,7 +818,17 @@ function emotionalContinuations(chords,emotion){
  calma:{title:"Calma",device:"Continuidad por notas comunes",why:"Séptimas mayores, novenas y acordes próximos favorecen enlaces graduales si se interpretan sin acentos bruscos.",patterns:[[[5,"maj7"],[2,"m7"],[0,"maj7"]],[[9,"m7"],[5,"maj7"],[0,"add9"]],[[4,"m7"],[5,"maj7"],[0,"maj7"]]]},
  contraste:{title:"Contraste inesperado",device:"Mediantes cromáticas y cambio de modo",why:"El cambio de calidad y las relaciones cromáticas separan claramente esta continuación del recorrido anterior.",patterns:[[[6,"M"],[8,"m"],[0,minor?"M":"m"]],[[4,"M"],[8,"M"],[0,minor?"M":"m"]],[[1,"M"],[6,"m"],[0,minor?"M":"m"]]]}
  };
- const spec=recipes[emotion]||recipes.misterio;
+ // Preserve a minor tonic in gentle/reflective lenses unless the user chose a
+ // deliberately bright or contrasting intent. Emotions remain creative hypotheses.
+ const gentleMinor={
+  calma:{why:"En contexto menor, enlaces con notas comunes y novena añadida conservan la sonoridad íntima sin forzar una llegada mayor.",patterns:[
+   [[8,"maj7"],[5,"m7"],[0,"madd9"]],[[3,"M"],[8,"maj7"],[0,"madd9"]],[[5,"m7"],[3,"M"],[0,"madd9"]]]},
+  ternura:{why:"Las sonoridades relativas, las notas comunes y una tónica menor con novena permiten una continuidad cálida sin cambiar involuntariamente de modo.",patterns:[
+   [[8,"maj7"],[5,"m7"],[0,"madd9"]],[[3,"maj7"],[8,"maj7"],[0,"madd9"]],[[5,"m7"],[10,"M"],[0,"madd9"]]]},
+  nostalgia:{why:"En un centro menor, los acordes relativos y la novena de tónica pueden mantener la ambivalencia sin imponer una tónica mayor.",patterns:[
+   [[8,"maj7"],[3,"M"],[0,"madd9"]],[[5,"m7"],[10,"M"],[0,"m7"]],[[3,"maj7"],[8,"maj7"],[0,"madd9"]]]}
+ };
+ const spec=minor&&gentleMinor[emotion]?{...recipes[emotion],...gentleMinor[emotion]}:(recipes[emotion]||recipes.misterio);
  const context=new Set(chords.slice(-4).flatMap(c=>c.notes.map(mod)));
  const fingerprint=c=>[...new Set(c.notes.map(mod))].sort((a,b)=>a-b).join(",");
  const seen=new Set(),options=[];
