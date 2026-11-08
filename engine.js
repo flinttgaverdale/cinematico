@@ -914,6 +914,40 @@ function harmonicContinuations(chords){
 // describe harmonic devices, not a reliable prediction of perceived emotion.
 // Degrees use a tentative tonal center, falling back to the last chord root.
  // A final V7 can point toward a previously stated tonic, without establishing a cadence.
+/* Expression research layer.
+   GEMS measures emotions felt while listening; these affiliations are NON-validated
+   creative analogies, not measured probabilities or universal chord semantics.
+   The engine can assess harmonic gestures, not perceived/induced emotions.
+*/
+const GEMS_EMOTION_DIMENSIONS=Object.freeze({
+ sublimity:Object.freeze(["wonder","transcendence","tenderness","nostalgia","peacefulness"]),
+ vitality:Object.freeze(["power","joyful_activation"]),
+ unease:Object.freeze(["tension","sadness"])
+});
+const EMOTION_CREATIVE_PROFILES=Object.freeze({
+ misterio:{family:"unease",gems:["tension","wonder"],gesture:"uncertainty",aim:"Explorar una llegada incierta"},
+ melancolia:{family:"sublimity",gems:["nostalgia","sadness"],gesture:"continuity",aim:"Conservar intimidad con una ligera desviación"},
+ tension:{family:"unease",gems:["tension"],gesture:"delay",aim:"Aplazar un punto de llegada"},
+ esperanza:{family:"sublimity",gems:["transcendence","joyful_activation"],gesture:"opening",aim:"Abrir el recorrido sin forzar una llegada"},
+ nostalgia:{family:"sublimity",gems:["nostalgia"],gesture:"continuity",aim:"Combinar familiaridad y cambio"},
+ epica:{family:"vitality",gems:["power"],gesture:"expansion",aim:"Explorar un recorrido más expansivo"},
+ tristeza:{family:"unease",gems:["sadness"],gesture:"darkening",aim:"Explorar una sonoridad más recogida"},
+ alegria:{family:"vitality",gems:["joyful_activation"],gesture:"arrival",aim:"Probar una llegada más afirmativa"},
+ ternura:{family:"sublimity",gems:["tenderness"],gesture:"continuity",aim:"Favorecer enlaces cercanos"},
+ asombro:{family:"sublimity",gems:["wonder"],gesture:"contrast",aim:"Explorar una región armónica inesperada"},
+ inquietud:{family:"unease",gems:["tension"],gesture:"uncertainty",aim:"Mantener la dirección inestable"},
+ suspense:{family:"unease",gems:["tension"],gesture:"delay",aim:"Mantener pendiente la llegada"},
+ oscuridad:{family:"unease",gems:["tension","sadness"],gesture:"darkening",aim:"Buscar un color armónico más denso"},
+ calma:{family:"sublimity",gems:["peacefulness"],gesture:"continuity",aim:"Favorecer el movimiento próximo entre acordes"},
+ contraste:{family:null,gems:[],gesture:"contrast",aim:"Cambiar deliberadamente de región o modo"}
+});
+function emotionCreativeProfile(id){
+ const actual=EMOTION_CREATIVE_PROFILES[id]?id:"misterio";
+ const spec=EMOTION_CREATIVE_PROFILES[actual];
+ return {id:actual,family:spec.family,gemsAffinities:spec.gems.slice(),
+  creativeGesture:spec.gesture,creativeAim:spec.aim,
+  scope:"Mapa de diseño interpretativo, no clasificación GEMS validada, ni predicción de la emoción que sentirá el oyente."};
+}
 function emotionalContinuations(chords,emotion){
  if(!Array.isArray(chords)||!chords.length)return [];
  const last=chords[chords.length-1];
@@ -968,6 +1002,7 @@ function emotionalContinuations(chords,emotion){
   nostalgia:{why:"En un centro menor, los acordes relativos y la novena de tónica pueden mantener la ambivalencia sin imponer una tónica mayor.",patterns:[
    [[8,"maj7"],[3,"M"],[0,"madd9"]],[[5,"m7"],[10,"M"],[0,"m7"]],[[3,"maj7"],[8,"maj7"],[0,"madd9"]]]}
  };
+ const creativeProfile=emotionCreativeProfile(emotion);
  const spec=minor&&gentleMinor[emotion]?{...recipes[emotion],...gentleMinor[emotion]}:(recipes[emotion]||recipes.misterio);
  const context=new Set(chords.slice(-4).flatMap(c=>c.notes.map(mod)));
  const fingerprint=c=>[...new Set(c.notes.map(mod))].sort((a,b)=>a-b).join(",");
@@ -999,10 +1034,44 @@ function emotionalContinuations(chords,emotion){
   const startLink=shared[0]||0;
   const continuity=startLink>=2?"El primer acorde propuesto conserva "+startLink+" notas con tu último acorde.":startLink===1?"El primer acorde propuesto conserva una nota con tu último acorde.":"El primer acorde propuesto cambia todas las notas del último acorde.";
   const directionText=direction==="resolver"?"La secuencia termina en una posible llegada tonal"+(center?" ("+center+")":"")+", no confirmada sin frase.":direction==="mantener tensión"?(suspended?"La cuarta suspendida del último acorde deja una resolución posible sin completar.":"La ruta termina cerca de una dominante posible y mantiene abierta la llegada."):majorMinorTurn?"La llegada cambia el color mayor/menor respecto al centro de referencia; es una exploración, no una modulación demostrada.":"La ruta cambia el color o la región armónica respecto al centro de referencia; no confirma modulación.";
+  // Observable symbolic gestures. Melody, metre, sound, timbre and historical
+  // associations are unknown, so these are not scores of emotional accuracy.
+  const referenceScale=(minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11]).map(n=>mod(tonic+n));
+  const foreignPitches=path.flatMap(c=>c.notes).filter(n=>!referenceScale.includes(mod(n))).length;
+  const sharedTotal=shared.reduce((a,b)=>a+b,0);
+  const rootLeaps=full.slice(1).filter((c,i)=>{
+   const delta=mod(c.root-full[i].root);
+   return delta>=5&&delta<=7;
+  }).length;
+  const tonalArrival=resolves&&!suspended&&!dominantEnding&&!majorMinorTurn;
+  const unfinishedEnding=suspended||dominantEnding;
+  const addedColor=["maj7","m7","add9","madd9"].includes(ending.type);
+  const minorEnding=["m","m7","madd9"].includes(ending.type);
+  const style=creativeProfile.creativeGesture;
+  let gestureFit=0;
+  if(style==="arrival")gestureFit=(tonalArrival?3:0)+Math.min(2,cadenceFit*.3);
+  else if(style==="opening")gestureFit=(["add9","maj7","madd9"].includes(ending.type)?2.5:0)+(tonalArrival?1:0)+(!resolves?1:0);
+  else if(style==="delay")gestureFit=(suspended?4:0)+(dominantEnding?2:0)+(unfinishedEnding?1:0)-(tonalArrival?2:0);
+  else if(style==="continuity")gestureFit=sharedTotal*.65+(addedColor?1:0)-Math.min(3,foreignPitches)*.35;
+  else if(style==="contrast")gestureFit=Math.min(4,foreignPitches)*.8+(majorMinorTurn?2:0)+(!resolves?1:0);
+  else if(style==="uncertainty")gestureFit=(unfinishedEnding?2:0)+(!resolves?2:0)+Math.min(3,foreignPitches)*.4;
+  else if(style==="expansion")gestureFit=rootLeaps*.75+(!resolves?1:0)+(!minor&&!minorEnding?1:0);
+  else if(style==="darkening")gestureFit=(minorEnding?2.5:0)+(majorMinorTurn?1:0)+Math.min(3,foreignPitches)*.3;
+  const creativeScore=score+gestureFit*1.6;
+  const gestureSummary=suspended?"Cuarta suspendida; llegada pendiente":
+    dominantEnding?"Posible dominante; llegada abierta":
+    majorMinorTurn?"Cambio entre color mayor y menor":
+    foreignPitches>0&&tonalArrival?"Desvío cromático y regreso posible":
+    foreignPitches>0&&!resolves?"Desplazamiento hacia otra región":
+    ending.type==="add9"||ending.type==="madd9"?"Llegada con novena añadida":
+    ending.type==="maj7"?"Color de séptima mayor":
+    tonalArrival?"Regreso posible al centro":"Cambio de dirección armónica";
+  const expressiveEvidence={foreignPitches,sharedNotes:sharedTotal,rootLeaps,
+    suspendedEnding:suspended,dominantEnding,tonalArrival,modeChange:majorMinorTurn};
   const explanation=continuity+" "+directionText+" "+spec.why+" Centro de referencia: "+center+" ("+anchorBasis+"). No se confirma tonalidad ni cadencia sin frase, melodía y ritmo.";
-  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,cadenceFit,direction,explanation,suggestedCenter:center,anchorBasis,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
+  options.push({id:emotion,title:spec.title,device:spec.device,intent:spec.why,chords:path.map(c=>c.label),sharedNotes:shared,estimatedMotion:movement,contextMatches:familiarity,contextScore:score,creativeScore,gestureFit,gestureSummary,expressiveEvidence,expressiveProfile:creativeProfile,cadenceFit,direction,explanation,suggestedCenter:center,anchorBasis,caveat:"Hipótesis armónica, no predicción emocional: melodía, ritmo, registro, textura e interpretación pueden cambiar el efecto. No se altera tu progresión."});
  }
- options.sort((a,b)=>b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
+ options.sort((a,b)=>b.creativeScore-a.creativeScore||b.contextScore-a.contextScore||a.chords.join(" ").localeCompare(b.chords.join(" ")));
  if(!options.length)return [];
  // Preserve the strongest context fit as the first idea. For the remaining
  // variants, prefer a different harmonic path instead of three almost identical
@@ -1012,8 +1081,8 @@ function emotionalContinuations(chords,emotion){
  while(distinct.length<3&&remaining.length){
   remaining.sort((a,b)=>{
    const novelty=o=>Math.min(...distinct.map(reference=>distance(o,reference)));
-   const diversity=o=>novelty(o)*2+(distinct.every(x=>x.direction!==o.direction)?1.5:0);
-   return diversity(b)-diversity(a)||b.contextScore-a.contextScore||
+   const diversity=o=>novelty(o)*2+(distinct.every(x=>x.direction!==o.direction)?1.5:0)+o.gestureFit*.65;
+   return diversity(b)-diversity(a)||b.creativeScore-a.creativeScore||b.contextScore-a.contextScore||
     a.chords.join(" ").localeCompare(b.chords.join(" "));
   });
   distinct.push(remaining.shift());
@@ -2329,5 +2398,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={emotionCreativeProfile,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
