@@ -52,12 +52,16 @@ assert.equal(center('C F G7','alegria')[0].chords.at(-1),'C');
 for(const mood of ['calma','ternura','nostalgia']){
  const minorIdeas=center('Cm Abmaj7 Fm7 G7',mood);
  assert.equal(minorIdeas.length,3,mood);
- assert.ok(minorIdeas.every(x=>['Cmadd9','Cm7'].includes(x.chords.at(-1))),
-  mood+' in C minor should not silently end in C major');
+ assert.ok(['Cmadd9','Cm7'].includes(minorIdeas[0].chords.at(-1)),
+  mood+' in C minor must preserve the minor-tonic first idea');
+ assert.ok(minorIdeas.every(x=>['Cmadd9','Cm7','Abmaj7','Fm7','Eb','Bb'].includes(x.chords.at(-1))),
+  mood+' in C minor may explore related regions but must not silently invert the tonic to C major');
  const majorIdeas=center('C F G7',mood);
  assert.equal(majorIdeas.length,3,mood);
- assert.ok(majorIdeas.every(x=>['Cmaj7','Cadd9'].includes(x.chords.at(-1))),
-  mood+' in C major should stay available');
+ assert.ok(['Cmaj7','Cadd9'].includes(majorIdeas[0].chords.at(-1)),
+  mood+' in C major must preserve the major-tonic first idea');
+ assert.ok(majorIdeas.every(x=>['Cmaj7','Cadd9','Fmaj7','Am7','Dm7','Em7'].includes(x.chords.at(-1))),
+  mood+' in C major may explore nearby regions but must not silently invert the tonic to C minor');
 }
 for(let shift=0;shift<12;shift++){
  const chords=parse('Dm G7 C').map(ch=>({...ch,root:(ch.root+shift)%12,bass:(ch.bass+shift)%12,notes:ch.notes.map(n=>(n+shift)%12)}));

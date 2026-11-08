@@ -128,6 +128,14 @@ for(const source of inputs){
   scenarios++;
  }
 }
+for(const mood of ['calma','ternura','nostalgia']){
+ const minor=E.emotionalContinuations(E.parseUserProgression('Cm Abmaj7 Fm7 G7').chords,mood);
+ const major=E.emotionalContinuations(E.parseUserProgression('C F G7').chords,mood);
+ assert.ok(['Cmadd9','Cm7'].includes(minor[0].chords.at(-1)),'Keep the original minor-tonic first route');
+ assert.ok(['Cmaj7','Cadd9'].includes(major[0].chords.at(-1)),'Keep the original major-tonic first route');
+ assert.ok(minor.every(x=>!['C','Cmaj7','Cadd9'].includes(x.chords.at(-1))),'Do not replace a minor tonic with an unasked major tonic');
+ assert.ok(major.every(x=>!['Cm','Cm7','Cmadd9'].includes(x.chords.at(-1))),'Do not replace a major tonic with an unasked minor tonic');
+}
 for(const [source,mood,firstExpected] of fixed){
  const p=E.parseUserProgression(source);
  assert.equal(E.emotionalContinuations(p.chords,mood)[0].chords.join(' '),firstExpected,'Keep original first route: '+source+' '+mood);

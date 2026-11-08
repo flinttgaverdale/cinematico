@@ -48,3 +48,6 @@ Las alternativas podían tener tres cifrados diferentes y, aun así, comunicar l
 
 ## Escucha con intérpretes pendiente
 Comparar con orden aleatorio las tres propuestas, usando iguales pulsos de dos segundos, las mismas voces neutras y los dos últimos acordes originales. Preguntar: «¿Cuál probarías?», «¿Son destinos distintos?», «¿Mantienen relación útil con la idea original?». Contrastar también tocándolas en piano/guitarra. No preguntar por grados exactos de emoción. Separar evaluación con músicos reales de las pruebas simbólicas documentadas aquí.
+
+## Compatibilidad con validación tonal previa
+La regresión antigua exigía que **todas** las rutas de calma, ternura y nostalgia terminaran en la misma tónica. Era apropiado cuando el motor únicamente ofrecía variaciones del mismo destino, pero incompatible con el nuevo propósito de explorar regiones vecinas. La comprobación reforzada conserva el **primer destino tónico** y prohíbe convertir inadvertidamente C menor en C mayor o viceversa; para las opciones exploratorias permite grados relacionados (por ejemplo, Abmaj7, Fm7 o Eb en C menor). Se amplían controles negativos en ambas pruebas. El cambio se documenta explícitamente; no se silencian fallos.
