@@ -58,7 +58,7 @@ for(const mood of expected){
  assert.equal(ideas.length,3,mood);
  for(const proposal of ideas){
   assert.equal(proposal.expressiveProfile.neighborhoodId,E.emotionNeighborhood(mood).id);
-  assert.equal(proposal.expressiveProfile.id,mood,'Family must not override user's requested nuance');
+  assert.equal(proposal.expressiveProfile.id,mood,'Family must not override the requested nuance');
  }
 }
 assert.ok(data.sources.some(x=>x.id==="eerola_vuoskoski_2011_perceived"));
