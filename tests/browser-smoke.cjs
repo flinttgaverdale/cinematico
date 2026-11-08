@@ -83,6 +83,10 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       const giacchinoContrast=await page.locator('.composer-path-contrast').innerText();
       assert.ok(giacchinoContrast.includes('misma secuencia de fundamentales'),'Giacchino paths share chord roots');
       assert.ok(giacchinoContrast.includes('extensiones de color'),'Giacchino difference is extension color');
+      await page.locator('#composerEqualChordDuration').check();
+      assert.ok((await page.locator('.composer-audio-actions').first().innerText()).includes('10 s'),'Five chords take ten seconds at a fixed two-second harmonic pulse');
+      await page.locator('#composerEqualChordDuration').uncheck();
+      assert.ok((await page.locator('.composer-audio-actions').first().innerText()).includes('8 s'),'Default A/B returns to matched phrase duration');
       await page.locator('#composer').selectOption('horner');
 
       assert.equal(await page.locator('#userChords').inputValue(),'',"Reference exercises must not overwrite the user progression");
