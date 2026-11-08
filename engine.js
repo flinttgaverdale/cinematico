@@ -455,7 +455,7 @@ function parseUserProgression(input){const tokens=String(input||"").trim().split
 function cadenceEvidence(chords,tonic,mode){
  const events=[];if(!Array.isArray(chords)||!chords.length)return events;
  const minor=mode==="menor natural",t=mod(tonic),v=mod(t+7),ii=mod(t+2),iv=mod(t+5);
- const tonicQuality=minor?["m","m7"]:["","maj7","add9"];
+ const tonicQuality=minor?["m","m7","madd9"]:["","maj7","add9"];
  const isTonic=c=>mod(c.root)===t&&tonicQuality.includes(c.type);
  const isDominant=c=>mod(c.root)===v&&(c.type===""||c.type==="7");
  const isPredominant=c=>(mod(c.root)===ii&&(minor?["dim","m7b5","m"].includes(c.type):["m","m7"].includes(c.type)))||(mod(c.root)===iv&&(minor?["m","m7"].includes(c.type):["","maj7"].includes(c.type)));
@@ -463,14 +463,17 @@ function cadenceEvidence(chords,tonic,mode){
  for(let i=1;i<chords.length;i++){
   const prev=chords[i-1],cur=chords[i],prevRoot=mod(prev.root),curRoot=mod(cur.root);
   if(isDominant(prev)&&isTonic(cur)){
-   events.push({kind:"V–I/i",index:i,weight:2.5,description:"Dominante hacia tónica; llegada armónica, no cadencia formal confirmada"});
+   const rootPositions=mod(prev.bass??prev.root)===v&&mod(cur.bass??cur.root)===t;
+    events.push({kind:"V–I/i",index:i,weight:rootPositions?2.5:1.5,description:"Dominante hacia tónica; "+(rootPositions?"bajos en posición fundamental":"al menos una inversión")+"; llegada armónica, no cadencia formal confirmada"});
    if(i>=2&&isPredominant(chords[i-2]))events.push({kind:"predominante–V–I/i",index:i,weight:2.3,description:"Preparación predominante, dominante y llegada"});
   }
   if(prevRoot===iv&&isTonic(cur)&&isPredominant(prev))events.push({kind:"IV–I / iv–i",index:i,weight:.8,description:"Movimiento plagal posible"});
   if(isDominant(prev)&&curRoot===mod(t+(minor?8:9))&&((minor&&cur.type==="")||(!minor&&cur.type==="m")))
    events.push({kind:minor?"V–VI":"V–vi",index:i,weight:.7,description:"Resolución interrumpida posible"});
   // Applied V7: a major dominant seventh resolves down a fifth to a diatonic chord other than the tonic.
-  if(prev.type==="7"&&curRoot===mod(prevRoot+5)&&diatonic.has(curRoot)&&curRoot!==t&&prevRoot!==v)
+  if(prev.type==="7"&&curRoot===mod(prevRoot+5)&&diatonic.has(curRoot)&&curRoot!==t&&prevRoot!==v
+    &&["","m","maj7","m7","add9","madd9"].includes(cur.type)
+    &&cur.notes.filter(pc=>diatonic.has(mod(pc))).length>=3)
    events.push({kind:"V7/"+spell(curRoot),index:i,weight:.65,description:"Dominante secundaria con resolución local; posible tonicización"});
  }
  // Ending on a dominant is a harmonic half-cadence clue, not proof of a phrase ending.
@@ -481,16 +484,19 @@ function cadenceEvidence(chords,tonic,mode){
 // Evidence for chromatic dominant practice in minor. This describes harmonic
 // vocabulary, not a claim that a complete passage uses one fixed minor scale.
 function minorDominantEvidence(chords,tonic){
- if(!Array.isArray(chords))return {raisedLeadingTone:false,dominantMajor:false,indices:[],description:""};
- const t=mod(tonic),leading=mod(t+11),dominantRoot=mod(t+7),indices=[];
+ const empty=description=>({raisedLeadingTone:false,dominantMajor:false,indices:[],minorContext:false,description});
+ if(!Array.isArray(chords)||!chords.length)return empty("No hay acordes para evaluar una dominante en menor.");
+ const t=mod(tonic),leading=mod(t+11),dominantRoot=mod(t+7);
+ // A major V7 implies a raised leading tone in minor only if the minor tonic is evidenced.
+ const minorContext=chords.some(ch=>ch&&mod(ch.root)===t&&["m","m7","madd9"].includes(ch.type));
+ if(!minorContext)return empty("No hay tónica menor que justifique atribuir a este centro una sensible elevada.");
+ const indices=[];
  for(let i=0;i<chords.length;i++){
-  const ch=chords[i];
-  if(!ch||!Array.isArray(ch.notes))continue;
-  const isMajorDominant=mod(ch.root)===dominantRoot&&(ch.type===""||ch.type==="7");
-  if(isMajorDominant&&ch.notes.some(n=>mod(n)===leading))indices.push(i);
+  const ch=chords[i];if(!ch||!Array.isArray(ch.notes))continue;
+  if(mod(ch.root)===dominantRoot&&["","7"].includes(ch.type)&&ch.notes.some(n=>mod(n)===leading))indices.push(i);
  }
- return {raisedLeadingTone:indices.length>0,dominantMajor:indices.length>0,indices,
-  description:indices.length?"Dominante mayor con sensible elevada: práctica tonal del modo menor; no implica que toda la progresión pertenezca a la escala menor natural.":"No se identifica una dominante mayor con sensible elevada en los acordes proporcionados."};
+ return {raisedLeadingTone:indices.length>0,dominantMajor:indices.length>0,minorContext:true,indices,
+  description:indices.length?"Se observan tónica menor y dominante mayor con sensible elevada; es práctica tonal menor, no prueba de una escala fija.":"Hay tónica menor, pero no se observa su dominante mayor con sensible elevada."};
 }
 // Conservative tonal hypotheses: compatibility is not proof of a tonic.
 function tonalHypotheses(chords){
@@ -499,15 +505,17 @@ function tonalHypotheses(chords){
  const candidates=[];
  for(let tonic=0;tonic<12;tonic++)for(const pattern of patterns){
   const scaleSet=new Set(pattern.steps.map(x=>mod(x+tonic)));
+  const minorContext=pattern.mode==="menor natural"&&chords.some(ch=>mod(ch.root)===tonic&&["m","m7","madd9"].includes(ch.type));
   let coverage=0,roots=0,tonicRoots=0,totalWeight=0;
   for(let i=0;i<chords.length;i++){
    const chord=chords[i],weight=i===chords.length-1?1.15:1;totalWeight+=weight;
-   coverage+=weight*(chord.notes.filter(pc=>scaleSet.has(mod(pc))).length/chord.notes.length);
+   const majorV=minorContext&&mod(chord.root)===mod(tonic+7)&&["","7"].includes(chord.type);
+   coverage+=weight*(chord.notes.filter(pc=>scaleSet.has(mod(pc))||(majorV&&mod(pc)===mod(tonic+11))).length/chord.notes.length);
    if(scaleSet.has(mod(chord.root)))roots+=weight;
    if(mod(chord.root)===tonic)tonicRoots+=i===chords.length-1?1.3:1;
   }
   const cadences=cadenceEvidence(chords,tonic,pattern.mode);const cadenceScore=cadences.reduce((sum,x)=>sum+x.weight,0);const score=coverage/totalWeight*7+roots/totalWeight+tonicRoots/totalWeight*.8+cadenceScore;
-  candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences,minorDominant:pattern.mode==="menor natural"?minorDominantEvidence(chords,tonic):null});
+  candidates.push({tonic,mode:pattern.mode,label:spell(tonic)+" "+pattern.mode,displayLabel:spell(tonic)+" "+(pattern.mode==="menor natural"?"menor":"mayor"),score:Math.round(score*100)/100,coverage:Math.round(coverage/totalWeight*100),cadences,minorDominant:pattern.mode==="menor natural"?minorDominantEvidence(chords,tonic):null});
  }
  candidates.sort((a,b)=>b.score-a.score||a.tonic-b.tonic);
  const best=candidates[0],second=candidates[1],close=candidates.filter(x=>best.score-x.score<0.6);
