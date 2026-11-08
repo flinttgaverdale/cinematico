@@ -43,7 +43,7 @@ assert.deepEqual(groupTags.map(x=>x[1]),groups);
 const found=[];
 for(let i=0;i<groupTags.length;i++){
  const ids=[...groupTags[i][2].matchAll(/<option value="([^"]+)"(?: selected)?>([^<]+)<\/option>/g)].map(x=>x[1]);
- assert.deepEqual(ids.slice().sort(),Object.values(E.EXPRESSION_NEIGHBORHOODS)[i].members.slice().sort(),'UI must reflect internal taxonomy');
+ assert.deepEqual(ids.slice().sort(),[...Object.values(E.EXPRESSION_NEIGHBORHOODS)[i].members].sort(),'UI must reflect internal taxonomy');
  found.push(...ids);
 }
 assert.deepEqual(found.slice().sort(),expected.slice().sort(),'Every optional nuance appears exactly once');
