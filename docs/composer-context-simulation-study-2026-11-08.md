@@ -72,6 +72,27 @@ Se compararon las dos rutas de un mismo compositor: en cuántos de los diez brie
 
 **Invariancia.** Los indicadores se mantienen al transponer el mismo recorrido a 12 tónicas, pero esa propiedad no asegura que cada transposición tenga la misma comodidad instrumental o realización de voces.
 
+## Segunda capa: simulación de disposición a cuatro voces
+
+La auditoría no se ha limitado a contar acordes. También se ejecutó el realizador contrapuntístico existente sobre las **22 rutas originales en Do**, con el estilo `cinematic`, y se verificó la conservación de las notas expresivas en **48 casos de acordes extendidos** (4 tipos × 12 fundamentales).
+
+- **22/22 rutas** admitieron una realización orientativa a cuatro voces dentro de los rangos que utiliza el motor; no hubo saltos individuales mayores de una octava en las soluciones elegidas.
+- **17 incidencias de quintas/octavas paralelas**, distribuidas entre **12 rutas**, permanecen en esas realizaciones cinematográficas. No son por definición «errores» en toda escritura para cine, pero una conducción clásica estricta debería revisarlas.
+- Se detectó y reparó una **pérdida material del color de acordes**: el motor, al reducir un acorde de cinco clases de altura a cuatro voces, priorizaba en ocasiones la quinta justa y **omitía la ♯11 o la novena**. Ahora para `maj7#11`, `maj9`, `9` y `m9` se preservan fundamental, tercera, séptima y extensión característica; la quinta queda como nota prescindible. Se comprobó la presencia de las cuatro clases en todos los voicings generados en las doce fundamentales.
+- En `Cadd9 → Fmaj7`, el realizador penalizaba de manera injustificada una **supuesta sensible de dominante secundaria**. Se retiró esa suposición: sin contexto tonal demostrado, un I(add9)–IVmaj7 no exige el comportamiento de V7/IV. La validación de sensibles permanece para **dominantes séptima explícitas** como G7–C.
+- **Límite abierto:** en una propuesta de Giacchino que termina `G7 → Cmaj7`, el realizador conserva una sensible sin resolver al seleccionar cuatro notas completas del acorde final. Si se quiere una escritura más estricta habrá que permitir, en ciertos casos, **omitir la quinta del acorde final y duplicar otra nota**, sin dar por hecho que toda música de cine debe obedecer reglas de coral clásico. Este punto no queda resuelto en esta fase y no debe ocultarse.
+
+**Alcance:** son resultados del **algoritmo de realización**, no una orquestación real ni una escucha. Ni los rangos de cuatro voces genéricas ni los costes de movimiento representan automáticamente el fraseo de una sección de cuerdas. La puntuación interna del optimizador **no es una calificación estética de los compositores**.
+
+### Mejora de presentación justificada por los empates
+
+Sin incorporar una pantalla pedagógica adicional, el panel de Lenguaje de referencia ya distingue dos problemas que la simulación expuso:
+
+- **Giacchino:** detecta que ambas rutas comparten exactamente las mismas fundamentales y explicita cuántos acordes de color/extensión lleva cada una, en vez de fingir rutas armónicas radicalmente distintas.
+- **Horner:** cuando ambas rutas usan las mismas operaciones en otro orden, la comparación presenta **P–L–R frente a R–L–P**; el número de requisitos cumplidos podía ser idéntico aunque el itinerario no lo fuese.
+
+Las otras comparaciones siguen siendo descriptivas. Si no hay diferencia sustentada en los acordes, se propone contrastar ritmo, registro o textura fuera del cifrado, sin atribuir esos datos a la entrada del usuario.
+
 ## Tres cambios justificables antes de añadir nuevos acordes
 
 1. **Mostrar contrastes que los criterios actuales ocultan.** Si las dos rutas usan las mismas fundamentales y solo cambian extensiones, decirlo (caso Giacchino). Si mantienen dos notas con series distintas de transformaciones, nombrar el orden (caso Horner). No crear acordes nuevos artificialmente para forzar divergencia.
