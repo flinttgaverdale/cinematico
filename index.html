@@ -139,6 +139,20 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 .composer-proof summary{font-size:11px;color:var(--sage);font-weight:700;cursor:pointer}
 .composer-proof p{font-size:11px;line-height:1.65;color:var(--muted);margin:9px 0}
 .composer-proof a{font-size:11px;color:var(--gold);text-underline-offset:3px}
+
+/* Musically grounded contrast, with optional details instead of theory-heavy main cards. */
+.composer-path-arrow.composer-path-operator{font:800 11px Manrope;color:var(--bg);background:var(--gold);border-radius:4px;padding:4px 6px;min-width:23px;text-align:center}
+.composer-path-facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.composer-path-facts span{font-size:10px;line-height:1.45;padding:5px 7px;border:1px solid #8d9d7b35;color:var(--sage);background:#20291f}
+.composer-path-analysis{margin-top:13px;border-top:1px solid #ffffff1e;padding-top:11px}
+.composer-path-analysis summary{font-size:11px;color:var(--gold);font-weight:700;cursor:pointer}
+.composer-path-analysis ol{list-style-position:outside;padding-left:22px;margin:12px 0 0}
+.composer-path-analysis li{font-size:11px;line-height:1.5;color:var(--txt);padding:0 0 10px}
+.composer-path-analysis li strong{display:block;margin-bottom:4px}
+.composer-path-analysis li span{display:block;color:var(--muted)}
+.composer-path-analysis .composer-scope{color:var(--quiet);font-size:10px}
+.composer-path-contrast{font-size:11px;line-height:1.65;color:var(--muted);border-left:2px solid #d6a86b77;padding:7px 12px;margin:12px 0}
+.composer-path-contrast strong{color:var(--txt)}
 </style><style>
 .vl-controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:14px 0}.vl-controls label{font-size:12px;color:var(--muted,#a7a89b)}.vl-controls select{max-width:190px;background:#202820;color:#e9e7db;border:1px solid #505848;border-radius:9px;padding:9px}
 .voiceleading{overflow-x:auto;padding:10px 0}.vl-chart{display:block;min-width:520px;width:100%;height:auto}.vl-legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0;font-size:12px;color:var(--muted,#b4b4aa)}.vl-legend span:before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--voice-color);margin-right:6px}.vl-summary{font-size:12px;line-height:1.6;color:#d0d0c4}.vl-warning{font-size:12px;color:#b8b7a8}
@@ -506,14 +520,43 @@ function renderComposerExplorations(){
  if(!target)return;
  const study=CinematicoEngine.composerCreativePaths(S.composer,S.key,S.keyName);
  if(!study){target.innerHTML="";return;}
- const chordRoute=route=>route.chords.map((ch,i)=>(i?'<span class="composer-path-arrow" aria-hidden="true">→</span>':'')+
-  '<span class="composer-path-chord" title="'+esc(ch.roman)+'">'+esc(ch.label)+'</span>').join("");
+ // Chord symbols are not actual voice leading. Display only pitch-class relationships.
+ const chordRoute=route=>route.chords.map((ch,i)=>{
+  const link=i?route.insights.transitions[i-1]:null;
+  const connector=link
+   ?'<span class="composer-path-arrow'+(link.operator?' composer-path-operator':'')+
+     '" aria-label="'+esc(link.operator?link.operator+" "+link.operatorName:"Siguiente acorde")+
+     '" title="'+esc(link.explanation)+'">'+esc(link.operator||"→")+'</span>'
+   :'';
+  return connector+'<span class="composer-path-chord" title="'+esc(ch.roman)+'">'+esc(ch.label)+'</span>';
+ }).join("");
+ const compactInsights=route=>{
+  const data=route.insights,links=data.transitions.length;
+  const retention=data.sharedLinkCount?
+   data.sharedLinkCount+' de '+links+' enlaces conservan al menos 2 notas':
+   'Sin enlaces que conserven 2 notas';
+  return '<div class="composer-path-facts"><span>'+esc(retention)+'</span><span>'+
+   (data.returnToCenter?'Regresa al centro inicial':'Final en otra fundamental')+'</span></div>';
+ };
+ const analysis=route=>'<details class="composer-path-analysis"><summary>Qué cambia entre los acordes</summary>'+
+  '<ol>'+route.insights.transitions.map(link=>
+   '<li><strong>'+esc(link.from+' → '+link.to)+'</strong><span>'+esc(link.explanation)+'</span></li>'
+  ).join("")+'</ol><p class="composer-scope">'+esc(route.insights.scope)+'</p></details>';
+ const pathA=study.paths[0].insights,pathB=study.paths[1].insights;
+ const contrast=pathA.returnToCenter!==pathB.returnToCenter
+  ?'Una ruta regresa al centro inicial y la otra termina en una fundamental distinta.'
+  :pathA.sharedLinkCount!==pathB.sharedLinkCount
+   ?'Las rutas conservan una cantidad distinta de enlaces con notas comunes. Esto no determina cuál funciona mejor.'
+   :pathA.chromaticCount!==pathB.chromaticCount
+    ?'Las rutas usan cantidades distintas de acordes con notas ajenas al modo de referencia.'
+    :'Las rutas comparten algunos rasgos armónicos; compara su color y decide dónde situar el contraste.';
  target.innerHTML='<div class="composer-ideas-heading"><strong>Dos caminos para explorar</strong><span>Ejercicios armónicos originales · referencia independiente</span></div>'+
   '<p class="composer-ideas-focus">'+esc(study.focus)+'</p>'+
   '<div class="composer-path-grid">'+study.paths.map((route,i)=>
    '<article class="composer-path-card"><div class="composer-path-number">0'+(i+1)+' · '+esc(route.name)+'</div>'+
    '<div class="composer-path-progression" aria-label="'+esc(route.chords.map(c=>c.label).join(" a "))+'">'+chordRoute(route)+'</div>'+
-   '<p>'+esc(route.intention)+'</p></article>').join("")+'</div>'+
+   '<p>'+esc(route.intention)+'</p>'+compactInsights(route)+analysis(route)+'</article>').join("")+'</div>'+
+  '<p class="composer-path-contrast"><strong>Para elegir:</strong> '+esc(contrast)+'</p>'+
   '<details class="composer-proof"><summary>Fundamento y límites de estas ideas</summary>'+
   '<p>'+esc(study.work)+' · evidencia documental '+esc(study.evidence)+'. '+esc(study.limit)+'</p>'+
   '<p>El perfil propone procedimientos compartidos con otros compositores. Ninguna ruta reproduce una partitura ni interpreta automáticamente tu progresión.</p>'+
@@ -582,5 +625,5 @@ out.querySelectorAll("[data-open-advanced]").forEach(b=>b.onclick=()=>{const cho
 $("workspaceExplore").onclick=()=>setWorkspace("explore");$("workspaceAdvanced").onclick=()=>{if(document.body.dataset.workspace==="explore")simpleOpenAdvanced();else setWorkspace("advanced");};// Restore the full studio on launch; the simplified workspace remains an explicit choice.
 setWorkspace("advanced")
 $("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("save").onclick=()=>{const source=document.body.dataset.workspace==="explore"?$("simpleChords").value.trim():$("userChords").value.trim();if(source){const checked=CinematicoEngine.parseUserProgression(source);if(checked.errors.length||!checked.chords.length){toast("Revisa tus acordes antes de guardar");return;}userMaterial=checked.chords;$("userChords").value=source;selectedUserChord=0;for(const k of Object.keys(labLocks))delete labLocks[k];renderUserMaterial();}else{userMaterial=null;$("userChords").value="";renderUserMaterial();}let a=readNotebook(),e=EMOTIONS[S.emotion],m=MODES[S.mode||e.mode];a.unshift({title:S.keyName+" · "+m.name,detail:e.name+" / "+COMPOSERS[S.composer].name,state:{key:S.key,keyName:S.keyName,emotion:S.emotion,composer:S.composer,mode:S.mode},voiceStyle:$("vlStyle").value,voiceSource:$("vlSource").value,progression:userMaterial?userMaterial.map(c=>c.label).join(" "):"",simpleMood:$("simpleMood").value});if(writeNotebook(a)){saved();toast("Idea guardada")}};
-$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();saved();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=30",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
+$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();saved();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=31",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
 </script></body></html>
