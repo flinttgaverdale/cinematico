@@ -51,4 +51,6 @@ jobs:
           python3 -m http.server 4173 --bind 127.0.0.1 >/tmp/cinematico-server.log 2>&1 &
           sleep 2
       - name: Test browser on desktop and mobile
-        run: node tests/browser-smoke.cjs
+        run: |
+          node tests/browser-smoke.cjs
+          node tests/pwa-offline-smoke.cjs
