@@ -1,0 +1,319 @@
+{
+  "metadata": {
+    "date": "2026-11-08",
+    "version": 1,
+    "status": "Unheard design probes. Not audience research or labeled training data.",
+    "purpose": "15 symbolic A/B test designs, one per existing creative intention; selected by theorizing, not by measured affect."
+  },
+  "controls": {
+    "render": "neutral_harmonic_preview",
+    "equalDuration": true,
+    "equalDynamics": true,
+    "equalRegister": true,
+    "randomizeAB": true,
+    "askPreferenceBeforeLabel": true,
+    "interpretationRoundTwo": true
+  },
+  "cases": [
+    {
+      "id": "misterio",
+      "family": "incertidumbre",
+      "source": "C G Am F",
+      "a": [
+        "Dm",
+        "G7",
+        "C"
+      ],
+      "b": [
+        "E",
+        "Ab",
+        "Ebm"
+      ],
+      "question": "¿Qué alternativa mantiene más incierto el centro de llegada?",
+      "gesture": "ambiguous_destination",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "melancolia",
+      "family": "sombra",
+      "source": "Am F C G",
+      "a": [
+        "Dm",
+        "G7",
+        "Cm"
+      ],
+      "b": [
+        "Fmaj7",
+        "G7",
+        "C"
+      ],
+      "question": "¿Qué camino deja una sensación musical más recogida sin confundirla con tristeza universal?",
+      "gesture": "incomplete_return",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "tension",
+      "family": "incertidumbre",
+      "source": "C F G",
+      "a": [
+        "Dm7",
+        "G7",
+        "C"
+      ],
+      "b": [
+        "D7",
+        "G7",
+        "Gsus4"
+      ],
+      "question": "¿Cuál acumula una expectativa más clara de resolución pendiente?",
+      "gesture": "delayed_arrival",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "esperanza",
+      "family": "luz",
+      "source": "Am F C G",
+      "a": [
+        "Dm",
+        "G7",
+        "Cadd9"
+      ],
+      "b": [
+        "Dm7",
+        "Fmaj7",
+        "Gsus4"
+      ],
+      "question": "¿Apertura con regreso o apertura sin cierre?",
+      "gesture": "opening",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "nostalgia",
+      "family": "cercania",
+      "source": "C G Am F",
+      "a": [
+        "F",
+        "Fm",
+        "C"
+      ],
+      "b": [
+        "Am7",
+        "Dm7",
+        "G7"
+      ],
+      "question": "¿Qué camino utiliza familiaridad y cambio de color, sin suponer recuerdos personales?",
+      "gesture": "modal_color",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "epica",
+      "family": "luz",
+      "source": "Am F C G",
+      "a": [
+        "F",
+        "Bb",
+        "C"
+      ],
+      "b": [
+        "Ab",
+        "Bb",
+        "C"
+      ],
+      "question": "¿Qué ampliación armónica inspira una idea con carácter más expansivo, antes de orquestar?",
+      "gesture": "expansion",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "tristeza",
+      "family": "sombra",
+      "source": "Am F C G",
+      "a": [
+        "Fm",
+        "G7",
+        "Cm"
+      ],
+      "b": [
+        "F",
+        "G7",
+        "C"
+      ],
+      "question": "¿Cómo cambia la escucha al terminar mayor o menor después de una preparación parecida?",
+      "gesture": "minor_ending",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "alegria",
+      "family": "luz",
+      "source": "C F G7",
+      "a": [
+        "Dm7",
+        "G7",
+        "C"
+      ],
+      "b": [
+        "Am7",
+        "G7",
+        "Csus4"
+      ],
+      "question": "¿Una llegada tonal afirmativa se diferencia de una llegada suspendida?",
+      "gesture": "arrival",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "ternura",
+      "family": "cercania",
+      "source": "C F G",
+      "a": [
+        "Am7",
+        "Fmaj7",
+        "Cadd9"
+      ],
+      "b": [
+        "D7",
+        "G7",
+        "C"
+      ],
+      "question": "¿Qué enlace invita a tocar más suavemente sin que el timbre esté fijado?",
+      "gesture": "close_links",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "asombro",
+      "family": "asombro",
+      "source": "C F G7",
+      "a": [
+        "Dm7",
+        "G7",
+        "C"
+      ],
+      "b": [
+        "Dm7",
+        "G7",
+        "Abmaj7"
+      ],
+      "question": "¿Qué produce un desvío después de una expectativa cadencial más reconocible?",
+      "gesture": "chromatic_cadential_shift",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "inquietud",
+      "family": "incertidumbre",
+      "source": "Am F C G",
+      "a": [
+        "Dm",
+        "G7",
+        "C"
+      ],
+      "b": [
+        "Bdim",
+        "Dbm",
+        "Gsus4"
+      ],
+      "question": "¿Cuál cambia de región sin establecer un destino único?",
+      "gesture": "unstable_region",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "suspense",
+      "family": "incertidumbre",
+      "source": "Am F C G",
+      "a": [
+        "Dm7",
+        "G7",
+        "C"
+      ],
+      "b": [
+        "Dm7",
+        "G7",
+        "Csus4"
+      ],
+      "question": "¿Se percibe una llegada aplazada frente a una posible llegada de tónica?",
+      "gesture": "suspension",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "oscuridad",
+      "family": "sombra",
+      "source": "Cm Ab Eb Bb",
+      "a": [
+        "Fm",
+        "Bb7",
+        "Eb"
+      ],
+      "b": [
+        "Abm",
+        "Db",
+        "Gbm"
+      ],
+      "question": "¿El desvío cromático se percibe más oscuro o solo más lejano?",
+      "gesture": "chromatic_shading",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "calma",
+      "family": "cercania",
+      "source": "C G Am F",
+      "a": [
+        "Am7",
+        "Fmaj7",
+        "Cadd9"
+      ],
+      "b": [
+        "D7",
+        "G7",
+        "Gsus4"
+      ],
+      "question": "¿Qué recorrido conserva mejor continuidad armónica con una interpretación idéntica?",
+      "gesture": "common_tones",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    },
+    {
+      "id": "contraste",
+      "family": "asombro",
+      "source": "Am F C G",
+      "a": [
+        "Dm7",
+        "G7",
+        "C"
+      ],
+      "b": [
+        "E",
+        "Ab",
+        "Eb"
+      ],
+      "question": "¿Es un contraste de región reconocible sin confundirlo con una emoción concreta?",
+      "gesture": "contrast",
+      "origin": "crafted_hypothesis",
+      "claimLevel": "C",
+      "listenRequired": true
+    }
+  ]
+}

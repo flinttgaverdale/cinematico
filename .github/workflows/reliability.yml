@@ -37,6 +37,7 @@ jobs:
           node tests/continuation-meaningful-diversity.cjs
           node tests/emotion-evidence-regression.cjs
           node tests/emotion-neighborhoods.cjs
+          node tests/expressive-listening-protocol.cjs
           node tests/musician-journey-regression.cjs
           node tests/static-audit.cjs
           node tests/pwa-assets.cjs
