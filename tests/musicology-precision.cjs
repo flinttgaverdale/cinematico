@@ -43,7 +43,7 @@ for(const [source,mood,target] of [
   assert.ok(E.prepareContinuationForAnalysis(base,idea.chords).ok);
   assert.equal(E.parseUserProgression(idea.chords.join(' ')).errors.length,0);
  }
- assert.equal(base.map(x=>x.label).join(' '),source,'Never mutate the composer's input');
+ assert.equal(base.map(x=>x.label).join(' '),source,"Never mutate the composer’s input");
 }
 assert.equal(center('C F G7','alegria')[0].chords.at(-1),'C');
 for(let shift=0;shift<12;shift++){
