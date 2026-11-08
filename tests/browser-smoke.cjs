@@ -21,6 +21,26 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       assert.ok(await page.locator('#keyCaption').isVisible(), 'Reference key must be visible');
       assert.ok(await page.locator('#composer').count(), 'Composer reference selector must exist');
       assert.ok(await page.locator('#userTonalReading').count(), 'Tonal analysis panel must exist');
+      // Deep composer-lens regression: independent reference, transposed and changing automatically.
+      assert.equal(await page.locator('.composer-path-card').count(),2);
+      for(const composer of ['williams','herrmann','zimmer','giacchino','elfman','silvestri','horner','shore','morricone','newman','goransson']){
+        await page.locator('#composer').selectOption(composer);
+        assert.equal(await page.locator('.composer-path-card').count(),2,composer);
+        assert.ok((await page.locator('#composerExplorations').innerText()).includes('Dos caminos para explorar'),composer);
+        assert.equal(await page.locator('#composerHere').inputValue(),composer);
+      }
+      await page.locator('#composer').selectOption('silvestri');
+      const originalRoute=await page.locator('.composer-path-card').first().innerText();
+      assert.ok(originalRoute.includes('Cmaj7#11'),originalRoute);
+      await page.locator('#quickKey').selectOption('G');
+      assert.ok((await page.locator('.composer-path-card').first().innerText()).includes('Gmaj7#11'));
+      assert.ok(!(await page.locator('.composer-path-card').first().innerText()).includes('Cmaj7#11'));
+      await page.locator('#quickKey').selectOption('C');
+      await page.locator('#composerHere').selectOption('horner');
+      assert.ok((await page.locator('.composer-path-card').first().innerText()).includes('Em'),'Horner transforms a C triad to Em');
+      assert.equal(await page.locator('#composer').inputValue(),'horner');
+      assert.equal(await page.locator('#userChords').inputValue(),'','Reference exercises must not overwrite the user's progressions');
+
       await page.locator('#workspaceExplore').click();
       await page.locator('#simpleChords').fill('Am F C G');
       await page.locator('#simpleMood').selectOption('misterio');
