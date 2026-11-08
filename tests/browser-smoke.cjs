@@ -39,7 +39,7 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       await page.locator('#composerHere').selectOption('horner');
       assert.ok((await page.locator('.composer-path-card').first().innerText()).includes('Em'),'Horner transforms a C triad to Em');
       assert.equal(await page.locator('#composer').inputValue(),'horner');
-      assert.equal(await page.locator('#userChords').inputValue(),'','Reference exercises must not overwrite the user's progressions');
+      assert.equal(await page.locator('#userChords').inputValue(),'',"Reference exercises must not overwrite the user progression");
 
       await page.locator('#workspaceExplore').click();
       await page.locator('#simpleChords').fill('Am F C G');
