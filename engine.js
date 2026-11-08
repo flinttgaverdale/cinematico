@@ -272,7 +272,7 @@ function neoTransform(root,quality,operation){
  }
  return {operation,source:{root:mod(root),quality,notes:source},target:{root:targetRoot,quality:targetQuality,notes:target},common,movement,description:{P:"Paralela: conserva fundamental y quinta; cambia la tercera.",L:"Leittonwechsel: conserva dos notas y desplaza la tercera voz un semitono.",R:"Relativa: conserva dos notas y desplaza la tercera voz un tono."}[operation]};
 }
-function tendencyResolution(a,b,fromChord,toChord){
+function tendencyResolution(a,b,fromChord,toChord,style="classical"){
  // Without a demonstrated tonal center a plain major chord moving down a fifth may be I–IV.
  // Require an explicit dominant seventh and fifth-related root movement before penalizing
  // unresolved tendency tones. No function is inferred from an added ninth or maj7 chord.
@@ -286,7 +286,14 @@ function tendencyResolution(a,b,fromChord,toChord){
  for(let i=1;i<4;i++){
   if(mod(a[i])===leading){
    const resolved=mod(b[i])===target&&b[i]-a[i]===1;
-   if(!resolved){penalty+=14;leadingTone++;details.push(["Tenor","Alto","Soprano"][i-1]+": sensible sin resolución ascendente");}
+   // In a tonic maj7, the former leading tone may deliberately persist as
+   // a common-tone color. Keep strict classical detection separately.
+   const tonicMajorSeventh=toChord.type==="maj7"&&toChord.notes.some(pc=>mod(pc)===leading);
+   const intentionallyHeld=tonicMajorSeventh&&b[i]===a[i];
+   if(!resolved&&!(style!=="classical"&&intentionallyHeld)){
+    penalty+=14;leadingTone++;
+    details.push(["Tenor","Alto","Soprano"][i-1]+": sensible sin resolución ascendente");
+   }
   }
   if(intervals.has(10)&&mod(a[i])===seventh){
    const resolved=b[i]-a[i]===-1||b[i]-a[i]===-2;
@@ -300,7 +307,7 @@ function harmonicResolutionDiagnostics(a,b,fromChord,toChord){
  if(!fromChord||!toChord||a.length!==b.length)return {observations,penalty:0};
  const root=mod(fromChord.root),target=mod(toChord.root);
  const intervals=new Set(fromChord.notes.map(p=>mod(p-root)));
- const dominantLike=mod(root+5)===target&&intervals.has(4)&&intervals.has(7);
+ const dominantLike=fromChord.type==="7"&&mod(root+5)===target&&intervals.has(4)&&intervals.has(7)&&intervals.has(10);
  let penalty=0;
  if(!dominantLike)return {observations,penalty};
  const leading=mod(target-1),seventh=mod(root+10);
@@ -356,7 +363,7 @@ function transitionCost(a,b,style,fromChord=null,toChord=null){
   const from=mod(a[j]-a[i]),to=mod(b[j]-b[i]);
   if(from===to&&(from===0||from===7)&&diffs[i]*diffs[j]>0)parallels++;
  }
- const tendency=tendencyResolution(a,b,fromChord,toChord);
+ const tendency=tendencyResolution(a,b,fromChord,toChord,style);
  const weights=style==="classical"?{motion:1,leap:2,parallel:12}:style==="minimal"||style==="sustained"?{motion:2,leap:1.5,parallel:1}:style==="contrary"?{motion:1,leap:1.3,parallel:5}:{motion:1,leap:.8,parallel:1.5};
  return {total:motion*weights.motion+leap*weights.leap+parallels*weights.parallel+tendency.penalty*(style==="minimal"||style==="sustained"?.2:style==="cinematic"?.6:1)+expressiveVoiceCost(a,b,style),motion,leap,parallels,diffs,tendency};
 }
@@ -940,6 +947,27 @@ function harmonicTrajectories(chords,start=0){
    why:choice.candidate.why,
    caveat:"Comparación de clases de altura sin melodía, ritmo, registro ni función tonal confirmada. Propuesta opcional: no modifica tu progresión."}];
  });
+}
+
+
+/* Neutral A/B listening plan, Web Audio playback done by UI only.
+   Same synthesized instrument, total time and per-voice envelope in both routes.
+   Different chord counts imply different chord rates; this is not a blinded test. */
+function composerListeningPlan(chords,options={}){
+ if(!Array.isArray(chords)||chords.length<2||chords.length>8)
+  return {status:"invalid",steps:[],warning:"Se necesitan entre 2 y 8 acordes para escuchar el ejemplo."};
+ const totalSeconds=8;
+ const choice=voiceLead(chords,"cinematic");
+ if(choice.voicings.length!==chords.length)
+  return {status:"unavailable",steps:[],warning:"No hay una disposición de cuatro voces para estos acordes."};
+ const stepSeconds=totalSeconds/chords.length;
+ return {status:"ready",steps:choice.voicings.map((pitches,i)=>({
+   chord:chords[i].label,startSeconds:i*stepSeconds,
+   durationSeconds:stepSeconds,pitches:pitches.slice(),
+   frequencies:pitches.map(note=>440*Math.pow(2,(note-69)/12))
+  })),
+  totalSeconds,voicingStyle:"cinematic",fixedInstrumentation:true,
+  warning:"Maqueta de cuatro voces sintetizadas: mismo sonido, volumen por voz y duración total. La cantidad de acordes cambia el ritmo armónico; no se han simulado instrumentos, melodías ni dinámica real."};
 }
 
 /* Evidence-informed composer exploration: non-destructive, original harmonic experiments. */
@@ -2101,5 +2129,5 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
