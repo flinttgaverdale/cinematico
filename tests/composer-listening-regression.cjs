@@ -50,7 +50,7 @@ assert.ok(E.tendencyResolution(a,b,plain[0],plain[1],"cinematic").penalty>0,"Onl
 const ordinary=p("Cadd9 Fmaj7");
 const dummyA=[48,52,60],dummyB=[53,57,65];
 assert.equal(E.harmonicResolutionDiagnostics(dummyA,dummyB,ordinary[0],ordinary[1]).penalty,0);
-const fromG7=[43,53,59],toC=[48,52,60];
+const fromG7=[43,53,59],toC=[48,55,60]; // F→G instead of required F→E
 assert.ok(E.harmonicResolutionDiagnostics(fromG7,toC,plain[0],plain[1]).penalty>0);
 // The global site remains a non-destructive harmony assistant, with optional audio audition but no MIDI analysis.
 const html=fs.readFileSync(path.join(__dirname,"../index.html"),"utf8");
