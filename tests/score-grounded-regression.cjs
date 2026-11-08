@@ -17,7 +17,7 @@ for(const source of corpus.profiles){
 const parser=s=>{const parsed=E.parseUserProgression(s);assert.equal(parsed.errors.length,0,s);return parsed.chords;};
 const score=corpus.validationFixtures[0];
 const chords=parser(score.input);
-assert.deepEqual(chords.map(c=>c.type),score.expectChordTypes);
+assert.deepEqual(Array.from(chords,c=>c.type),score.expectChordTypes);
 assert.equal(chords[3].label,"G(sus4)");
 assert.equal(chords[5].label,"C(sus4)");
 assert.equal(chords[1].bassKind,"independent");
