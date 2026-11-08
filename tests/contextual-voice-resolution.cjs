@@ -67,6 +67,6 @@ assert.ok(four.expressiveNotes.some(n=>n.text.includes("séptima mayor")));
 const h=fs.readFileSync(path.join(__dirname,"../index.html"),"utf8");
 assert.ok(h.includes("id=\"vlStyleNote\""));
 assert.ok(h.includes("Criterio cinematográfico:"));
-assert.ok(h.includes("sensible mantenida como séptima mayor"));
+assert.ok(fs.readFileSync(path.join(__dirname,"../engine.js"),"utf8").includes("sensible mantenida como séptima mayor"));
 assert.ok(h.includes("result.expressiveNotes.length"));
 console.log("PASS contextual voice resolution: 22 original routes, retained jazz/cinematic tonic maj7, strict warnings, 3/4 voices, source protected.");
