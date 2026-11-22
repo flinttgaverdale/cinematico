@@ -52,5 +52,5 @@ for(const s of inputs)for(const mood of moods){
 ctx.chords('H');const old=generated.length;ctx.dictionary('live');
 assert.equal(generated.length,old+1);
 assert.equal(generated.at(-1).notes.length,0,'Invalid chords must not touch a clip');
-assert.ok(status.some(x=>String(x).includes('Sin cambios')));
+assert.ok(status.some(x=>String(x).includes('Corrige los acordes')),'Invalid inputs should produce an understandable status');
 console.log('PASS Live generator: '+count+' source/mood/route plans, correct 3-bar MIDI, input guarding, engine parity, patch structure');
