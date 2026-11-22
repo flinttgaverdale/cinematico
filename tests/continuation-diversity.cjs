@@ -24,6 +24,17 @@ for(const source of ['C F G7','Cm Abmaj7 Fm7 G7','Am F C G']){
   assert.equal(JSON.stringify(original),snapshot,'The composer source must never be rewritten');
  }
 }
+for(let root=0;root<12;root++){
+ const tonic=E.spell(root),dominant=E.spell((root+7)%12);
+ for(const suffix of ['m6','m9','mMaj7']){
+  for(const source of [tonic+suffix,tonic+suffix+' '+dominant+'7']){
+   const arrival=E.emotionalContinuations(parse(source),'calma')[0].chords.at(-1);
+   const chord=parse(arrival)[0];
+   assert.equal(chord.root,root,source+' tonic');
+   assert.equal(chord.type,'madd9',source+' minor arrival');
+  }
+ }
+}
 const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
 assert.ok(html.includes('q.variantDescription'),'Simplified writing mode exposes differences');
 console.log('PASS continuation diversity: 45 creative contexts, structural distinction and non-destructive operation');
