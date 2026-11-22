@@ -1,13 +1,17 @@
-# CINEMÁTICO LIVE · Beta 0.1 (Windows / Ableton Live 12 Suite)
+# CINEMÁTICO LIVE · Fuente histórica beta 0.1
 
 **Estado real:** código preparado y verificado en pruebas automáticas. El host Ableton/Max NO se puede ejecutar en nuestro entorno; el resultado es un **proyecto fuente de MIDI Tool Generator**, no un `.amxd` precompilado, probado o firmado. Para instalarlo definitivamente hay que guardarlo como `.amxd` desde la plantilla oficial de Live.
 
-## Qué funciona en el prototipo
+El ZIP de la beta 0.1 se conserva como paquete fuente histórico. Su generador
+distribuye los acordes a un pulso de distancia. Para evaluar el dispositivo
+actual, sigue la [guía de instalación directa](INSTALACION-DIRECTA.md).
+
+## Comportamiento previsto del prototipo
 - Introducir una progresión de 1 a 8 acordes en cifrado (ejemplo: `Am F C G`).
 - Elegir una de las 15 intenciones armónicas de Cinemático.
 - Elegir camino 1, 2 o 3. Se usa el MISMO motor `emotionalContinuations` de la aplicación web.
 - Ver los cifrados de la propuesta seleccionada.
-- Al pulsar **Apply** desde la sección Generar del editor MIDI de Live, añadir tres acordes en tres compases (sin sobreescribir las notas anteriores).
+- Al pulsar **Apply** desde la sección Generar del editor MIDI de Live, proponer tres acordes consecutivos a un pulso de distancia en el ZIP histórico. El efecto en un clip poblado requiere una prueba en el host.
 - MIDI con 3–4 notas por acorde, ritmo fijo, voicing provisional; no intenta crear una composición ni controlar expresividad/orquestación.
 
 ## Pasos para obtener y guardar la herramienta `.amxd`
