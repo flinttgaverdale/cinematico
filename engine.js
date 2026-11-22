@@ -1006,13 +1006,13 @@ function emotionalContinuations(chords,emotion){
   const gap=leading&&tonal.candidates[1]?leading.score-tonal.candidates[1].score:0;
   const dominantGoal=mod(root+5);
   // Prefer a root already stated earlier when the final V7 targets it.
-  const tonicInHistory=last.type==="7"?chords.slice(0,-1).find(c=>mod(c.root)===dominantGoal&&["","m","maj7","m7","add9","madd9"].includes(c.type)):null;
+  const tonicInHistory=last.type==="7"?chords.slice(0,-1).find(c=>mod(c.root)===dominantGoal&&(["","maj7","add9"].includes(c.type)||MINOR_TONIC_TYPES.includes(c.type))):null;
   const tentativeCadentialCenter=chords.length>=3&&leading&&leading.coverage>=96&&
    (leading.cadences||[]).length>0&&gap>=0.25;
   const reliableCenter=chords.length>=3&&
    ((tonal.status==="suggestive"&&gap>=0.65)||tentativeCadentialCenter);
   const tonic=tonicInHistory?dominantGoal:(reliableCenter?leading.tonic:root);
-  const minor=tonicInHistory?["m","m7","madd9"].includes(tonicInHistory.type):(reliableCenter?leading.mode==="menor natural":["m","m7","madd9"].includes(last.type));
+  const minor=tonicInHistory?MINOR_TONIC_TYPES.includes(tonicInHistory.type):(reliableCenter?leading.mode==="menor natural":MINOR_TONIC_TYPES.includes(last.type));
   const anchorBasis=tonicInHistory?"dominante dirigida a una tónica anterior":tentativeCadentialCenter&&tonal.status==="ambiguous"?"hipótesis tonal preferente, con alternativas posibles":reliableCenter?"principal hipótesis tonal":"último acorde (sin centro confirmado)";
  const make=(offset,kind="M")=>{
   const r=mod(tonic+offset);
