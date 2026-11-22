@@ -1,6 +1,8 @@
 # Cinemático Generator — instalación directa en Ableton Live 12 Suite
 Versión beta 0.2 — **archivo único** `Cinematico-Generator-Beta.amxd`.
 
+Consulta la [matriz de aceptación en Ableton Live](ACEPTACION.md) antes de distribuir una nueva beta.
+
 ## Cómo instalar
 1. Descarga `Cinematico-Generator-Beta.amxd` desde https://flinttgaverdale.github.io/cinematico/downloads/Cinematico-Generator-Beta.amxd
 2. Abre Ableton Live 12 Suite y crea una pista MIDI con instrumento y un clip vacío de **3 compases en 4/4**.
@@ -14,5 +16,3 @@ Versión beta 0.2 — **archivo único** `Cinematico-Generator-Beta.amxd`.
 **Validación:** formato de archivo, dependencias empaquetadas, lógica de 270 casos y geometría de controles probados por código. La carga final en Live/Max y el comportamiento de la interfaz **no están probados en un Windows real**, por lo que es una beta y debes usar un proyecto de prueba. Si al abrirlo sale error, envíame el texto exacto de la consola de Max, no tomaremos el archivo por estable hasta pasar esa prueba.
 
 Requisitos: Live 12 Suite / Max for Live 8.6 o posterior.
-
-Consulta la [matriz de aceptación en Ableton Live](ACEPTACION.md) antes de distribuir una nueva beta.
