@@ -12,6 +12,8 @@ var VALID=new Set(Object.keys(Engine.EMOTION_CREATIVE_PROFILES));
 function labelStatus(text){outlet(1,"set",String(text).slice(0,180));}
 function normalized(){return Engine.parseUserProgression(source);}
 function getProposals(){
+  if(!VALID.has(intent))return {ok:false,error:"Matiz no reconocido: "+intent,paths:[]};
+  if(!Number.isInteger(choice)||choice<1||choice>3)return {ok:false,error:"Elige camino 1, 2 o 3.",paths:[]};
   var parsed=normalized();
   if(parsed.errors.length)return {ok:false,error:parsed.errors.join("; "),paths:[]};
   if(!parsed.chords.length)return {ok:false,error:"Escribe al menos un acorde.",paths:[]};
@@ -25,19 +27,16 @@ function chords(){
 }
 function text(){chords.apply(null,arguments);}
 function mood(id){
-  var value=String(id).trim().toLowerCase();
-  if(!VALID.has(value)){labelStatus("Matiz no reconocido: "+value);return;}
-  intent=value;
+  intent=String(id).trim().toLowerCase();
   preview();
 }
 function variant(n){
-  var v=Number(n);
-  if(!Number.isInteger(v)||v<1||v>3){labelStatus("Elige camino 1, 2 o 3.");return;}
-  choice=v;preview();
+  choice=Number(n);
+  preview();
 }
 function preview(){
   var out=getProposals();
-  if(!out.ok){labelStatus("Revisa tus acordes: "+out.error);return;}
+  if(!out.ok){labelStatus("Revisa la entrada: "+out.error);return;}
   labelStatus("CAMINO "+choice+" / "+intent+": "+out.paths[choice-1].chords.join(" - "));
 }
 function chordVoicing(label){
@@ -71,7 +70,7 @@ function applyToClip(){
     labelStatus("CAMINO "+choice+": "+result.selected.join(" · "));
   }catch(err){
     outlet_dictionary(0,{notes:[]}); // No notes on invalid input.
-    labelStatus("Corrige los acordes: "+String(err.message||err).slice(0,90));
+    labelStatus("Corrige los acordes o los controles: "+String(err.message||err).slice(0,90));
   }
 }
 function msg_dictionary(payload){applyToClip();}
