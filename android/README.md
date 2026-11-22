@@ -15,7 +15,25 @@ Esta aplicación **NO necesita Chrome como navegador**. Lleva una copia de `inde
 
 ## Cómo se genera
 
-El workflow `.github/workflows/android-apk.yml` copia los archivos web actuales dentro de `android/app/src/main/assets`, elimina referencias remotas a Google Fonts, compila con Android Gradle Plugin 8.7.3 / Gradle 8.9 y publica el APK como un activo de una versión de prueba. Se mantiene **el mismo motor armónico** de la web.
+El workflow `.github/workflows/android-apk.yml` comprueba el APK de
+depuración en las PR que afectan a Android o a la web empaquetada. La ejecución
+manual desde `main` genera un candidato firmado para revisión, con el commit,
+el certificado esperado y el checksum. Utiliza el número de ejecución más uno
+como `versionCode` para superar el 1 de la beta anterior.
+
+Configura el entorno de GitHub Actions `android-beta-release` con revisión
+obligatoria. Guarda `ANDROID_KEYSTORE_BASE64`, `ANDROID_STORE_PASSWORD` y
+`ANDROID_KEY_PASSWORD` como secretos del entorno. Configura `ANDROID_KEY_ALIAS`
+y `ANDROID_CERT_SHA256` como variables del entorno. Reutiliza la misma clave de
+distribución y verifica el certificado en cada ejecución.
+
+Antes de publicar, verifica `SHA256SUMS` y prueba en un teléfono la instalación,
+el audio offline y la actualización desde un candidato anterior firmado con el
+mismo certificado. La beta antigua de depuración puede requerir una
+reinstalación si su certificado difiere. Publica el artefacto aprobado con los
+metadatos y checksum en una versión nueva asociada al commit indicado en
+`build-info.json`. Usa un tag distinto por versión y conserva los activos
+previos.
 
 Para compilar localmente en Android Studio: abre la carpeta `android/` como proyecto, usa JDK 17, instala Android SDK 35 y ejecuta `assembleDebug`. Copia previamente desde la raíz `index.html`, `engine.js`, `manifest.json`, `icon-192.png`, `icon-512.png` a `android/app/src/main/assets`, como hace el workflow.
 
