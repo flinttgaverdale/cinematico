@@ -46,7 +46,7 @@ jobs:
           node tests/live-package-regression.cjs
       - name: Install browser runner
         run: |
-          npm install --no-save playwright
+          npm install --no-save playwright@1.65.1
           npx playwright install --with-deps chromium
       - name: Start local app server
         run: |
