@@ -20,6 +20,12 @@ outlet:(i,...args)=>{status.push([i,...args]);},inlets:0,outlets:0};
 vm.runInNewContext(source,ctx,{filename:'cinematico-generator.js'});
 assert.equal(ctx.inlets,1);assert.equal(ctx.outlets,2);
 assert.equal(typeof ctx.dictionary,'function');
+assert.equal(typeof ctx.msg_dictionary,'function');
+assert.equal(patch.patcher.project.amxdtype,1851877223,'Must be a MIDI Note Generator (nagg)');
+assert.equal(patch.patcher.devicewidth,350,'The device must fit the Live clip-tool sidebar');
+for(const box of patch.patcher.boxes.map(x=>x.box).filter(x=>x.presentation)){
+ assert.ok(box.presentation_rect[0]+box.presentation_rect[2]<=350,'Clipped control '+box.id);
+}
 const E=ctx.require('cinematico-core.js');
 const inputs=['Am F C G','Cm Ab Eb Bb','C F G7','Am F Dm','C G Am F','C'];
 const moods=Object.keys(E.EMOTION_CREATIVE_PROFILES);
@@ -29,7 +35,7 @@ for(const s of inputs)for(const mood of moods){
  const options=E.emotionalContinuations(E.parseUserProgression(s).chords,mood);
  for(let variant=1;variant<=3;variant++){
   ctx.variant(variant);
-  const from=generated.length;ctx.dictionary('from-live');
+  const from=generated.length;ctx.msg_dictionary({notes:[],clip:{}});
   assert.equal(generated.length,from+1);
   const notes=generated.at(-1).notes;
   const expected=options[variant-1].chords.flatMap((x,i)=>{
@@ -37,8 +43,8 @@ for(const s of inputs)for(const mood of moods){
    return pcs.length;
   });
   assert.ok(notes.length>=9&&notes.length<=12,'At least triads, at most seventh chords');
-  assert.ok(new Set(notes.map(x=>x.start_time)).size===3);
-  assert.ok(notes.every(x=>Number.isInteger(x.pitch)&&x.pitch>=48&&x.pitch<=79&&x.duration===0.95&&x.velocity===90));
+  assert.deepEqual([...new Set(notes.map(x=>x.start_time))].sort((a,b)=>a-b),[0,4,8]);
+  assert.ok(notes.every(x=>Number.isInteger(x.pitch)&&x.pitch>=48&&x.pitch<=79&&x.duration===3.75&&x.velocity===90));
   assert.ok(notes.every(x=>x.probability===1));
   count++;
  }

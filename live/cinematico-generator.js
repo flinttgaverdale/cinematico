@@ -1,7 +1,7 @@
-/* Cinemático Live Generator · Max for Live 12 · beta 0.1
-   Keep these files together: cinematico-generator.js, cinematico-core.js.
-   Installed in a MIDI GENERATOR template, not a MIDI Effect.
-   NOTE: Only an explicit MIDI Tool Apply action generates notes. */
+/* Cinemático Studio · MIDI Tool Generator beta 0.2 (Live 12 Suite)
+   Source + harmonic engine are embedded in the downloadable .amxd.
+   This is a MIDI Note Generator; Live's Generate > Apply starts each cycle.
+   Assumes 4/4; three chords spanning 3 full bars. */
 var inlets=1;
 var outlets=2;
 var Engine=require("cinematico-core.js");
@@ -57,22 +57,24 @@ function generatedNotes(){
   for(var bar=0;bar<selected.chords.length;bar++){
     var pitches=chordVoicing(selected.chords[bar]);
     for(var n=0;n<pitches.length;n++){
-      notes.push({pitch:pitches[n],start_time:bar,duration:0.95,velocity:90,mute:0,probability:1});
+      notes.push({pitch:pitches[n],start_time:bar*4,duration:3.75,velocity:90,mute:0,probability:1});
     }
   }
   return {notes:notes,selected:selected.chords.slice(),source:source,intent:intent,variant:choice};
 }
-function dictionary(name){
-  // live.miditool.in sends a dictionary; editing it is deliberately avoided.
-  // Generator output is additive, not a transformation of the original clip.
+function applyToClip(){
+  // Live 12 sends a dictionary when Apply is pressed in the Generator tab.
+  // Never change any source chord. The notes payload only contains the new idea.
   try {
     var result=generatedNotes();
     outlet_dictionary(0,{notes:result.notes});
-    labelStatus("Enviado: "+result.selected.join(" - ")+". Usa Deshacer en Live si lo necesitas.");
+    labelStatus("CAMINO "+choice+": "+result.selected.join(" · "));
   }catch(err){
-    outlet_dictionary(0,{notes:[]}); // Always close Live's apply cycle.
-    labelStatus("Sin cambios: "+String(err.message||err).slice(0,110));
+    outlet_dictionary(0,{notes:[]}); // No notes on invalid input.
+    labelStatus("Corrige los acordes: "+String(err.message||err).slice(0,90));
   }
 }
-function bang(){dictionary("");}
+function msg_dictionary(payload){applyToClip();}
+function dictionary(name){applyToClip();} // Compatibility with legacy Max routing.
+function bang(){applyToClip();}
 function loadbang(){preview();}

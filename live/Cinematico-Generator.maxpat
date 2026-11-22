@@ -8,50 +8,92 @@
       "architecture": "x64",
       "modernui": 1
     },
+    "classnamespace": "box",
     "rect": [
-      100,
-      100,
-      960,
-      620
+      40,
+      40,
+      720,
+      590
     ],
-    "bglocked": 0,
+    "openrect": [
+      0,
+      0,
+      350,
+      318
+    ],
     "openinpresentation": 1,
-    "default_fontsize": 12,
+    "default_fontsize": 11,
     "default_fontface": 0,
     "default_fontname": "Arial",
-    "gridonopen": 1,
     "gridsize": [
-      15,
-      15
+      8,
+      8
     ],
-    "gridsnaponopen": 1,
-    "toolbarvisible": 1,
+    "devicewidth": 350,
+    "description": "Cinemático Studio: explora tres caminos armónicos y genera en el clip la opción elegida.",
+    "digest": "Tres rutas armónicas basadas en acordes propios e intención musical; inserción explícita.",
+    "tags": "Cinemático Generator Harmonia Emotion",
+    "style": "",
+    "latency": 0,
+    "is_mpe": 0,
+    "minimum_live_version": "12.0",
+    "minimum_max_version": "8.6",
+    "platform_compatibility": 0,
+    "project": {
+      "version": 1,
+      "creationdate": 3860000000,
+      "modificationdate": 3860000000,
+      "viewrect": [
+        0,
+        0,
+        350,
+        320
+      ],
+      "autoorganize": 1,
+      "hideprojectwindow": 1,
+      "showdependencies": 1,
+      "autolocalize": 0,
+      "contents": {
+        "patchers": {},
+        "media": {},
+        "code": {}
+      },
+      "layout": {},
+      "searchpath": {},
+      "detailsvisible": 0,
+      "amxdtype": 1851877223,
+      "readonly": 0,
+      "devpathtype": 0,
+      "devpath": ".",
+      "sortmode": 0,
+      "viewmode": 0
+    },
     "boxes": [
       {
         "box": {
           "id": "obj-1",
           "maxclass": "comment",
           "patching_rect": [
-            20,
-            15,
-            780,
-            36
+            10,
+            7,
+            325,
+            27
           ],
-          "text": "CINEMÁTICO STUDIO / GENERADOR ARMÓNICO · beta 0.1",
-          "fontsize": 22,
+          "text": "CINEMÁTICO  /  GENERADOR ARMÓNICO",
+          "fontsize": 14,
           "fontface": 1,
           "textcolor": [
-            0.92,
-            0.78,
-            0.51,
+            0.86,
+            0.69,
+            0.42,
             1
           ],
           "presentation": 1,
           "presentation_rect": [
-            20,
-            15,
-            780,
-            36
+            10,
+            7,
+            325,
+            27
           ]
         }
       },
@@ -60,18 +102,24 @@
           "id": "obj-2",
           "maxclass": "comment",
           "patching_rect": [
-            20,
-            54,
-            820,
+            10,
+            37,
+            325,
             20
           ],
-          "text": "Escribe tus acordes, elige una intención y un camino. Inserta solo al pulsar Apply en el clip.",
-          "fontsize": 11,
+          "text": "Tres ideas; elige una y pulsa Aplicar en Live",
+          "fontsize": 10,
+          "textcolor": [
+            0.72,
+            0.75,
+            0.7,
+            1
+          ],
           "presentation": 1,
           "presentation_rect": [
-            20,
-            54,
-            820,
+            10,
+            37,
+            325,
             20
           ]
         }
@@ -81,20 +129,20 @@
           "id": "obj-3",
           "maxclass": "comment",
           "patching_rect": [
-            20,
-            87,
-            260,
-            20
+            10,
+            63,
+            325,
+            17
           ],
-          "text": "PROGRESIÓN DE PARTIDA",
+          "text": "TU PROGRESIÓN  ·  Ej.: Am F C G",
+          "fontsize": 11,
           "fontface": 1,
-          "fontsize": 12,
           "presentation": 1,
           "presentation_rect": [
-            20,
-            87,
-            260,
-            20
+            10,
+            63,
+            325,
+            17
           ]
         }
       },
@@ -103,21 +151,23 @@
           "id": "obj-4",
           "maxclass": "textedit",
           "patching_rect": [
-            20,
-            110,
-            470,
-            45
+            10,
+            83,
+            323,
+            36
           ],
           "keymode": 1,
           "outputmode": 1,
           "lines": 1,
           "wordwrap": 0,
+          "fontsize": 12,
+          "text": "Am F C G",
           "presentation": 1,
           "presentation_rect": [
-            20,
-            110,
-            470,
-            45
+            10,
+            83,
+            323,
+            36
           ]
         }
       },
@@ -126,19 +176,19 @@
           "id": "obj-5",
           "maxclass": "textbutton",
           "patching_rect": [
-            502,
-            110,
-            165,
-            40
+            10,
+            126,
+            111,
+            26
           ],
-          "text": "Actualizar acordes",
-          "texton": "Actualizar acordes",
+          "text": "Actualizar",
+          "texton": "Actualizar",
           "presentation": 1,
           "presentation_rect": [
-            502,
-            110,
-            165,
-            40
+            10,
+            126,
+            111,
+            26
           ]
         }
       },
@@ -147,20 +197,20 @@
           "id": "obj-6",
           "maxclass": "comment",
           "patching_rect": [
-            20,
-            169,
-            200,
-            20
+            10,
+            158,
+            185,
+            18
           ],
-          "text": "INTENCIÓN MUSICAL",
+          "text": "INTENCIÓN",
           "fontface": 1,
-          "fontsize": 12,
+          "fontsize": 10,
           "presentation": 1,
           "presentation_rect": [
-            20,
-            169,
-            200,
-            20
+            10,
+            158,
+            185,
+            18
           ]
         }
       },
@@ -169,35 +219,35 @@
           "id": "obj-7",
           "maxclass": "umenu",
           "patching_rect": [
-            20,
-            191,
-            220,
-            30
+            10,
+            179,
+            210,
+            26
           ],
           "items": [
-            "misterio",
-            "melancolia",
-            "tension",
             "esperanza",
+            "suspense",
+            "asombro",
+            "contraste",
+            "calma",
             "nostalgia",
-            "epica",
+            "melancolia",
+            "ternura",
             "tristeza",
             "alegria",
-            "ternura",
-            "asombro",
+            "epica",
+            "tension",
             "inquietud",
-            "suspense",
-            "oscuridad",
-            "calma",
-            "contraste"
+            "misterio",
+            "oscuridad"
           ],
-          "fontsize": 13,
+          "fontsize": 12,
           "presentation": 1,
           "presentation_rect": [
-            20,
-            191,
-            220,
-            30
+            10,
+            179,
+            210,
+            26
           ]
         }
       },
@@ -206,20 +256,20 @@
           "id": "obj-8",
           "maxclass": "comment",
           "patching_rect": [
-            265,
-            169,
-            160,
-            20
+            231,
+            158,
+            102,
+            18
           ],
-          "text": "CAMINO (1, 2 o 3)",
+          "text": "CAMINO 1–3",
           "fontface": 1,
-          "fontsize": 12,
+          "fontsize": 10,
           "presentation": 1,
           "presentation_rect": [
-            265,
-            169,
-            160,
-            20
+            231,
+            158,
+            102,
+            18
           ]
         }
       },
@@ -228,19 +278,20 @@
           "id": "obj-9",
           "maxclass": "number",
           "patching_rect": [
-            265,
-            191,
-            76,
-            30
+            231,
+            179,
+            53,
+            26
           ],
           "minimum": 1,
           "maximum": 3,
+          "fontsize": 13,
           "presentation": 1,
           "presentation_rect": [
-            265,
-            191,
-            76,
-            30
+            231,
+            179,
+            53,
+            26
           ]
         }
       },
@@ -249,113 +300,93 @@
           "id": "obj-10",
           "maxclass": "textbutton",
           "patching_rect": [
-            360,
-            191,
-            175,
-            30
+            231,
+            215,
+            102,
+            25
           ],
-          "text": "Comparar propuesta",
-          "texton": "Comparar propuesta",
+          "text": "Ver camino",
+          "texton": "Ver camino",
           "presentation": 1,
           "presentation_rect": [
-            360,
-            191,
-            175,
-            30
+            231,
+            215,
+            102,
+            25
           ]
         }
       },
       {
         "box": {
           "id": "obj-11",
-          "maxclass": "comment",
+          "maxclass": "message",
           "patching_rect": [
-            20,
-            238,
-            850,
-            25
+            10,
+            245,
+            323,
+            37
           ],
-          "text": "NO MODIFICA TUS ACORDES. Crea un clip MIDI vacío de al menos 3 compases. Pulsa Apply en Generar.",
-          "fontsize": 12,
-          "fontface": 1,
-          "textcolor": [
-            0.82,
-            0.74,
-            0.55,
-            1
-          ],
+          "text": "Cinemático: actualiza tus acordes.",
+          "fontsize": 10,
           "presentation": 1,
           "presentation_rect": [
-            20,
-            238,
-            850,
-            25
+            10,
+            245,
+            323,
+            37
           ]
         }
       },
       {
         "box": {
           "id": "obj-12",
-          "maxclass": "message",
+          "maxclass": "comment",
           "patching_rect": [
-            20,
-            267,
-            840,
-            37
+            10,
+            286,
+            323,
+            29
           ],
-          "text": "Cinemático: elige tus acordes y tu camino.",
-          "fontsize": 12,
+          "text": "APLICAR en Live inserta 3 acordes (3 compases 4/4). Prueba primero en un clip vacío.",
+          "fontsize": 10,
+          "textcolor": [
+            0.8,
+            0.72,
+            0.54,
+            1
+          ],
           "presentation": 1,
           "presentation_rect": [
-            20,
-            267,
-            840,
-            37
+            10,
+            286,
+            323,
+            29
           ]
         }
       },
       {
         "box": {
           "id": "obj-13",
-          "maxclass": "comment",
+          "maxclass": "newobj",
           "patching_rect": [
-            20,
-            317,
-            860,
-            43
+            410,
+            350,
+            80,
+            22
           ],
-          "text": "Prototipo de Live: escribe cifrados (Am F C G); no lee aún el contenido MIDI ni crea melodía. Las propuestas vienen del motor web.",
-          "fontsize": 11,
-          "presentation": 1,
-          "presentation_rect": [
-            20,
-            317,
-            860,
-            43
-          ]
+          "text": "loadbang",
+          "numinlets": 1,
+          "numoutlets": 1
         }
       },
       {
         "box": {
           "id": "obj-14",
-          "maxclass": "newobj",
-          "patching_rect": [
-            20,
-            412,
-            70,
-            22
-          ],
-          "text": "loadbang"
-        }
-      },
-      {
-        "box": {
-          "id": "obj-15",
           "maxclass": "message",
           "patching_rect": [
+            500,
+            350,
             110,
-            412,
-            150,
             22
           ],
           "text": "set Am F C G"
@@ -363,11 +394,11 @@
       },
       {
         "box": {
-          "id": "obj-16",
+          "id": "obj-15",
           "maxclass": "message",
           "patching_rect": [
-            110,
-            450,
+            500,
+            380,
             45,
             22
           ],
@@ -376,12 +407,12 @@
       },
       {
         "box": {
-          "id": "obj-17",
+          "id": "obj-16",
           "maxclass": "message",
           "patching_rect": [
-            110,
-            486,
-            80,
+            500,
+            410,
+            90,
             22
           ],
           "text": "set esperanza"
@@ -389,12 +420,42 @@
       },
       {
         "box": {
+          "id": "obj-17",
+          "maxclass": "newobj",
+          "patching_rect": [
+            320,
+            380,
+            100,
+            22
+          ],
+          "text": "prepend variant",
+          "numinlets": 2,
+          "numoutlets": 1
+        }
+      },
+      {
+        "box": {
           "id": "obj-18",
+          "maxclass": "newobj",
+          "patching_rect": [
+            320,
+            410,
+            100,
+            22
+          ],
+          "text": "prepend mood",
+          "numinlets": 2,
+          "numoutlets": 1
+        }
+      },
+      {
+        "box": {
+          "id": "obj-19",
           "maxclass": "message",
           "patching_rect": [
-            550,
-            368,
-            68,
+            320,
+            350,
+            70,
             22
           ],
           "text": "preview"
@@ -402,28 +463,22 @@
       },
       {
         "box": {
-          "id": "obj-19",
-          "maxclass": "newobj",
-          "patching_rect": [
-            265,
-            450,
-            120,
-            22
-          ],
-          "text": "prepend variant"
-        }
-      },
-      {
-        "box": {
           "id": "obj-20",
           "maxclass": "newobj",
           "patching_rect": [
-            270,
-            488,
-            120,
+            10,
+            350,
+            130,
             22
           ],
-          "text": "prepend mood"
+          "text": "live.miditool.in",
+          "numinlets": 1,
+          "numoutlets": 3,
+          "outlettype": [
+            "",
+            "",
+            ""
+          ]
         }
       },
       {
@@ -431,9 +486,9 @@
           "id": "obj-21",
           "maxclass": "newobj",
           "patching_rect": [
-            450,
-            455,
-            252,
+            120,
+            468,
+            230,
             23
           ],
           "text": "v8 cinematico-generator.js",
@@ -450,12 +505,14 @@
           "id": "obj-22",
           "maxclass": "newobj",
           "patching_rect": [
-            20,
-            535,
-            130,
+            120,
+            515,
+            145,
             23
           ],
-          "text": "live.miditool.in"
+          "text": "live.miditool.out",
+          "numinlets": 1,
+          "numoutlets": 0
         }
       },
       {
@@ -463,12 +520,19 @@
           "id": "obj-23",
           "maxclass": "newobj",
           "patching_rect": [
-            760,
-            538,
-            155,
-            23
+            10,
+            385,
+            123,
+            22
           ],
-          "text": "live.miditool.out"
+          "text": "live.thisdevice",
+          "numinlets": 1,
+          "numoutlets": 3,
+          "outlettype": [
+            "bang",
+            "bang",
+            ""
+          ]
         }
       },
       {
@@ -476,12 +540,14 @@
           "id": "obj-24",
           "maxclass": "newobj",
           "patching_rect": [
-            745,
-            480,
-            155,
+            352,
+            490,
+            180,
             23
           ],
-          "text": "print CinematicoLive"
+          "text": "print CinematicoLive",
+          "numinlets": 1,
+          "numoutlets": 0
         }
       }
     ],
@@ -489,11 +555,11 @@
       {
         "patchline": {
           "source": [
-            "obj-14",
+            "obj-13",
             0
           ],
           "destination": [
-            "obj-15",
+            "obj-14",
             0
           ]
         }
@@ -501,7 +567,7 @@
       {
         "patchline": {
           "source": [
-            "obj-15",
+            "obj-14",
             0
           ],
           "destination": [
@@ -513,11 +579,11 @@
       {
         "patchline": {
           "source": [
-            "obj-14",
+            "obj-13",
             0
           ],
           "destination": [
-            "obj-16",
+            "obj-15",
             0
           ]
         }
@@ -525,7 +591,7 @@
       {
         "patchline": {
           "source": [
-            "obj-16",
+            "obj-15",
             0
           ],
           "destination": [
@@ -537,11 +603,11 @@
       {
         "patchline": {
           "source": [
-            "obj-14",
+            "obj-13",
             0
           ],
           "destination": [
-            "obj-17",
+            "obj-16",
             0
           ]
         }
@@ -549,7 +615,7 @@
       {
         "patchline": {
           "source": [
-            "obj-17",
+            "obj-16",
             0
           ],
           "destination": [
@@ -589,7 +655,7 @@
             1
           ],
           "destination": [
-            "obj-20",
+            "obj-18",
             0
           ]
         }
@@ -597,7 +663,7 @@
       {
         "patchline": {
           "source": [
-            "obj-20",
+            "obj-18",
             0
           ],
           "destination": [
@@ -613,7 +679,7 @@
             0
           ],
           "destination": [
-            "obj-19",
+            "obj-17",
             0
           ]
         }
@@ -621,7 +687,7 @@
       {
         "patchline": {
           "source": [
-            "obj-19",
+            "obj-17",
             0
           ],
           "destination": [
@@ -637,7 +703,7 @@
             0
           ],
           "destination": [
-            "obj-18",
+            "obj-19",
             0
           ]
         }
@@ -645,7 +711,7 @@
       {
         "patchline": {
           "source": [
-            "obj-18",
+            "obj-19",
             0
           ],
           "destination": [
@@ -657,23 +723,23 @@
       {
         "patchline": {
           "source": [
+            "obj-20",
+            0
+          ],
+          "destination": [
+            "obj-21",
+            0
+          ]
+        }
+      },
+      {
+        "patchline": {
+          "source": [
+            "obj-21",
+            0
+          ],
+          "destination": [
             "obj-22",
-            0
-          ],
-          "destination": [
-            "obj-21",
-            0
-          ]
-        }
-      },
-      {
-        "patchline": {
-          "source": [
-            "obj-21",
-            0
-          ],
-          "destination": [
-            "obj-23",
             0
           ]
         }
@@ -685,7 +751,7 @@
             1
           ],
           "destination": [
-            "obj-12",
+            "obj-11",
             0
           ]
         }
@@ -702,6 +768,8 @@
           ]
         }
       }
-    ]
+    ],
+    "dependency_cache": [],
+    "autosave": 0
   }
 }
