@@ -41,6 +41,7 @@ jobs:
           node tests/musician-journey-regression.cjs
           node tests/static-audit.cjs
           node tests/pwa-assets.cjs
+          node audit/repro-live-voicings.cjs
           node tests/live-generator-regression.cjs
           python3 live/build_amxd.py --check
           node tests/live-package-regression.cjs

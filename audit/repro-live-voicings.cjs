@@ -1,6 +1,6 @@
 'use strict';
 // Regression reproducer for two confirmed musical integrity bugs in
-// cinematico-generator.js. EXPECTED to fail until fixed by Codex.
+// cinematico-generator.js.
 // Run: node audit/repro-live-voicings.cjs
 const fs = require('node:fs');
 const path = require('node:path');
@@ -25,15 +25,18 @@ for (const notation of input) {
     'SLASH BASS ' + notation + ': expected pc ' + chord.bass +
     ', generated bass pc ' + actualBass + ', MIDI=' + notes.join(','));
 }
-for (const notation of ['Cmaj7#11', 'Bbmaj7#11']) {
+for (const notation of ['Cmaj7#11', 'Bbmaj7#11', 'Cmaj9', 'Cm9', 'C9']) {
   const chord = E.parseUserProgression(notation).chords[0];
   const notes = Array.from(ctx.chordVoicing(notation));
   const pcs = notes.map(p => p % 12);
-  const expectedSeventh = (chord.root + 11) % 12;
-  const expectedSharpEleventh = (chord.root + 6) % 12;
-  if (!pcs.includes(expectedSeventh) || !pcs.includes(expectedSharpEleventh)) {
-    errors.push('EXTENSION ' + notation + ': 7M and #11 must both survive; actual pcs=' + pcs.join(','));
+  if (!chord.notes.every(pc => pcs.includes(pc))) {
+    errors.push('EXTENSION ' + notation + ': preserve chord tones; actual pcs=' + pcs.join(','));
   }
+}
+for (const notation of ['Cadd9', 'Ebmadd9', 'Bbmaj9']) {
+  const chord = E.parseUserProgression(notation).chords[0];
+  const notes = Array.from(ctx.chordVoicing(notation));
+  if (!notes.includes(48 + chord.root + 14)) errors.push('COMPOUND NINTH ' + notation);
 }
 if (errors.length) {
   console.error('FAIL — ' + errors.length + ' confirmed voicing problems:\n' + errors.map((e, i) => (i + 1) + '. ' + e).join('\n'));

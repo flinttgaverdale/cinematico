@@ -43,11 +43,18 @@ function preview(){
 function chordVoicing(label){
   var parsed=Engine.parseUserProgression(label);
   if(parsed.errors.length||parsed.chords.length!==1)throw Error("Acorde no válido: "+label);
-  var ch=parsed.chords[0],r=ch.root;
-  var intervals=Array.from(new Set(ch.notes.map(function(pc){return (pc-r+12)%12;}))).sort(function(a,b){return a-b;});
-  if(!intervals.includes(0))intervals.unshift(0);
-  var ordered=intervals.slice(0,4);
-  return ordered.map(function(i){return 48+r+i;});
+  var ch=parsed.chords[0];
+  var rootPitch=48+ch.root;
+  var bassPitch=rootPitch-(ch.root-ch.bass+12)%12;
+  // The shared parser supplies interval classes. Restore compound extensions
+  // for MIDI while keeping sus2 and other simple intervals in the root octave.
+  var hasNinth=["9","maj9","m9","add9","madd9"].includes(ch.type);
+  var upper=ch.intervals.map(function(interval){
+    if(hasNinth&&interval===2)return rootPitch+14;
+    if(ch.type==="maj7#11"&&interval===6)return rootPitch+18;
+    return rootPitch+interval;
+  }).filter(function(pitch){return pitch%12!==ch.bass;});
+  return [bassPitch].concat(upper.sort(function(a,b){return a-b;}));
 }
 function generatedNotes(){
   var out=getProposals();
