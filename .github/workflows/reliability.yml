@@ -56,3 +56,4 @@ jobs:
         run: |
           node tests/browser-smoke.cjs
           node tests/pwa-offline-smoke.cjs
+          node tests/pwa-update-regression.cjs
