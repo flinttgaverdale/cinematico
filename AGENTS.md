@@ -12,7 +12,7 @@ Cinemático es un asistente de composición, no un generador automático de canc
 - `tests/`: regresiones de motor, navegación, PWA, MIDI y empaquetado.
 
 ## Antes de cambios
-1. Lee `docs/auditoria-tecnica-codex-2026-11-22.md` y ejecuta `node audit/repro-live-voicings.cjs` para comprobar los problemas de bajo y extensiones (actualmente deben FALLAR).
+1. Lee `docs/auditoria-tecnica-codex-2026-11-22.md` y ejecuta `node audit/repro-live-voicings.cjs` para comprobar la conservación del bajo y las extensiones MIDI.
 2. Reproduce el último workflow verde de `.github/workflows/reliability.yml` en Node 22. Los tests de navegador requieren Playwright/Chromium y servidor HTTP local. Si no puedes ejecutar Windows, Android físico o Ableton, declara explícitamente la limitación; no simules una prueba de usuario real.
 3. Crea una rama/PR separada para cada corrección de P0/P1. No sobreescribas la versión pública ni publiques APK o .amxd estable sin validación.
 
