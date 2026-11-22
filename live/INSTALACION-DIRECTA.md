@@ -14,3 +14,5 @@ Versión beta 0.2 — **archivo único** `Cinematico-Generator-Beta.amxd`.
 **Validación:** formato de archivo, dependencias empaquetadas, lógica de 270 casos y geometría de controles probados por código. La carga final en Live/Max y el comportamiento de la interfaz **no están probados en un Windows real**, por lo que es una beta y debes usar un proyecto de prueba. Si al abrirlo sale error, envíame el texto exacto de la consola de Max, no tomaremos el archivo por estable hasta pasar esa prueba.
 
 Requisitos: Live 12 Suite / Max for Live 8.6 o posterior.
+
+Consulta la [matriz de aceptación en Ableton Live](ACEPTACION.md) antes de distribuir una nueva beta.
