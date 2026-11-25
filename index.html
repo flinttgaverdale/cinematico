@@ -382,6 +382,11 @@ body[data-study="inspire"] .reference-flow{margin-bottom:15px}
   .guide{padding:16px}
   .layout{gap:14px}
   .simple-nuance-content select{max-width:100%}
+  /* The advanced chord editor must not force two min-content-width buttons beyond 320px. */
+  .vl-controls{grid-template-columns:repeat(2,minmax(0,1fr));min-width:0}
+  .vl-controls > input,.vl-controls > select,.vl-controls > button{min-width:0;max-width:100%}
+  .vl-controls > button{min-height:44px;white-space:normal;overflow-wrap:anywhere;line-height:1.3}
+  #userChords{grid-column:1/-1;width:100%}
 }
 @media(max-width:360px){
   .advanced-tabs{display:grid;grid-template-columns:minmax(0,1fr)}

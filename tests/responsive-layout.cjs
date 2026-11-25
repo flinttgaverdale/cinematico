@@ -22,7 +22,7 @@ async function overflow(page,where){
    suspects:Array.from(document.querySelectorAll('*')).filter(el=>{
      const rect=el.getBoundingClientRect(),cs=getComputedStyle(el);
      return cs.display!=='none'&&rect.width>0&&(rect.left< -2||rect.right>innerWidth+2);
-   }).slice(0,8).map(el=>({tag:el.tagName,className:typeof el.className==='string'?el.className.slice(0,70):'',rect:Math.round(el.getBoundingClientRect().right)}))
+   }).slice(0,8).map(el=>({tag:el.tagName,id:el.id,text:(el.textContent||'').trim().slice(0,45),className:typeof el.className==='string'?el.className.slice(0,70):'',rect:Math.round(el.getBoundingClientRect().right)}))
  }));
  assert.ok(d.htmlWidth<=d.width+1&&d.bodyWidth<=d.width+1,
    where+' horizontal document overflow '+JSON.stringify(d));
