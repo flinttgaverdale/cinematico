@@ -396,6 +396,33 @@ body[data-study="inspire"] .reference-flow{margin-bottom:15px}
   .simple-intent-pills button{font-size:13px}
 }
 
+
+/* Responsive refinement: comfortable gutters, safe areas and compact screens. */
+:root{--page-gutter:clamp(24px,4.8vw,64px)}
+.shell{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.top .mark{flex-shrink:0}
+.simple-actions .primary{min-width:0;max-width:100%;white-space:normal}
+.tech-grid,.mods{grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr))}
+.voiceleading{max-width:100%;min-width:0}
+@media(max-width:650px){
+  .simple-create{padding:clamp(15px,4vw,22px)}
+  .simple-path{padding:15px}
+  .workspace-switch{padding:15px}
+  .advanced-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .advanced-tabs button:last-child{grid-column:1/-1}
+  .advanced-tabs button{min-height:64px;font-size:13px}
+  .field select,.vl-controls select,.vl-controls input,.simple-nuance-content select{font-size:16px;min-height:44px}
+  .field,.tech-card,.tile,.chord{min-width:0;overflow-wrap:anywhere}
+  .chords{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .foot{flex-wrap:wrap}
+}
+@media(max-width:360px){
+  :root{--page-gutter:20px}
+  .advanced-tabs{grid-template-columns:minmax(0,1fr)}
+  .simple-intent-pills button{padding-inline:6px}
+  .study-inspect > div,.study-tool > article{padding:12px}
+}
+
 </style></head><body><div class="shell"><header class="top"><div class="brand"><div class="mark">C</div><div><b>CINEMÁTICO</b><small>Estudio de composición</small></div></div><small>Exploración armónica · herramienta creativa</small></header><section class="hero"><div class="kicker">CINEMÁTICO / INSTRUMENTO ARMÓNICO</div><h1>Una idea. Nuevos caminos.</h1><p>Escribe tus acordes y descubre otras direcciones posibles. Tu música sigue siendo tuya.</p></section><nav class="workspace-switch" aria-label="Modo de trabajo"><div><strong id="workspaceTitle">Crear</strong><p id="workspaceDesc">Tus acordes, nuevas posibilidades. Sin necesidad de teoría musical.</p></div><div class="workspace-tabs" role="group" aria-label="Nivel de herramientas"><button id="workspaceExplore" type="button" aria-pressed="true">Crear</button><button id="workspaceAdvanced" type="button" aria-pressed="false">Estudio avanzado</button></div></nav><aside class="guide" id="studioGuide" aria-label="Guía de inicio"><div class="guide-head"><b>Guía rápida · Tres pasos para empezar</b><button class="secondary" id="guideToggle" type="button" aria-expanded="false" aria-controls="guideSteps">Mostrar guía</button></div><div class="guide-steps" id="guideSteps" hidden><div class="guide-step"><span class="guide-number">1</span><div><strong>Elige el centro tonal</strong>Pulsa una nota del círculo de quintas.</div></div><div class="guide-step"><span class="guide-number">2</span><div><strong>Define la intención</strong>Selecciona emoción, compositor y, si quieres, un modo.</div></div><div class="guide-step"><span class="guide-number">3</span><div><strong>Explora y profundiza</strong>Consulta acordes y voces. Abre las ayudas de cada herramienta cuando las necesites.</div></div></div></aside><section class="simple-create" aria-label="Crear con tus acordes"><div class="simple-intro"><span class="kicker">CREAR / TU IDEA MUSICAL</span><h2>¿Hacia dónde seguimos?</h2><p>Empieza por tus acordes. Elige una intención y compara tres ideas, sin modificar tu progresión.</p></div><div class="simple-fields"><div><label for="simpleChords">Tu progresión</label><input id="simpleChords" type="text" value="" placeholder="Am F C G" autocomplete="off" aria-describedby="simpleChordsHelp"><p id="simpleChordsHelp">Escribe los acordes separados por espacios. Ejemplo: Am F C G.</p></div></div>
 <div class="simple-intention"><p class="simple-section-title" id="simpleIntentTitle">¿Qué dirección quieres explorar?</p><div class="simple-intent-pills" role="group" aria-labelledby="simpleIntentTitle">
 <button type="button" data-quick-intent="esperanza" aria-pressed="true" aria-describedby="simpleIntentHelp">Apertura / esperanza</button>
@@ -978,5 +1005,5 @@ $("workspaceAdvanced").onclick=()=>{if(document.body.dataset.workspace==="explor
 let openingWorkspace="explore";
 try{if(localStorage.getItem("cinematico-workspace-v2")==="advanced")openingWorkspace="advanced";}catch{}
 setWorkspace(openingWorkspace);
-$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=48",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
+$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=49",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
 </script></body></html>
