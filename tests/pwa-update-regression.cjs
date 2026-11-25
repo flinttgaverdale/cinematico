@@ -20,17 +20,26 @@ const assets = new Map([
 const updatedCache = 'cinematico-studio-audit-update';
 let update = false;
 let broken = false;
+let rejectNavigation = false;
 let rejectedEngine = 0;
 const server = http.createServer((request, response) => {
   const url = new URL(request.url, 'http://localhost');
   const pathname = url.pathname.startsWith(scope) ? url.pathname.slice(scope.length - 1) : '';
   const asset = assets.get(pathname);
-  if (!asset || (broken && pathname === '/engine.js')) {
-    if (asset) rejectedEngine++;
-    response.writeHead(asset ? 503 : 404).end();
+  if (!asset) {
+    response.writeHead(404).end();
     return;
   }
   const [filename, mime] = asset;
+  if (broken && filename === 'engine.js') {
+    rejectedEngine++;
+    response.writeHead(503).end();
+    return;
+  }
+  if (rejectNavigation && filename === 'index.html') {
+    response.writeHead(503).end();
+    return;
+  }
   let data = fs.readFileSync(path.join(root, filename));
   if (update && filename === 'index.html') {
     data = data.toString().replace('<head>', '<head><meta name="test-version" content="next">');
@@ -87,6 +96,7 @@ async function main() {
       const cache = await caches.open(key);
       return !!(await cache.match(url));
     }, {key: initial.keys[0], url: engineUrl}), 'The active cache must keep the motor');
+    rejectNavigation = true;
     for (const offline of [false, true]) {
       await context.setOffline(offline);
       await page.reload({ waitUntil: 'domcontentloaded' });
@@ -99,6 +109,7 @@ async function main() {
     assert.deepEqual(errors, []);
 
     broken = false;
+    rejectNavigation = false;
     await context.setOffline(false);
     assert.equal(await requestUpdate(), 'installed', 'A restored server should install the update');
     assert.ok(await page.evaluate(async () => (await navigator.serviceWorker.ready).waiting));

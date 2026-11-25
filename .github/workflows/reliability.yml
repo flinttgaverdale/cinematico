@@ -13,6 +13,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Require a new shell cache when publishing new app assets
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --depth=1 origin "$BASE_SHA"
+          if ! git diff --quiet "$BASE_SHA" HEAD -- index.html engine.js manifest.json icon-192.png icon-512.png; then
+            base_cache=$(git show "$BASE_SHA:service-worker.js" | sed -nE 's/^const CACHE = "(.*)";$/\1/p')
+            next_cache=$(sed -nE 's/^const CACHE = "(.*)";$/\1/p' service-worker.js)
+            if [[ "$base_cache" == "$next_cache" ]]; then
+              echo 'Increment the shell cache and service-worker registration versions when changing app assets.'
+              exit 1
+            fi
+          fi
       - name: Test harmonic engine
         run: |
           node tests/phase1-regression.cjs
