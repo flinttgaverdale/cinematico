@@ -18,17 +18,24 @@ const assets = new Map([
 ]);
 const updatedCache = 'cinematico-studio-audit-update';
 let update = false;
+let broken = false;
 let rejectedEngine = 0;
 const server = http.createServer((request, response) => {
   const pathname = new URL(request.url, 'http://localhost').pathname;
   const asset = assets.get(pathname);
-  if (!asset || (update && pathname === '/engine.js')) {
+  if (!asset || (broken && pathname === '/engine.js')) {
     if (asset) rejectedEngine++;
     response.writeHead(asset ? 503 : 404).end();
     return;
   }
   const [filename, mime] = asset;
   let data = fs.readFileSync(path.join(root, filename));
+  if (update && filename === 'index.html') {
+    data = data.toString().replace('<head>', '<head><meta name="test-version" content="next">');
+  }
+  if (update && filename === 'engine.js') {
+    data = data.toString() + '\nwindow.testEngineVersion = "next";';
+  }
   if (update && filename === 'service-worker.js') {
     data = data.toString().replace(/const CACHE = "[^"]+";/, 'const CACHE = "' + updatedCache + '";');
   }
@@ -51,33 +58,57 @@ async function main() {
     }));
     assert.equal(initial.engine, true);
     assert.equal(initial.keys.length, 1);
-    update = true;
-    const outcome = await page.evaluate(async () => {
+    const requestUpdate = () => page.evaluate(async () => {
       const registration = await navigator.serviceWorker.ready;
-      const state = new Promise((resolve) => {
+      const state = new Promise((resolve, reject) => {
+        const timer = setTimeout(() => reject(new Error('No update state')), 10000);
         registration.addEventListener('updatefound', () => {
           const worker = registration.installing;
           worker.addEventListener('statechange', () => {
-            if (['activated', 'redundant'].includes(worker.state)) resolve(worker.state);
+            if (['installed', 'redundant'].includes(worker.state)) {
+              clearTimeout(timer);
+              resolve(worker.state);
+            }
           });
         }, { once: true });
       });
       await registration.update();
       return state;
     });
+    update = true;
+    broken = true;
+    const outcome = await requestUpdate();
     assert.ok(rejectedEngine > 0);
     assert.equal(outcome, 'redundant', 'An incomplete worker must not activate');
     assert.ok(await page.evaluate(async (key) => {
       const cache = await caches.open(key);
       return !!(await cache.match('/engine.js'));
     }, initial.keys[0]), 'The active cache must keep the motor');
-    await context.setOffline(true);
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await page.locator('#simpleChords').fill('Am F C G');
-    await page.locator('#simpleExplore').click();
-    assert.equal(await page.locator('.simple-path').count(), 3);
+    for (const offline of [false, true]) {
+      await context.setOffline(offline);
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      assert.equal(await page.locator('meta[name="test-version"]').count(), 0);
+      assert.equal(await page.evaluate(() => window.testEngineVersion), undefined);
+      await page.locator('#simpleChords').fill('Am F C G');
+      await page.locator('#simpleExplore').click();
+      assert.equal(await page.locator('.simple-path').count(), 3);
+    }
     assert.deepEqual(errors, []);
-    console.log('PASS PWA update: failed engine precache preserves the offline app');
+
+    broken = false;
+    await context.setOffline(false);
+    assert.equal(await requestUpdate(), 'installed', 'A restored server should install the update');
+    assert.ok(await page.evaluate(async () => (await navigator.serviceWorker.ready).waiting));
+    const url = page.url();
+    await page.close();
+    const updated = await context.newPage();
+    await updated.goto(url, {waitUntil:'domcontentloaded'});
+    await updated.evaluate(() => navigator.serviceWorker.ready);
+    await context.setOffline(true);
+    await updated.reload({waitUntil:'domcontentloaded'});
+    assert.equal(await updated.locator('meta[name="test-version"]').getAttribute('content'), 'next');
+    assert.equal(await updated.evaluate(() => window.testEngineVersion), 'next');
+    console.log('PASS PWA update: HTTP 503 preserves the old shell, then HTML and engine update together');
   } finally {
     await browser.close();
   }

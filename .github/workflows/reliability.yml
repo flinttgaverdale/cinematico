@@ -57,3 +57,4 @@ jobs:
           node tests/browser-smoke.cjs
           node tests/pwa-offline-smoke.cjs
           node tests/pwa-update-regression.cjs
+          node tests/responsive-layout.cjs

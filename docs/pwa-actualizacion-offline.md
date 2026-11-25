@@ -1,10 +1,12 @@
 # Actualización offline de la PWA
 
-El service worker exige que todos los recursos del shell se guarden antes de
-activar una nueva versión. Si falla la instalación, la versión activa conserva
-su caché. Asigna un identificador de caché nuevo a cada versión del shell.
+El service worker precarga el shell completo y mantiene juntas la versión
+del HTML y la del motor. Si algún recurso falla, la versión activa conserva
+su caché. La versión nueva se activa cuando se cierran las pestañas controladas
+por la anterior. Al cambiar HTML, motor, iconos o manifiesto, incrementa el
+identificador de caché y la versión del registro de worker en `index.html`.
 
-La regresión automatizada instala una versión, devuelve HTTP 503 al solicitar
-el motor durante la siguiente actualización y prueba Crear en modo offline.
-Para comprobarlo manualmente, abre la PWA instalada sin conexión después de
-una actualización fallida y genera tres caminos a partir de `Am F C G`.
+La regresión instala una versión, simula un HTTP 503 durante el precache del
+motor y verifica que Crear siga funcionando online y offline. Después restaura
+la red, precarga la versión nueva y comprueba el cambio al abrir otra pestaña
+tras cerrar la anterior.
