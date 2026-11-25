@@ -3,7 +3,9 @@
 **Estado real:** código preparado y verificado en pruebas automáticas. El host Ableton/Max NO se puede ejecutar en nuestro entorno; el resultado es un **proyecto fuente de MIDI Tool Generator**, no un `.amxd` precompilado, probado o firmado. Para instalarlo definitivamente hay que guardarlo como `.amxd` desde la plantilla oficial de Live.
 
 El ZIP de la beta 0.1 se conserva como paquete fuente histórico. Su generador
-distribuye los acordes a un pulso de distancia. Para evaluar el dispositivo
+distribuye los acordes a un pulso de distancia. Los tres archivos de demostración
+MIDI incluidos tienen su propio arreglo: comienzan en los pulsos 0, 4 y 8,
+con duración de 3,8 pulsos por acorde. Para evaluar el dispositivo
 actual, sigue la [guía de instalación directa](INSTALACION-DIRECTA.md).
 
 ## Comportamiento previsto del prototipo
