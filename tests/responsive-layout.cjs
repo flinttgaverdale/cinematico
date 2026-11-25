@@ -6,7 +6,7 @@ const {chromium}=require('playwright');
 const BASE=process.env.CINEMATICO_TEST_URL||'http://127.0.0.1:4173/';
 
 async function check(page,selector,minimum,viewport,label){
- const info=await page.locator(selector).evaluate(el=>{
+ const info=await page.locator(selector).first().evaluate(el=>{
    const r=el.getBoundingClientRect();
    const style=getComputedStyle(el);
    return {left:r.left,right:r.right,width:r.width,visible:style.display!=='none'};
