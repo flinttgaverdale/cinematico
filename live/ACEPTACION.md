@@ -26,3 +26,25 @@ conserva capturas del editor MIDI y del registro de Max.
 Usa estas observaciones como contrato para el PR de compás, selección y
 reversibilidad. La simulación JavaScript permite comprobar las notas generadas
 pero no determina cómo Live procesa el diccionario ni el historial de Undo.
+
+## Evidencia necesaria para el adaptador de selección
+
+En una copia local de revisión, registra en la consola qué mensaje llega de
+`live.miditool.in` cada vez que se pulsa Aplicar. Si llega a
+`msg_dictionary(payload)`, añade temporalmente antes de `applyToClip()` la
+línea siguiente en `cinematico-generator.js` y vuelve a empaquetar esa copia:
+
+```js
+post(JSON.stringify(payload, null, 2) + "\\n");
+```
+
+Usa notas sintéticas y comparte una muestra por caso. Si el host llama a
+`dictionary(name)` o `bang()`, indica la ruta que observaste. En Max también
+puedes añadir un `print` en paralelo a la salida de `live.miditool.in` para
+identificar el mensaje. Conserva los nombres, unidades y valores originales de
+los campos de tiempo, compás, selección y límites del clip que entregue el
+host. Registra cuáles faltan. Anota el número de notas y sus posiciones después
+de Aplicar y después de una sola operación Deshacer, tanto con selección vacía
+como con notas existentes.
+
+Retira el registro temporal antes de generar un AMXD para revisión final.
