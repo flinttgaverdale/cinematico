@@ -13,6 +13,9 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
       await page.goto(BASE, {waitUntil:'domcontentloaded'});
+      const bounds=await page.locator('.shell').evaluate(el=>({left:parseFloat(getComputedStyle(el).paddingLeft),right:parseFloat(getComputedStyle(el).paddingRight),width:document.documentElement.scrollWidth,viewport:innerWidth}));
+      assert.ok(bounds.left>=24 && bounds.right>=24,'Comfortable outer gutters');
+      assert.ok(bounds.width<=bounds.viewport+2,'Landing must fit viewport');
       // Create is the landing experience. The full studio must be opt-in and retained.
       assert.equal(await page.locator('body').getAttribute('data-workspace'), 'explore');
       assert.ok(await page.locator('#simpleChords').isVisible(), 'Create progression is primary on first visit');
