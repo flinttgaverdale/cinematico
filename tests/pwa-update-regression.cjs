@@ -7,6 +7,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 
 const root = path.join(__dirname, '..');
+const scope = "/cinematico/";
 const assets = new Map([
   ['/', ['index.html', 'text/html']],
   ['/index.html', ['index.html', 'text/html']],
@@ -21,7 +22,8 @@ let update = false;
 let broken = false;
 let rejectedEngine = 0;
 const server = http.createServer((request, response) => {
-  const pathname = new URL(request.url, 'http://localhost').pathname;
+  const url = new URL(request.url, 'http://localhost');
+  const pathname = url.pathname.startsWith(scope) ? url.pathname.slice(scope.length - 1) : '';
   const asset = assets.get(pathname);
   if (!asset || (broken && pathname === '/engine.js')) {
     if (asset) rejectedEngine++;
@@ -50,12 +52,13 @@ async function main() {
     const page = await context.newPage();
     const errors = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.goto('http://127.0.0.1:' + server.address().port + '/');
+    await page.goto('http://127.0.0.1:' + server.address().port + scope);
     await page.waitForFunction(() => navigator.serviceWorker.controller !== null);
-    const initial = await page.evaluate(async () => ({
+    const engineUrl = scope + 'engine.js';
+    const initial = await page.evaluate(async (url) => ({
       keys: await caches.keys(),
-      engine: !!(await caches.match('/engine.js')),
-    }));
+      engine: !!(await caches.match(url)),
+    }), engineUrl);
     assert.equal(initial.engine, true);
     assert.equal(initial.keys.length, 1);
     const requestUpdate = () => page.evaluate(async () => {
@@ -80,10 +83,10 @@ async function main() {
     const outcome = await requestUpdate();
     assert.ok(rejectedEngine > 0);
     assert.equal(outcome, 'redundant', 'An incomplete worker must not activate');
-    assert.ok(await page.evaluate(async (key) => {
+    assert.ok(await page.evaluate(async ({key, url}) => {
       const cache = await caches.open(key);
-      return !!(await cache.match('/engine.js'));
-    }, initial.keys[0]), 'The active cache must keep the motor');
+      return !!(await cache.match(url));
+    }, {key: initial.keys[0], url: engineUrl}), 'The active cache must keep the motor');
     for (const offline of [false, true]) {
       await context.setOffline(offline);
       await page.reload({ waitUntil: 'domcontentloaded' });
