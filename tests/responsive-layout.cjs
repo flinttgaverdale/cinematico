@@ -30,8 +30,10 @@ async function overflow(page,where){
 (async()=>{
  const browser=await chromium.launch({headless:true});
  try{
-  for(const width of [320,360,390,430,768,1024,1440]){
-   const page=await browser.newPage({viewport:{width,height:850},deviceScaleFactor:width<=430?2:1});
+  const viewports=[320,360,375,390,412,430,768,1024,1440,1920].map(width=>({width,height:850}));
+  viewports.push({width:844,height:390},{width:400,height:340});
+  for(const {width,height} of viewports){
+   const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:width<=430?2:1});
    const errors=[];
    page.on('pageerror',e=>errors.push(e.message));
    await page.goto(BASE,{waitUntil:'domcontentloaded'});
@@ -51,12 +53,39 @@ async function overflow(page,where){
    await overflow(page,'Advanced home '+width);
    for(const mode of ['chords','inspire','tools']){
      await page.locator('[data-study-open="'+mode+'"]').click();
+     if(mode==='inspire'){
+       const wheel=page.locator('#circle [data-key]');
+       for(const [index,key] of [[1,'Enter'],[2,'Space']]){
+         const note=wheel.nth(index);
+         const name=await note.getAttribute('data-key');
+         await note.focus();
+         await page.keyboard.press(key);
+         assert.equal(await page.evaluate(()=>document.activeElement.getAttribute('data-key')),name,'Wheel activation retains keyboard focus');
+         assert.equal(await note.getAttribute('aria-pressed'),'true');
+         await page.keyboard.press('Tab');
+         assert.equal(await page.evaluate(()=>document.activeElement.getAttribute('data-key')),await wheel.nth(index+1).getAttribute('data-key'));
+       }
+     }
+     if(mode==='tools'){
+       for(const panel of await page.locator('.study-tool > summary').all()) await panel.click();
+       const chart=page.getByRole('region',{name:'Gráfico de conducción de voces'});
+       assert.ok(await chart.isVisible());
+       if(width<=430){
+         const help=page.locator('[data-study-panel="tools"] .help-details > summary:visible').first();
+         for(const target of [help,page.locator('#guideToggle')]){
+           assert.ok((await target.boundingBox()).height>=44,'Mobile help control reaches 44px');
+         }
+         await chart.focus();
+         await page.keyboard.press('ArrowRight');
+         await page.waitForFunction(()=>document.querySelector('#voiceLeading').scrollLeft>0);
+       }
+     }
      await overflow(page,'Advanced '+mode+' '+width);
      await page.locator('#workspaceAdvanced').click();
    }
    assert.deepEqual(errors,[],'Runtime errors at '+width+': '+errors.join('; '));
    await page.close();
-   console.log('PASS responsive viewport',width,'px · gutters, input, routes, advanced views, no document overflow');
+   console.log('PASS responsive viewport',width+'×'+height,'· gutters, keyboard, controls and expanded panels');
   }
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
