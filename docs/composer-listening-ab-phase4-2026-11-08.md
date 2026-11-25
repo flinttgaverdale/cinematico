@@ -40,11 +40,36 @@ En «Lenguaje de referencia» se incluyen dos botones **Escuchar** (uno por ruta
 - Pruebas Playwright para arranque/parada A/B, liberación de recursos al cambiar de tonalidad y preservación de material, en escritorio y móvil.
 - Se actualiza el caché PWA para evitar retener una versión anterior del motor.
 
-## Siguiente evaluación humana real (pendiente)
-1. Presentar dos rutas y un control a varios compositores sin atribuciones visibles, generando realizaciones con **igual duración por acorde, mismo registro, misma instrumentación y loudness** cuando se quiera aislar la armonía. Si cambia la longitud, seleccionar un subfragmento compatible o ajustar el diseño experimental sin sesgar la elección.
-2. Hacer varias rondas con orden aleatorizado, descansos y una opción «ninguna».
-3. Preguntar por utilidad para su escena, interés de continuación, sensación de dirección y posibilidad de desarrollo, dejando explícita la subjetividad del juicio.
-4. Anotar contexto y tamaño muestral antes de inferir preferencias, y separar la evaluación de armonía de futuras pruebas de orquestación, ritmo y melodía.
-5. No convertir puntuaciones humanas de un grupo pequeño en una etiqueta automática de autor o emoción.
+## Protocolo de escucha con participantes
 
-**Esta fase entrega una herramienta de audición exploratoria y mejores diagnósticos. No se ha realizado el estudio perceptivo humano.**
+Estado: preparado para pilotaje. Usa las simulaciones como control de
+integridad y los casos de `research/expressive-listening-pairs-v1.json` como
+hipótesis. Registra antes de reclutar el commit, los casos elegidos, las
+preguntas, el número previsto de participantes, los criterios de inclusión y
+la regla para cerrar la recogida.
+
+1. Pide consentimiento antes de cada sesión. Explica finalidad, duración,
+   conservación de los datos y cómo retirarse. Recluta compositores
+   voluntarios. Usa un código aleatorio por persona y guarda por separado
+   cualquier dato necesario para el consentimiento.
+2. Exporta una realización fija para cada caso. Usa la misma progresión
+   inicial, instrumento, tempo, duración por acorde, política de registro y
+   sonoridad comparable. Identifica los archivos por códigos neutrales y
+   registra el commit y SHA-256 de cada estímulo. Añade un par idéntico como
+   control negativo y analiza sus respuestas de forma separada.
+3. Alterna los órdenes A/B y B/A entre participantes y baraja el orden de los
+   casos. Usa auriculares a un volumen cómodo. Oculta compositor, cifrado y
+   etiqueta expresiva. Incluye pausas y permite escuchar cada par de nuevo.
+4. Pide utilidad para una escena o continuación concreta, con opciones
+   «A», «B», «ambas por igual», «ninguna» y «omitir». Pregunta por la
+   razón musical de la elección antes de mostrar etiquetas. En la segunda
+   ronda, pregunta por la relación con la intención como valoración distinta
+   de la preferencia.
+5. Conserva los campos `participante_codigo`, `caso`, `orden`, `eleccion`,
+   `utilidad`, `interpretacion` y `repeticiones`. Evita datos personales e
+   información musical identificable en los comentarios. Publica resultados
+   agregados, con denominadores, omisiones, control negativo y limitaciones.
+   Distingue lo que una persona oyó de lo que elegiría para componer.
+
+La prueba automatizada comprueba la estructura de los 15 diseños y sus
+progresiones. La ejecución con participantes y sus resultados siguen pendientes.
