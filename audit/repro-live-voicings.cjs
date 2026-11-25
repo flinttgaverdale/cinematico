@@ -38,9 +38,27 @@ for (const notation of ['Cadd9', 'Ebmadd9', 'Bbmaj9']) {
   const notes = Array.from(ctx.chordVoicing(notation));
   if (!notes.includes(48 + chord.root + 14)) errors.push('COMPOUND NINTH ' + notation);
 }
+for (let rootPc = 0; rootPc < 12; rootPc++) {
+  const tonic = E.spell(rootPc);
+  const inversion = E.spell((rootPc + 4) % 12);
+  const external = E.spell((rootPc + 10) % 12);
+  for (const notation of [tonic + '/' + inversion, tonic + '/' + external, tonic + 'maj9', tonic + 'maj7#11']) {
+    const chord = E.parseUserProgression(notation).chords[0];
+    const pitches = Array.from(ctx.chordVoicing(notation));
+    const expected = new Set([...chord.notes, chord.bass]);
+    const actual = new Set(pitches.map(pitch => pitch % 12));
+    if (pitches[0] % 12 !== chord.bass || pitches[0] !== Math.min(...pitches)
+        || actual.size !== expected.size || [...expected].some(pc => !actual.has(pc))) {
+      errors.push('TRANSPOSED ' + notation + ': MIDI=' + pitches.join(','));
+    }
+    if (chord.type === 'maj7#11' && !pitches.includes(48 + rootPc + 18)) {
+      errors.push('COMPOUND SHARP ELEVENTH ' + notation);
+    }
+  }
+}
 if (errors.length) {
   console.error('FAIL — ' + errors.length + ' confirmed voicing problems:\n' + errors.map((e, i) => (i + 1) + '. ' + e).join('\n'));
   process.exitCode = 1;
 } else {
-  console.log('PASS — bass inversions and identity-defining extensions preserved.');
+  console.log('PASS — bass and defining extensions preserved across 12 roots.');
 }
