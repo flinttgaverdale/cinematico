@@ -89,7 +89,7 @@ async function main(){
   }
   fs.copyFileSync(path.join(__dirname,'participant.html'),path.join(participant,'index.html'));
   const pairs=records.map(item=>({id:item.id,tracks:item.sides.map(x=>x.name)}));
-  fs.writeFileSync(path.join(participant,'pairs.js'),'window.CINEMATICO_PILOT='+JSON.stringify({pairs})+';\n');
+  fs.writeFileSync(path.join(participant,'pairs.js'),'window.CINEMATICO_PILOT='+JSON.stringify({revision,pairs})+';\n');
   fs.writeFileSync(path.join(output,'clave-coordinacion.json'),JSON.stringify({revision,rate,records},null,2)+'\n');
   console.log('PASS '+records.length+' pares, incluido control idéntico. WAV PCM mono a 48 kHz con duración emparejada.');
  }finally{await browser.close();}

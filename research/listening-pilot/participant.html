@@ -29,7 +29,8 @@ button{font:inherit;padding:.6rem 1rem}
 const form=document.getElementById("pilot");
 const host=document.getElementById("pairs");
 const guide=document.getElementById("feedback");
-const pairs=window.CINEMATICO_PILOT.pairs.slice();
+const pilot=window.CINEMATICO_PILOT;
+const pairs=pilot.pairs.slice();
 const random=new Uint32Array(pairs.length+2);
 crypto.getRandomValues(random);
 const participant=random[0].toString(16).padStart(8,"0");
@@ -56,9 +57,9 @@ for(const [index,pair] of pairs.entries()){
 form.addEventListener("submit",event=>{
  event.preventDefault();
  const data=new FormData(form);
- const rows=[["participante_codigo","par","posicion","grupo","eleccion","motivo"]];
+ const rows=[["revision","participante_codigo","par","posicion","grupo","eleccion","motivo"]];
  for(const [index,pair] of pairs.entries()){
-  rows.push([participant,pair.id,index+1,group,data.get(pair.id),data.get(pair.id+"-motivo")]);
+  rows.push([pilot.revision,participant,pair.id,index+1,group,data.get(pair.id),data.get(pair.id+"-motivo")]);
  }
  const escape=value=>{
   const text=String(value);

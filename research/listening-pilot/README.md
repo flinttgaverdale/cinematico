@@ -28,3 +28,8 @@ nota melódica, la resonancia y el cambio de acento en el instrumento. Recoge
 si esa tarea resulta útil por separado del bloque comparativo, ya que los
 acordes de esos casos no describen por sí solos la intervención. No se han
 recogido datos de participantes en esta revisión.
+
+Tras recoger los CSV, ejecuta
+`python3 research/listening-pilot/aggregate.py clave-coordinacion.json RESPUESTAS/*.csv`.
+El resultado valida la revisión y los grupos, separa el control y emite
+recuentos agregados sin códigos de participante ni comentarios.
