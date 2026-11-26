@@ -2758,7 +2758,7 @@ function harmonicPhraseEvidence(original,path,centers=[],endingPreference="auto"
  const transformedLinks=links.filter(l=>l.triadic||l.parallel).length;
  const recovery=links.length>1&&links[0].newPitches>0&&links.slice(1).some(l=>l.retention>=.5);
  const firstReturn=sameHarmony(first,end);
- const presentation=firstRecalled?"Recupera "+path[0].label+", ya presente en tu idea.":"Parte del enlace "+last.label+" → "+path[0].label+".";
+ const presentation=firstRecalled?"Recupera el núcleo de "+path[0].label+", presente en tu idea (el bajo puede variar).":"Parte del enlace "+last.label+" → "+path[0].label+".";
  const development=path.length===1?"No es imprescindible desarrollar más armonías para probar este enlace.":transformedLinks?"Ensaya "+transformedLinks+" transformación(es) entre tríadas.":transformed.length?"Reinterpreta fundamentales ya escuchadas.":sustainedLinks?"Conserva el bajo en "+sustainedLinks+" enlace(s).":recurrentLinks.length?"Recupera un enlace anterior.":"Desarrolla mediante cambios de armonía y notas comunes.";
  const culmination=preparation.length?"Posible preparación o desvío: "+preparation.at(-1).from+" → "+preparation.at(-1).to+". El punto culminante depende de la interpretación.":"El cifrado no localiza una culminación; puedes construirla con ritmo, registro o dinámica.";
  const resolution=arrivalKind==="dominant"||arrivalKind==="dominantTriad"?"Posible llegada de dominante con bajo de tónica.":arrivalKind==="plagal"?"Llegada plagal con bajo de tónica.":arrivalKind==="return"?"Regreso a un centro candidato.":arrivalKind==="inverted"?"Regreso con bajo no conclusivo.":arrivalKind==="suspended"?"Llegada suspendida.":"El destino permite continuar; no se confirma cierre de frase.";
@@ -2827,6 +2827,76 @@ function harmonicStructureEvidence(original,path,centers=[],durations=null){
  rhythm.suggestion=rhythmicSuggestion;
  return {boundary,groups,spans,bassSpans,passingBass,arrivals,closure,rhythm,relevant,relevantBass,relevantGroups,
   scope:"Lectura estructural posible, no reducción demostrada. Sin duración, acentos y melodía no se identifica ornamentación ni cierre formal."};
+}
+// Harmonic gestures are symbolic chord relationships, not inferred leitmotifs.
+function harmonicMotifEvidence(original,path){
+ if(!original?.length||!path?.length)return null;
+ const key=c=>[c.type,mod(c.bass-c.root)].join(":");
+ const delta=(a,b)=>mod(b.root-a.root);
+ const matches=(a,b)=>a.length===b.length&&a.length>=2&&a.every((c,i)=>key(c)===key(b[i])&&delta(c,b[i])===delta(a[0],b[0]))&&a.some(c=>c.root!==a[0].root);
+ const gestures=[],seen=new Set();
+ const add=(kind,model,candidate,offset=0)=>{const k=[kind,model.join(" "),candidate.join(" "),offset].join("|");if(!seen.has(k)){seen.add(k);gestures.push({kind,model,candidate,offset});}};
+ const labels=a=>a.map(c=>c.label);
+ const joined=[original.at(-1),...path];
+ for(let n=2;n<=3;n++){
+  for(let i=0;i+n<=original.length;i++){
+   const a=original.slice(i,i+n);
+   for(let j=0;j+n<=joined.length;j++){
+    const b=joined.slice(j,j+n);
+    if(matches(a,b))add(delta(a[0],b[0])?"transposition":"recall",labels(a),labels(b),delta(a[0],b[0]));
+    if(n===3&&a.every((c,k)=>key(c)===key(b[k]))&&a.some(c=>c.root!==a[0].root)&&a.every((c,k)=>delta(a[0],c)===mod(-delta(b[0],b[k])))&&!matches(a,b))add("rootReflection",labels(a),labels(b));
+   }
+  }
+ }
+ // Insertion/removal of one internal chord is structural, not temporal augmentation.
+ for(let i=0;i+2<=original.length;i++)for(let j=0;j+3<=joined.length;j++){
+  const a=original.slice(i,i+2),b=joined.slice(j,j+3);
+  if(matches(a,[b[0],b[2]])&&b[1].root!==b[0].root&&b[1].root!==b[2].root)add("insertion",labels(a),labels(b),delta(a[0],b[0]));
+ }
+ for(let i=0;i+3<=original.length;i++)for(let j=0;j+2<=joined.length;j++){
+  const a=original.slice(i,i+3),b=joined.slice(j,j+2);
+  if(matches([a[0],a[2]],b)&&a[1].root!==a[0].root&&a[1].root!==a[2].root)add("omission",labels(a),labels(b),delta(a[0],b[0]));
+ }
+ const intervals=joined.slice(1).map((c,i)=>delta(joined[i],c));
+ const cycle=intervals.length>=2&&intervals[0]!==0&&intervals.every(x=>x===intervals[0])?{step:intervals[0],links:intervals.length,closed:joined[0].root===joined.at(-1).root,labels:labels(joined)}:null;
+ const mirrors=[];
+ for(let i=0;i+2<joined.length;i++)if(intervals[i]&&mod(intervals[i]+intervals[i+1])===0)mirrors.push({index:i,labels:labels(joined.slice(i,i+3))});
+ const parallelChanges=joined.slice(1).flatMap((b,i)=>{const a=joined[i];return a.root===b.root&&["","m"].includes(a.type)&&["","m"].includes(b.type)&&a.type!==b.type?[{from:a.label,to:b.label}]:[];});
+ return {gestures,cycle,mirrors,parallelChanges,scope:"Relaciones del cifrado; no demuestran identidad temática, simetría registral, cambio de modo global ni aumento/disminución rítmica."};
+}
+// Small explicit set of contextual candidates, all evaluated by the same search.
+function harmonicMotifSeeds(original,pool){
+ const out=[],seen=new Set();
+ const lookup=new Map(pool.map(c=>[[c.root,c.type,mod(c.bass-c.root)].join(":"),c]));
+ const lookupAt=(c,root)=>lookup.get([mod(root),c.type,mod(c.bass-c.root)].join(":"));
+ const add=path=>{if(path.length!==3||path.some(c=>!c))return;const k=path.map(c=>c.label).join("|");if(!seen.has(k)){seen.add(k);out.push(path);}};
+ for(let i=0;i+3<=original.length;i++){
+  const a=original.slice(i,i+3);if(new Set(a.map(c=>c.root)).size<2)continue;
+  for(let t=0;t<12;t++){
+   add(a.map(c=>lookupAt(c,c.root+t)));
+   add(a.map(c=>lookupAt(c,a[0].root+t-mod(c.root-a[0].root))));
+  }
+ }
+ // Continue a repeated non-zero root step only if the input already establishes it.
+ if(original.length>=3){
+  const a=original.at(-3),b=original.at(-2),c=original.at(-1),step=mod(b.root-a.root);
+  if(step&&step===mod(c.root-b.root)&&a.type===b.type&&b.type===c.type)add([1,2,3].map(i=>lookupAt(c,c.root+step*i)));
+ }
+ return out;
+}
+const MOTIF_WEIGHTS={
+ williams:[.6,.7,.1,.3,.3],horner:[1.3,.8,.7,.5,1.1],herrmann:[.9,1.4,1.0,.5,.7],
+ elfman:[.9,1.0,.6,1.0,.8],zimmer:[1.1,.2,.2,.5,.4],giacchino:[1.0,.7,.2,1.0,.6],
+ silvestri:[.8,1.1,1.0,.5,.5],shore:[.9,.4,.4,.7,1.5],morricone:[1.1,.3,.2,1.0,.4],
+ newman:[1.0,.2,.2,.9,.5],goransson:[1.1,.3,.7,.7,.3]
+};
+function motifPathScore(e,id,kind){
+ if(!e)return 0;const w=MOTIF_WEIGHTS[id];
+ const recall=e.gestures.some(g=>g.kind==="recall"||g.kind==="transposition");
+ const mirror=e.mirrors.length||e.gestures.some(g=>g.kind==="rootReflection");
+ const expanded=e.gestures.some(g=>g.kind==="insertion"||g.kind==="omission");
+ const score=w[0]*Number(recall)+w[1]*Number(Boolean(mirror))+w[2]*Number(Boolean(e.cycle))+w[3]*Number(expanded)+w[4]*Number(e.parallelChanges.length>0);
+ return Math.min(3,score*(kind==="transformation"?1.2:kind==="continuity"?.85:1));
 }
 function structuralPathScore(e,composerId,kind,mood){
  if(!e)return 0;
@@ -2948,11 +3018,7 @@ function composerContinuations(chords,intent,composerId,options={}){
  };
  const used=new Set(),out=[];
  for(const [kind,title] of [["continuity","Continuidad"],["transformation","Transformación"],["contrast","Contraste"]]){
-  let beam=[{path:[],score:0}];
-  for(let i=0;i<3;i++){
-   const next=[];
-   for(const state of beam){const a=state.path.at(-1)||last;
-    for(const b of pool){
+  const extend=(state,b,i)=>{const a=state.path.at(-1)||last;
      const l=local(a,b);
      let score=state.score+l.score;
      if(kind==="continuity")score+=l.retention*3.6-l.chrom*1.0-l.motion*.24;
@@ -2970,8 +3036,8 @@ function composerContinuations(chords,intent,composerId,options={}){
      if(i>=1&&same(a,b)&&same(state.path[i-2]||last,a))score-=6;
      if(i===0&&same(last,b)&&!["zimmer","goransson"].includes(composerId))score-=3;
      if(i===2){const end=endFit(a,b);
-      if(endingPreference==="closed"&&centers.length&&!end.rootArrival)continue;
-      if(endingPreference==="open"&&end.arrival&&!end.suspended)continue;
+      if(endingPreference==="closed"&&centers.length&&!end.rootArrival)return null;
+      if(endingPreference==="open"&&end.arrival&&!end.suspended)return null;
       score+=end.score;
       if(endingPreference==="closed"){
        score+=end.directed?10:end.plagal?6:end.rootArrival?4:1;
@@ -2985,14 +3051,23 @@ function composerContinuations(chords,intent,composerId,options={}){
       if(kind==="contrast")score+=end.arrival?1.0:end.suspended?0.5:0;
       if(mood==="delay")score+=end.directed?-3:end.suspended?1.5:0;
      }
-     next.push({path:[...state.path,b],score});
-    }
-   }
+     return {path:[...state.path,b],score};
+  };
+  let beam=[{path:[],score:0}];
+  for(let i=0;i<3;i++){
+   const next=[];
+   for(const state of beam)for(const b of pool){const candidate=extend(state,b,i);if(candidate)next.push(candidate);}
    next.sort((a,b)=>b.score-a.score);
    beam=next.slice(0,18);
   }
+  const keys=new Set(beam.map(x=>x.path.map(c=>c.label).join("|")));
+  for(const seed of harmonicMotifSeeds(chords,pool)){
+   const k=seed.map(c=>c.label).join("|");if(keys.has(k))continue;
+   let state={path:[],score:0};for(let i=0;i<seed.length&&state;i++)state=extend(state,seed[i],i);
+   if(state){beam.push(state);keys.add(k);}
+  }
   // Re-rank a bounded set of complete paths using whole-phrase relationships.
-  beam=beam.map(state=>({...state,score:state.score+phraseArchScore(harmonicPhraseEvidence(chords,state.path,centers,endingPreference),composerId,kind,mood)+structuralPathScore(harmonicStructureEvidence(chords,state.path,centers),composerId,kind,mood)})).sort((a,b)=>b.score-a.score);
+  beam=beam.map(state=>({...state,score:state.score+phraseArchScore(harmonicPhraseEvidence(chords,state.path,centers,endingPreference),composerId,kind,mood)+structuralPathScore(harmonicStructureEvidence(chords,state.path,centers),composerId,kind,mood)+motifPathScore(harmonicMotifEvidence(chords,state.path),composerId,kind)})).sort((a,b)=>b.score-a.score);
   const selected=beam.find(s=>!used.has(s.path.map(c=>c.label).join("|")));
   if(!selected)continue;
   let p=selected.path;
@@ -3008,6 +3083,7 @@ function composerContinuations(chords,intent,composerId,options={}){
   const end=endFit(p.length>1?p.at(-2):last,p.at(-1));
   const phrase=harmonicPhraseEvidence(chords,p,centers,endingPreference);
   const structure=harmonicStructureEvidence(chords,p,centers);
+  const motif=harmonicMotifEvidence(chords,p);
   const direction=end.directed||end.plagal?"resolver":end.suspended?"mantener tensión":"cambiar dirección";
   const links=[last,...p].slice(1).map((c,i)=>{const a=i?p[i-1]:last;return {from:a.label,to:c.label,common:common(a,c),bassHeld:a.bass===c.bass,expectation:continuationExpectation(a,c,centers)};});
   const facts=links.map(x=>x.from+" → "+x.to+": "+(x.common.length?x.common.map(n=>spell(n,sharp)).join(", ")+" en común":"sin notas comunes")+(x.bassHeld?", mismo bajo":"")).join("; ");
@@ -3019,10 +3095,10 @@ function composerContinuations(chords,intent,composerId,options={}){
   out.push({id:kind,title,device:lens.name,chords:labels,direction,gestureSummary:ending,arcSummary:ending,
    variantDescription:lens.name+" · "+title,explanation:facts+". "+expectationText+" "+(memory.length?"Recuperas material anterior en "+memory.map(m=>m.label).join(", ")+". ":"")+interpretation+" Ejercicio original, no predicción de autoría. "+context.caveat,
    evidence:{grade:"D",work:COMPOSER_CREATIVE_LENSES[composerId].work,source:COMPOSER_CREATIVE_LENSES[composerId].source},
-   original:origin.slice(),composerId,intent,ending,endingPreference,endingEvidence:{arrival:end.arrival,directed:end.directed,plagal:end.plagal,suspended:end.suspended,rootArrival:end.rootArrival,dominantLink:end.dominantLink},memory,phrase,structure,expectations:links.map(l=>l.expectation),candidateCenters:centers.map(c=>c.displayLabel),sharedNotes:links.map(x=>x.common.length),rootPath:p.map(c=>c.root)});
+   original:origin.slice(),composerId,intent,ending,endingPreference,endingEvidence:{arrival:end.arrival,directed:end.directed,plagal:end.plagal,suspended:end.suspended,rootArrival:end.rootArrival,dominantLink:end.dominantLink},memory,phrase,structure,motif,expectations:links.map(l=>l.expectation),candidateCenters:centers.map(c=>c.displayLabel),sharedNotes:links.map(x=>x.common.length),rootPath:p.map(c=>c.root)});
  }
  return out;
 }
 
-root.CinematicoEngine={harmonicStructureEvidence,continuationInnerVoiceExample,harmonicPhraseEvidence,continuationExpectation,continuationCenters,composerContinuations,analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={harmonicMotifEvidence,harmonicStructureEvidence,continuationInnerVoiceExample,harmonicPhraseEvidence,continuationExpectation,continuationCenters,composerContinuations,analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
