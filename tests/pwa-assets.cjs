@@ -49,4 +49,8 @@ for(const size of [192,512]){
  assert.ok(sw.includes('./'+src),'PWA should cache installed icon '+src);
 }
 assert.ok(html.includes('href="icon-192.png"'));
+const workerVersion=sw.match(/cinematico-studio-v(\d+)/)?.[1];
+const registrationVersion=html.match(/service-worker\.js\?v=(\d+)/)?.[1];
+assert.ok(workerVersion,'Cache must declare a version');
+assert.equal(registrationVersion,workerVersion,'Registration and shell cache versions must match');
 console.log('PASS PWA assets: PNG signature, chunks, CRC, decompress, visible mark, 192/512 manifest and offline caching');
