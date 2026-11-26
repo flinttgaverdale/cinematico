@@ -48,6 +48,19 @@ async function overflow(page,where){
    assert.equal(await page.locator('.simple-path').count(),3,'Three musical routes still appear');
    await check(page,'.simple-path',20,width,'Route cards');
    await overflow(page,'Suggestions '+width);
+   await page.locator('#simpleReference').selectOption('horner');
+   assert.ok(await page.locator('#simpleEnding').isVisible(),'Conditional phrase direction visible');
+   await page.locator('#simpleExplore').click();
+   assert.equal(await page.locator('.simple-path').count(),3);
+   await check(page,'#simpleReference',20,width,'Composer selection');
+   for(const card of await page.locator('.simple-path').all()){
+    const action=card.locator('.simple-audio-row');
+    assert.ok(await action.isVisible());
+    if(width<=430)for(const button of await action.locator('button').all())assert.ok((await button.boundingBox()).height>=44,'Audio touch target');
+   }
+   await page.locator('.simple-path').first().locator(':scope > details > summary').click();
+   await overflow(page,'Expanded composer result '+width);
+
    await page.locator('#workspaceAdvanced').click();
    await check(page,'.advanced-navigation',20,width,'Advanced choice');
    await overflow(page,'Advanced home '+width);
