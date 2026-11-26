@@ -14,3 +14,12 @@ Versión beta 0.2 — **archivo único** `Cinematico-Generator-Beta.amxd`.
 **Validación:** formato de archivo, dependencias empaquetadas, lógica de 270 casos y geometría de controles probados por código. La carga final en Live/Max y el comportamiento de la interfaz **no están probados en un Windows real**, por lo que es una beta y debes usar un proyecto de prueba. Si al abrirlo sale error, envíame el texto exacto de la consola de Max, no tomaremos el archivo por estable hasta pasar esa prueba.
 
 Requisitos: Live 12 Suite / Max for Live 8.6 o posterior.
+
+### Comprobación del voicing
+
+En una compilación de revisión, abre el dispositivo en Live 12 Suite en Windows,
+elige una ruta y pulsa Aplicar en un clip vacío. Comprueba las alturas y el
+registro de las novenas en el editor MIDI y verifica Deshacer. Los acordes slash
+y las extensiones de cinco notas se comprueban también en el banco de pruebas
+del generador, ya que las rutas de la beta no ofrecen todos esos acordes.
+El empaquetado y las pruebas JavaScript se ejecutan fuera de Ableton.
