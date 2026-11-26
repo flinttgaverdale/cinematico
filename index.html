@@ -1041,6 +1041,20 @@ function experimentCard(experiment,listening){
   (comparison?audition("Original",comparison.before)+audition("Variante",comparison.after):'')+
   experimentDetails(experiment)+'</article>';
 }
+function structuralDetails(q,i){
+ const st=q.structure;if(!st)return "";
+ const span=st.relevant.find(x=>x.kind==="neighborOverBass")||st.relevant.find(x=>x.kind==="return");
+ const group=st.relevantGroups.find(g=>new Set(g.labels).size>1);
+ const bass=st.relevantBass[0];
+ const local=st.arrivals.filter(a=>a.index>=st.boundary&&a.kind==="localTarget");
+ const closure={centerArrival:"Llegada a un centro candidato",plagalArrival:"Posible llegada plagal",localArrival:"Llegada local a otra fundamental",invertedArrival:"Llegada con bajo distinto de la fundamental",centerReturn:"Regreso al centro, sin confirmar cadencia",nonConclusiveBassOrColor:"Regreso con bajo o color poco conclusivo",dominantOpen:"Dominante de un centro candidato; queda abierta",unstableOpen:"Sonoridad final abierta",undetermined:"Cierre no determinable"};
+ const lines=[];
+ if(span)lines.push("Retorno posible: "+span.labels.join(" → ")+(span.kind==="neighborOverBass"?" sobre un mismo bajo escrito.":"."));
+ if(group)lines.push("Un mismo núcleo armónico: "+group.labels.join(" → ")+".");
+ if(bass)lines.push("Bajo escrito común: "+CinematicoEngine.spell(bass.pc)+".");
+ if(local.length)lines.push("Llegada local: "+local.map(a=>a.from+" → "+a.to).join(" · ")+".");
+ return '<details><summary>Estructura y voces interiores</summary>'+lines.map(t=>'<p>'+esc(t)+'</p>').join("")+'<p><strong>Destino:</strong> '+esc(closure[st.closure]||"Sin cierre determinado")+'.</p><p><strong>Ritmo armónico:</strong> '+esc(st.rhythm.suggestion)+'</p><details data-structural-voice="'+i+'"><summary>Ejemplo de voces interiores</summary><p class="inner-voice-example"></p></details><p>'+esc(st.scope)+'</p></details>';
+}
 function simpleExplore(){
  stopSimplePreview();
  $("simpleListenStatus").textContent="";
@@ -1075,11 +1089,21 @@ function simpleExplore(){
    '</span><h3>'+esc(q.composerId?q.title:cardTitles[i])+'</h3></div><p class="simple-direction">'+esc(q.arcSummary||q.gestureSummary||chosenDirection[q.direction]||"Explorar una alternativa")+
    '</p><div class="simple-chips" aria-label="Acordes sugeridos">'+q.chords.map(c=>'<span class="new" title="Acorde propuesto">'+esc(c)+'</span>').join('<span class="simple-arrow" aria-hidden="true">→</span>')+
    '</div><details><summary>¿Por qué esta opción?</summary><p>'+esc(q.variantDescription||"")+'</p><p>Gesto armónico: '+esc(q.gestureSummary||"")+
-   '</p><p>'+esc(q.explanation)+'</p>'+(q.candidateCenters?.length?'<p>Centros de referencia posibles: '+esc(q.candidateCenters.join(' / '))+'.</p>':'')+(q.phrase?'<details><summary>Desarrollo de la frase</summary><p><strong>Presentación:</strong> '+esc(q.phrase.presentation)+'</p><p><strong>Desarrollo:</strong> '+esc(q.phrase.development)+'</p><p><strong>Culminación:</strong> '+esc(q.phrase.culmination)+'</p><p><strong>Resolución:</strong> '+esc(q.phrase.resolution)+'</p><p>'+esc(q.phrase.scope)+'</p></details>':'')+'<p>La melodía, el ritmo y la interpretación también cuentan.</p></details>'+
+   '</p><p>'+esc(q.explanation)+'</p>'+(q.candidateCenters?.length?'<p>Centros de referencia posibles: '+esc(q.candidateCenters.join(' / '))+'.</p>':'')+(q.phrase?'<details><summary>Desarrollo de la frase</summary><p><strong>Presentación:</strong> '+esc(q.phrase.presentation)+'</p><p><strong>Desarrollo:</strong> '+esc(q.phrase.development)+'</p><p><strong>Culminación:</strong> '+esc(q.phrase.culmination)+'</p><p><strong>Resolución:</strong> '+esc(q.phrase.resolution)+'</p><p>'+esc(q.phrase.scope)+'</p></details>':'') +structuralDetails(q,i)+'<p>La melodía, el ritmo y la interpretación también cuentan.</p></details>'+
    (q.evidence?'<p class="simple-direction">Ejercicio original · <a href="'+esc(q.evidence.source)+'" target="_blank" rel="noopener noreferrer">'+esc(q.evidence.work)+'</a></p>':'')+audition('Continuación',q.chords)+audition('Todo',[...original,...q.chords])+
    '<button class="secondary" type="button" data-open-advanced="'+i+'" '+(canAnalyze(q)?"":"disabled title=\"El estudio admite 8 acordes como máximo\"")+
    '>Elegir y analizar →</button></article>').join("");
  out.querySelectorAll("[data-simple-preview]").forEach(button=>button.onclick=()=>playSimplePreview(Number(button.dataset.simplePreview),p.chords,listening));
+ out.querySelectorAll("[data-structural-voice]").forEach(details=>details.addEventListener("toggle",()=>{
+  if(!details.open||details.dataset.ready)return;
+  const q=paths[Number(details.dataset.structuralVoice)];
+  const parsed=CinematicoEngine.parseUserProgression(q.chords.join(" "));
+  const result=CinematicoEngine.continuationInnerVoiceExample(p.chords,parsed.chords,q.composerId);
+  const name=n=>CinematicoEngine.spell(n%12)+(Math.floor(n/12)-1);
+  details.querySelector(".inner-voice-example").textContent=result?result.voices.map(v=>v.name+": "+v.notes.map(name).join(" → ")).join(" · ")+". "+result.scope:"No se ha encontrado una disposición válida.";
+  details.dataset.ready="true";
+ }));
+
  out.querySelectorAll("[data-open-advanced]").forEach(button=>button.onclick=()=>{
   stopSimplePreview();
   const chosen=paths[Number(button.dataset.openAdvanced)];
@@ -1133,5 +1157,5 @@ $("workspaceAdvanced").onclick=()=>{if(document.body.dataset.workspace==="explor
 let openingWorkspace="explore";
 try{if(localStorage.getItem("cinematico-workspace-v2")==="advanced")openingWorkspace="advanced";}catch{}
 setWorkspace(openingWorkspace);
-$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=56",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
+$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=57",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
 </script></body></html>
