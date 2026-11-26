@@ -39,6 +39,7 @@ jobs:
           node tests/composer-research-regression.cjs
           node tests/composer-lenses-integration.cjs
           node tests/contextual-composer-experiments.cjs
+          node tests/composer-continuations-context.cjs
           node tests/composer-continuity-regression.cjs
           node tests/composer-context-simulations.cjs --json
           node tests/composer-voicing-research.cjs
