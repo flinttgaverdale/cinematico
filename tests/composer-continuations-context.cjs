@@ -26,8 +26,20 @@ for(let t=0;t<12;t++){
 }
 for(const raw of ['Dm7 G7 Cmaj7','Am/E Fmaj7/C Dm7 Gsus4','Cmaj7#11 E/Bb Bm7b5','F#dim7','C G Am F Dm Em F G'])
  for(const id of ids)for(const mood of ['suspense','nostalgia','contraste'])check(raw,id,mood);
+for(const raw of ['Am F C G','Dm7 G7 Cmaj7','Am Dm E7'])for(const id of ids)for(const ending of ['open','closed']){
+ const original=E.parseUserProgression(raw).chords;
+ const paths=E.composerContinuations(original,'esperanza',id,{ending});
+ assert.equal(paths.length,3);
+ for(const path of paths){
+  assert.deepEqual(E.parseUserProgression(path.chords.join(' ')).errors,[]);
+  assert.equal(path.endingPreference,ending);
+  if(ending==='closed')assert.ok(path.endingEvidence.arrival);
+  else assert.ok(!path.endingEvidence.arrival||path.endingEvidence.suspended);
+ }
+ count++;
+}
 const p=E.parseUserProgression('Am F C G').chords;
 assert.deepEqual(E.composerContinuations(p,'esperanza',''),E.emotionalContinuations(p,'esperanza'));
 assert.equal(E.composerListeningPlan(E.parseUserProgression('Am').chords,{fullPreview:true,equalChordDuration:true}).status,'ready');
 assert.equal(E.composerListeningPlan([...E.parseUserProgression('C G Am F Dm Em F G').chords,...E.parseUserProgression('Am F G').chords],{fullPreview:true,equalChordDuration:true}).status,'ready');
-console.log('PASS '+count+' composer-continuation cases, original intact, 11 distinct profiles in 12 transpositions');
+console.log('PASS '+count+' composer-continuation cases, original intact, 11 distinct profiles in 12 transpositions, open and arrival targets');
