@@ -2819,10 +2819,13 @@ function harmonicStructureEvidence(original,path,centers=[],durations=null){
  const terminal=arrivals.find(x=>x.terminal)||null;
  const end=all.at(-1),centerEnd=centers.some(c=>c.tonic===end.root&&(c.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(end.type));
  const openDominant=centers.some(c=>mod(c.tonic+7)===end.root&&DOMINANT_TYPES.includes(end.type));
- const closure=terminal?(terminal.rootBass?(terminal.kind==="candidateCenter"?"centerArrival":"localArrival"):"invertedArrival"):centerEnd?(end.bass===end.root&&end.type!=="mMaj7"?"centerReturn":"nonConclusiveBassOrColor"):openDominant?"dominantOpen":["sus4","7sus4","mMaj7","dim","dim7"].includes(end.type)?"unstableOpen":"undetermined";
+ const plagal=all.length>1&&centerEnd&&end.bass===end.root&&end.type!=="mMaj7"&&mod(all.at(-2).root-end.root)===5&&(MAJOR_TONIC_TYPES.includes(all.at(-2).type)||MINOR_TONIC_TYPES.includes(all.at(-2).type));
+ const closure=terminal?(terminal.rootBass?(terminal.kind==="candidateCenter"?"centerArrival":"localArrival"):"invertedArrival"):plagal?"plagalArrival":centerEnd?(end.bass===end.root&&end.type!=="mMaj7"?"centerReturn":"nonConclusiveBassOrColor"):openDominant?"dominantOpen":["sus4","7sus4","mMaj7","dim","dim7"].includes(end.type)?"unstableOpen":"undetermined";
  const timed=Array.isArray(durations)&&durations.length===all.length&&durations.every(d=>Number.isFinite(d)&&d>0);
  const rhythm=timed?{known:true,unit:"beats",originalMean:durations.slice(0,boundary).reduce((a,b)=>a+b,0)/boundary,continuationMean:durations.slice(boundary).reduce((a,b)=>a+b,0)/path.length}:{known:false};
- return {groups,spans,bassSpans,passingBass,arrivals,closure,rhythm,relevant,relevantBass,relevantGroups,
+ const rhythmicSuggestion=closure==="centerArrival"||closure==="plagalArrival"?"Prueba alargar el último acorde respecto a la preparación.":relevantBass.length||relevantGroups.length?"Prueba mantener más tiempo el apoyo y variar la subdivisión, sin cambiar necesariamente de acorde.":"Compara un pulso armónico regular con una duración mayor del acorde que quieras destacar.";
+ rhythm.suggestion=rhythmicSuggestion;
+ return {boundary,groups,spans,bassSpans,passingBass,arrivals,closure,rhythm,relevant,relevantBass,relevantGroups,
   scope:"Lectura estructural posible, no reducción demostrada. Sin duración, acentos y melodía no se identifica ornamentación ni cierre formal."};
 }
 function structuralPathScore(e,composerId,kind,mood){
@@ -2832,7 +2835,7 @@ function structuralPathScore(e,composerId,kind,mood){
  const prolongation=e.relevant.some(x=>x.kind==="neighborOverBass")?1:0;
  const held=e.relevantBass.length?1:0;
  const variant=e.relevantGroups.length?1:0;
- const local=e.arrivals.some(x=>!x.terminal&&x.kind==="localTarget"&&x.rootBass&&x.index>=e.groups[0].start)?1:0;
+ const local=e.arrivals.some(x=>!x.terminal&&x.kind==="localTarget"&&x.rootBass&&x.index>=e.boundary)?1:0;
  let score=(staticStyle?1.3:.45)*prolongation+(staticStyle?1.0:.25)*held+(staticStyle?.55:.15)*variant;
  if(kind==="transformation"&&e.relevant.some(x=>x.kind==="return"))score+=.7;
  if(tonalStyle&&mood!=="delay")score+=.7*local;
@@ -2841,7 +2844,7 @@ function structuralPathScore(e,composerId,kind,mood){
 // Actual inner voices of a generated realization, not inferred user performance.
 function continuationInnerVoiceExample(original,path,composerId){
  const all=[...original,...path],start=original.length-1;
- const style=["zimmer","newman","morricone"].includes(composerId)?"sustained":composerId==="herrmann"?"contrary":"cinematic";
+ const style="cinematic";
  const result=voiceLead(all,style);
  if(result.voicings.length!==all.length)return null;
  const pitches=result.voicings.slice(start);
