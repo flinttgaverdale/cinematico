@@ -2683,14 +2683,44 @@ const CONTINUATION_LENSES={
  newman:{name:"Continuidad y resonancia",w:[2.1,0.2,0,0,0.6,2.5,0,0]},
  goransson:{name:"Permanencia y transformación",w:[0.7,0.8,0,0,1.0,0,0,0.2]}
 };
+// Symbolic expectation: pitch-class opportunities, not actual voice resolutions.
+// A dominant seventh can also be a color; only claim a plausible directed target.
+function continuationExpectation(from,to,centers=[]){
+ const target=mod(from.root+5),targetQuality=MAJOR_TONIC_TYPES.includes(to.type)||MINOR_TONIC_TYPES.includes(to.type);
+ const dominant=["7","9"].includes(from.type)&&from.notes.includes(mod(from.root+4))&&from.notes.includes(mod(from.root+10));
+ const targetCenter=centers.filter(c=>c.tonic===target);
+ const matches=to.root===target&&targetQuality;
+ const stable=targetQuality&&!["mMaj7"].includes(to.type);
+ const rootBass=to.bass===to.root;
+ const leading=mod(target-1),seventh=mod(from.root+10);
+ const possibleLeading=matches&&to.notes.includes(target),possibleSeventh=matches&&[mod(seventh-1),mod(seventh-2)].some(n=>to.notes.includes(n));
+ let kind="none";
+ if(dominant){
+  if(matches&&stable)kind="resolution";
+  else if(to.root===target&&["sus4","7sus4"].includes(to.type))kind="suspension";
+  else if(to.root===from.root)kind="prolongation";
+  else if(targetCenter.some(c=>c.mode==="menor natural"?to.root===mod(target+8)&&MAJOR_TONIC_TYPES.includes(to.type):to.root===mod(target+9)&&MINOR_TONIC_TYPES.includes(to.type)))kind="deceptive";
+  else kind="departure";
+ }
+ return {kind,target,rootBass,stable,possibleLeading,possibleSeventh,contextual:targetCenter.length>0,dominant};
+}
+function continuationCenters(context,chords){
+ const hs=context.tonal.candidates||[],best=hs[0];
+ if(!best||context.tonal.status==="insufficient")return [];
+ // Relative keys with comparable pitch coverage are kept unless strong
+ // cadential evidence distinguishes them. The ranking is not a probability.
+ const relative=h=>h.mode!==best.mode&&mod(h.tonic-best.tonic)===(best.mode==="mayor"?9:3);
+ return hs.filter(h=>best.score-h.score<.65||relative(h)&&best.score-h.score<=1.1&&h.coverage>=best.coverage-3&&!(best.cadences||[]).some(c=>c.kind==="V–I/i"&&c.index===chords.length-1)).slice(0,3);
+}
 function composerContinuations(chords,intent,composerId,options={}){
  if(!Object.prototype.hasOwnProperty.call(CONTINUATION_LENSES,composerId))return emotionalContinuations(chords,intent);
  const context=analyzeCompositionMaterial(chords);
  if(!context)return [];
  const lens=CONTINUATION_LENSES[composerId],last=chords.at(-1);
  const origin=chords.map(c=>c.label),history=new Set(chords.flatMap(c=>[...c.notes,c.bass]));
- const hypotheses=context.tonal.candidates||[],best=hypotheses[0];
- const centers=hypotheses.filter(h=>best.score-h.score<0.65).slice(0,3);
+ const centers=continuationCenters(context,chords);
+ const initial=chords[0];
+ const priorRoots=new Set(chords.map(c=>c.root));
  const emotional=emotionalContinuations(chords,intent);
  const mood=emotionCreativeProfile(intent).creativeGesture;
  const endingPreference=["open","closed"].includes(options.ending)?options.ending:"auto";
@@ -2709,7 +2739,7 @@ function composerContinuations(chords,intent,composerId,options={}){
  const common=(a,b)=>a.notes.filter(n=>b.notes.includes(n));
  const dist=(a,b)=>Math.min(mod(a-b),mod(b-a));
  const tension=c=>["7","dim","mMaj7","sus4"].includes(c.type);
- const color=c=>["maj7","m7","add9","madd9"].includes(c.type);
+ const color=c=>["maj7","maj9","maj7#11","m7","m9","add9","madd9","6","m6"].includes(c.type);
  const same=(a,b)=>a.root===b.root&&a.type===b.type&&a.bass===b.bass;
  const linkCache=new Map();
  const local=(a,b)=>{
@@ -2726,8 +2756,16 @@ function composerContinuations(chords,intent,composerId,options={}){
   score+=b.notes.filter(n=>history.has(n)).length/b.notes.length*.85;
   // Avoid rewarding a fourth pitch simply for increasing note count.
   score-=motion.distance*.16+motion.unmatched*.4;
-  if(color(b)&&!color(a))score-=.4;
-  if(color(b)&&color(a))score-=1.2;
+  if(color(b)&&!color(a))score-=.8;
+  if(color(b)&&color(a))score-=2;
+  if(color(b)&&composerId!=="newman")score-=.6;
+  if(priorRoots.has(b.root))score+=.4;
+  const expectation=continuationExpectation(a,b,centers);
+  if(expectation.dominant&&expectation.contextual){
+   if(expectation.kind==="resolution")score+=mood==="delay"?-.5:2.2;
+   else if(expectation.kind==="deceptive")score+=1;
+   else if(expectation.kind==="departure")score-=1.1;
+  }
   if(b.type==="mMaj7"&&composerId!=="herrmann")score-=1.5;
   if(b.type==="mMaj7"&&a.type==="mMaj7")score-=2.5;
   if(composerId==="horner"&&["","m"].includes(a.type)&&["","m"].includes(b.type)&&a.type!==b.type&&motion.distance<=2&&d>0)score+=2.5;
@@ -2745,15 +2783,17 @@ function composerContinuations(chords,intent,composerId,options={}){
   if(mood==="opening"&&color(b))score+=.65;
   if(mood==="expansion"&&d>=5&&d<=7)score+=.8;
   if(mood==="opening"&&b.type==="mMaj7")score-=1.4;
-  const result={score,shared,retention,chrom,bass,d,motion:motion.distance};linkCache.set(key,result);return result;
+  const result={score,shared,retention,chrom,bass,d,motion:motion.distance,expectation};linkCache.set(key,result);return result;
  };
  const endFit=(a,b)=>{
   const arrival=context.tonal.status!=="insufficient"&&centers.some(h=>h.tonic===b.root&&(h.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(b.type));
-  const directed=mod(a.root-b.root)===7&&DOMINANT_TYPES.includes(a.type)&&arrival;
-  const rootArrival=arrival&&b.bass===b.root;
-  const plagal=arrival&&mod(a.root-b.root)===5&&(MAJOR_TONIC_TYPES.includes(a.type)||MINOR_TONIC_TYPES.includes(a.type));
+  const rootArrival=arrival&&b.bass===b.root&&b.type!=="mMaj7";
+  const dominantLink=mod(a.root-b.root)===7&&DOMINANT_TYPES.includes(a.type)&&arrival;
+  const directed=dominantLink&&rootArrival;
+  const plagalLink=arrival&&mod(a.root-b.root)===5&&(MAJOR_TONIC_TYPES.includes(a.type)||MINOR_TONIC_TYPES.includes(a.type));
+  const plagal=plagalLink&&rootArrival;
   const suspended=b.type==="sus4"||b.type==="7"||b.type==="dim"||b.type==="mMaj7";
-  return {arrival,directed,plagal,rootArrival,suspended,score:(mood==="arrival"?Number(directed)*3+Number(arrival):mood==="delay"?Number(suspended)*3-Number(arrival):mood==="opening"?Number(color(b))*2:mood==="continuity"?Number(color(b)):0)};
+  return {arrival,directed,plagal,rootArrival,dominantLink,plagalLink,suspended,score:(mood==="arrival"?Number(directed)*3+Number(arrival):mood==="delay"?Number(suspended)*3-Number(arrival):mood==="opening"?Number(color(b))*2:mood==="continuity"?Number(color(b)):0)};
  };
  const used=new Set(),out=[];
  for(const [kind,title] of [["continuity","Continuidad"],["transformation","Transformación"],["contrast","Contraste"]]){
@@ -2765,6 +2805,10 @@ function composerContinuations(chords,intent,composerId,options={}){
      const l=local(a,b);
      let score=state.score+l.score;
      if(kind==="continuity")score+=l.retention*3.6-l.chrom*1.0-l.motion*.24;
+     // Prefer recalling a material element over arbitrary novelty, especially at a return.
+     if(i===2&&b.root===initial.root&&centers.some(c=>c.tonic===b.root)&&mood!=="delay"&&endingPreference!=="open")score+=2.4;
+     if(i===0&&l.expectation.kind==="resolution"&&l.expectation.contextual&&mood!=="delay"&&kind==="continuity")score+=2.5;
+     if(i===0&&kind==="contrast"&&l.expectation.kind==="deceptive")score+=2.5;
      if(kind==="transformation")score+=l.score*.25+(same(a,b)?-.6:0);
      if(kind==="contrast")score+=(i===0?Math.min(l.chrom,2)*1.2+(l.d===6?1:0):l.retention*1.7-l.chrom*.7)-(l.shared===0?.8:0);
      if(i===0&&out.some(p=>p.chords[0]===b.label))score-=4;
@@ -2775,10 +2819,10 @@ function composerContinuations(chords,intent,composerId,options={}){
      if(i>=1&&same(a,b)&&same(state.path[i-2]||last,a))score-=6;
      if(i===0&&same(last,b)&&!["zimmer","goransson"].includes(composerId))score-=3;
      if(i===2){const end=endFit(a,b);
-      if(endingPreference==="closed"&&context.tonal.status!=="insufficient"&&!end.arrival)continue;
+      if(endingPreference==="closed"&&centers.length&&!end.rootArrival)continue;
       if(endingPreference==="open"&&end.arrival&&!end.suspended)continue;
       score+=end.score;
-      if(endingPreference==="closed")score+=end.directed?8:end.plagal?5:end.rootArrival?4:1;
+      if(endingPreference==="closed")score+=end.directed?10:end.plagal?6:end.rootArrival?4:1;
       if(endingPreference==="open")score+=end.suspended?4:1;
       if(["williams","giacchino","silvestri"].includes(composerId)&&kind==="continuity"&&mood!=="delay"&&endingPreference!=="open")score+=end.directed?5:end.arrival?4:-2;
       if(kind==="continuity"&&["williams","giacchino"].includes(composerId)&&centers.length&&i===2&&!end.arrival)score-=2;
@@ -2797,17 +2841,20 @@ function composerContinuations(chords,intent,composerId,options={}){
   const p=selected.path,labels=p.map(c=>c.label);used.add(labels.join("|"));
   const end=endFit(p[1],p[2]);
   const direction=end.directed||end.plagal?"resolver":end.suspended?"mantener tensión":"cambiar dirección";
-  const links=[last,...p].slice(1).map((c,i)=>{const a=i?p[i-1]:last;return {from:a.label,to:c.label,common:common(a,c),bassHeld:a.bass===c.bass};});
+  const links=[last,...p].slice(1).map((c,i)=>{const a=i?p[i-1]:last;return {from:a.label,to:c.label,common:common(a,c),bassHeld:a.bass===c.bass,expectation:continuationExpectation(a,c,centers)};});
   const facts=links.map(x=>x.from+" → "+x.to+": "+(x.common.length?x.common.map(n=>spell(n,sharp)).join(", ")+" en común":"sin notas comunes")+(x.bassHeld?", mismo bajo":"")).join("; ");
+  const memory=p.flatMap((c,i)=>chords.some(x=>x.root===c.root&&x.type===c.type)?[{index:i,label:c.label,kind:"recuperación"}]:priorRoots.has(c.root)?[{index:i,label:c.label,kind:"transformación de fundamental anterior"}]:[]);
+  const firstExpectation=links[0].expectation;
+  const expectationText=firstExpectation.kind==="resolution"?"El primer enlace satisface una posible dirección de la dominante anterior.":firstExpectation.kind==="deceptive"?"El primer enlace desvía la llegada esperada hacia una relativa.":firstExpectation.kind==="suspension"?"La llegada conserva una suspensión posible.":firstExpectation.kind==="prolongation"?"Se prolonga la región de la dominante.":"";
   const interpretation=composerId==="goransson"?"Prueba variar el pulso o las capas sin deducirlos del cifrado.":composerId==="zimmer"?"Ensaya sostener el bajo cuando coincida y variar las capas.":composerId==="morricone"?"Escucha el recorrido del bajo por separado.":"Escucha el enlace y decide si la dirección encaja con tu frase.";
-  const ending=end.directed?"Posible llegada de dominante":end.plagal?"Posible llegada plagal":end.suspended?"Llegada abierta o tensa":end.arrival?"Regreso a un centro candidato; cierre no confirmado":"Otro destino armónico; cierre no confirmado";
+  const ending=end.directed?"Posible llegada de dominante con bajo de tónica":end.plagal?"Posible llegada plagal con bajo de tónica":end.dominantLink||end.plagalLink?"Llegada armónica con bajo no conclusivo":end.suspended?"Llegada abierta o tensa":end.arrival?"Regreso a un centro candidato; cierre no confirmado":"Otro destino armónico; cierre no confirmado";
   out.push({id:kind,title,device:lens.name,chords:labels,direction,gestureSummary:ending,arcSummary:ending,
-   variantDescription:lens.name+" · "+title,explanation:facts+". "+interpretation+" Ejercicio original, no predicción de autoría. "+context.caveat,
+   variantDescription:lens.name+" · "+title,explanation:facts+". "+expectationText+" "+(memory.length?"Recuperas material anterior en "+memory.map(m=>m.label).join(", ")+". ":"")+interpretation+" Ejercicio original, no predicción de autoría. "+context.caveat,
    evidence:{grade:"D",work:COMPOSER_CREATIVE_LENSES[composerId].work,source:COMPOSER_CREATIVE_LENSES[composerId].source},
-   original:origin.slice(),composerId,intent,ending,endingPreference,endingEvidence:{arrival:end.arrival,directed:end.directed,plagal:end.plagal,suspended:end.suspended},sharedNotes:links.map(x=>x.common.length),rootPath:p.map(c=>c.root)});
+   original:origin.slice(),composerId,intent,ending,endingPreference,endingEvidence:{arrival:end.arrival,directed:end.directed,plagal:end.plagal,suspended:end.suspended,rootArrival:end.rootArrival,dominantLink:end.dominantLink},memory,expectations:links.map(l=>l.expectation),candidateCenters:centers.map(c=>c.displayLabel),sharedNotes:links.map(x=>x.common.length),rootPath:p.map(c=>c.root)});
  }
  return out;
 }
 
-root.CinematicoEngine={composerContinuations,analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={continuationExpectation,continuationCenters,composerContinuations,analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
