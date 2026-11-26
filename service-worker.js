@@ -1,6 +1,6 @@
 // Service Worker — Cinemático Studio
 // Cada publicación del shell debe incrementar CACHE y el registro en index.html.
-const CACHE = "cinematico-studio-v63";
+const CACHE = "cinematico-studio-v64";
 const ASSETS = [
   "./", "./index.html", "./engine.js", "./studio.css", "./manifest.json",
   "./icon-192.png", "./icon-512.png",
@@ -30,6 +30,15 @@ self.addEventListener("activate", event => {
     .then(() => self.clients.claim()));
 });
 
+self.addEventListener("message", event => {
+  if (event.data !== "cinematico:activate-update" || !event.source?.url) return;
+  const client = new URL(event.source.url);
+  const updatePage = new URL("actualizar.html", self.registration.scope);
+  if (client.origin === updatePage.origin && client.pathname === updatePage.pathname) {
+    event.waitUntil(self.skipWaiting());
+  }
+});
+
 self.addEventListener("fetch", event => {
   const request = event.request;
   const url = new URL(request.url);
@@ -37,6 +46,6 @@ self.addEventListener("fetch", event => {
   const key = SHELL.get(url.pathname);
   if (!key) return;
   // La versión activa sirve HTML y motor de la misma precarga. Una versión
-  // nueva espera a que se cierren las pestañas que siguen usando la anterior.
+  // nueva espera al cierre de las pestañas o a la activación desde actualizar.html.
   event.respondWith(caches.open(CACHE).then(cache => cache.match(key)).then(response => response || fetch(request)));
 });

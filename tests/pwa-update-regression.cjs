@@ -13,6 +13,8 @@ const assets = new Map([
   ['/index.html', ['index.html', 'text/html']],
   ['/engine.js', ['engine.js', 'text/javascript']],
   ['/studio.css', ['studio.css', 'text/css']],
+  ['/actualizar.html', ['actualizar.html', 'text/html']],
+  ['/preview/', ['preview/index.html', 'text/html']],
   ['/manifest.json', ['manifest.json', 'application/manifest+json']],
   ['/icon-192.png', ['icon-192.png', 'image/png']],
   ['/icon-512.png', ['icon-512.png', 'image/png']],
@@ -22,8 +24,7 @@ for (const font of fs.readdirSync(path.join(root, 'assets/fonts'))) {
   const file = 'assets/fonts/' + font;
   assets.set('/' + file, [file, font.endsWith('.woff2') ? 'font/woff2' : 'text/plain']);
 }
-const updatedCache = 'cinematico-studio-audit-update';
-let update = false;
+let update = 0;
 let broken = false;
 let rejectNavigation = false;
 let rejectedEngine = 0;
@@ -47,13 +48,13 @@ const server = http.createServer((request, response) => {
   }
   let data = fs.readFileSync(path.join(root, filename));
   if (update && filename === 'index.html') {
-    data = data.toString().replace('<head>', '<head><meta name="test-version" content="next">');
+    data = data.toString().replace('<head>', '<head><meta name="test-version" content="next-' + update + '">');
   }
   if (update && filename === 'engine.js') {
-    data = data.toString() + '\nwindow.testEngineVersion = "next";';
+    data = data.toString() + '\nwindow.testEngineVersion = "next-' + update + '";';
   }
   if (update && filename === 'service-worker.js') {
-    data = data.toString().replace(/const CACHE = "[^"]+";/, 'const CACHE = "' + updatedCache + '";');
+    data = data.toString().replace(/const CACHE = "[^"]+";/, 'const CACHE = "cinematico-studio-audit-update-' + update + '";');
   }
   response.writeHead(200, { 'Content-Type': mime, 'Cache-Control': 'no-store' }).end(data);
 });
@@ -92,7 +93,7 @@ async function main() {
       await registration.update();
       return state;
     });
-    update = true;
+    update = 1;
     broken = true;
     const outcome = await requestUpdate();
     assert.ok(rejectedEngine > 0);
@@ -125,9 +126,39 @@ async function main() {
     await updated.evaluate(() => navigator.serviceWorker.ready);
     await context.setOffline(true);
     await updated.reload({waitUntil:'domcontentloaded'});
-    assert.equal(await updated.locator('meta[name="test-version"]').getAttribute('content'), 'next');
-    assert.equal(await updated.evaluate(() => window.testEngineVersion), 'next');
-    console.log('PASS PWA update: HTTP 503 preserves the old shell, then HTML and engine update together');
+    assert.equal(await updated.locator('meta[name="test-version"]').getAttribute('content'), 'next-1');
+    assert.equal(await updated.evaluate(() => window.testEngineVersion), 'next-1');
+
+    await context.setOffline(false);
+    await updated.locator('#simpleChords').fill('Am F C G');
+    update = 2;
+    broken = true;
+    const other = await context.newPage();
+    const updatePage = new URL('actualizar.html', url).href;
+    await other.goto(updatePage);
+    await other.getByRole('button', {name:'Actualizar y abrir'}).click();
+    await other.getByText('No se pudo aplicar la actualización.', {exact:false}).waitFor();
+    assert.equal(other.url(), updatePage, 'An incomplete update must keep the recovery page open');
+    assert.equal(await updated.evaluate(() => window.testEngineVersion), 'next-1');
+
+    broken = false;
+    await updated.evaluate(async () => (await navigator.serviceWorker.ready).update());
+    await updated.waitForFunction(async () => Boolean((await navigator.serviceWorker.ready).waiting));
+    await other.goto(url + '?version=2');
+    assert.equal(await other.locator('meta[name="test-version"]').getAttribute('content'), 'next-1');
+    await other.goto(new URL('preview/', url).href);
+    await other.waitForURL(updatePage);
+    await other.getByRole('button', {name:'Actualizar y abrir'}).click();
+    await other.waitForURL(url);
+    assert.equal(await other.locator('meta[name="test-version"]').getAttribute('content'), 'next-2');
+    assert.equal(await other.evaluate(() => window.testEngineVersion), 'next-2');
+    assert.match(await other.locator('footer').innerText(), /0\.2\.0-beta\.3/);
+    assert.equal(await updated.locator('#simpleChords').inputValue(), 'Am F C G', 'Another tab retains its progression');
+    await context.setOffline(true);
+    await other.reload({waitUntil:'domcontentloaded'});
+    assert.equal(await other.locator('meta[name="test-version"]').getAttribute('content'), 'next-2');
+    assert.equal(await other.evaluate(() => window.testEngineVersion), 'next-2');
+    console.log('PASS PWA update: HTTP 503 preserves the old shell, then passive and explicit updates switch HTML and engine together');
   } finally {
     await browser.close();
   }

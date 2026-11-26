@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171A1C">
+  <title>Actualizar Cinemático Studio</title>
+  <link rel="stylesheet" href="studio.css">
+  <style>
+    main { max-width: 42rem; margin: 4rem auto; padding: 1.5rem; }
+    h1 { margin-top: 0; }
+    p { line-height: 1.6; }
+    .actions { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; margin-top: 1.5rem; }
+    .actions button { flex: none; }
+    .actions a { color: var(--sage); }
+    .actions button:disabled { opacity: .65; cursor: wait; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <main class="panel">
+      <h1>Actualizar Cinemático Studio</h1>
+      <p>La versión publicada es <strong>0.2.0-beta.3</strong>. El número aparece al pie del estudio.</p>
+      <p>El estudio se abrirá en esta pestaña. Las demás pestañas seguirán abiertas.</p>
+      <div class="actions">
+        <button class="primary" type="button" id="update">Actualizar y abrir</button>
+        <a href="./">Abrir el estudio</a>
+      </div>
+      <p id="status" role="status"></p>
+    </main>
+  </div>
+  <script>
+    const button = document.getElementById('update');
+    const status = document.getElementById('status');
+
+    function awaitState(worker, states) {
+      return new Promise((resolve, reject) => {
+        const timeout = setTimeout(() => finish(reject, new Error('Tiempo de espera agotado')), 30000);
+        function finish(callback, value) {
+          clearTimeout(timeout);
+          worker.removeEventListener('statechange', check);
+          callback(value);
+        }
+        function check() {
+          if (states.includes(worker.state)) finish(resolve, worker.state);
+        }
+        worker.addEventListener('statechange', check);
+        check();
+      });
+    }
+
+    button.addEventListener('click', async () => {
+      button.disabled = true;
+      status.textContent = 'Comprobando la actualización…';
+      try {
+        const registration = await navigator.serviceWorker?.getRegistration();
+        if (registration) {
+          await registration.update();
+          const installing = registration.installing;
+          if (installing && await awaitState(installing, ['installed', 'activating', 'activated', 'redundant']) === 'redundant') {
+            throw new Error('Descarga incompleta');
+          }
+          const waiting = registration.waiting;
+          if (waiting) {
+            const activation = awaitState(waiting, ['activated', 'redundant']);
+            waiting.postMessage('cinematico:activate-update');
+            if (await activation !== 'activated') throw new Error('Versión descartada');
+          }
+        }
+        location.replace('./');
+      } catch {
+        status.textContent = 'No se pudo aplicar la actualización. Comprueba la conexión y vuelve a intentarlo.';
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
