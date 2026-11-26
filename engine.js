@@ -1251,8 +1251,8 @@ function harmonicTrajectories(chords,start=0){
    Same synthesized instrument, total time and per-voice envelope in both routes.
    Different chord counts imply different chord rates; this is not a blinded test. */
 function composerListeningPlan(chords,options={}){
- if(!Array.isArray(chords)||chords.length<2||chords.length>8)
-  return {status:"invalid",steps:[],warning:"Se necesitan entre 2 y 8 acordes para escuchar el ejemplo."};
+ if(!Array.isArray(chords)||chords.length<(options.fullPreview?1:2)||chords.length>(options.fullPreview?11:8))
+  return {status:"invalid",steps:[],warning:options.fullPreview?"Se necesitan entre 1 y 11 acordes para escuchar.":"Se necesitan entre 2 y 8 acordes para escuchar el ejemplo."};
  const equalChordDuration=options.equalChordDuration===true;
  // Two honest comparison controls: equal total phrase duration (default),
  // or an equal 2-second harmonic pulse per chord across routes.
