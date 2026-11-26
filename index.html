@@ -971,10 +971,10 @@ function playSimplePreview(index,original,paths){
  // A consistent, brief listening context: at most the last two user chords,
  // then the three proposed chords. The complete user input is never altered.
  const previewLabels=choice.preview||[...original.slice(-2).map(ch=>ch.label),...choice.chords];
- const parsed=CinematicoEngine.parseUserProgression(previewLabels.join(" "));
+ const parsed=choice.fullPreview?previewLabels.map(label=>CinematicoEngine.parseUserProgression(label)).reduce((a,b)=>({chords:[...a.chords,...b.chords],errors:[...a.errors,...b.errors]}),{chords:[],errors:[]}):CinematicoEngine.parseUserProgression(previewLabels.join(" "));
  const status=$("simpleListenStatus");
  if(parsed.errors.length){status.textContent="No se puede reproducir esta propuesta.";return;}
- const plan=CinematicoEngine.composerListeningPlan(parsed.chords,{equalChordDuration:true});
+ const plan=CinematicoEngine.composerListeningPlan(parsed.chords,{equalChordDuration:true,fullPreview:!!choice.fullPreview});
  if(plan.status!=="ready"){status.textContent=plan.warning;return;}
  const AudioConstructor=window.AudioContext||window.webkitAudioContext;
  if(!AudioConstructor){status.textContent="Este navegador no permite escuchar las armonías.";return;}
@@ -1057,27 +1057,28 @@ function simpleExplore(){
  for(const k of Object.keys(labLocks))delete labLocks[k];
  renderUserMaterial();
  const mood=$("simpleMood").value;
- const experiment=CinematicoEngine.contextualComposerExperiment($("simpleReference").value,p.chords,mood);
- const options=CinematicoEngine.emotionalContinuations(userMaterial,mood);
- const paths=experiment?options.slice(0,2):options;
- const listening=paths.slice();
+ const reference=$("simpleReference").value;
+ const paths=CinematicoEngine.composerContinuations(userMaterial,mood,reference);
+ const listening=[];
+ const original=p.chords.map(c=>c.label);
+ const audition=(label,preview)=>{const i=listening.length;listening.push({preview,fullPreview:true,listenAs:"Escuchando "+label});return '<button class="secondary simple-play-button" type="button" data-simple-preview="'+i+'" data-listen-label="'+esc("▶ "+label)+'" aria-pressed="false">'+esc("▶ "+label)+'</button>';};
  const chosenDirection={resolver:"Posible regreso al centro","mantener tensión":"Una llegada que queda abierta",tonicizar:"Otra región tonal posible","cambiar dirección":"Un cambio de color armónico"};
  const cardTitles=["Primera posibilidad","Un recorrido distinto","Una tercera vía"];
  $("simpleFeedback").textContent=paths.length?"Estas opciones son sugerencias, no cambios en tu progresión.":"No hemos encontrado caminos diferentes para estos acordes. Prueba otro matiz.";
  const canAnalyze=p.chords.length+3<=8;
  if(!canAnalyze&&paths.length)$("simpleFeedback").textContent="Puedes comparar los caminos. Para estudiarlos en profundidad, usa una progresión inicial de hasta cinco acordes.";
- if(!paths.length&&!experiment)return;
- out.innerHTML='<div class="simple-results-intro"><h3>'+ (experiment?"Continuaciones y un experimento":"Tres caminos para explorar")+
+ if(!paths.length)return;
+ out.innerHTML='<div class="simple-results-intro"><h3>'+ (reference&&COMPOSERS[reference]?"Tres caminos · "+esc(COMPOSERS[reference].name):"Tres caminos para explorar")+
   '</h3><div class="simple-start-chips" aria-label="Tu progresión original"><span class="simple-start-label">TU IDEA</span>'+
-  userMaterial.map(c=>'<span>'+esc(c.label)+'</span>').join('')+'</div></div>'+
+  userMaterial.map(c=>'<span>'+esc(c.label)+'</span>').join('')+'</div>'+audition('Original',original)+'</div>'+
   paths.map((q,i)=>'<article class="simple-path"><div class="simple-path-heading"><span class="simple-variant">CAMINO '+(i+1)+
-   '</span><h3>'+esc(cardTitles[i])+'</h3></div><p class="simple-direction">'+esc(q.arcSummary||q.gestureSummary||chosenDirection[q.direction]||"Explorar una alternativa")+
+   '</span><h3>'+esc(q.composerId?q.title:cardTitles[i])+'</h3></div><p class="simple-direction">'+esc(q.arcSummary||q.gestureSummary||chosenDirection[q.direction]||"Explorar una alternativa")+
    '</p><div class="simple-chips" aria-label="Acordes sugeridos">'+q.chords.map(c=>'<span class="new" title="Acorde propuesto">'+esc(c)+'</span>').join('<span class="simple-arrow" aria-hidden="true">→</span>')+
    '</div><details><summary>¿Por qué esta opción?</summary><p>'+esc(q.variantDescription||"")+'</p><p>Gesto armónico: '+esc(q.gestureSummary||"")+
    '</p><p>'+esc(q.explanation)+'</p><p>La melodía, el ritmo y la interpretación también cuentan.</p></details>'+
-   '<button class="secondary simple-play-button" type="button" data-simple-preview="'+i+'" aria-pressed="false">▶ Escuchar</button>'+
+   (q.evidence?'<p class="simple-direction">Ejercicio original · <a href="'+esc(q.evidence.source)+'" target="_blank" rel="noopener noreferrer">'+esc(q.evidence.work)+'</a></p>':'')+audition('Continuación',q.chords)+audition('Todo',[...original,...q.chords])+
    '<button class="secondary" type="button" data-open-advanced="'+i+'" '+(canAnalyze?"":"disabled title=\"El estudio admite 8 acordes como máximo\"")+
-   '>Elegir y analizar →</button></article>').join("")+(experiment?experimentCard(experiment,listening):"");
+   '>Elegir y analizar →</button></article>').join("");
  out.querySelectorAll("[data-simple-preview]").forEach(button=>button.onclick=()=>playSimplePreview(Number(button.dataset.simplePreview),p.chords,listening));
  out.querySelectorAll("[data-open-advanced]").forEach(button=>button.onclick=()=>{
   stopSimplePreview();
@@ -1130,5 +1131,5 @@ $("workspaceAdvanced").onclick=()=>{if(document.body.dataset.workspace==="explor
 let openingWorkspace="explore";
 try{if(localStorage.getItem("cinematico-workspace-v2")==="advanced")openingWorkspace="advanced";}catch{}
 setWorkspace(openingWorkspace);
-$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=52",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
+$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=53",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
 </script></body></html>
