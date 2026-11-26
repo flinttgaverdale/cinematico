@@ -2695,7 +2695,7 @@ function composerContinuations(chords,intent,composerId){
  const mood=emotionCreativeProfile(intent).creativeGesture;
  const sharp=/#|♯/.test(last.label);
  const pool=[],seen=new Set();
- const add=label=>{if(seen.has(label))return;const p=parseUserProgression(label);if(!p.errors.length&&p.chords.length===1){seen.add(label);pool.push(p.chords[0]);}};
+ const add=label=>{const p=parseUserProgression(label);if(!p.errors.length&&p.chords.length===1){const c=p.chords[0],key=[c.root,c.type,c.bass].join(":");if(!seen.has(key)){seen.add(key);pool.push(c);}}};
  // Generate single chord candidates, then search contextual links, not preset suffixes.
  for(let offset=0;offset<12;offset++){const r=mod(last.root+offset);for(const q of ["","m","7","maj7","m7","add9","madd9","sus4","mMaj7","dim"])add(spell(r,sharp)+q);}
  for(const label of origin)add(label);
@@ -2710,14 +2710,26 @@ function composerContinuations(chords,intent,composerId){
  const tension=c=>["7","dim","mMaj7","sus4"].includes(c.type);
  const color=c=>["maj7","m7","add9","madd9"].includes(c.type);
  const same=(a,b)=>a.root===b.root&&a.type===b.type&&a.bass===b.bass;
+ const linkCache=new Map();
  const local=(a,b)=>{
+  const key=[a.root,a.type,a.bass,b.root,b.type,b.bass].join(":");
+  if(linkCache.has(key))return linkCache.get(key);
   const shared=common(a,b).length,d=dist(a.root,b.root),bass=dist(a.bass,b.bass);
+  const motion=pitchClassMotionEstimate(a,b);
+  const retention=shared/Math.max(a.notes.length,b.notes.length);
   const chrom=b.notes.filter(n=>!history.has(n)).length;
-  const features=[shared,Number(a.root===b.root&&a.type!==b.type),Number(d===1||d===3||d===4)*1.5+chrom*.35,
+  const features=[retention*3,Number(a.root===b.root&&a.type!==b.type),Number(d===1||d===3||d===4)*1.5+chrom*.35,
    Number(mod(a.root-b.root)===7)*(a.type==="7"?2:1),Number(a.bass===b.bass),Number(color(b)),
    Number(b.type==="mMaj7"||b.type==="dim"),Number(d===6||d===2)];
   let score=features.reduce((sum,v,i)=>sum+v*lens.w[i],0);
-  score+=b.notes.filter(n=>history.has(n)).length*.28;
+  score+=b.notes.filter(n=>history.has(n)).length/b.notes.length*.85;
+  // Avoid rewarding a fourth pitch simply for increasing note count.
+  score-=motion.distance*.16+motion.unmatched*.4;
+  if(color(b)&&!color(a))score-=.4;
+  if(color(b)&&color(a))score-=1.2;
+  if(b.type==="mMaj7"&&composerId!=="herrmann")score-=1.5;
+  if(b.type==="mMaj7"&&a.type==="mMaj7")score-=2.5;
+  if(composerId==="horner"&&["","m"].includes(a.type)&&["","m"].includes(b.type)&&a.type!==b.type&&motion.distance<=2&&d>0)score+=2.5;
   if(composerId==="morricone")score+=(bass===1||bass===2?2.4:0)+(b.bass!==b.root?1.4:0);
   if(composerId==="goransson"&&same(a,b))score+=3;
   if(composerId==="horner"){if(["","m"].includes(a.type)&&["","m"].includes(b.type)&&shared>=1)score+=4;else if(!["","m"].includes(b.type))score-=2;}
@@ -2725,17 +2737,19 @@ function composerContinuations(chords,intent,composerId){
   if(composerId==="silvestri"&&d===2&&a.type===""&&b.type==="")score+=1.5;
   if(same(a,b)&&!["zimmer","goransson","herrmann"].includes(composerId))score-=5;
   if(b.bassKind==="independent"&&b.bass!==a.bass)score-=1.8;
-  if(mood==="continuity")score+=shared*.45-chrom*.4;
-  if(mood==="contrast"||mood==="uncertainty")score+=chrom*.65;
+  if(mood==="continuity")score+=retention*1.35-chrom*.7;
+  if(mood==="contrast"||mood==="uncertainty")score+=Math.min(chrom,2)*.55;
   if(mood==="darkening"&&MINOR_TONIC_TYPES.includes(b.type))score+=.8;
   if(mood==="delay"&&tension(b))score+=.8;
-  if(mood==="opening"&&color(b))score+=.8;
-  return {score,shared,chrom,bass,d};
+  if(mood==="opening"&&color(b))score+=.65;
+  if(mood==="expansion"&&d>=5&&d<=7)score+=.8;
+  if(mood==="opening"&&b.type==="mMaj7")score-=1.4;
+  const result={score,shared,retention,chrom,bass,d,motion:motion.distance};linkCache.set(key,result);return result;
  };
  const endFit=(a,b)=>{
   const arrival=context.tonal.status!=="insufficient"&&centers.some(h=>h.tonic===b.root&&(h.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(b.type));
   const directed=mod(a.root-b.root)===7&&DOMINANT_TYPES.includes(a.type)&&arrival;
-  const suspended=tension(b);
+  const suspended=b.type==="sus4"||b.type==="7"||b.type==="dim"||b.type==="mMaj7";
   return {arrival,directed,suspended,score:(mood==="arrival"?Number(directed)*3+Number(arrival):mood==="delay"?Number(suspended)*3-Number(arrival):mood==="opening"?Number(color(b))*2:mood==="continuity"?Number(color(b)):0)};
  };
  const used=new Set(),out=[];
@@ -2747,14 +2761,21 @@ function composerContinuations(chords,intent,composerId){
     for(const b of pool){
      const l=local(a,b);
      let score=state.score+l.score;
-     if(kind==="continuity")score+=l.shared*1.2-l.chrom*.8-l.d*.15;
+     if(kind==="continuity")score+=l.retention*3.6-l.chrom*1.0-l.motion*.24;
      if(kind==="transformation")score+=l.score*.25+(same(a,b)?-.6:0);
-     if(kind==="contrast")score+=l.chrom*1.15+(l.d===6?1.5:0)-(l.shared===0?.5:0);
-     if(i===0&&out.some(p=>p.chords[0]===b.label))score-=3;
+     if(kind==="contrast")score+=(i===0?Math.min(l.chrom,2)*1.2+(l.d===6?1:0):l.retention*1.7-l.chrom*.7)-(l.shared===0?.8:0);
+     if(i===0&&out.some(p=>p.chords[0]===b.label))score-=4;
+     if(out.some(p=>p.chords[i]===b.label))score-=1.8;
+     if(i>0&&state.path.filter(c=>color(c)).length>=2&&color(b))score-=3;
+     if(i>0&&state.path.filter(c=>c.type==="mMaj7").length>=1&&b.type==="mMaj7")score-=3;
      if(state.path.some(c=>same(c,b)))score-=3;
      if(i>=1&&same(a,b)&&same(state.path[i-2]||last,a))score-=6;
      if(i===0&&same(last,b)&&!["zimmer","goransson"].includes(composerId))score-=3;
-     if(i===2)score+=endFit(a,b).score+(kind==="continuity"&&endFit(a,b).directed?1.5:0);
+     if(i===2){const end=endFit(a,b);score+=end.score;
+      if(kind==="continuity"&&mood!=="delay")score+=end.directed?3.5:end.arrival?1.8:0;
+      if(kind==="contrast")score+=end.arrival?1.0:end.suspended?0.5:0;
+      if(mood==="delay")score+=end.directed?-3:end.suspended?1.5:0;
+     }
      next.push({path:[...state.path,b],score});
     }
    }
@@ -2764,7 +2785,7 @@ function composerContinuations(chords,intent,composerId){
   const selected=beam.find(s=>!used.has(s.path.map(c=>c.label).join("|")));
   if(!selected)continue;
   const p=selected.path,labels=p.map(c=>c.label);used.add(labels.join("|"));
-  const first=local(last,p[0]),end=endFit(p[1],p[2]);
+  const end=endFit(p[1],p[2]);
   const direction=end.directed?"resolver":end.suspended?"mantener tensión":"cambiar dirección";
   const links=[last,...p].slice(1).map((c,i)=>{const a=i?p[i-1]:last;return {from:a.label,to:c.label,common:common(a,c),bassHeld:a.bass===c.bass};});
   const facts=links.map(x=>x.from+" → "+x.to+": "+(x.common.length?x.common.map(n=>spell(n,sharp)).join(", ")+" en común":"sin notas comunes")+(x.bassHeld?", mismo bajo":"")).join("; ");
