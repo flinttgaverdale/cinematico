@@ -1273,6 +1273,70 @@ function composerListeningPlan(chords,options={}){
    :"Maqueta de cuatro voces sintetizadas: mismo sonido, volumen por voz y duración total. La cantidad de acordes cambia el ritmo armónico; no se han simulado instrumentos, melodías ni dinámica real."};
 }
 
+// Pianistic suggestions, not a model of the composer's actual performance.
+// All pitches are taken from the neutral realization; no extra harmony or instruments.
+const PIANO_GESTURES={
+ williams:{name:"Proyectar la voz superior y dar espacio a la llegada",shape:"arrival",spread:"top",pattern:"block",gate:.94,accent:"top"},
+ horner:{name:"Conservar las voces comunes y enlazar suavemente",shape:"even",spread:"none",pattern:"sustain",gate:.98,accent:"inner"},
+ herrmann:{name:"Destacar una célula interior sobre un bajo sostenido",shape:"even",spread:"bass",pattern:"inner",gate:.72,accent:"inner"},
+ elfman:{name:"Alternar ataques ligeros y registros contrastados",shape:"even",spread:"alternate",pattern:"broken",gate:.62,accent:"alternate"},
+ zimmer:{name:"Acumular actividad sobre el mismo apoyo",shape:"even",spread:"bass",pattern:"accumulate",gate:.90,accent:"bass"},
+ giacchino:{name:"Articular el recorrido y recuperar el gesto inicial",shape:"arrival",spread:"none",pattern:"broken",gate:.86,accent:"top"},
+ silvestri:{name:"Impulsar la llegada mediante subdivisión y acentos",shape:"impulse",spread:"top",pattern:"pulse",gate:.78,accent:"top"},
+ shore:{name:"Separar planos y sostener las notas comunes",shape:"even",spread:"bass",pattern:"sustain",gate:.98,accent:"top"},
+ morricone:{name:"Separar el bajo de una línea superior",shape:"even",spread:"bass",pattern:"independent",gate:.94,accent:"top"},
+ newman:{name:"Dejar espacio entre ataques y conservar resonancia",shape:"arrival",spread:"top",pattern:"sustain",gate:.98,accent:"soft"},
+ goransson:{name:"Repetir una célula con acentos desplazados",shape:"even",spread:"none",pattern:"syncopated",gate:.56,accent:"alternate"}
+};
+function composerPianoPerformance(chords,composerId,options={}){
+ const p=PIANO_GESTURES[composerId];
+ if(!p)return {status:"invalid",events:[],warning:"Selecciona una referencia musical."};
+ const neutral=composerListeningPlan(chords,{fullPreview:true,equalChordDuration:true});
+ if(neutral.status!=="ready")return {...neutral,events:[]};
+ const n=chords.length,totalSeconds=neutral.totalSeconds;
+ const raw=chords.map((_,i)=>p.shape==="arrival"?(i===n-1&&n>1?1.5:1):p.shape==="impulse"?(i===n-1?1.3:Math.max(.7,1.15-i*.1)):1);
+ const unit=totalSeconds/raw.reduce((a,b)=>a+b,0),events=[],steps=[];
+ let start=0;
+ for(let i=0;i<n;i++){
+  const duration=raw[i]*unit,notes=neutral.steps[i].pitches.slice();
+  if((p.spread==="bass"||p.spread==="alternate"&&i%2===0)&&notes[0]>=40)notes[0]-=12;
+  if((p.spread==="top"||p.spread==="alternate"&&i%2===1)&&notes[3]<=76)notes[3]+=12;
+  const step={chord:chords[i].label,startSeconds:start,durationSeconds:duration,pitches:notes};
+  steps.push(step);
+  const add=(v,offset,length,velocity=1)=>{
+   const time=start+offset*duration,d=Math.min(length*duration,start+duration-time);
+   if(d<.02)return;
+   const accent=p.accent==="top"?(v===3?1.12:.91):p.accent==="inner"?(v===1||v===2?1.08:.93):p.accent==="bass"?(v===0?1.08:.94):p.accent==="soft"?.78:p.accent==="alternate"?((v+i)%2===0?1.04:.86):1;
+   events.push({chordIndex:i,voice:v,pitch:notes[v],frequency:440*2**((notes[v]-69)/12),startSeconds:time,durationSeconds:d,velocity:Math.max(.38,Math.min(1.15,velocity*accent))});
+  };
+  for(let v=0;v<4;v++){
+   if(v===0){add(v,0,p.gate);continue;}
+   if(p.pattern==="pulse"||p.pattern==="syncopated"||p.pattern==="inner"&&v===2){
+    const offsets=p.pattern==="syncopated"?[0,.375,.75]:[0,.5];
+    offsets.forEach((o,j)=>add(v,o,Math.min(p.gate/offsets.length,.22),j===0?.84:.73));
+   }else if(p.pattern==="accumulate"){
+    const count=Math.min(4,1+Math.floor(i/Math.max(1,n-1)*3));
+    for(let j=0;j<count;j++)add(v,j/count,Math.min(p.gate/count,.9/count),.82);
+   }else if(p.pattern==="broken"||p.pattern==="independent"){
+    const offset=p.pattern==="independent"?(v===3?.12:(v-1)*.06):(v-1)*.12;
+    add(v,offset,Math.min(p.gate,1-offset-.015),.94);
+   }else add(v,0,p.gate);
+  }
+  start+=duration;
+ }
+ // Tie only exactly matching pitches in the same voice, with no change
+ // of pitch or bass. This models a piano key held, not sustain-pedal audio.
+ if(p.pattern==="sustain"){
+  for(let i=1;i<steps.length;i++)for(let v=0;v<4;v++){
+   const prev=events.findLast(e=>e.voice===v&&e.chordIndex<i&&Math.abs(e.startSeconds+e.durationSeconds-steps[i].startSeconds)<.12);
+   const next=events.find(e=>e.voice===v&&e.chordIndex===i);
+   if(prev&&next&&prev.pitch===next.pitch){prev.durationSeconds=next.startSeconds+next.durationSeconds-prev.startSeconds;events.splice(events.indexOf(next),1);}
+  }
+ }
+ return {status:"ready",steps,events:events.sort((a,b)=>a.startSeconds-b.startSeconds||a.voice-b.voice),totalSeconds,instrument:"piano",gesture:p.name,
+ warning:"Realización pianística original, no imitación de una interpretación ni partitura del compositor. Mismos acordes y duración total que la escucha neutra; cambian disposición y ataques."};
+}
+
 /* Evidence-informed composer exploration: non-destructive, original harmonic experiments. */
 const COMPOSER_CREATIVE_LENSES={
  "williams": {
@@ -2968,7 +3032,9 @@ function contextualStylePathScore(original,path,centers,id,kind){
  }else if(id==="zimmer"){
   if(joined.every(c=>c.bass===joined[0].bass)&&new Set(joined.map(c=>c.root)).size>1)score+=3;
  }else if(id==="herrmann"){
-  if(internalChromaticEvidence(original,path).length)score+=2.6;
+  const chrom=internalChromaticEvidence(original,path);
+  if(chrom.length)score+=1.6;
+  if(chrom.length>1)score-=1.4*(chrom.length-1);
   if(motif.cycle&&[3,4,6,8,9].includes(motif.cycle.step))score+=1.3;
  }else if(id==="shore"){
   const modal=modalIdentityEvidence(original,path);
@@ -3072,6 +3138,7 @@ function composerContinuations(chords,intent,composerId,options={}){
   }
   if(b.type==="mMaj7"&&composerId!=="herrmann")score-=1.5;
   if(b.type==="mMaj7"&&a.type==="mMaj7")score-=2.5;
+  if(composerId==="herrmann"&&a.root===b.root&&a.type!==b.type)score-=.8;
   if(composerId==="horner"&&["","m"].includes(a.type)&&["","m"].includes(b.type)&&a.type!==b.type&&motion.distance<=2&&d>0)score+=2.5;
   if(composerId==="morricone")score+=(bass===1||bass===2?2.4:0)+(b.bass!==b.root?1.4:0);
   if(composerId==="goransson"&&same(a,b))score+=3;
@@ -3184,5 +3251,5 @@ function composerContinuations(chords,intent,composerId,options={}){
  return out;
 }
 
-root.CinematicoEngine={modalIdentityEvidence,internalChromaticEvidence,composerLayerExercise,harmonicMotifEvidence,harmonicStructureEvidence,continuationInnerVoiceExample,harmonicPhraseEvidence,continuationExpectation,continuationCenters,composerContinuations,analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={composerPianoPerformance,modalIdentityEvidence,internalChromaticEvidence,composerLayerExercise,harmonicMotifEvidence,harmonicStructureEvidence,continuationInnerVoiceExample,harmonicPhraseEvidence,continuationExpectation,continuationCenters,composerContinuations,analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
