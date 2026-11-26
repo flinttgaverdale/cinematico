@@ -173,8 +173,6 @@ body{background:var(--bg);font-size:14px}
 .workspace-switch{background:var(--p2);border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin-bottom:10px}
 .workspace-switch strong{font-size:13px}.workspace-switch p{font-size:12px}
 .workspace-tabs{border-radius:5px;background:var(--bg)}.workspace-tabs button{border-radius:3px;font-size:12px}
-.guide{border-radius:6px;background:var(--p2);border:1px solid var(--line);padding:10px 14px;margin-bottom:10px}
-.guide-head b{font-size:12px;color:var(--muted)}
 .layout{grid-template-columns:minmax(260px,.58fr) minmax(0,1.42fr);gap:10px}
 .panel{background:var(--p2);border:1px solid var(--line);border-radius:7px}
 .head{padding:14px 16px 0}.head b,.cardhead b{font-size:14px;letter-spacing:0}
@@ -251,15 +249,6 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 
 /* Guided visual hierarchy — professional, progressive disclosure */
 :focus-visible{outline:2px solid var(--focus)!important;outline-offset:3px}
-.guide{border:1px solid var(--line);background:var(--p);border-radius:12px;padding:16px 18px;margin:0 0 14px}
-.guide-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.guide-head b{font:700 13px var(--title-font);color:var(--txt)}
-.guide-head button{padding:7px 10px;font-size:11px}
-.guide-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
-.guide-step{display:flex;gap:9px;align-items:flex-start;color:var(--muted);font-size:11px;line-height:1.5}
-.guide-number{display:grid;place-items:center;flex:none;width:25px;height:25px;border:1px solid var(--line);border-radius:50%;color:var(--gold);font:700 11px var(--title-font)}
-.guide-step strong{display:block;color:var(--txt);font-size:11px;margin-bottom:2px}
-.guide[hidden],.guide-steps[hidden]{display:none!important}
 .help-details{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}
 .help-details summary{cursor:pointer;color:var(--sage);font-size:11px;font-weight:700;list-style-position:inside}
 #userAnalysis > .help-details{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--p)}
@@ -283,7 +272,7 @@ button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visi
 #neoResult .chord .pill{font-size:11px}
 #neoResult .vl-summary{border-top:1px solid var(--line);padding-top:12px}
 .section-lead{font-size:11px;line-height:1.7;color:var(--muted);margin:0 0 10px}
-@media(max-width:650px){.guide-steps{grid-template-columns:1fr}.guide{padding:14px}.vl-controls{display:grid;grid-template-columns:1fr 1fr}.vl-controls label{grid-column:span 1}.vl-controls select{width:100%;max-width:none}.vl-controls button{grid-column:span 1}.cardhead{align-items:flex-start}#neoResult .chord{min-width:90px;padding:10px}}
+@media(max-width:650px){.vl-controls{display:grid;grid-template-columns:1fr 1fr}.vl-controls label{grid-column:span 1}.vl-controls select{width:100%;max-width:none}.vl-controls button{grid-column:span 1}.cardhead{align-items:flex-start}#neoResult .chord{min-width:90px;padding:10px}}
 
 /* Two-depth workspace: simple discovery, full analytical access */
 .workspace-switch{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--p);border:1px solid var(--line);border-radius:12px;padding:14px 17px;margin-bottom:13px}
@@ -305,7 +294,7 @@ body[data-workspace="explore"] [data-advanced]{display:none!important}
 .workspace-tabs button{min-height:44px;padding:10px 17px;border:0;border-radius:4px;font-size:14px;font-weight:700;white-space:nowrap;background:transparent;color:var(--studio-muted);cursor:pointer}
 .workspace-tabs button[aria-pressed="true"]{background:var(--studio-gold);color:var(--bg)}
 .workspace-tabs button:focus-visible,.simple-create button:focus-visible,.simple-create select:focus-visible,.simple-create input:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
-body[data-workspace="explore"] .layout,body[data-workspace="explore"] #studioGuide{display:none!important}
+body[data-workspace="explore"] .layout{display:none!important}
 body[data-workspace="advanced"] .simple-create{display:none!important}
 .simple-create{max-width:1060px;margin:15px auto 36px;background:var(--studio-panel);border:1px solid var(--studio-edge);border-radius:var(--studio-radius);padding:clamp(20px,3vw,36px)}
 .simple-intro h2{font:650 clamp(27px,3vw,34px)/1.2 var(--title-font);color:var(--studio-ink);letter-spacing:-.025em;margin:9px 0 11px}
@@ -466,7 +455,6 @@ body[data-study="inspire"] .reference-flow{margin-bottom:15px}
   .study-inspect > summary,.study-tool > summary{padding:15px}
   .study-inspect > div,.study-tool > article{padding:16px}
   .card,.heroresult,.saved,.reference-flow > .heroresult,.reference-flow > .card{padding:18px}
-  .guide{padding:16px}
   .layout{gap:14px}
   .simple-nuance-content select{max-width:100%}
   /* The advanced chord editor must not force two min-content-width buttons beyond 320px. */
@@ -478,7 +466,7 @@ body[data-study="inspire"] .reference-flow{margin-bottom:15px}
   .field,.tech-card,.tile,.chord{min-width:0;overflow-wrap:anywhere}
   .chords{grid-template-columns:repeat(2,minmax(0,1fr))}
   .foot{flex-wrap:wrap}
-  .guide-head button,.help-details > summary{min-height:44px}
+  .help-details > summary{min-height:44px}
   .help-details > summary{display:list-item;padding-block:10px}
   .voiceleading-hint{display:block}
 }
@@ -556,7 +544,7 @@ button,input,select{font-family:inherit}
 .simple-path [data-open-advanced]:disabled{opacity:.5}
 .simple-depth-note{border-top:1px solid var(--line);padding-top:14px;margin-top:19px;font-size:13px}
 .simple-listen-status{font-size:13px}
-.panel,.study-inspect,.study-tool,.reference-language-panel,.reference-flow>.card,.reference-flow>.heroresult,.guide,.tech-card,.composer-path-card,.reference-style-card{background:var(--p);border-color:var(--line);border-radius:8px}
+.panel,.study-inspect,.study-tool,.reference-language-panel,.reference-flow>.card,.reference-flow>.heroresult,.tech-card,.composer-path-card,.reference-style-card{background:var(--p);border-color:var(--line);border-radius:8px}
 .cardhead{border-color:var(--line)}
 .cardhead b,.head b{font-size:14px;font-weight:650}
 .copy,.insight,.section-lead,.help-details p,.help-details li,.composer-path-card p,.tech-card p,.mod p{font-size:13px;line-height:1.6}

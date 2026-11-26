@@ -1,6 +1,8 @@
 # Cinemático Studio · beta 0.2.0-beta.3
 
-La web y la PWA incorporan los once lenguajes de referencia, la escucha con piano sintetizado y la identidad oscura con tipografía local. La caché web v64 instala el conjunto completo de recursos. Si sigues viendo el diseño anterior, abre la página de actualización y pulsa **Actualizar y abrir**. El estudio muestra `0.2.0-beta.3` al pie de la página. [Actualizar Cinemático](https://flinttgaverdale.github.io/cinematico/actualizar.html)
+La web y la PWA incorporan los once lenguajes de referencia, la escucha con piano sintetizado y la identidad oscura con tipografía local. La caché web v65 instala el conjunto completo de recursos. Si sigues viendo el diseño anterior, abre la página de actualización y pulsa **Actualizar y abrir**. El estudio muestra `0.2.0-beta.3` al pie de la página. [Actualizar Cinemático](https://flinttgaverdale.github.io/cinematico/actualizar.html)
+
+El Estudio avanzado abre directamente el selector de áreas. Las ayudas se consultan en los desplegables de cada herramienta.
 
 ## Descargas
 
@@ -18,4 +20,4 @@ El APK beta firmado conserva el identificador `io.github.flinttgaverdale.cinemat
 
 ## Descargas anteriores y vuelta atrás
 
-La beta anterior conserva sus archivos y su documentación. Para volver a la web anterior, restaura sus archivos desde `aa8538d` en un commit nuevo y aumenta el número de caché y el registro a v65. Esto conserva el historial y permite a las PWA instaladas detectar la restauración. [Beta 0.2 anterior](beta-0.2.md)
+La beta anterior conserva sus archivos y su documentación. Para volver a la web anterior, restaura sus archivos desde `aa8538d` en un commit nuevo y aumenta el número de caché y el registro a v66. Esto conserva el historial y permite a las PWA instaladas detectar la restauración. [Beta 0.2 anterior](beta-0.2.md)

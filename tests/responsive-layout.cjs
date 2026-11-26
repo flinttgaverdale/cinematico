@@ -85,6 +85,7 @@ async function overflow(page,where){
 
    await page.locator('#workspaceAdvanced').click();
    await check(page,'.advanced-navigation',20,width,'Advanced choice');
+   assert.equal(await page.locator('#studioGuide').count(),0,'Advanced study should start with the area chooser');
    await overflow(page,'Advanced home '+width);
    for(const mode of ['chords','inspire','tools']){
      await page.locator('[data-study-open="'+mode+'"]').click();
@@ -123,9 +124,7 @@ async function overflow(page,where){
        assert.ok(await chart.isVisible());
        if(width<=430){
          const help=page.locator('[data-study-panel="tools"] .help-details > summary:visible').first();
-         for(const target of [help,page.locator('#guideToggle')]){
-           assert.ok((await target.boundingBox()).height>=44,'Mobile help control reaches 44px');
-         }
+         assert.ok((await help.boundingBox()).height>=44,'Contextual help reaches 44px on mobile');
          await chart.focus();
          await page.keyboard.press('ArrowRight');
          await page.waitForFunction(()=>document.querySelector('#voiceLeading').scrollLeft>0);
