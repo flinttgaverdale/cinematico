@@ -16,6 +16,8 @@ function check(raw,id,intent){
   assert.deepEqual(E.parseUserProgression(q.chords.join(' ')).errors,[]);
   assert.deepEqual(q.original,parsed.chords.map(x=>x.label));
   assert.equal(q.composerId,id);assert.equal(q.evidence.grade,'D');
+  assert.equal(q.phrase.links.length,q.chords.length);
+  for(const key of ['presentation','development','culmination','resolution','scope'])assert.ok(q.phrase[key]);
  }
  assert.equal(JSON.stringify(parsed.chords),before);
  count++;return paths.map(q=>q.chords.join(' ')).join('|');
@@ -54,6 +56,20 @@ for(const id of ids){
  assert.equal(q.expectations[0].kind,'resolution');assert.equal(q.memory[0].kind,'recuperación');
 }
 
+// Four phrase tasks must be grounded in the actual path, not inferred timing.
+const phrase=labels=>E.harmonicPhraseEvidence(p,labels.split(' ').map(c),candidates,'auto');
+assert.equal(phrase('G7 C').arrivalKind,'dominant');
+assert.equal(phrase('G C').arrivalKind,'dominantTriad');
+assert.equal(phrase('G7 C/G').arrivalKind,'inverted');
+assert.equal(phrase('G7 Csus4').arrivalKind,'suspended');
+assert.equal(phrase('Dm E7 Am').firstReturn,true);
+assert.equal(phrase('Am F').recurrentLinks.length,1);
+assert.equal(phrase('Em C Am').links[0].triadic,'R');
+assert.equal(phrase('C/G G').sustainedLinks,2);
+assert.equal(phrase('G7 C').preparation[0].kind,'resolution');
+assert.equal(phrase('G7 C').preparation[0].from,'G7');
+assert.ok(phrase('Am F').culmination.includes('no localiza'));
+assert.ok(phrase('Am').development.includes('No es imprescindible'));
 assert.deepEqual(E.composerContinuations(p,'esperanza',''),E.emotionalContinuations(p,'esperanza'));
 assert.equal(E.composerListeningPlan(E.parseUserProgression('Am').chords,{fullPreview:true,equalChordDuration:true}).status,'ready');
 assert.equal(E.composerListeningPlan([...E.parseUserProgression('C G Am F Dm Em F G').chords,...E.parseUserProgression('Am F G').chords],{fullPreview:true,equalChordDuration:true}).status,'ready');
