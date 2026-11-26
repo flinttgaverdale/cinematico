@@ -2,11 +2,19 @@
 
 La web y la PWA incorporan los once lenguajes de referencia, la escucha con piano sintetizado y la identidad oscura con tipografía local. La caché v63 instala el conjunto completo de recursos. Cierra las pestañas de la versión anterior para activar la nueva PWA.
 
+## Descargas
+
+- [APK firmado para Android 8.0 o posterior](../downloads/Cinematico-Android-Beta-0.2.3.apk)
+- [AMXD para Ableton Live 12 Suite](../downloads/Cinematico-Generator-Beta-0.2.3.amxd)
+- [ZIP con las fuentes de Max for Live](../downloads/Cinematico-Live-Preview-0.2.3.zip)
+- [ZIP de la versión web](../downloads/Cinematico-Web-0.2.3.zip)
+- [Sumas SHA-256](../downloads/SHA256SUMS-Cinematico-0.2.3.txt) y [procedencia](../downloads/Cinematico-Beta-0.2.3-build-info.json)
+
 ## Comprobaciones
 
 Pasaron 33 comandos técnicos y seis pruebas de navegador, incluidas las vistas responsive, la actualización atómica de la PWA y el render de audio. El generador de Max for Live empaqueta el motor web y su adaptador CommonJS. El empaquetador actualiza también el ZIP de fuentes a partir de la misma revisión.
 
-El APK candidato firmado conserva el identificador `io.github.flinttgaverdale.cinematico.beta02` y el certificado de la beta 0.2 anterior. El código de versión pasa de 2 a 3. Los 15 recursos del sitio coinciden byte a byte con los del APK. La instalación, la actualización y el audio en Android físico quedan pendientes. El AMXD pasó la inspección estructural y la simulación de 270 planes MIDI. Falta comprobarlo dentro de Ableton Live 12 Suite.
+El APK beta firmado conserva el identificador `io.github.flinttgaverdale.cinematico.beta02` y el certificado de la beta 0.2 anterior. El código de versión pasa de 2 a 3. Los 15 recursos del sitio coinciden byte a byte con los del APK. La instalación, la actualización y el audio en Android físico quedan pendientes. El AMXD pasó la inspección estructural y la simulación de 270 planes MIDI. Falta comprobarlo dentro de Ableton Live 12 Suite.
 
 ## Descargas anteriores y vuelta atrás
 

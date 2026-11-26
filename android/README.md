@@ -3,18 +3,18 @@
 La aplicación usa Android WebView y lleva el motor, la interfaz y el piano
 sintetizado dentro del APK. Requiere Android 8.0 o posterior.
 
-## Instalar la beta 0.2
+## Instalar la beta 0.2.0-beta.3
 
 Descarga el APK y ábrelo desde Archivos o Descargas. Aparecerá como
 **Cinemático Beta 0.2**. El identificador de esta edición termina en
 `.beta02` y permite instalarla junto a la beta 0.1 y la PWA. La beta 0.1
-conserva su enlace y sus datos. [APK beta 0.2](../downloads/Cinematico-Android-Beta-0.2.apk) · [Beta 0.1](https://github.com/flinttgaverdale/cinematico/releases/tag/android-beta-0.1)
+conserva su enlace y sus datos. [APK actual](../downloads/Cinematico-Android-Beta-0.2.3.apk) · [Beta 0.2 anterior](../downloads/Cinematico-Android-Beta-0.2.apk) · [Beta 0.1](https://github.com/flinttgaverdale/cinematico/releases/tag/android-beta-0.1)
 
-La beta 0.2 usa el código de versión **2** y un certificado dedicado. Antes
+La actualización usa el código de versión **3** y conserva el certificado de la beta anterior. Antes
 de distribuir una actualización de esta edición, aumenta su código de
 versión y firma con esa misma clave. Se verificaron la firma, el contenido
 y un par de APK de códigos 2 y 3. La instalación y el audio en un teléfono
-físico quedan pendientes. [Identidad y huellas](../downloads/Cinematico-Beta-0.2-build-info.json)
+físico quedan pendientes. [Identidad y huellas](../downloads/Cinematico-Beta-0.2.3-build-info.json)
 
 ## Cómo se genera
 
@@ -31,7 +31,7 @@ obligatoria. Guarda `ANDROID_KEYSTORE_BASE64`, `ANDROID_STORE_PASSWORD` y
 y `ANDROID_CERT_SHA256` como variables del entorno. Reutiliza la misma clave de
 distribución y verifica el certificado en cada ejecución.
 
-Antes de publicar, verifica `SHA256SUMS` y prueba en un teléfono la instalación,
+Antes de publicar una versión estable, verifica `SHA256SUMS` y prueba en un teléfono la instalación,
 el audio offline y la actualización desde un candidato anterior firmado con el
 mismo certificado. La beta antigua de depuración puede requerir una
 reinstalación si su certificado difiere. Publica el artefacto aprobado con los

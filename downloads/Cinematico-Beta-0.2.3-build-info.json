@@ -8,7 +8,8 @@
   "sha256": {
     "Cinematico-Android-Beta-0.2.3.apk": "0197c97c75971ecfda3c6901816e3d6cd45fabb068a28d79a8509169caf71950",
     "Cinematico-Generator-Beta-0.2.3.amxd": "211d0dbbecf0d7219cb93d16b05d95c4fa099636b8c64223778ae6d8d086cfd9",
-    "Cinematico-Live-Preview-0.2.3.zip": "0449290c506ee007267a551bcbb1856333655b242bfec7a90bd7164512654596"
+    "Cinematico-Live-Preview-0.2.3.zip": "0449290c506ee007267a551bcbb1856333655b242bfec7a90bd7164512654596",
+    "Cinematico-Web-0.2.3.zip": "a0bf34cd125e54742ceaa666cbf2e11de3aea639da45c2a915a53bee15bdebf2"
   },
   "apkAssets": {
     "index.html": "199651feb130cb6d1c400b70cb5d5801564761b5676098367254b4faef4c1e22",
