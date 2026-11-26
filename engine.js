@@ -2743,7 +2743,11 @@ function harmonicPhraseEvidence(original,path,centers=[],endingPreference="auto"
  });
  // A preparatory event must point to an actual succeeding chord. A late
  // dominant is not itself proof of a climax or a measured tension curve.
- const preparation=links.flatMap((l,i)=>l.contextual&&["resolution","deceptive","suspension"].includes(l.expectation)?[{index:i,from:l.from,to:l.to,kind:l.expectation}]:[]);
+ const preparation=links.flatMap((l,i)=>{
+  if(l.contextual&&["resolution","deceptive","suspension"].includes(l.expectation))return [{index:i,from:l.from,to:l.to,kind:l.expectation}];
+  const a=combined[i],b=combined[i+1];
+  return a.type===""&&mod(a.root-b.root)===7&&centers.some(c=>c.tonic===b.root&&(c.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(b.type))?[{index:i,from:l.from,to:l.to,kind:"dominantTriad"}]:[];
+ });
  const end=path.at(-1),before=path.length>1?path.at(-2):last;
  const arrival=centers.some(c=>c.tonic===end.root&&(c.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(end.type));
  const rootArrival=arrival&&end.root===end.bass&&end.type!=="mMaj7";
@@ -2755,16 +2759,17 @@ function harmonicPhraseEvidence(original,path,centers=[],endingPreference="auto"
  const recovery=links.length>1&&links[0].newPitches>0&&links.slice(1).some(l=>l.retention>=.5);
  const firstReturn=sameHarmony(first,end);
  const presentation=firstRecalled?"Recupera "+path[0].label+", ya presente en tu idea.":"Parte del enlace "+last.label+" → "+path[0].label+".";
- const development=transformedLinks?"Ensaya "+transformedLinks+" transformación(es) entre tríadas.":transformed.length?"Reinterpreta fundamentales ya escuchadas.":sustainedLinks?"Conserva el bajo en "+sustainedLinks+" enlace(s).":recurrentLinks.length?"Recupera un enlace anterior.":"Desarrolla mediante cambios de armonía y notas comunes.";
- const culmination=preparation.length?"Posible preparación de llegada: "+preparation.at(-1).from+" → "+preparation.at(-1).to+".":"El cifrado no localiza una culminación; puedes construirla con ritmo, registro o dinámica.";
- const resolution=arrivalKind==="dominant"||arrivalKind==="dominantTriad"?"Llegada de dominante con bajo de tónica.":arrivalKind==="plagal"?"Llegada plagal con bajo de tónica.":arrivalKind==="return"?"Regreso a un centro candidato.":arrivalKind==="inverted"?"Regreso con bajo no conclusivo.":arrivalKind==="suspended"?"Llegada suspendida.":"El destino permite continuar; no se confirma cierre de frase.";
+ const development=path.length===1?"No es imprescindible desarrollar más armonías para probar este enlace.":transformedLinks?"Ensaya "+transformedLinks+" transformación(es) entre tríadas.":transformed.length?"Reinterpreta fundamentales ya escuchadas.":sustainedLinks?"Conserva el bajo en "+sustainedLinks+" enlace(s).":recurrentLinks.length?"Recupera un enlace anterior.":"Desarrolla mediante cambios de armonía y notas comunes.";
+ const culmination=preparation.length?"Posible preparación o desvío: "+preparation.at(-1).from+" → "+preparation.at(-1).to+". El punto culminante depende de la interpretación.":"El cifrado no localiza una culminación; puedes construirla con ritmo, registro o dinámica.";
+ const resolution=arrivalKind==="dominant"||arrivalKind==="dominantTriad"?"Posible llegada de dominante con bajo de tónica.":arrivalKind==="plagal"?"Llegada plagal con bajo de tónica.":arrivalKind==="return"?"Regreso a un centro candidato.":arrivalKind==="inverted"?"Regreso con bajo no conclusivo.":arrivalKind==="suspended"?"Llegada suspendida.":"El destino permite continuar; no se confirma cierre de frase.";
  return {presentation,development,culmination,resolution,recalled,transformed,recurrentLinks,preparation,links,arrivalKind,firstReturn,sustainedLinks,transformedLinks,recovery,firstRecalled,endingPreference,scope:"Cuatro tareas compositivas opcionales; no son fases detectadas ni obligatorias. La culminación real y la forma requieren melodía, ritmo y dinámica."};
 }
 function phraseArchScore(e,composerId,kind,mood){
  const w=PHRASE_ARCH_PROFILES[composerId];
  if(!e||!w)return 0;
  // Bounded rewards across a whole path. No reward for a claimed climax.
- const p=Number(e.firstRecalled)+Math.min(1,e.recurrentLinks.length)*.6;
+ const stableProfiles=["zimmer","newman","morricone","goransson"];
+ const p=Number(e.firstRecalled)+Math.min(1,e.recurrentLinks.length)*.6+(stableProfiles.includes(composerId)?Math.min(2,e.sustainedLinks)*.55:0);
  const d=Math.min(2,e.transformedLinks+e.transformed.length*.5)+Number(e.recovery)*.6;
  const c=Number(e.preparation.length>0);
  const r=e.endingPreference==="open"||mood==="delay"?Number(["open","suspended","inverted"].includes(e.arrivalKind)):Number(["dominant","dominantTriad","plagal","return"].includes(e.arrivalKind))+.5*Number(e.firstReturn);
