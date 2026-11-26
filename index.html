@@ -1062,7 +1062,7 @@ function syncQuickIntents(){const selected=$("simpleMood").value;document.queryS
  $("simpleIntentHelp").textContent=help[selected]||"Este matiz orienta las propuestas, sin determinar qué emoción sentirá quien las escuche."}
 $("simpleChords").addEventListener("input",()=>clearSimpleSuggestions("Has cambiado tus acordes. Explora de nuevo para actualizar los caminos."));
 document.querySelectorAll("[data-quick-intent]").forEach(btn=>btn.addEventListener("click",()=>{
- if($("simpleMood").value!==btn.dataset.quickIntent){$("simpleMood").value=btn.dataset.quickIntent;clearSimpleSuggestions("Nueva dirección elegida. Explora tres caminos para compararlos.");}
+ if($("simpleMood").value!==btn.dataset.quickIntent){$("simpleMood").value=btn.dataset.quickIntent;clearSimpleSuggestions("Nueva dirección elegida. Explora tres caminos para compararlos.");renderMaterialExperiment();}
  syncQuickIntents();
  $("simpleNuances").open=false;
 }));
