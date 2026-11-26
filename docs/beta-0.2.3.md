@@ -1,0 +1,13 @@
+# Cinemático Studio · beta 0.2.0-beta.3
+
+La web y la PWA incorporan los once lenguajes de referencia, la escucha con piano sintetizado y la identidad oscura con tipografía local. La caché v63 instala el conjunto completo de recursos. Cierra las pestañas de la versión anterior para activar la nueva PWA.
+
+## Comprobaciones
+
+Pasaron 33 comandos técnicos y seis pruebas de navegador, incluidas las vistas responsive, la actualización atómica de la PWA y el render de audio. El generador de Max for Live empaqueta el motor web y su adaptador CommonJS. El empaquetador actualiza también el ZIP de fuentes a partir de la misma revisión.
+
+El APK candidato firmado conserva el identificador `io.github.flinttgaverdale.cinematico.beta02` y el certificado de la beta 0.2 anterior. El código de versión pasa de 2 a 3. Los 15 recursos del sitio coinciden byte a byte con los del APK. La instalación, la actualización y el audio en Android físico quedan pendientes. El AMXD pasó la inspección estructural y la simulación de 270 planes MIDI. Falta comprobarlo dentro de Ableton Live 12 Suite.
+
+## Descargas anteriores y vuelta atrás
+
+La beta anterior conserva sus archivos y su documentación. Para volver a la web anterior, restaura sus archivos desde `aa8538d` en un commit nuevo y aumenta el número de caché y el registro a v64. Esto conserva el historial y permite a las PWA instaladas detectar la restauración. [Beta 0.2 anterior](beta-0.2.md)

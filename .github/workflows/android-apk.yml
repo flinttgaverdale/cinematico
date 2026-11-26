@@ -62,10 +62,10 @@ jobs:
           : "${ANDROID_KEY_PASSWORD:?Missing key password}"
           : "${ANDROID_KEY_ALIAS:?Missing release key alias}"
           : "${ANDROID_CERT_SHA256:?Missing expected certificate SHA-256}"
-          version_code=$((GITHUB_RUN_NUMBER + 2))
+          version_code=$((GITHUB_RUN_NUMBER + 3))
           version_name="0.2.0-beta.$version_code"
           gradle --project-dir android :app:assembleRelease --no-daemon \
-            "-PcinematicoVersionCode=$version_code" "-PcinematicoVersionName=$version_name"
+            -PcinematicoBeta02=true "-PcinematicoVersionCode=$version_code" "-PcinematicoVersionName=$version_name"
           build_tools="$ANDROID_HOME/build-tools/35.0.0"
           staging=$(mktemp -d)
           trap 'rm -rf "$staging"' EXIT

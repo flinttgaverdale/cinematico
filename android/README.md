@@ -22,7 +22,7 @@ Para compilar la edición aislada, pasa `-PcinematicoBeta02=true` a Gradle.
 El workflow `.github/workflows/android-apk.yml` comprueba el APK de
 depuración en las PR que afectan a Android o a la web empaquetada. La ejecución
 manual desde `main` genera un candidato firmado para revisión, con el commit,
-el certificado esperado y el checksum. Utiliza el número de ejecución más dos
+el certificado esperado y el checksum. Utiliza el número de ejecución más tres
 como `versionCode` para superar los códigos de las betas anteriores.
 
 Configura el entorno de GitHub Actions `android-beta-release` con revisión
