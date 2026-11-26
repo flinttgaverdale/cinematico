@@ -755,28 +755,33 @@ function stopComposerPreview(){
 }
 // Shared offline piano-like voice: struck, slightly inharmonic partials
 // with register-dependent decay. Identical timbre and level for every route.
-function playPianoTone(context,destination,hz,at,held){
- const min=0.00001,release=0.18,attack=0.006;
- const end=at+held+release;
+function playPianoTone(context,destination,hz,at,held,velocity=1){
+ // Two-stage partial decay, stretched harmonics and velocity-dependent
+ // brightness. Lightweight original synthesis; no sample downloads.
+ const min=0.00001;
+ const strength=Math.max(.38,Math.min(1.15,Number.isFinite(velocity)?velocity:1));
+ const attack=Math.min(.006,held*.18),release=Math.min(.24,Math.max(.09,held*.45));
+ const keyUp=at+held,end=keyUp+release;
  const register=Math.log2(hz/261.6256);
- const brightness=Math.max(0.55,Math.min(1.15,1-register*0.09));
- const stretch=0.00022*Math.pow(hz/261.6256,0.35);
- const partials=[[1,1,1.65],[2,0.46,0.98],[3,0.24,0.60],[4,0.13,0.36],[5,0.075,0.23],[6,0.045,0.14]];
+ const brightness=Math.max(.48,Math.min(1.17,1-register*.08))*Math.pow(strength,.48);
+ const stretch=.00022*Math.pow(hz/261.6256,.35);
+ const partials=[[1,1,1.8],[2,.44,1.12],[3,.23,.67],[4,.14,.43],[5,.075,.28],[6,.045,.19],[7,.024,.13],[8,.014,.09]];
  for(const [n,weight,decay] of partials){
   const frequency=hz*n*Math.sqrt((1+stretch*n*n)/(1+stretch));
-  if(frequency>=context.sampleRate*0.45)continue;
+  if(frequency>=context.sampleRate*.45)continue;
   const osc=context.createOscillator(),amp=context.createGain();
-  const peak=0.12*weight*Math.pow(brightness,n-1);
-  const tau=decay*Math.max(0.50,Math.min(1.7,Math.pow(2,-register*0.23)));
-  const keyUp=at+held;
-  const keyUpLevel=Math.max(min,peak*Math.exp(-Math.max(0,held-attack)/tau));
+  const peak=Math.max(min,.108*weight*Math.pow(brightness,n-1)*strength);
+  const tau=decay*Math.max(.50,Math.min(1.7,Math.pow(2,-register*.23)));
+  const elapsed=Math.max(0,held-attack),knee=Math.min(elapsed*.55,.085);
+  const envelope=t=>Math.max(min,peak*(.7*Math.exp(-t/(tau*.30))+.3*Math.exp(-t/(tau*1.55))));
   osc.type="sine";osc.frequency.value=frequency;
   amp.gain.setValueAtTime(min,at);
   amp.gain.exponentialRampToValueAtTime(peak,at+attack);
-  amp.gain.exponentialRampToValueAtTime(keyUpLevel,keyUp);
+  if(knee>.0001)amp.gain.exponentialRampToValueAtTime(envelope(knee),at+attack+knee);
+  amp.gain.exponentialRampToValueAtTime(envelope(elapsed),keyUp);
   amp.gain.exponentialRampToValueAtTime(min,end);
   osc.connect(amp);amp.connect(destination);
-  osc.start(at);osc.stop(end+0.01);
+  osc.start(at);osc.stop(end+.01);
  }
 }
 function createPianoMaster(context){
@@ -820,7 +825,7 @@ function playComposerPreview(index){
    if(composerPreviewSession!==session)return;
    stopComposerPreview();
    if(feedback)feedback.textContent="Maqueta finalizada; puedes comparar con la otra ruta.";
-  },(plan.totalSeconds+0.3)*1000);
+  },(plan.totalSeconds+0.4)*1000);
   context.resume().catch(()=>{
    if(composerPreviewSession===session)stopComposerPreview();
    if(feedback)feedback.textContent="No se ha podido iniciar el audio.";
@@ -974,7 +979,7 @@ function playSimplePreview(index,original,paths){
  const parsed=choice.fullPreview?previewLabels.map(label=>CinematicoEngine.parseUserProgression(label)).reduce((a,b)=>({chords:[...a.chords,...b.chords],errors:[...a.errors,...b.errors]}),{chords:[],errors:[]}):CinematicoEngine.parseUserProgression(previewLabels.join(" "));
  const status=$("simpleListenStatus");
  if(parsed.errors.length){status.textContent="No se puede reproducir esta propuesta.";return;}
- const plan=CinematicoEngine.composerListeningPlan(parsed.chords,{equalChordDuration:true,fullPreview:!!choice.fullPreview});
+ const plan=choice.composerPerformance?CinematicoEngine.composerPianoPerformance(parsed.chords,choice.composerPerformance):CinematicoEngine.composerListeningPlan(parsed.chords,{equalChordDuration:true,fullPreview:!!choice.fullPreview});
  if(plan.status!=="ready"){status.textContent=plan.warning;return;}
  const AudioConstructor=window.AudioContext||window.webkitAudioContext;
  if(!AudioConstructor){status.textContent="Este navegador no permite escuchar las armonías.";return;}
@@ -984,12 +989,12 @@ function playSimplePreview(index,original,paths){
   context.resume?.().catch(()=>{});
   const master=createPianoMaster(context);
   const start=context.currentTime+0.08;
-  for(const step of plan.steps){
+  if(choice.composerPerformance){
+   for(const e of plan.events)playPianoTone(context,master,e.frequency,start+e.startSeconds,e.durationSeconds,e.velocity);
+  }else for(const step of plan.steps){
    const at=start+step.startSeconds;
    const length=Math.max(0.2,step.durationSeconds-0.08);
-   for(const hz of step.frequencies){
-    playPianoTone(context,master,hz,at,length);
-   }
+   for(const hz of step.frequencies)playPianoTone(context,master,hz,at,length);
   }
   simplePreviewSession={index,context,timer:null};
   document.querySelectorAll("[data-simple-preview]").forEach(btn=>{
@@ -997,10 +1002,10 @@ function playSimplePreview(index,original,paths){
    btn.textContent=playing?"■ Detener":(btn.dataset.listenLabel||"▶ Escuchar");
    btn.setAttribute("aria-pressed",String(playing));
   });
-  status.textContent=choice.preview?choice.listenAs+" · mismos timbre de piano sintetizado y pulso armónico.":
+  status.textContent=choice.composerPerformance?choice.listenAs+" · mismo piano, realización expresiva orientativa.":choice.preview?choice.listenAs+" · mismo timbre de piano sintetizado y pulso armónico.":
    "Escuchando camino "+(index+1)+". Maqueta de piano sintetizado: los últimos "+Math.min(2,original.length)+" acordes tuyos y los tres nuevos; dos segundos por acorde, sin melodía ni orquestación.";
   const playing=simplePreviewSession;
-  playing.timer=setTimeout(()=>{if(simplePreviewSession===playing){stopSimplePreview();status.textContent="Escucha finalizada.";}} ,Math.ceil(plan.totalSeconds*1000)+300);
+  playing.timer=setTimeout(()=>{if(simplePreviewSession===playing){stopSimplePreview();status.textContent="Escucha finalizada.";}} ,Math.ceil(plan.totalSeconds*1000)+400);
  }catch(error){
   if(context)context.close().catch(()=>{});
   simplePreviewSession=null;status.textContent="No se pudo iniciar la escucha en este dispositivo.";
@@ -1095,7 +1100,7 @@ function simpleExplore(){
  const paths=CinematicoEngine.composerContinuations(userMaterial,mood,reference,{ending:$("simpleEnding").value});
  const listening=[];
  const original=p.chords.map(c=>c.label);
- const audition=(label,preview)=>{const i=listening.length;listening.push({preview,fullPreview:true,listenAs:"Escuchando "+label});return '<button class="secondary simple-play-button" type="button" data-simple-preview="'+i+'" data-listen-label="'+esc("▶ "+label)+'" aria-pressed="false">'+esc("▶ "+label)+'</button>';};
+ const audition=(label,preview,composerPerformance=null)=>{const i=listening.length;listening.push({preview,fullPreview:true,composerPerformance,listenAs:"Escuchando "+label});return '<button class="secondary simple-play-button" type="button" data-simple-preview="'+i+'" data-listen-label="'+esc("▶ "+label)+'" aria-pressed="false">'+esc("▶ "+label)+'</button>';};
  const chosenDirection={resolver:"Posible regreso al centro","mantener tensión":"Una llegada que queda abierta",tonicizar:"Otra región tonal posible","cambiar dirección":"Un cambio de color armónico"};
  const cardTitles=["Primera posibilidad","Un recorrido distinto","Una tercera vía"];
  $("simpleFeedback").textContent=paths.length?"Estas opciones son sugerencias, no cambios en tu progresión.":"No hemos encontrado caminos diferentes para estos acordes. Prueba otro matiz.";
@@ -1109,7 +1114,7 @@ function simpleExplore(){
    '</span><h3>'+esc(q.composerId?q.title:cardTitles[i])+'</h3></div><p class="simple-direction">'+esc(q.arcSummary||q.gestureSummary||chosenDirection[q.direction]||"Explorar una alternativa")+
    '</p><div class="simple-chips" aria-label="Acordes sugeridos">'+q.chords.map(c=>'<span class="new" title="Acorde propuesto">'+esc(c)+'</span>').join('<span class="simple-arrow" aria-hidden="true">→</span>')+
    '</div><details><summary>¿Por qué esta opción?</summary><p>'+esc(q.variantDescription||"")+'</p><p>Gesto armónico: '+esc(q.gestureSummary||"")+
-   '</p><p>'+esc(q.explanation)+'</p>'+(q.candidateCenters?.length?'<p>Centros de referencia posibles: '+esc(q.candidateCenters.join(' / '))+'.</p>':'')+(q.phrase?'<details><summary>Desarrollo de la frase</summary><p><strong>Presentación:</strong> '+esc(q.phrase.presentation)+'</p><p><strong>Desarrollo:</strong> '+esc(q.phrase.development)+'</p><p><strong>Culminación:</strong> '+esc(q.phrase.culmination)+'</p><p><strong>Resolución:</strong> '+esc(q.phrase.resolution)+'</p><p>'+esc(q.phrase.scope)+'</p></details>':'') +harmonicGestureDetails(q)+structuralDetails(q,i)+'<p>La melodía, el ritmo y la interpretación también cuentan.</p></details>'+
+   '</p><p>'+esc(q.explanation)+'</p>'+(q.candidateCenters?.length?'<p>Centros de referencia posibles: '+esc(q.candidateCenters.join(' / '))+'.</p>':'')+(q.phrase?'<details><summary>Desarrollo de la frase</summary><p><strong>Presentación:</strong> '+esc(q.phrase.presentation)+'</p><p><strong>Desarrollo:</strong> '+esc(q.phrase.development)+'</p><p><strong>Culminación:</strong> '+esc(q.phrase.culmination)+'</p><p><strong>Resolución:</strong> '+esc(q.phrase.resolution)+'</p><p>'+esc(q.phrase.scope)+'</p></details>':'') +harmonicGestureDetails(q)+structuralDetails(q,i)+(q.composerId?'<p>Escucha alternativa: mismos acordes y mismo piano, con distribución, ritmo y articulación orientados por la referencia.</p>'+audition('Piano interpretado',[...original,...q.chords],q.composerId):'')+'<p>La melodía, el ritmo y la interpretación también cuentan.</p></details>'+
    (q.evidence?'<p class="simple-direction">Ejercicio original · <a href="'+esc(q.evidence.source)+'" target="_blank" rel="noopener noreferrer">'+esc(q.evidence.work)+'</a></p>':'')+audition('Continuación',q.chords)+audition('Todo',[...original,...q.chords])+
    '<button class="secondary" type="button" data-open-advanced="'+i+'" '+(canAnalyze(q)?"":"disabled title=\"El estudio admite 8 acordes como máximo\"")+
    '>Elegir y analizar →</button></article>').join("");
@@ -1177,5 +1182,5 @@ $("workspaceAdvanced").onclick=()=>{if(document.body.dataset.workspace==="explor
 let openingWorkspace="explore";
 try{if(localStorage.getItem("cinematico-workspace-v2")==="advanced")openingWorkspace="advanced";}catch{}
 setWorkspace(openingWorkspace);
-$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=59",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
+$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=60",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
 </script></body></html>
