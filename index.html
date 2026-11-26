@@ -728,6 +728,41 @@ function stopComposerPreview(){
   button.textContent="▶ Escuchar";button.setAttribute("aria-pressed","false");
  });
 }
+// Shared offline piano-like voice: struck, slightly inharmonic partials
+// with register-dependent decay. Identical timbre and level for every route.
+function playPianoTone(context,destination,hz,at,held){
+ const min=0.00001,release=0.18,attack=0.006;
+ const end=at+held+release;
+ const register=Math.log2(hz/261.6256);
+ const brightness=Math.max(0.55,Math.min(1.15,1-register*0.09));
+ const stretch=0.00022*Math.pow(hz/261.6256,0.35);
+ const partials=[[1,1,1.65],[2,0.46,0.98],[3,0.24,0.60],[4,0.13,0.36],[5,0.075,0.23],[6,0.045,0.14]];
+ for(const [n,weight,decay] of partials){
+  const frequency=hz*n*Math.sqrt((1+stretch*n*n)/(1+stretch));
+  if(frequency>=context.sampleRate*0.45)continue;
+  const osc=context.createOscillator(),amp=context.createGain();
+  const peak=0.12*weight*Math.pow(brightness,n-1);
+  const tau=decay*Math.max(0.50,Math.min(1.7,Math.pow(2,-register*0.23)));
+  const keyUp=at+held;
+  const keyUpLevel=Math.max(min,peak*Math.exp(-Math.max(0,held-attack)/tau));
+  osc.type="sine";osc.frequency.value=frequency;
+  amp.gain.setValueAtTime(min,at);
+  amp.gain.exponentialRampToValueAtTime(peak,at+attack);
+  amp.gain.exponentialRampToValueAtTime(keyUpLevel,keyUp);
+  amp.gain.exponentialRampToValueAtTime(min,end);
+  osc.connect(amp);amp.connect(destination);
+  osc.start(at);osc.stop(end+0.01);
+ }
+}
+function createPianoMaster(context){
+ const master=context.createGain();
+ master.gain.value=0.36;
+ const compressor=context.createDynamicsCompressor();
+ compressor.threshold.value=-14;compressor.knee.value=15;
+ compressor.ratio.value=2;compressor.attack.value=0.008;compressor.release.value=0.15;
+ master.connect(compressor);compressor.connect(context.destination);
+ return master;
+}
 function playComposerPreview(index){
  if(composerPreviewSession?.index===index){stopComposerPreview();return;}
  stopComposerPreview();
@@ -742,23 +777,13 @@ function playComposerPreview(index){
  let context;
  try{
   context=new AudioConstructor();
-  const master=context.createGain();
-  master.gain.value=0.15;master.connect(context.destination);
+  const master=createPianoMaster(context);
   const start=context.currentTime+0.08;
   for(const step of plan.steps){
    const attackStart=start+step.startSeconds;
    const duration=Math.max(0.2,step.durationSeconds-0.08);
    for(const hz of step.frequencies){
-    const gain=context.createGain();
-    // Identical muted, non-orchestral tone across all routes; gentle attack/release.
-    gain.gain.setValueAtTime(0.0001,attackStart);
-    gain.gain.linearRampToValueAtTime(0.09,attackStart+0.06);
-    gain.gain.setValueAtTime(0.09,attackStart+duration-0.14);
-    gain.gain.linearRampToValueAtTime(0.0001,attackStart+duration);
-    gain.connect(master);
-    const osc=context.createOscillator();
-    osc.type="triangle";osc.frequency.value=hz;osc.connect(gain);
-    osc.start(attackStart);osc.stop(attackStart+duration+0.01);
+    playPianoTone(context,master,hz,attackStart,duration);
    }
   }
   composerPreviewSession={context,index,timer:null};
@@ -932,21 +957,13 @@ function playSimplePreview(index,original,paths){
  try{
   context=new AudioConstructor();
   context.resume?.().catch(()=>{});
-  const master=context.createGain();
-  master.gain.value=0.13;master.connect(context.destination);
+  const master=createPianoMaster(context);
   const start=context.currentTime+0.08;
   for(const step of plan.steps){
    const at=start+step.startSeconds;
    const length=Math.max(0.2,step.durationSeconds-0.08);
    for(const hz of step.frequencies){
-    const gain=context.createGain();
-    gain.gain.setValueAtTime(0.0001,at);
-    gain.gain.linearRampToValueAtTime(0.08,at+0.06);
-    gain.gain.setValueAtTime(0.08,at+length-0.14);
-    gain.gain.linearRampToValueAtTime(0.0001,at+length);
-    gain.connect(master);
-    const osc=context.createOscillator();osc.type="triangle";osc.frequency.value=hz;osc.connect(gain);
-    osc.start(at);osc.stop(at+length+0.01);
+    playPianoTone(context,master,hz,at,length);
    }
   }
   simplePreviewSession={index,context,timer:null};
@@ -955,9 +972,9 @@ function playSimplePreview(index,original,paths){
    btn.textContent=playing?"■ Detener":"▶ Escuchar";
    btn.setAttribute("aria-pressed",String(playing));
   });
-  status.textContent="Escuchando camino "+(index+1)+". Maqueta neutra: los últimos "+Math.min(2,original.length)+" acordes tuyos y los tres nuevos; dos segundos por acorde, sin melodía ni orquestación.";
+  status.textContent="Escuchando camino "+(index+1)+". Maqueta de piano sintetizado: los últimos "+Math.min(2,original.length)+" acordes tuyos y los tres nuevos; dos segundos por acorde, sin melodía ni orquestación.";
   const playing=simplePreviewSession;
-  playing.timer=setTimeout(()=>{if(simplePreviewSession===playing){stopSimplePreview();status.textContent="Escucha finalizada.";}} ,Math.ceil(plan.totalSeconds*1000)+180);
+  playing.timer=setTimeout(()=>{if(simplePreviewSession===playing){stopSimplePreview();status.textContent="Escucha finalizada.";}} ,Math.ceil(plan.totalSeconds*1000)+300);
  }catch(error){
   if(context)context.close().catch(()=>{});
   simplePreviewSession=null;status.textContent="No se pudo iniciar la escucha en este dispositivo.";
