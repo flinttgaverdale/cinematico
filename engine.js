@@ -2712,6 +2712,64 @@ function continuationCenters(context,chords){
  const relative=h=>h.mode!==best.mode&&mod(h.tonic-best.tonic)===(best.mode==="mayor"?9:3);
  return hs.filter(h=>best.score-h.score<.65||relative(h)&&best.score-h.score<=1.1&&h.coverage>=best.coverage-3&&!(best.cadences||[]).some(c=>c.kind==="V–I/i"&&c.index===chords.length-1)).slice(0,3);
 }
+// Four compositional tasks, not four mandatory temporal segments.
+// From chord symbols alone we can only observe harmonic events, not thematic
+// presentation, rhythmic acceleration, actual climax, or a formal cadence.
+const PHRASE_ARCH_PROFILES={
+ williams:[1.1,1.0,1.4,1.5],horner:[1.2,1.8,.5,.8],
+ herrmann:[1.2,1.5,1.1,.4],elfman:[.8,1.5,1.1,.8],
+ zimmer:[1.8,1.0,.4,.7],giacchino:[1.2,1.1,.8,1.3],
+ silvestri:[.8,1.1,1.4,1.3],shore:[1.3,1.6,.6,.9],
+ morricone:[1.5,1.1,.5,.8],newman:[1.6,1.3,.3,.5],
+ goransson:[1.8,1.0,.4,.5]
+};
+function harmonicPhraseEvidence(original,path,centers=[],endingPreference="auto"){
+ if(!original.length||!path.length)return null;
+ const sameHarmony=(a,b)=>a.root===b.root&&a.type===b.type;
+ const first=original[0],last=original.at(-1),combined=[last,...path];
+ const recalled=path.flatMap((c,i)=>original.some(o=>sameHarmony(o,c))?[i]:[]);
+ const transformed=path.flatMap((c,i)=>original.some(o=>o.root===c.root)&&!original.some(o=>sameHarmony(o,c))?[i]:[]);
+ const originalLinks=original.slice(1).map((b,i)=>({a:original[i],b}));
+ const recurrentLinks=combined.slice(1).flatMap((b,i)=>originalLinks.some(x=>sameHarmony(x.a,combined[i])&&sameHarmony(x.b,b))?[i]:[]);
+ const history=new Set(original.flatMap(c=>c.notes));
+ const links=combined.slice(1).map((b,i)=>{
+  const a=combined[i],retention=a.notes.filter(n=>b.notes.includes(n)).length/Math.max(a.notes.length,b.notes.length);
+  const newPitches=b.notes.filter(n=>!history.has(n)).length;
+  const motion=pitchClassMotionEstimate(a,b);
+  const expectation=continuationExpectation(a,b,centers);
+  const parallel=a.root===b.root&&a.type!==b.type&&["","m"].includes(a.type)&&["","m"].includes(b.type);
+  const triadic=["","m"].includes(a.type)&&["","m"].includes(b.type)&&a.type!==b.type?["P","L","R","S"].find(op=>{const t=neoTransform(a.root,a.type==="m"?"minor":"major",op);return t.target.root===b.root&&t.target.quality===(b.type==="m"?"minor":"major");}):null;
+  return {from:a.label,to:b.label,retention,newPitches,motion:motion.distance,expectation:expectation.kind,contextual:expectation.contextual,parallel,triadic:triadic||null,stableBass:a.bass===b.bass};
+ });
+ // A preparatory event must point to an actual succeeding chord. A late
+ // dominant is not itself proof of a climax or a measured tension curve.
+ const preparation=links.flatMap((l,i)=>l.contextual&&["resolution","deceptive","suspension"].includes(l.expectation)?[{index:i,from:l.from,to:l.to,kind:l.expectation}]:[]);
+ const end=path.at(-1),before=path.length>1?path.at(-2):last;
+ const arrival=centers.some(c=>c.tonic===end.root&&(c.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(end.type));
+ const rootArrival=arrival&&end.root===end.bass&&end.type!=="mMaj7";
+ const finalLink=links.at(-1);
+ const arrivalKind=rootArrival&&finalLink.expectation==="resolution"?"dominant":rootArrival&&mod(before.root-end.root)===7&&DOMINANT_TYPES.includes(before.type)?"dominantTriad":rootArrival&&mod(before.root-end.root)===5&&(MAJOR_TONIC_TYPES.includes(before.type)||MINOR_TONIC_TYPES.includes(before.type))?"plagal":rootArrival?"return":arrival?"inverted":finalLink.expectation==="suspension"?"suspended":"open";
+ const firstRecalled=original.some(c=>sameHarmony(c,path[0]));
+ const sustainedLinks=links.filter(l=>l.stableBass).length;
+ const transformedLinks=links.filter(l=>l.triadic||l.parallel).length;
+ const recovery=links.length>1&&links[0].newPitches>0&&links.slice(1).some(l=>l.retention>=.5);
+ const firstReturn=sameHarmony(first,end);
+ const presentation=firstRecalled?"Recupera "+path[0].label+", ya presente en tu idea.":"Parte del enlace "+last.label+" → "+path[0].label+".";
+ const development=transformedLinks?"Ensaya "+transformedLinks+" transformación(es) entre tríadas.":transformed.length?"Reinterpreta fundamentales ya escuchadas.":sustainedLinks?"Conserva el bajo en "+sustainedLinks+" enlace(s).":recurrentLinks.length?"Recupera un enlace anterior.":"Desarrolla mediante cambios de armonía y notas comunes.";
+ const culmination=preparation.length?"Posible preparación de llegada: "+preparation.at(-1).from+" → "+preparation.at(-1).to+".":"El cifrado no localiza una culminación; puedes construirla con ritmo, registro o dinámica.";
+ const resolution=arrivalKind==="dominant"||arrivalKind==="dominantTriad"?"Llegada de dominante con bajo de tónica.":arrivalKind==="plagal"?"Llegada plagal con bajo de tónica.":arrivalKind==="return"?"Regreso a un centro candidato.":arrivalKind==="inverted"?"Regreso con bajo no conclusivo.":arrivalKind==="suspended"?"Llegada suspendida.":"El destino permite continuar; no se confirma cierre de frase.";
+ return {presentation,development,culmination,resolution,recalled,transformed,recurrentLinks,preparation,links,arrivalKind,firstReturn,sustainedLinks,transformedLinks,recovery,firstRecalled,endingPreference,scope:"Cuatro tareas compositivas opcionales; no son fases detectadas ni obligatorias. La culminación real y la forma requieren melodía, ritmo y dinámica."};
+}
+function phraseArchScore(e,composerId,kind,mood){
+ const w=PHRASE_ARCH_PROFILES[composerId];
+ if(!e||!w)return 0;
+ // Bounded rewards across a whole path. No reward for a claimed climax.
+ const p=Number(e.firstRecalled)+Math.min(1,e.recurrentLinks.length)*.6;
+ const d=Math.min(2,e.transformedLinks+e.transformed.length*.5)+Number(e.recovery)*.6;
+ const c=Number(e.preparation.length>0);
+ const r=e.endingPreference==="open"||mood==="delay"?Number(["open","suspended","inverted"].includes(e.arrivalKind)):Number(["dominant","dominantTriad","plagal","return"].includes(e.arrivalKind))+.5*Number(e.firstReturn);
+ return Math.min(5,w[0]*p*(kind==="continuity"?1.2:.7)+w[1]*d*(kind==="transformation"?1.3:.8)+w[2]*c+w[3]*r);
+}
 function composerContinuations(chords,intent,composerId,options={}){
  if(!Object.prototype.hasOwnProperty.call(CONTINUATION_LENSES,composerId))return emotionalContinuations(chords,intent);
  const context=analyzeCompositionMaterial(chords);
@@ -2841,6 +2899,8 @@ function composerContinuations(chords,intent,composerId,options={}){
    next.sort((a,b)=>b.score-a.score);
    beam=next.slice(0,18);
   }
+  // Re-rank a bounded set of complete paths using whole-phrase relationships.
+  beam=beam.map(state=>({...state,score:state.score+phraseArchScore(harmonicPhraseEvidence(chords,state.path,centers,endingPreference),composerId,kind,mood)})).sort((a,b)=>b.score-a.score);
   const selected=beam.find(s=>!used.has(s.path.map(c=>c.label).join("|")));
   if(!selected)continue;
   let p=selected.path;
@@ -2854,6 +2914,7 @@ function composerContinuations(chords,intent,composerId,options={}){
   }
   const labels=p.map(c=>c.label);used.add(labels.join("|"));
   const end=endFit(p.length>1?p.at(-2):last,p.at(-1));
+  const phrase=harmonicPhraseEvidence(chords,p,centers,endingPreference);
   const direction=end.directed||end.plagal?"resolver":end.suspended?"mantener tensión":"cambiar dirección";
   const links=[last,...p].slice(1).map((c,i)=>{const a=i?p[i-1]:last;return {from:a.label,to:c.label,common:common(a,c),bassHeld:a.bass===c.bass,expectation:continuationExpectation(a,c,centers)};});
   const facts=links.map(x=>x.from+" → "+x.to+": "+(x.common.length?x.common.map(n=>spell(n,sharp)).join(", ")+" en común":"sin notas comunes")+(x.bassHeld?", mismo bajo":"")).join("; ");
@@ -2865,10 +2926,10 @@ function composerContinuations(chords,intent,composerId,options={}){
   out.push({id:kind,title,device:lens.name,chords:labels,direction,gestureSummary:ending,arcSummary:ending,
    variantDescription:lens.name+" · "+title,explanation:facts+". "+expectationText+" "+(memory.length?"Recuperas material anterior en "+memory.map(m=>m.label).join(", ")+". ":"")+interpretation+" Ejercicio original, no predicción de autoría. "+context.caveat,
    evidence:{grade:"D",work:COMPOSER_CREATIVE_LENSES[composerId].work,source:COMPOSER_CREATIVE_LENSES[composerId].source},
-   original:origin.slice(),composerId,intent,ending,endingPreference,endingEvidence:{arrival:end.arrival,directed:end.directed,plagal:end.plagal,suspended:end.suspended,rootArrival:end.rootArrival,dominantLink:end.dominantLink},memory,expectations:links.map(l=>l.expectation),candidateCenters:centers.map(c=>c.displayLabel),sharedNotes:links.map(x=>x.common.length),rootPath:p.map(c=>c.root)});
+   original:origin.slice(),composerId,intent,ending,endingPreference,endingEvidence:{arrival:end.arrival,directed:end.directed,plagal:end.plagal,suspended:end.suspended,rootArrival:end.rootArrival,dominantLink:end.dominantLink},memory,phrase,expectations:links.map(l=>l.expectation),candidateCenters:centers.map(c=>c.displayLabel),sharedNotes:links.map(x=>x.common.length),rootPath:p.map(c=>c.root)});
  }
  return out;
 }
 
-root.CinematicoEngine={continuationExpectation,continuationCenters,composerContinuations,analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={harmonicPhraseEvidence,continuationExpectation,continuationCenters,composerContinuations,analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
