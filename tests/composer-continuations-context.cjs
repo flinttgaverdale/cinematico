@@ -19,6 +19,7 @@ function check(raw,id,intent){
   assert.equal(q.phrase.links.length,q.chords.length);
   assert.equal(q.structure.groups.flatMap(g=>g.labels).join(' '),[...q.original,...q.chords].join(' '));
   assert.equal(q.structure.rhythm.known,false);
+  assert.ok(q.motif&&Array.isArray(q.motif.gestures));
   for(const key of ['presentation','development','culmination','resolution','scope'])assert.ok(q.phrase[key]);
  }
  assert.equal(JSON.stringify(parsed.chords),before);
@@ -93,6 +94,19 @@ const sample=E.continuationInnerVoiceExample(p,full.slice(p.length),'horner');
 const preview=E.composerListeningPlan(full,{fullPreview:true,equalChordDuration:true});
 assert.ok(sample&&preview.status==='ready');
 for(const [i,v] of sample.voices.entries())assert.deepEqual(v.notes,preview.steps.slice(p.length-1).map(x=>x.pitches[i+1]));
+const motif=(a,b)=>E.harmonicMotifEvidence(a.split(' ').map(c),b.split(' ').map(c));
+assert.ok(motif('Dm G7','Em A7').gestures.some(g=>g.kind==='transposition'&&g.offset===2));
+assert.ok(motif('Am F C','Am F').gestures.some(g=>g.kind==='recall'));
+assert.ok(motif('Am C','Am G C').gestures.some(g=>g.kind==='insertion'));
+assert.ok(motif('Am G C','Am C').gestures.some(g=>g.kind==='omission'));
+assert.ok(motif('C D F','C Bb G').gestures.some(g=>g.kind==='rootReflection'));
+assert.equal(motif('C','E Ab C').cycle.closed,true);
+assert.equal(motif('C','E Ab C').cycle.step,4);
+assert.equal(motif('C','D E F#').cycle.closed,false);
+assert.equal(motif('C','C C C').cycle,null);
+assert.equal(motif('C','Cm').parallelChanges.length,1);
+assert.equal(motif('C','E C').mirrors.length,1);
+assert.ok(!motif('C/E F','D G').gestures.some(g=>g.kind==='transposition'&&g.model.join(' ')==='C/E F'&&g.candidate.join(' ')==='D G'));
 assert.deepEqual(E.composerContinuations(p,'esperanza',''),E.emotionalContinuations(p,'esperanza'));
 assert.equal(E.composerListeningPlan(E.parseUserProgression('Am').chords,{fullPreview:true,equalChordDuration:true}).status,'ready');
 assert.equal(E.composerListeningPlan([...E.parseUserProgression('C G Am F Dm Em F G').chords,...E.parseUserProgression('Am F G').chords],{fullPreview:true,equalChordDuration:true}).status,'ready');
