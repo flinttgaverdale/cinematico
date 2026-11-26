@@ -17,6 +17,8 @@ function check(raw,id,intent){
   assert.deepEqual(q.original,parsed.chords.map(x=>x.label));
   assert.equal(q.composerId,id);assert.equal(q.evidence.grade,'D');
   assert.equal(q.phrase.links.length,q.chords.length);
+  assert.equal(q.structure.groups.flatMap(g=>g.labels).join(' '),[...q.original,...q.chords].join(' '));
+  assert.equal(q.structure.rhythm.known,false);
   for(const key of ['presentation','development','culmination','resolution','scope'])assert.ok(q.phrase[key]);
  }
  assert.equal(JSON.stringify(parsed.chords),before);
@@ -70,6 +72,27 @@ assert.equal(phrase('G7 C').preparation[0].kind,'resolution');
 assert.equal(phrase('G7 C').preparation[0].from,'G7');
 assert.ok(phrase('Am F').culmination.includes('no localiza'));
 assert.ok(phrase('Am').development.includes('No es imprescindible'));
+// Structural readings retain all original events; they never remove ornaments.
+const st=(a,b,d)=>E.harmonicStructureEvidence(a.split(' ').map(c),b.split(' ').map(c),[{tonic:0,mode:'mayor'}],d);
+const prolonged=st('C Cadd9 F/C','C G7 C');
+assert.ok(prolonged.relevant.some(x=>x.kind==='neighborOverBass'&&x.start===0&&x.end===3));
+assert.equal(prolonged.groups[0].labels.join(' '),'C Cadd9');
+assert.equal(prolonged.closure,'centerArrival');
+assert.equal(st('C','G7 C/G').closure,'invertedArrival');
+assert.equal(st('C','F C').closure,'plagalArrival');
+assert.equal(st('C','A7 Dm').closure,'localArrival');
+assert.equal(st('C','G7').closure,'dominantOpen');
+assert.equal(st('C','G7 Csus4').closure,'unstableOpen');
+assert.equal(st('C','C/E F').rhythm.known,false);
+assert.equal(st('C','C/E F',[4,2,2]).rhythm.continuationMean,2);
+assert.equal(st('C','F',[4,0]).rhythm.known,false);
+assert.ok(st('C','G/B Am').passingBass.length);
+assert.equal(st('C','G G7 C').groups.length,4);
+const full=[...p,...['Em','C','Am'].map(c)];
+const sample=E.continuationInnerVoiceExample(p,full.slice(p.length),'horner');
+const preview=E.composerListeningPlan(full,{fullPreview:true,equalChordDuration:true});
+assert.ok(sample&&preview.status==='ready');
+for(const [i,v] of sample.voices.entries())assert.deepEqual(v.notes,preview.steps.slice(p.length-1).map(x=>x.pitches[i+1]));
 assert.deepEqual(E.composerContinuations(p,'esperanza',''),E.emotionalContinuations(p,'esperanza'));
 assert.equal(E.composerListeningPlan(E.parseUserProgression('Am').chords,{fullPreview:true,equalChordDuration:true}).status,'ready');
 assert.equal(E.composerListeningPlan([...E.parseUserProgression('C G Am F Dm Em F G').chords,...E.parseUserProgression('Am F G').chords],{fullPreview:true,equalChordDuration:true}).status,'ready');
