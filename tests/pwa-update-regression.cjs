@@ -136,7 +136,9 @@ async function main() {
     const other = await context.newPage();
     const updatePage = new URL('actualizar.html', url).href;
     await other.goto(updatePage);
-    await other.getByRole('button', {name:'Actualizar y abrir'}).click();
+    const updateButton = other.getByRole('button', {name:'Actualizar y abrir'});
+    assert.ok((await updateButton.boundingBox()).height >= 44, 'Update button must be easy to tap');
+    await updateButton.click();
     await other.getByText('No se pudo aplicar la actualización.', {exact:false}).waitFor();
     assert.equal(other.url(), updatePage, 'An incomplete update must keep the recovery page open');
     assert.equal(await updated.evaluate(() => window.testEngineVersion), 'next-1');
