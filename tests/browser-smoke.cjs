@@ -29,6 +29,8 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       await page.locator('[data-quick-intent="esperanza"]').click();
       assert.equal(await page.locator('[data-quick-intent="esperanza"]').getAttribute('aria-pressed'),'true');
       assert.ok(!(await page.locator('#simpleMood').isVisible()), 'Fifteen detailed nuances are progressive disclosure');
+      assert.ok(await page.locator('#simpleReference').isVisible(),'Composer selection is visible without opening more nuances');
+      assert.ok(!(await page.locator('#simpleEnding').isVisible()),'Ending direction remains conditional on composer');
       assert.deepEqual(await page.locator('#simpleMood optgroup').evaluateAll(groups=>groups.map(g=>g.label)),
         ['Luz y expansión','Calma y cercanía','Melancolía y sombra','Tensión e incertidumbre','Cambio y asombro'],
         'Optional nuances are grouped by expressive proximity without adding more decisions');
@@ -96,7 +98,7 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       await page.locator('[data-composer-preview="0"]').click();
       assert.equal(await page.locator('[data-composer-preview="0"]').getAttribute('aria-pressed'),'true');
       assert.ok((await page.locator('#composerListenStatus').innerText()).includes('Escuchando camino 1'));
-      assert.equal(await page.evaluate(()=>window.__previewStats.notes),96,'Four chords, four voices and six partials per tone');
+      assert.equal(await page.evaluate(()=>window.__previewStats.notes),128,'Four chords, four voices and eight partials per tone');
       await page.locator('[data-composer-preview="1"]').click();
       assert.equal(await page.locator('[data-composer-preview="0"]').getAttribute('aria-pressed'),'false');
       assert.equal(await page.locator('[data-composer-preview="1"]').getAttribute('aria-pressed'),'true');
@@ -133,13 +135,13 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       assert.equal(await page.locator('.simple-start-chips').count(),1,'Source progression is shown once, not copied into each alternative');
       assert.equal(await page.locator('.simple-path .simple-chips .new').count(),9,'Only three added chords per path');
       assert.equal(await page.locator('.simple-path details[open]').count(),0,'Detailed theory starts collapsed');
-      assert.equal(await page.locator('[data-simple-preview]').count(),3,'A neutral listening option for each alternative');
+      assert.equal(await page.locator('[data-simple-preview]').count(),7,'Original once, plus continuation and complete sequence for each route');
       const notesBefore=await page.evaluate(()=>window.__previewStats.notes);
       await page.locator('[data-simple-preview="0"]').click();
       assert.equal(await page.locator('[data-simple-preview="0"]').getAttribute('aria-pressed'),'true');
-      assert.equal(await page.evaluate(()=>window.__previewStats.notes)-notesBefore,120,
-        'Five chords with four voices and six partials per tone');
-      assert.ok((await page.locator('#simpleListenStatus').innerText()).includes('últimos 2 acordes'));
+      assert.equal(await page.evaluate(()=>window.__previewStats.notes)-notesBefore,128,
+        'Original four chords with four voices and eight partials per tone');
+      assert.ok((await page.locator('#simpleListenStatus').innerText()).includes('Escuchando Original'));
       const closedBefore=await page.evaluate(()=>window.__previewStats.closed);
       await page.locator('[data-simple-preview="1"]').click();
       assert.equal(await page.evaluate(()=>window.__previewStats.closed),closedBefore+1,
