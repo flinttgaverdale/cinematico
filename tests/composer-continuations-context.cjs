@@ -33,12 +33,27 @@ for(const raw of ['Am F C G','Dm7 G7 Cmaj7','Am Dm E7'])for(const id of ids)for(
  for(const path of paths){
   assert.deepEqual(E.parseUserProgression(path.chords.join(' ')).errors,[]);
   assert.equal(path.endingPreference,ending);
-  if(ending==='closed')assert.ok(path.endingEvidence.arrival);
+  if(ending==='closed')assert.ok(path.endingEvidence.rootArrival);
   else assert.ok(!path.endingEvidence.arrival||path.endingEvidence.suspended);
  }
  count++;
 }
 const p=E.parseUserProgression('Am F C G').chords;
+const candidates=E.continuationCenters(E.analyzeCompositionMaterial(p),p);
+assert.deepEqual(new Set(candidates.map(c=>c.tonic)),new Set([0,9]));
+const c=label=>E.parseUserProgression(label).chords[0];
+assert.equal(E.continuationExpectation(c('G7'),c('C'),candidates).kind,'resolution');
+assert.equal(E.continuationExpectation(c('G7'),c('Am'),candidates).kind,'deceptive');
+assert.equal(E.continuationExpectation(c('G7'),c('Csus4'),candidates).kind,'suspension');
+assert.equal(E.continuationExpectation(c('G7'),c('C/G'),candidates).rootBass,false);
+assert.equal(E.continuationExpectation(c('Gm7'),c('C'),candidates).dominant,false);
+const cadence=E.parseUserProgression('Am Dm E7').chords;
+for(const id of ids){
+ const q=E.composerContinuations(cadence,'esperanza',id,{ending:'closed'})[0];
+ assert.deepEqual(q.chords,['Am']);assert.ok(q.endingEvidence.rootArrival);
+ assert.equal(q.expectations[0].kind,'resolution');assert.equal(q.memory[0].kind,'recuperación');
+}
+
 assert.deepEqual(E.composerContinuations(p,'esperanza',''),E.emotionalContinuations(p,'esperanza'));
 assert.equal(E.composerListeningPlan(E.parseUserProgression('Am').chords,{fullPreview:true,equalChordDuration:true}).status,'ready');
 assert.equal(E.composerListeningPlan([...E.parseUserProgression('C G Am F Dm Em F G').chords,...E.parseUserProgression('Am F G').chords],{fullPreview:true,equalChordDuration:true}).status,'ready');
