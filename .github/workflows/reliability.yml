@@ -24,6 +24,7 @@ jobs:
           node tests/extended-harmonic-functions.cjs
           node tests/composer-research-regression.cjs
           node tests/composer-lenses-integration.cjs
+          node tests/contextual-composer-experiments.cjs
           node tests/composer-continuity-regression.cjs
           node tests/composer-context-simulations.cjs --json
           node tests/composer-voicing-research.cjs
@@ -55,5 +56,6 @@ jobs:
       - name: Test browser on desktop and mobile
         run: |
           node tests/browser-smoke.cjs
+          node tests/contextual-composer-browser.cjs
           node tests/pwa-offline-smoke.cjs
           node tests/responsive-layout.cjs
