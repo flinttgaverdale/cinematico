@@ -2683,7 +2683,7 @@ const CONTINUATION_LENSES={
  newman:{name:"Continuidad y resonancia",w:[2.1,0.2,0,0,0.6,2.5,0,0]},
  goransson:{name:"Permanencia y transformación",w:[0.7,0.8,0,0,1.0,0,0,0.2]}
 };
-function composerContinuations(chords,intent,composerId){
+function composerContinuations(chords,intent,composerId,options={}){
  if(!Object.prototype.hasOwnProperty.call(CONTINUATION_LENSES,composerId))return emotionalContinuations(chords,intent);
  const context=analyzeCompositionMaterial(chords);
  if(!context)return [];
@@ -2693,6 +2693,7 @@ function composerContinuations(chords,intent,composerId){
  const centers=hypotheses.filter(h=>best.score-h.score<0.65).slice(0,3);
  const emotional=emotionalContinuations(chords,intent);
  const mood=emotionCreativeProfile(intent).creativeGesture;
+ const endingPreference=["open","closed"].includes(options.ending)?options.ending:"auto";
  const sharp=/#|♯/.test(last.label);
  const pool=[],seen=new Set();
  const add=label=>{const p=parseUserProgression(label);if(!p.errors.length&&p.chords.length===1){const c=p.chords[0],key=[c.root,c.type,c.bass].join(":");if(!seen.has(key)){seen.add(key);pool.push(c);}}};
@@ -2749,8 +2750,10 @@ function composerContinuations(chords,intent,composerId){
  const endFit=(a,b)=>{
   const arrival=context.tonal.status!=="insufficient"&&centers.some(h=>h.tonic===b.root&&(h.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(b.type));
   const directed=mod(a.root-b.root)===7&&DOMINANT_TYPES.includes(a.type)&&arrival;
+  const rootArrival=arrival&&b.bass===b.root;
+  const plagal=arrival&&mod(a.root-b.root)===5&&(MAJOR_TONIC_TYPES.includes(a.type)||MINOR_TONIC_TYPES.includes(a.type));
   const suspended=b.type==="sus4"||b.type==="7"||b.type==="dim"||b.type==="mMaj7";
-  return {arrival,directed,suspended,score:(mood==="arrival"?Number(directed)*3+Number(arrival):mood==="delay"?Number(suspended)*3-Number(arrival):mood==="opening"?Number(color(b))*2:mood==="continuity"?Number(color(b)):0)};
+  return {arrival,directed,plagal,rootArrival,suspended,score:(mood==="arrival"?Number(directed)*3+Number(arrival):mood==="delay"?Number(suspended)*3-Number(arrival):mood==="opening"?Number(color(b))*2:mood==="continuity"?Number(color(b)):0)};
  };
  const used=new Set(),out=[];
  for(const [kind,title] of [["continuity","Continuidad"],["transformation","Transformación"],["contrast","Contraste"]]){
@@ -2771,7 +2774,14 @@ function composerContinuations(chords,intent,composerId){
      if(state.path.some(c=>same(c,b)))score-=3;
      if(i>=1&&same(a,b)&&same(state.path[i-2]||last,a))score-=6;
      if(i===0&&same(last,b)&&!["zimmer","goransson"].includes(composerId))score-=3;
-     if(i===2){const end=endFit(a,b);score+=end.score;
+     if(i===2){const end=endFit(a,b);
+      if(endingPreference==="closed"&&context.tonal.status!=="insufficient"&&!end.arrival)continue;
+      if(endingPreference==="open"&&end.arrival&&!end.suspended)continue;
+      score+=end.score;
+      if(endingPreference==="closed")score+=end.directed?8:end.plagal?5:end.rootArrival?4:1;
+      if(endingPreference==="open")score+=end.suspended?4:1;
+      if(["williams","giacchino","silvestri"].includes(composerId)&&kind==="continuity"&&mood!=="delay"&&endingPreference!=="open")score+=end.directed?5:end.arrival?4:-2;
+      if(kind==="continuity"&&["williams","giacchino"].includes(composerId)&&centers.length&&i===2&&!end.arrival)score-=2;
       if(kind==="continuity"&&mood!=="delay")score+=end.directed?3.5:end.arrival?1.8:0;
       if(kind==="contrast")score+=end.arrival?1.0:end.suspended?0.5:0;
       if(mood==="delay")score+=end.directed?-3:end.suspended?1.5:0;
@@ -2786,15 +2796,15 @@ function composerContinuations(chords,intent,composerId){
   if(!selected)continue;
   const p=selected.path,labels=p.map(c=>c.label);used.add(labels.join("|"));
   const end=endFit(p[1],p[2]);
-  const direction=end.directed?"resolver":end.suspended?"mantener tensión":"cambiar dirección";
+  const direction=end.directed||end.plagal?"resolver":end.suspended?"mantener tensión":"cambiar dirección";
   const links=[last,...p].slice(1).map((c,i)=>{const a=i?p[i-1]:last;return {from:a.label,to:c.label,common:common(a,c),bassHeld:a.bass===c.bass};});
   const facts=links.map(x=>x.from+" → "+x.to+": "+(x.common.length?x.common.map(n=>spell(n,sharp)).join(", ")+" en común":"sin notas comunes")+(x.bassHeld?", mismo bajo":"")).join("; ");
   const interpretation=composerId==="goransson"?"Prueba variar el pulso o las capas sin deducirlos del cifrado.":composerId==="zimmer"?"Ensaya sostener el bajo cuando coincida y variar las capas.":composerId==="morricone"?"Escucha el recorrido del bajo por separado.":"Escucha el enlace y decide si la dirección encaja con tu frase.";
-  const ending=end.directed?"Posible llegada preparada":end.suspended?"Llegada abierta o tensa":end.arrival?"Regreso a un centro candidato; cierre no confirmado":"Otro destino armónico; cierre no confirmado";
+  const ending=end.directed?"Posible llegada de dominante":end.plagal?"Posible llegada plagal":end.suspended?"Llegada abierta o tensa":end.arrival?"Regreso a un centro candidato; cierre no confirmado":"Otro destino armónico; cierre no confirmado";
   out.push({id:kind,title,device:lens.name,chords:labels,direction,gestureSummary:ending,arcSummary:ending,
    variantDescription:lens.name+" · "+title,explanation:facts+". "+interpretation+" Ejercicio original, no predicción de autoría. "+context.caveat,
    evidence:{grade:"D",work:COMPOSER_CREATIVE_LENSES[composerId].work,source:COMPOSER_CREATIVE_LENSES[composerId].source},
-   original:origin.slice(),composerId,intent,ending,sharedNotes:links.map(x=>x.common.length),rootPath:p.map(c=>c.root)});
+   original:origin.slice(),composerId,intent,ending,endingPreference,endingEvidence:{arrival:end.arrival,directed:end.directed,plagal:end.plagal,suspended:end.suspended},sharedNotes:links.map(x=>x.common.length),rootPath:p.map(c=>c.root)});
  }
  return out;
 }
