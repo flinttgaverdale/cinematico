@@ -2669,5 +2669,112 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+// Contextual continuation search. Weights are creative heuristics, not measured stylistic probabilities.
+const CONTINUATION_LENSES={
+ williams:{name:"Preparación tonal",w:[1.1,0.6,0.2,2.8,0.1,0.1,0.1,0.5]},
+ horner:{name:"Transformación triádica",w:[2.7,0.2,1.3,0.2,0,0,0.1,0.1]},
+ herrmann:{name:"Fricción interna",w:[0.9,3.3,1.2,-0.3,0,0,2.3,0]},
+ elfman:{name:"Vecindad cromática",w:[0.8,0.6,3.2,0.2,0,0,1.7,0]},
+ zimmer:{name:"Bajo estable",w:[0.6,0.5,0,0.1,3.1,0,0,0.5]},
+ giacchino:{name:"Color y dirección tonal",w:[0.7,0.1,0.2,2.3,0,2.1,0,0.5]},
+ silvestri:{name:"Contraste interválico",w:[0.2,0,0.8,1.7,0,0,0,3.1]},
+ shore:{name:"Transformación modal",w:[0.8,1.9,1.0,0.1,0,0,0,1.2]},
+ morricone:{name:"Trayectoria del bajo",w:[0.7,0.2,0,0.3,0.5,0,0,0.3]},
+ newman:{name:"Continuidad y resonancia",w:[2.1,0.2,0,0,0.6,2.5,0,0]},
+ goransson:{name:"Permanencia y transformación",w:[0.7,0.8,0,0,1.0,0,0,0.2]}
+};
+function composerContinuations(chords,intent,composerId){
+ if(!Object.prototype.hasOwnProperty.call(CONTINUATION_LENSES,composerId))return emotionalContinuations(chords,intent);
+ const context=analyzeCompositionMaterial(chords);
+ if(!context)return [];
+ const lens=CONTINUATION_LENSES[composerId],last=chords.at(-1);
+ const origin=chords.map(c=>c.label),history=new Set(chords.flatMap(c=>[...c.notes,c.bass]));
+ const hypotheses=context.tonal.candidates||[],best=hypotheses[0];
+ const centers=hypotheses.filter(h=>best.score-h.score<0.65).slice(0,3);
+ const emotional=emotionalContinuations(chords,intent);
+ const mood=emotionCreativeProfile(intent).creativeGesture;
+ const sharp=/#|♯/.test(last.label);
+ const pool=[],seen=new Set();
+ const add=label=>{if(seen.has(label))return;const p=parseUserProgression(label);if(!p.errors.length&&p.chords.length===1){seen.add(label);pool.push(p.chords[0]);}};
+ // Generate single chord candidates, then search contextual links, not preset suffixes.
+ for(let r=0;r<12;r++)for(const q of ["","m","7","maj7","m7","add9","madd9","sus4","mMaj7","dim"])add(spell(r,sharp)+q);
+ for(const label of origin)add(label);
+ for(const p of emotional)for(const label of p.chords)add(label);
+ if(["zimmer","morricone","newman"].includes(composerId)){
+  const basses=[...new Set([last.bass,...chords.slice(-3).map(c=>c.bass),...last.notes])];
+  for(const c of pool.slice())if(["","m","add9","madd9","maj7"].includes(c.type))
+   for(const b of basses)if(b!==c.root&&(c.notes.includes(b)||b===last.bass&&composerId==="zimmer"))add(c.label+"/"+spell(b,sharp));
+ }
+ const common=(a,b)=>a.notes.filter(n=>b.notes.includes(n));
+ const dist=(a,b)=>Math.min(mod(a-b),mod(b-a));
+ const tension=c=>["7","dim","mMaj7","sus4"].includes(c.type);
+ const color=c=>["maj7","m7","add9","madd9"].includes(c.type);
+ const same=(a,b)=>a.root===b.root&&a.type===b.type&&a.bass===b.bass;
+ const local=(a,b)=>{
+  const shared=common(a,b).length,d=dist(a.root,b.root),bass=dist(a.bass,b.bass);
+  const chrom=b.notes.filter(n=>!history.has(n)).length;
+  const features=[shared,Number(a.root===b.root&&a.type!==b.type),Number(d===1||d===3||d===4)*1.5+chrom*.35,
+   Number(mod(a.root-b.root)===7)*(a.type==="7"?2:1),Number(a.bass===b.bass),Number(color(b)),
+   Number(b.type==="mMaj7"||b.type==="dim"),Number(d===6||d===2)];
+  let score=features.reduce((sum,v,i)=>sum+v*lens.w[i],0);
+  score+=b.notes.filter(n=>history.has(n)).length*.28;
+  if(composerId==="morricone")score+=(bass===1||bass===2?2.4:0)+(b.bass!==b.root?1.4:0);
+  if(composerId==="goransson"&&same(a,b))score+=3;
+  if(composerId==="horner"&&["","m"].includes(a.type)&&["","m"].includes(b.type)&&shared>=1)score+=2;
+  if(composerId==="shore"&&a.root===b.root&&((a.type==="m"&&b.type==="")||(a.type===""&&b.type==="m")))score+=3;
+  if(composerId==="silvestri"&&d===2&&a.type===""&&b.type==="")score+=1.5;
+  if(same(a,b)&&!["zimmer","goransson","herrmann"].includes(composerId))score-=5;
+  if(b.bassKind==="independent"&&b.bass!==a.bass)score-=1.8;
+  if(mood==="continuity")score+=shared*.45-chrom*.4;
+  if(mood==="contrast"||mood==="uncertainty")score+=chrom*.65;
+  if(mood==="darkening"&&MINOR_TONIC_TYPES.includes(b.type))score+=.8;
+  if(mood==="delay"&&tension(b))score+=.8;
+  if(mood==="opening"&&color(b))score+=.8;
+  return {score,shared,chrom,bass,d};
+ };
+ const endFit=(a,b)=>{
+  const arrival=centers.some(h=>h.tonic===b.root&&(h.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(b.type));
+  const directed=mod(a.root-b.root)===7&&DOMINANT_TYPES.includes(a.type)&&arrival;
+  const suspended=tension(b);
+  return {arrival,directed,suspended,score:(mood==="arrival"?Number(directed)*3+Number(arrival):mood==="delay"?Number(suspended)*3-Number(arrival):mood==="opening"?Number(color(b))*2:mood==="continuity"?Number(color(b)):0)};
+ };
+ const used=new Set(),out=[];
+ for(const [kind,title] of [["continuity","Continuidad"],["transformation","Transformación"],["contrast","Contraste"]]){
+  let beam=[{path:[],score:0}];
+  for(let i=0;i<3;i++){
+   const next=[];
+   for(const state of beam){const a=state.path.at(-1)||last;
+    for(const b of pool){
+     const l=local(a,b);
+     let score=state.score+l.score;
+     if(kind==="continuity")score+=l.shared*1.2-l.chrom*.8-l.d*.15;
+     if(kind==="transformation")score+=l.score*.25+(same(a,b)?-.6:0);
+     if(kind==="contrast")score+=l.chrom*1.15+(l.d===6?1.5:0)-(l.shared===0?.5:0);
+     if(i===0&&out.some(p=>p.chords[0]===b.label))score-=3;
+     if(state.path.some(c=>same(c,b)))score-=1.5;
+     if(i===2)score+=endFit(a,b).score+(kind==="continuity"&&endFit(a,b).directed?1.5:0);
+     next.push({path:[...state.path,b],score});
+    }
+   }
+   next.sort((a,b)=>b.score-a.score);
+   beam=next.slice(0,18);
+  }
+  const selected=beam.find(s=>!used.has(s.path.map(c=>c.label).join("|")));
+  if(!selected)continue;
+  const p=selected.path,labels=p.map(c=>c.label);used.add(labels.join("|"));
+  const first=local(last,p[0]),end=endFit(p[1],p[2]);
+  const direction=end.directed?"resolver":end.suspended?"mantener tensión":"cambiar dirección";
+  const links=[last,...p].slice(1).map((c,i)=>{const a=i?p[i-1]:last;return {from:a.label,to:c.label,common:common(a,c),bassHeld:a.bass===c.bass};});
+  const facts=links.map(x=>x.from+" → "+x.to+": "+(x.common.length?x.common.map(n=>spell(n,sharp)).join(", ")+" en común":"sin notas comunes")+(x.bassHeld?", mismo bajo":"")).join("; ");
+  const interpretation=composerId==="goransson"?"Prueba variar el pulso o las capas sin deducirlos del cifrado.":composerId==="zimmer"?"Ensaya sostener el bajo cuando coincida y variar las capas.":composerId==="morricone"?"Escucha el recorrido del bajo por separado.":"Escucha el enlace y decide si la dirección encaja con tu frase.";
+  const ending=end.directed?"Posible llegada preparada":end.suspended?"Llegada abierta o tensa":end.arrival?"Regreso a un centro candidato; cierre no confirmado":"Otro destino armónico; cierre no confirmado";
+  out.push({id:kind,title,device:lens.name,chords:labels,direction,gestureSummary:ending,arcSummary:ending,
+   variantDescription:lens.name+" · "+title,explanation:facts+". "+interpretation+" Ejercicio original, no predicción de autoría. "+context.caveat,
+   evidence:{grade:"D",work:COMPOSER_CREATIVE_LENSES[composerId].work,source:COMPOSER_CREATIVE_LENSES[composerId].source},
+   original:origin.slice(),composerId,intent,ending,sharedNotes:links.map(x=>x.common.length),rootPath:p.map(c=>c.root)});
+ }
+ return out;
+}
+
+root.CinematicoEngine={composerContinuations,analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
