@@ -414,7 +414,112 @@ body[data-study="inspire"] .reference-flow{margin-bottom:15px}
   .study-inspect > div,.study-tool > article{padding:12px}
 }
 
-</style></head><body><div class="shell"><header class="top"><div class="brand"><div class="mark">C</div><div><b>CINEMÁTICO</b><small>Estudio de composición</small></div></div><small>Exploración armónica · herramienta creativa</small></header><section class="hero"><div class="kicker">CINEMÁTICO / INSTRUMENTO ARMÓNICO</div><h1>Una idea. Nuevos caminos.</h1><p>Escribe tus acordes y descubre otras direcciones posibles. Tu música sigue siendo tuya.</p></section><nav class="workspace-switch" aria-label="Modo de trabajo"><div><strong id="workspaceTitle">Crear</strong><p id="workspaceDesc">Tus acordes, nuevas posibilidades. Sin necesidad de teoría musical.</p></div><div class="workspace-tabs" role="group" aria-label="Nivel de herramientas"><button id="workspaceExplore" type="button" aria-pressed="true">Crear</button><button id="workspaceAdvanced" type="button" aria-pressed="false">Estudio avanzado</button></div></nav><aside class="guide" id="studioGuide" aria-label="Guía de inicio"><div class="guide-head"><b>Guía rápida · Tres pasos para empezar</b><button class="secondary" id="guideToggle" type="button" aria-expanded="false" aria-controls="guideSteps">Mostrar guía</button></div><div class="guide-steps" id="guideSteps" hidden><div class="guide-step"><span class="guide-number">1</span><div><strong>Elige el centro tonal</strong>Pulsa una nota del círculo de quintas.</div></div><div class="guide-step"><span class="guide-number">2</span><div><strong>Define la intención</strong>Selecciona emoción, compositor y, si quieres, un modo.</div></div><div class="guide-step"><span class="guide-number">3</span><div><strong>Explora y profundiza</strong>Consulta acordes y voces. Abre las ayudas de cada herramienta cuando las necesites.</div></div></div></aside><section class="simple-create" aria-label="Crear con tus acordes"><div class="simple-intro"><span class="kicker">CREAR / TU IDEA MUSICAL</span><h2>¿Hacia dónde seguimos?</h2><p>Empieza por tus acordes. Elige una intención y compara tres ideas, sin modificar tu progresión.</p></div><div class="simple-fields"><div><label for="simpleChords">Tu progresión</label><input id="simpleChords" type="text" value="" placeholder="Am F C G" autocomplete="off" aria-describedby="simpleChordsHelp"><p id="simpleChordsHelp">Escribe los acordes separados por espacios. Ejemplo: Am F C G.</p></div></div>
+
+/* Consolidated visual polish — keep existing workflows, no new features. */
+:root{
+ --bg:#181b1c;--p:#222627;--p2:#2b3031;--line:#414849;
+ --txt:#f0f1ed;--muted:#c2c8c5;--quiet:#a0aaa5;--gold:#d9b785;--sage:#a9c2b4;
+ --studio-bg:var(--bg);--studio-panel:var(--p);--studio-raised:var(--p2);
+ --studio-edge:var(--line);--studio-ink:var(--txt);--studio-muted:var(--muted);
+ --studio-gold:var(--gold);--studio-chord:#303b38;--studio-next:#3e352a;--studio-radius:8px;
+ --r:8px
+}
+body{background:var(--bg);background-image:none;font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;letter-spacing:0}
+button,input,select{font-family:inherit}
+.top,.hero,.workspace-switch,.simple-create,.advanced-navigation,body[data-workspace="advanced"] main.layout{max-width:1080px;margin-inline:auto}
+.top{border-color:var(--line);height:60px}
+.hero{border:0;display:block;padding:22px 0 14px}
+.hero .kicker{display:none}
+.hero h1{font:650 clamp(23px,3vw,34px)/1.18 "Manrope",system-ui,sans-serif;letter-spacing:-.035em;margin:0 0 6px}
+.hero p{font-size:13px;max-width:660px;line-height:1.55}
+.workspace-switch{background:transparent;border:0;padding:0;margin-bottom:18px;gap:14px}
+.workspace-switch>div:first-child{display:none}
+.workspace-tabs{width:100%;padding:3px;background:var(--p);border-color:var(--line);gap:3px}
+.workspace-tabs button{flex:1 1 0;min-width:0;font-size:14px;font-weight:600;min-height:44px}
+.workspace-tabs button[aria-pressed="true"]{background:var(--p2);color:var(--gold);box-shadow:inset 0 -2px var(--gold)}
+.simple-create{max-width:1080px;margin:0 auto 32px;padding:clamp(18px,3vw,32px);border-color:var(--line)}
+.simple-intro h2{font:650 clamp(22px,2.7vw,29px)/1.2 "Manrope",system-ui,sans-serif;margin:0 0 6px;letter-spacing:-.025em}
+.simple-intro p{font-size:14px;line-height:1.55}
+.simple-fields{max-width:none;margin-top:21px}
+.simple-fields label,.simple-reference-label,.simple-section-title{font-size:14px;font-weight:650;letter-spacing:0;margin:0 0 8px}
+.simple-fields input{background:#171a1b!important;border-color:#596362!important;border-radius:6px!important;min-height:50px!important;font-size:22px!important}
+.simple-intention{margin-top:21px}
+.simple-intent-pills{max-width:none;gap:8px}
+.simple-intent-pills button{background:var(--p2);border-color:var(--line);color:var(--txt);font-size:13px;min-height:46px}
+.simple-intent-pills button[aria-pressed="true"]{background:#453a2b;border-color:var(--gold);color:#f3dbb7}
+.simple-nuances{max-width:none;margin-top:8px}
+.simple-nuances summary{min-height:40px;display:list-item;width:auto;padding:10px 0;color:var(--muted)}
+.simple-nuance-content{max-width:none;padding-top:4px}
+.simple-reference-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px;align-items:start}
+.simple-reference-fields>div{min-width:0}
+.simple-reference-fields label{display:block;color:var(--txt)}
+.simple-reference-fields select,.simple-nuance-content select{width:100%;min-height:44px;font-size:15px!important;background:#1a1e1f!important;border-color:#56605e!important;border-radius:6px!important}
+.simple-actions{margin:19px 0 8px}
+.simple-actions .primary{flex:0 1 auto;min-height:46px;padding-inline:22px;font-size:14px}
+.simple-feedback{font-size:13px;line-height:1.55}
+.simple-results{gap:12px;align-items:start}
+.simple-results-intro{border-top:1px solid var(--line);padding-top:17px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.simple-results-intro h3{flex:1 0 100%;margin:0;font-size:17px}
+.simple-results-intro .simple-start-chips{flex:1 1 auto}
+.simple-results-intro .simple-play-button{min-height:44px}
+.simple-start-chips{gap:6px}
+.simple-start-chips span{background:var(--studio-chord);border-color:#52625d;font-size:15px}
+.simple-path{background:#1c2021;border-color:var(--line);padding:16px;gap:9px;box-shadow:none;align-self:stretch}
+.simple-path-heading{gap:3px}
+.simple-path .simple-variant{font-size:11px;letter-spacing:.04em;color:var(--quiet)}
+.simple-path h3{font-size:17px;line-height:1.25;font-weight:650}
+.simple-path .simple-direction{font-size:13px;color:var(--muted);font-weight:500;min-height:2.9em}
+.simple-path .simple-chips{gap:5px;margin:4px 0 8px;align-content:flex-start;min-height:40px}
+.simple-path .simple-chips span.new{min-width:0;min-height:37px;padding:7px 9px;font-size:17px;background:var(--studio-next);border-color:#8c7558;color:#f1d8b2;max-width:100%;overflow-wrap:anywhere}
+.simple-chips .simple-arrow{font-size:13px;padding:0 1px;color:var(--quiet)}
+.simple-path details{margin-top:0;padding-top:6px;border-top:1px solid var(--line);min-width:0}
+.simple-path>details{margin-bottom:auto}
+.simple-path details details{margin-top:10px;padding:6px 0 0}
+.simple-path summary{min-height:40px;padding:10px 0;font-size:13px;line-height:1.4;color:var(--sage);list-style-position:inside}
+.simple-path details p{font-size:13px;line-height:1.6;margin:7px 0;color:var(--muted)}
+.simple-path .simple-source{font-size:12px}
+.simple-source a,.simple-path a{color:var(--gold);text-underline-offset:3px;overflow-wrap:anywhere}
+.simple-audio-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.simple-path button{margin:0;min-height:44px;white-space:normal;overflow-wrap:anywhere;font-size:12px;font-weight:600;padding:8px 5px}
+.simple-play-button{background:var(--p2)!important;border-color:#58635e!important;color:var(--txt)!important}
+.simple-play-button[aria-pressed="true"]{background:#59452f!important;color:#ffdfb0!important;border-color:var(--gold)!important}
+.simple-path [data-open-advanced]{background:transparent;color:var(--muted);border-color:var(--line)}
+.simple-path [data-open-advanced]:disabled{opacity:.5}
+.simple-depth-note{border-top:1px solid var(--line);padding-top:14px;margin-top:19px;font-size:13px}
+.simple-listen-status{font-size:13px}
+.panel,.study-inspect,.study-tool,.reference-language-panel,.reference-flow>.card,.reference-flow>.heroresult,.guide,.tech-card,.composer-path-card,.reference-style-card{background:var(--p);border-color:var(--line);box-shadow:none;border-radius:8px}
+.reference-style-card,.reference-language-panel,.guide{background-image:none}
+.cardhead{border-color:var(--line)}
+.cardhead b,.head b{font-size:14px;font-weight:650}
+.copy,.insight,.section-lead,.help-details p,.help-details li,.composer-path-card p,.tech-card p,.mod p{font-size:13px;line-height:1.6}
+.help-details summary,.composer-path-analysis summary,.tech-card summary{font-size:13px}
+.advanced-tabs button{background:var(--p2);border-color:var(--line);border-radius:6px}
+.advanced-tabs button[aria-pressed="true"]{background:#453a2b;border-color:var(--gold);color:#f3dbb7}
+.advanced-tabs button[aria-pressed="true"] small{color:#e4cba6}
+@media(max-width:950px){.simple-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){
+ .hero{padding:16px 0 10px;margin-bottom:7px}
+ .hero h1{font-size:25px}
+ .hero p{font-size:13px}
+ .workspace-switch{padding:0;margin-bottom:12px}
+ .simple-create{padding:15px;margin-top:0}
+ .simple-intro h2{font-size:23px}
+ .simple-fields{margin-top:18px}
+ .simple-fields input,.simple-reference-fields select,.simple-nuance-content select{font-size:16px!important}
+ .simple-fields input{font-size:21px!important}
+ .simple-intention{margin-top:19px}
+ .simple-reference-fields{grid-template-columns:minmax(0,1fr);gap:11px}
+ .simple-intent-pills button{min-height:48px}
+ .simple-actions .primary{width:100%;flex:1}
+ .simple-results{grid-template-columns:minmax(0,1fr)}
+ .simple-path{padding:13px}
+ .simple-path .simple-direction{min-height:0}
+ .simple-path summary{min-height:44px}
+ .simple-nuances summary{min-height:44px}
+ .simple-results-intro .simple-play-button{flex:0 0 auto}
+ .simple-path .simple-chips span.new{font-size:16px}
+}
+</style></head><body><div class="shell"><header class="top"><div class="brand"><div class="mark">C</div><div><b>CINEMÁTICO</b><small>Estudio de composición</small></div></div><small>Exploración armónica · herramienta creativa</small></header><section class="hero"><div class="kicker">CINEMÁTICO / INSTRUMENTO ARMÓNICO</div><h1>Una idea. Nuevos caminos.</h1><p>Escribe tus acordes y descubre otras direcciones posibles. Tu música sigue siendo tuya.</p></section><nav class="workspace-switch" aria-label="Modo de trabajo"><div><strong id="workspaceTitle">Crear</strong><p id="workspaceDesc">Tus acordes, nuevas posibilidades. Sin necesidad de teoría musical.</p></div><div class="workspace-tabs" role="group" aria-label="Nivel de herramientas"><button id="workspaceExplore" type="button" aria-pressed="true">Crear</button><button id="workspaceAdvanced" type="button" aria-pressed="false">Estudio avanzado</button></div></nav><aside class="guide" id="studioGuide" aria-label="Guía de inicio"><div class="guide-head"><b>Guía rápida · Tres pasos para empezar</b><button class="secondary" id="guideToggle" type="button" aria-expanded="false" aria-controls="guideSteps">Mostrar guía</button></div><div class="guide-steps" id="guideSteps" hidden><div class="guide-step"><span class="guide-number">1</span><div><strong>Elige el centro tonal</strong>Pulsa una nota del círculo de quintas.</div></div><div class="guide-step"><span class="guide-number">2</span><div><strong>Define la intención</strong>Selecciona emoción, compositor y, si quieres, un modo.</div></div><div class="guide-step"><span class="guide-number">3</span><div><strong>Explora y profundiza</strong>Consulta acordes y voces. Abre las ayudas de cada herramienta cuando las necesites.</div></div></div></aside><section class="simple-create" aria-label="Crear con tus acordes"><div class="simple-intro"><h2>Desarrolla tu idea</h2><p>Escribe tus acordes, elige una intención y compara tres caminos.</p></div><div class="simple-fields"><div><label for="simpleChords">Tu progresión</label><input id="simpleChords" type="text" value="" placeholder="Am F C G" autocomplete="off" aria-describedby="simpleChordsHelp"><p id="simpleChordsHelp">Escribe los acordes separados por espacios. Ejemplo: Am F C G.</p></div></div>
 <div class="simple-intention"><p class="simple-section-title" id="simpleIntentTitle">¿Qué dirección quieres explorar?</p><div class="simple-intent-pills" role="group" aria-labelledby="simpleIntentTitle">
 <button type="button" data-quick-intent="esperanza" aria-pressed="true" aria-describedby="simpleIntentHelp">Apertura / esperanza</button>
 <button type="button" data-quick-intent="suspense" aria-pressed="false" aria-describedby="simpleIntentHelp">Mantener tensión</button>
@@ -422,7 +527,7 @@ body[data-study="inspire"] .reference-flow{margin-bottom:15px}
 <button type="button" data-quick-intent="contraste" aria-pressed="false" aria-describedby="simpleIntentHelp">Contrastar</button>
 </div>
 <p class="simple-intent-help" id="simpleIntentHelp" aria-live="polite">Busca continuaciones más abiertas o luminosas. Es una intención musical, no una orden para abrir algo.</p>
-<details class="simple-nuances" id="simpleNuances"><summary>Matiz y referencia</summary><div class="simple-nuance-content"><label for="simpleMood">Matiz que quieres explorar</label><select id="simpleMood"><optgroup label="Luz y expansión"><option value="esperanza" selected>Esperanza / apertura</option><option value="alegria">Alegría</option><option value="epica">Épica</option></optgroup><optgroup label="Calma y cercanía"><option value="calma">Calma</option><option value="ternura">Ternura</option><option value="nostalgia">Nostalgia</option></optgroup><optgroup label="Melancolía y sombra"><option value="melancolia">Melancolía</option><option value="tristeza">Tristeza</option><option value="oscuridad">Oscuridad</option></optgroup><optgroup label="Tensión e incertidumbre"><option value="tension">Tensión</option><option value="suspense">Suspense</option><option value="inquietud">Inquietud</option><option value="misterio">Misterio</option></optgroup><optgroup label="Cambio y asombro"><option value="contraste">Contraste inesperado</option><option value="asombro">Asombro / magia</option></optgroup></select><label class="simple-reference-label" for="simpleReference">Lenguaje de referencia (opcional)</label><select id="simpleReference"><option value="">Sin referencia</option></select><div id="simpleEndingGroup" hidden><label class="simple-reference-label" for="simpleEnding">Dirección de la frase</label><select id="simpleEnding"><option value="auto">Explorar libremente</option><option value="closed">Buscar una llegada</option><option value="open">Dejarla abierta</option></select></div><p>La intención orienta las sugerencias; no determina cómo se sentirá la música.</p></div></details></div>
+<details class="simple-nuances" id="simpleNuances"><summary>Más matices</summary><div class="simple-nuance-content"><label for="simpleMood">Matiz que quieres explorar</label><select id="simpleMood"><optgroup label="Luz y expansión"><option value="esperanza" selected>Esperanza / apertura</option><option value="alegria">Alegría</option><option value="epica">Épica</option></optgroup><optgroup label="Calma y cercanía"><option value="calma">Calma</option><option value="ternura">Ternura</option><option value="nostalgia">Nostalgia</option></optgroup><optgroup label="Melancolía y sombra"><option value="melancolia">Melancolía</option><option value="tristeza">Tristeza</option><option value="oscuridad">Oscuridad</option></optgroup><optgroup label="Tensión e incertidumbre"><option value="tension">Tensión</option><option value="suspense">Suspense</option><option value="inquietud">Inquietud</option><option value="misterio">Misterio</option></optgroup><optgroup label="Cambio y asombro"><option value="contraste">Contraste inesperado</option><option value="asombro">Asombro / magia</option></optgroup></select><p>La intención orienta las sugerencias; no determina cómo se sentirá la música.</p></div></details><div class="simple-reference-fields"><div><label class="simple-reference-label" for="simpleReference">Lenguaje de referencia (opcional)</label><select id="simpleReference"><option value="">Sin referencia</option></select></div><div id="simpleEndingGroup" hidden><label class="simple-reference-label" for="simpleEnding">Dirección de la frase</label><select id="simpleEnding"><option value="auto">Explorar libremente</option><option value="closed">Buscar una llegada</option><option value="open">Dejarla abierta</option></select></div></div></div>
 <div class="simple-actions"><button class="primary" id="simpleExplore" type="button">Explorar tres caminos →</button></div><p class="simple-feedback" id="simpleFeedback" role="status" aria-live="polite"></p><div id="simpleResults" class="simple-results" aria-live="polite"></div><p id="simpleListenStatus" class="simple-listen-status" role="status" aria-live="polite"></p><p class="simple-depth-note">¿Quieres profundizar en los acordes y sus relaciones? <button type="button" id="simpleToAdvanced" class="simple-deep-link">Abrir estudio avanzado</button></p></section><section class="advanced-navigation" id="advancedNavigation" tabindex="-1" aria-label="Elegir área de estudio">
  <span class="kicker">ESTUDIO · SI QUIERES IR MÁS ALLÁ</span>
  <h2>¿Qué quieres explorar?</h2>
@@ -1114,8 +1219,8 @@ function simpleExplore(){
    '</span><h3>'+esc(q.composerId?q.title:cardTitles[i])+'</h3></div><p class="simple-direction">'+esc(q.arcSummary||q.gestureSummary||chosenDirection[q.direction]||"Explorar una alternativa")+
    '</p><div class="simple-chips" aria-label="Acordes sugeridos">'+q.chords.map(c=>'<span class="new" title="Acorde propuesto">'+esc(c)+'</span>').join('<span class="simple-arrow" aria-hidden="true">→</span>')+
    '</div><details><summary>¿Por qué esta opción?</summary><p>'+esc(q.variantDescription||"")+'</p><p>Gesto armónico: '+esc(q.gestureSummary||"")+
-   '</p><p>'+esc(q.explanation)+'</p>'+(q.candidateCenters?.length?'<p>Centros de referencia posibles: '+esc(q.candidateCenters.join(' / '))+'.</p>':'')+(q.phrase?'<details><summary>Desarrollo de la frase</summary><p><strong>Presentación:</strong> '+esc(q.phrase.presentation)+'</p><p><strong>Desarrollo:</strong> '+esc(q.phrase.development)+'</p><p><strong>Culminación:</strong> '+esc(q.phrase.culmination)+'</p><p><strong>Resolución:</strong> '+esc(q.phrase.resolution)+'</p><p>'+esc(q.phrase.scope)+'</p></details>':'') +harmonicGestureDetails(q)+structuralDetails(q,i)+(q.composerId?'<p>Escucha alternativa: mismos acordes y mismo piano, con distribución, ritmo y articulación orientados por la referencia.</p>'+audition('Piano interpretado',[...original,...q.chords],q.composerId):'')+'<p>La melodía, el ritmo y la interpretación también cuentan.</p></details>'+
-   (q.evidence?'<p class="simple-direction">Ejercicio original · <a href="'+esc(q.evidence.source)+'" target="_blank" rel="noopener noreferrer">'+esc(q.evidence.work)+'</a></p>':'')+audition('Continuación',q.chords)+audition('Todo',[...original,...q.chords])+
+   '</p><p>'+esc(q.explanation)+'</p>'+(q.evidence?'<p class="simple-source">Ejercicio original · <a href="'+esc(q.evidence.source)+'" target="_blank" rel="noopener noreferrer">'+esc(q.evidence.work)+'</a></p>':'')+(q.candidateCenters?.length?'<p>Centros de referencia posibles: '+esc(q.candidateCenters.join(' / '))+'.</p>':'')+(q.phrase?'<details><summary>Desarrollo de la frase</summary><p><strong>Presentación:</strong> '+esc(q.phrase.presentation)+'</p><p><strong>Desarrollo:</strong> '+esc(q.phrase.development)+'</p><p><strong>Culminación:</strong> '+esc(q.phrase.culmination)+'</p><p><strong>Resolución:</strong> '+esc(q.phrase.resolution)+'</p><p>'+esc(q.phrase.scope)+'</p></details>':'') +harmonicGestureDetails(q)+structuralDetails(q,i)+(q.composerId?'<p>Escucha alternativa: mismos acordes y mismo piano, con distribución, ritmo y articulación orientados por la referencia.</p>'+audition('Piano interpretado',[...original,...q.chords],q.composerId):'')+'<p>La melodía, el ritmo y la interpretación también cuentan.</p></details>'+
+   '<div class="simple-audio-row">'+audition('Continuación',q.chords)+audition('Todo',[...original,...q.chords])+'</div>'+
    '<button class="secondary" type="button" data-open-advanced="'+i+'" '+(canAnalyze(q)?"":"disabled title=\"El estudio admite 8 acordes como máximo\"")+
    '>Elegir y analizar →</button></article>').join("");
  out.querySelectorAll("[data-simple-preview]").forEach(button=>button.onclick=()=>playSimplePreview(Number(button.dataset.simplePreview),p.chords,listening));
@@ -1182,5 +1287,5 @@ $("workspaceAdvanced").onclick=()=>{if(document.body.dataset.workspace==="explor
 let openingWorkspace="explore";
 try{if(localStorage.getItem("cinematico-workspace-v2")==="advanced")openingWorkspace="advanced";}catch{}
 setWorkspace(openingWorkspace);
-$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=60",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
+$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=61",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
 </script></body></html>
