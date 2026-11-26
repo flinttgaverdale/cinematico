@@ -2697,7 +2697,7 @@ function composerContinuations(chords,intent,composerId){
  const pool=[],seen=new Set();
  const add=label=>{if(seen.has(label))return;const p=parseUserProgression(label);if(!p.errors.length&&p.chords.length===1){seen.add(label);pool.push(p.chords[0]);}};
  // Generate single chord candidates, then search contextual links, not preset suffixes.
- for(let r=0;r<12;r++)for(const q of ["","m","7","maj7","m7","add9","madd9","sus4","mMaj7","dim"])add(spell(r,sharp)+q);
+ for(let offset=0;offset<12;offset++){const r=mod(last.root+offset);for(const q of ["","m","7","maj7","m7","add9","madd9","sus4","mMaj7","dim"])add(spell(r,sharp)+q);}
  for(const label of origin)add(label);
  for(const p of emotional)for(const label of p.chords)add(label);
  if(["zimmer","morricone","newman"].includes(composerId)){
@@ -2720,7 +2720,7 @@ function composerContinuations(chords,intent,composerId){
   score+=b.notes.filter(n=>history.has(n)).length*.28;
   if(composerId==="morricone")score+=(bass===1||bass===2?2.4:0)+(b.bass!==b.root?1.4:0);
   if(composerId==="goransson"&&same(a,b))score+=3;
-  if(composerId==="horner"&&["","m"].includes(a.type)&&["","m"].includes(b.type)&&shared>=1)score+=2;
+  if(composerId==="horner"){if(["","m"].includes(a.type)&&["","m"].includes(b.type)&&shared>=1)score+=4;else if(!["","m"].includes(b.type))score-=2;}
   if(composerId==="shore"&&a.root===b.root&&((a.type==="m"&&b.type==="")||(a.type===""&&b.type==="m")))score+=3;
   if(composerId==="silvestri"&&d===2&&a.type===""&&b.type==="")score+=1.5;
   if(same(a,b)&&!["zimmer","goransson","herrmann"].includes(composerId))score-=5;
@@ -2733,7 +2733,7 @@ function composerContinuations(chords,intent,composerId){
   return {score,shared,chrom,bass,d};
  };
  const endFit=(a,b)=>{
-  const arrival=centers.some(h=>h.tonic===b.root&&(h.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(b.type));
+  const arrival=context.tonal.status!=="insufficient"&&centers.some(h=>h.tonic===b.root&&(h.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(b.type));
   const directed=mod(a.root-b.root)===7&&DOMINANT_TYPES.includes(a.type)&&arrival;
   const suspended=tension(b);
   return {arrival,directed,suspended,score:(mood==="arrival"?Number(directed)*3+Number(arrival):mood==="delay"?Number(suspended)*3-Number(arrival):mood==="opening"?Number(color(b))*2:mood==="continuity"?Number(color(b)):0)};
@@ -2751,7 +2751,9 @@ function composerContinuations(chords,intent,composerId){
      if(kind==="transformation")score+=l.score*.25+(same(a,b)?-.6:0);
      if(kind==="contrast")score+=l.chrom*1.15+(l.d===6?1.5:0)-(l.shared===0?.5:0);
      if(i===0&&out.some(p=>p.chords[0]===b.label))score-=3;
-     if(state.path.some(c=>same(c,b)))score-=1.5;
+     if(state.path.some(c=>same(c,b)))score-=3;
+     if(i>=1&&same(a,b)&&same(state.path[i-2]||last,a))score-=6;
+     if(i===0&&same(last,b)&&!["zimmer","goransson"].includes(composerId))score-=3;
      if(i===2)score+=endFit(a,b).score+(kind==="continuity"&&endFit(a,b).directed?1.5:0);
      next.push({path:[...state.path,b],score});
     }
