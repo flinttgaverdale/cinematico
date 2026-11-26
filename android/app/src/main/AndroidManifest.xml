@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- No INTERNET permission: the complete app is packaged as local assets. -->
     <application
-        android:label="${cinematicoAppLabel}"
+        android:label="Cinemático"
         android:allowBackup="false"
         android:usesCleartextTraffic="false"
         android:icon="@drawable/ic_cinematico"

@@ -1006,13 +1006,13 @@ function emotionalContinuations(chords,emotion){
   const gap=leading&&tonal.candidates[1]?leading.score-tonal.candidates[1].score:0;
   const dominantGoal=mod(root+5);
   // Prefer a root already stated earlier when the final V7 targets it.
-  const tonicInHistory=last.type==="7"?chords.slice(0,-1).find(c=>mod(c.root)===dominantGoal&&(["","maj7","add9"].includes(c.type)||MINOR_TONIC_TYPES.includes(c.type))):null;
+  const tonicInHistory=last.type==="7"?chords.slice(0,-1).find(c=>mod(c.root)===dominantGoal&&["","m","maj7","m7","add9","madd9"].includes(c.type)):null;
   const tentativeCadentialCenter=chords.length>=3&&leading&&leading.coverage>=96&&
    (leading.cadences||[]).length>0&&gap>=0.25;
   const reliableCenter=chords.length>=3&&
    ((tonal.status==="suggestive"&&gap>=0.65)||tentativeCadentialCenter);
   const tonic=tonicInHistory?dominantGoal:(reliableCenter?leading.tonic:root);
-  const minor=tonicInHistory?MINOR_TONIC_TYPES.includes(tonicInHistory.type):(reliableCenter?leading.mode==="menor natural":MINOR_TONIC_TYPES.includes(last.type));
+  const minor=tonicInHistory?["m","m7","madd9"].includes(tonicInHistory.type):(reliableCenter?leading.mode==="menor natural":["m","m7","madd9"].includes(last.type));
   const anchorBasis=tonicInHistory?"dominante dirigida a una tónica anterior":tentativeCadentialCenter&&tonal.status==="ambiguous"?"hipótesis tonal preferente, con alternativas posibles":reliableCenter?"principal hipótesis tonal":"último acorde (sin centro confirmado)";
  const make=(offset,kind="M")=>{
   const r=mod(tonic+offset);
@@ -2252,191 +2252,6 @@ function composerAssistance(composerId,progression=[]){
  });
 }
 
-/* Chord-only context shared across composition experiments. */
-function analyzeCompositionMaterial(chords){
- if(!Array.isArray(chords)||!chords.length||chords.length>8||chords.some(ch=>
-  !ch||typeof ch.label!=="string"||!Number.isInteger(ch.root)||!Number.isInteger(ch.bass)||!Array.isArray(ch.notes)||!ch.notes.length))return null;
- const tonal=tonalHypotheses(chords);
- const pitches=new Set(chords.flatMap(ch=>[...ch.notes,ch.bass]));
- const anchors=[...new Set(tonal.candidates.map(candidate=>candidate.tonic))].filter(pc=>chords.some(ch=>ch.root===pc));
- const compatibleModes=chords.length<3?[]:anchors.flatMap(tonic=>Object.entries(MODAL_INTERVALS)
-  .filter(([,intervals])=>[...pitches].every(pc=>intervals.includes(mod(pc-tonic))))
-  .map(([mode])=>({tonic,mode})));
- const links=chords.slice(1).map((to,index)=>{
-  const from=chords[index];
-  return {index,common:from.notes.filter(pc=>to.notes.includes(pc)),
-   bassMotion:mod(to.bass-from.bass+6)-6,
-   motion:pitchClassMotionEstimate(from,to),
-   sameHarmony:from.root===to.root&&from.type===to.type};
- });
- return {tonal,compatibleModes,links,
-  basses:chords.map(ch=>({pc:ch.bass,kind:ch.bassKind})),
-  tritones:tritoneTriadRelations(chords),
-  caveat:"El cifrado aporta clases de altura y bajos escritos. Para confirmar voces, pedales o cierres de frase hacen falta registro, duración y melodía."};
-}
-
-const COMPOSER_PROCEDURES={
- williams:{id:"prepare-arrival",dimensions:["función tonal","tensión y resolución","dirección de frase"]},
- horner:{id:"triadic-link",dimensions:["relaciones interválicas","conducción de voces","notas comunes","cromatismo"]},
- herrmann:{id:"internal-tension",dimensions:["cromatismo","tensión y resolución","repetición y transformación"]},
- elfman:{id:"neighbor-return",dimensions:["cromatismo","repetición y transformación","textura y registro"]},
- zimmer:{id:"pedal-layer",dimensions:["pedales","independencia del bajo","ritmo armónico","textura y registro"]},
- giacchino:{id:"motif-color",dimensions:["desarrollo motívico","función tonal","dirección de frase"]},
- silvestri:{id:"lydian-line",dimensions:["modalismo","relaciones interválicas","ritmo armónico"]},
- shore:{id:"parallel-mode",dimensions:["modalismo","notas comunes","desarrollo motívico"]},
- morricone:{id:"separate-bass",dimensions:["independencia del bajo","conducción de voces","textura y registro"]},
- newman:{id:"resonant-link",dimensions:["modalismo","notas comunes","textura y registro"]},
- goransson:{id:"rhythmic-energy",dimensions:["ritmo armónico","repetición y transformación","textura y registro"]}
-};
-
-function contextualComposerExperiment(composerId,chords,intent){
- if(!Object.prototype.hasOwnProperty.call(COMPOSER_PROCEDURES,composerId))return null;
- const context=analyzeCompositionMaterial(chords);
- if(!context)return null;
- const first=chords[0],last=chords.at(-1),profile=COMPOSER_CREATIVE_LENSES[composerId];
- const {id,dimensions}=COMPOSER_PROCEDURES[composerId];
- const contrasting=["asombro","contraste"].includes(intent);
- const delayed=["suspense","tension","inquietud","misterio"].includes(intent);
- const triad=ch=>ch.bassKind==="root"&&(ch.type===""||ch.type==="m");
- const latest=predicate=>chords.reduce((index,ch,i)=>predicate(ch,i)?i:index,-1);
- const triadIndex=latest(triad);
- const minorIndex=chords.findIndex(ch=>ch.bassKind==="root"&&ch.type==="m");
- const namedRoot=ch=>tonalCenterSpelling(ch.root,MINOR_TONIC_TYPES.includes(ch.type),[ch]);
- const link=context.links.reduce((best,item)=>!best||item.common.length>best.common.length?item:best,null);
- const note=link?.common.length?spell(link.common[0]):null;
- const pair=(index,replacement)=>{
-  const before=index?chords[index-1].label:chords[index].label;
-  return {before:[before,chords[index].label],after:[before,replacement]};
- };
- const render=(title,action,change,effect,comparison=null,requires=[])=>({
-  id,composerId,dimensions:dimensions.slice(),intent:Object.prototype.hasOwnProperty.call(EMOTION_CREATIVE_PROFILES,intent)?intent:null,
-  title,action,change,effect,comparison,requires,changesOriginal:false,
-  evidence:{grade:"D",work:profile.work,source:profile.source},context
- });
- switch(id){
-  case "prepare-arrival":{
-   if(!MAJOR_TONIC_TYPES.includes(last.type)&&!MINOR_TONIC_TYPES.includes(last.type))
-    return render("Decide dónde quieres llegar","Elige un acorde de llegada después de "+last.label+" y compara una preparación corta con una espera.",
-     "La progresión se conserva.","Puedes separar sensación de dirección y cierre.",null,["frase y duración"]);
-   const dominant=spell(last.root+7)+"7", predecessor=chords.at(-2)?.label??last.label;
-   const alreadyDirected=chords.length>1&&chords.at(-2).root===mod(last.root+7)&&DOMINANT_TYPES.includes(chords.at(-2).type);
-   if(delayed||alreadyDirected||chords.at(-2)?.bassKind==="independent"||chords.at(-2)?.bassKind==="inversion")return render("Da más espacio a la llegada",
-    "En el enlace hacia "+last.label+", compara llegar enseguida con esperar un pulso antes del acorde.",
-    "Conservas las alturas y cambias el momento de llegada.","La espera puede reforzar o debilitar la articulación de la frase.",null,["duración y frase"]);
-   return render("Prepara una llegada local","Compara "+predecessor+" → "+last.label+" con "+dominant+" → "+last.label+".",
-    "Cambias solo el acorde inmediatamente anterior en la comparación.","La dominante puede dar dirección hacia "+last.label+" sin decidir el centro global.",
-    {before:[predecessor,last.label],after:[dominant,last.label]});
-  }
-  case "triadic-link":{
-   const index=latest((ch,i)=>triad(ch)&&i<chords.length-1);
-   const anchor=index>=0?index:triadIndex;
-   if(anchor<0)return render("Explora una conexión entre tríadas","Elige una tríada mayor o menor sencilla como punto de partida.",
-    "Tus extensiones y bajos escritos se conservan.","P, L, R y S permiten ensayar enlaces de un movimiento muy pequeño.",null,["tríada de partida"]);
-   const ch=chords[anchor],next=chords[anchor+1],quality=ch.type==="m"?"minor":"major";
-   const operations=(contrasting||delayed?["S","L","R","P"]:["L","R","P","S"]).map(op=>neoTransform(ch.root,quality,op));
-   const eligible=operations.filter(t=>!next||t.target.root!==next.root||t.target.notes.some(pc=>!next.notes.includes(pc)));
-   if(!contrasting&&!delayed&&next)eligible.sort((a,b)=>
-    b.target.notes.filter(pc=>next.notes.includes(pc)).length-a.target.notes.filter(pc=>next.notes.includes(pc)).length);
-   const selected=eligible[0];
-   const label=spell(selected.target.root)+(selected.target.quality==="minor"?"m":"");
-   const connection=next?.label??ch.label;
-   return render("Ensaya una transformación "+selected.operation,"Compara "+ch.label+" con "+label+" antes de "+connection+".",
-    "La transformación conecta las dos tríadas por "+selected.common.map(pc=>spell(pc)).join(" y ")+".",
-    "Escucha si el siguiente enlace gana continuidad o produce un giro perceptible.",
-    {before:[ch.label,connection],after:[label,connection]});
-  }
-  case "internal-tension":{
-   if(minorIndex<0)return render("Cambia una voz interior","Repite "+first.label+" y ensaya una nota vecina de semitono en una voz interior.",
-    "Mantienes la fundamental y la armonía escrita.","Una fricción pequeña puede ampliar la tensión sin cambiar de centro.",null,["voz y registro"]);
-   const ch=chords[minorIndex],variant=namedRoot(ch)+"mMaj7";
-   return render("Cambia la tensión dentro de "+ch.label,"Compara "+ch.label+" y "+variant+" sobre el mismo bajo.",
-    "Añades una séptima mayor con la tríada menor intacta.","Escucha si esa tensión interna basta para sostener el pasaje.",pair(minorIndex,variant));
-  }
-  case "neighbor-return":{
-   if(minorIndex<0)return render("Contrasta dos articulaciones","Prueba "+first.label+" corto y separado, y luego sostenido en el mismo registro.",
-    "Mantienes las notas y cambias la articulación.","La misma sonoridad puede pasar de ligera a inquietante.",null,["articulación y ritmo"]);
-   const ch=chords[minorIndex],neighbor=namedRoot(ch)+"dim";
-   return render("Desvío breve y regreso","Prueba "+ch.label+" → "+neighbor+" → "+ch.label+" frente a repetir "+ch.label+".",
-    "Bajas la quinta un semitono en la sonoridad intermedia y luego la recuperas.",
-    "La vuelta permite escuchar la fricción como un gesto local.",
-    {before:[ch.label,ch.label,ch.label],after:[ch.label,neighbor,ch.label]});
-  }
-  case "pedal-layer":{
-   // Find the longest adjoining span that supports one pitch in every chord.
-   // Extensions are left intact and a written slash bass is never replaced.
-   let best=null;
-   for(let start=0;start<chords.length;start++){
-    for(const pc of chords[start].notes){
-     let end=start;
-     while(end<chords.length&&chords[end].notes.includes(pc)
-       &&(chords[end].bassKind==="root"||chords[end].bass===pc))end++;
-     if(end-start>(best?.length??1))best={start,pc,length:end-start};
-    }
-   }
-   if(!best)return render("Mantén un acorde y construye capas","Prolonga "+first.label+" y cambia la densidad antes de añadir otra armonía.",
-    "Mantienes la sucesión escrita.","Las capas pueden aportar desarrollo aunque el acorde permanezca.",null,["duración y textura"]);
-   const span=chords.slice(best.start,best.start+best.length),bass=spell(best.pc);
-   const before=span.map(ch=>ch.label);
-   const after=span.map(ch=>ch.bass===best.pc?ch.label:ch.label+"/"+bass);
-   const comparison=before.some((label,i)=>label!==after[i])?{before,after}:null;
-   return render("Mantén "+bass+" como bajo","Ensaya un bajo sostenido "+bass+" en "+before.join(" → ")+".",
-    "La nota pertenece a todos los acordes de ese tramo. Las voces superiores conservan las armonías.",
-    delayed?"Puedes prolongar la expectativa cambiando capas antes de abandonar el pedal.":"Comprueba si el bajo une los cambios mientras varías la densidad.",
-    comparison,["duración para comprobar el pedal"]);
-  }
-  case "motif-color":{
-   if(triadIndex<0)return render("Repite el motivo con otra distribución","Toca tu motivo sobre "+first.label+" y cambia la distribución del acompañamiento.",
-    "Mantienes las alturas de los acordes.","Comprueba qué rasgo permite reconocer el motivo.",null,["melodía y registro"]);
-   const ch=chords[triadIndex],label=namedRoot(ch)+(ch.type==="m"?"madd9":"add9");
-   return render("Un color nuevo para el mismo motivo","Compara "+ch.label+" y "+label+" con el mismo bajo. Luego prueba tu motivo sobre ambos.",
-    "La novena se añade sin reemplazar la tercera ni la quinta.","Una variación pequeña de color puede mantener estable la identidad del tema.",
-    pair(triadIndex,label),["melodía para valorar el motivo"]);
-  }
-  case "lydian-line":{
-   const major=chords.find(ch=>MAJOR_TONIC_TYPES.includes(ch.type));
-   if(!major)return render("Contrasta acentos sobre una célula","Mantén "+first.label+" y desplaza el acento de la célula un paso.",
-    "Se conserva la armonía.","El acento puede dar impulso sin otra sucesión de acordes.",null,["ritmo"]);
-   const fourth=spellDegreePc(major.root,3,mod(major.root+5),namedRoot(major));
-   const raisedFourth=spellDegreePc(major.root,3,mod(major.root+6),namedRoot(major));
-   return render("Prueba la cuarta elevada en una línea",
-    "Sobre "+major.label+", compara "+fourth+" con "+raisedFourth+" en el mismo punto de la melodía.",
-    "La comparación afecta a una nota melódica. El acorde se conserva.",
-    "Comprueba cuánto impulso o color aporta esa nota según el lugar y la duración.",null,["melodía y ritmo"]);
-  }
-  case "parallel-mode":{
-   if(triadIndex<0)return render("Conserva el eje de quinta","Prueba un sostén de quinta abierta bajo un motivo y reserva la tercera para otra voz.",
-    "La idea original se conserva.","Separar quinta y tercera permite aplazar qué modo se percibe.",null,["motivo y registro"]);
-   const ch=chords[triadIndex],alternative=namedRoot(ch)+(ch.type==="m"?"":"m");
-   return render("Compara la tercera paralela","Prueba "+alternative+" junto a "+ch.label+" y repite el mismo motivo si lo tienes.",
-    "Cambia la tercera. La fundamental y la quinta permanecen.",
-    "La misma idea puede cambiar de color evitando un salto de fundamental.",
-    pair(triadIndex,alternative),["melodía para probar la identidad del motivo"]);
-  }
-  case "separate-bass":{
-   const index=latest((ch,i)=>i>0&&ch.bassKind==="root"&&ch.notes.some(pc=>pc!==ch.root));
-   if(index<0)return render("Separa el gesto del bajo","Sobre "+first.label+", deja fijo el bajo escrito y mueve una voz superior.",
-    "El bajo y el acorde original se conservan.","Escucha ambas líneas por separado antes de combinarlas.",null,["voces y registro"]);
-   const ch=chords[index],prev=chords[index-1];
-   const distance=pc=>Math.abs(mod(pc-prev.bass+6)-6);
-   const pc=ch.notes.filter(pc=>pc!==ch.root).sort((a,b)=>distance(a)-distance(b))[0];
-   const effect=distance(pc)<distance(ch.bass)?"La línea de bajo puede ganar continuidad sin reharmonizar las voces superiores.":"Comprueba cómo cambia el contorno del bajo al conservar la armonía superior.";
-   const variant=ch.label+"/"+spell(pc);
-   return render("Da al bajo su propio recorrido","En "+prev.label+" → "+ch.label+", compara el bajo escrito con "+variant+".",
-    "Cambia una nota del bajo sin cambiar la colección del acorde superior.",
-    effect,pair(index,variant),["registro para evaluar el contrapunto"]);
-  }
-  case "resonant-link":
-   return render("Deja resonar una voz",note?"Sostén "+note+" de "+chords[link.index].label+" a "+chords[link.index+1].label+" y compara reatacarla.":"Sobre "+first.label+", separa los ataques y escucha cuánto espacio deja cada nota.",
-    "Conservas los acordes y decides qué voz se rearticula.","Escucha si la continuidad o el silencio dan más espacio al enlace.",null,["registro, duración y articulación"]);
-  case "rhythmic-energy":{
-   const anchor=context.links.find(item=>item.sameHarmony);
-   const cell=anchor?chords.slice(anchor.index,anchor.index+2):chords.slice(0,2);
-   return render("Cambia energía sin reharmonizar","Repite "+cell.map(ch=>ch.label).join(" → ")+" y "+(contrasting?"desplaza el acento entre repeticiones.":"divide el segundo ataque en dos pulsos iguales dentro de la misma duración."),
-    "Mantienes alturas y bajas o subes la densidad de ataques.","Una transformación rítmica puede cambiar la energía aunque la armonía permanezca.",null,["pulso, duración y articulación"]);
-  }
- }
-}
-
 // Pitch-class observations are independent of composer style and do not modify input.
 function sustainedToneAnalysis(chords){
  if(!Array.isArray(chords)||!chords.length)return [];
@@ -2669,7 +2484,7 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+root.CinematicoEngine={emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
 
 // Max V8/CommonJS bridge. Music logic is unchanged from web engine.js.

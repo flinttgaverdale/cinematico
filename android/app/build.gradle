@@ -1,18 +1,15 @@
 plugins {
     id 'com.android.application'
 }
-def beta02 = providers.gradleProperty('cinematicoBeta02').map { it.toBoolean() }.getOrElse(false)
-
 android {
     namespace 'io.github.flinttgaverdale.cinematico'
     compileSdk 35
     defaultConfig {
-        applicationId(beta02 ? 'io.github.flinttgaverdale.cinematico.beta02' : 'io.github.flinttgaverdale.cinematico')
-        manifestPlaceholders = [cinematicoAppLabel: beta02 ? 'Cinemático Beta 0.2' : 'Cinemático']
+        applicationId 'io.github.flinttgaverdale.cinematico'
         minSdk 26
         targetSdk 35
-        versionCode providers.gradleProperty('cinematicoVersionCode').map { it.toInteger() }.getOrElse(2)
-        versionName providers.gradleProperty('cinematicoVersionName').getOrElse('0.2.0-beta')
+        versionCode 1
+        versionName '0.1.0-beta'
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17

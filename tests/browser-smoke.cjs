@@ -83,10 +83,9 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       await page.evaluate(()=>{
         window.__previewStats={opened:0,closed:0,notes:0};
         window.AudioContext=class FakeAudioContext{
-          currentTime=0;sampleRate=48000;destination={};
+          currentTime=0;destination={};
           constructor(){window.__previewStats.opened++;}
-          createGain(){return {gain:{value:0,setValueAtTime(){},exponentialRampToValueAtTime(){}},connect(){}};}
-          createDynamicsCompressor(){return {threshold:{},knee:{},ratio:{},attack:{},release:{},connect(){}};}
+          createGain(){return {gain:{value:0,setValueAtTime(){},linearRampToValueAtTime(){}},connect(){}};}
           createOscillator(){window.__previewStats.notes++;return {type:'',frequency:{value:0},connect(){},start(){},stop(){}};}
           resume(){return Promise.resolve();}
           close(){window.__previewStats.closed++;return Promise.resolve();}
@@ -96,7 +95,7 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       await page.locator('[data-composer-preview="0"]').click();
       assert.equal(await page.locator('[data-composer-preview="0"]').getAttribute('aria-pressed'),'true');
       assert.ok((await page.locator('#composerListenStatus').innerText()).includes('Escuchando camino 1'));
-      assert.equal(await page.evaluate(()=>window.__previewStats.notes),96,'Four chords, four voices and six partials per tone');
+      assert.equal(await page.evaluate(()=>window.__previewStats.notes),16,'Four chords, four simultaneous tones per event');
       await page.locator('[data-composer-preview="1"]').click();
       assert.equal(await page.locator('[data-composer-preview="0"]').getAttribute('aria-pressed'),'false');
       assert.equal(await page.locator('[data-composer-preview="1"]').getAttribute('aria-pressed'),'true');
@@ -137,8 +136,8 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       const notesBefore=await page.evaluate(()=>window.__previewStats.notes);
       await page.locator('[data-simple-preview="0"]').click();
       assert.equal(await page.locator('[data-simple-preview="0"]').getAttribute('aria-pressed'),'true');
-      assert.equal(await page.evaluate(()=>window.__previewStats.notes)-notesBefore,120,
-        'Five chords with four voices and six partials per tone');
+      assert.equal(await page.evaluate(()=>window.__previewStats.notes)-notesBefore,20,
+        'Two original chords and three new chords, four synthesized voices each');
       assert.ok((await page.locator('#simpleListenStatus').innerText()).includes('últimos 2 acordes'));
       const closedBefore=await page.evaluate(()=>window.__previewStats.closed);
       await page.locator('[data-simple-preview="1"]').click();

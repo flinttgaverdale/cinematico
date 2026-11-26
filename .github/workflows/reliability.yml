@@ -13,20 +13,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Require a new shell cache when publishing new app assets
-        if: github.event_name == 'pull_request'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
-        run: |
-          git fetch --depth=1 origin "$BASE_SHA"
-          if ! git diff --quiet "$BASE_SHA" HEAD -- index.html engine.js manifest.json icon-192.png icon-512.png; then
-            base_cache=$(git show "$BASE_SHA:service-worker.js" | sed -nE 's/^const CACHE = "(.*)";$/\1/p')
-            next_cache=$(sed -nE 's/^const CACHE = "(.*)";$/\1/p' service-worker.js)
-            if [[ "$base_cache" == "$next_cache" ]]; then
-              echo 'Increment the shell cache and service-worker registration versions when changing app assets.'
-              exit 1
-            fi
-          fi
       - name: Test harmonic engine
         run: |
           node tests/phase1-regression.cjs
@@ -38,7 +24,6 @@ jobs:
           node tests/extended-harmonic-functions.cjs
           node tests/composer-research-regression.cjs
           node tests/composer-lenses-integration.cjs
-          node tests/contextual-composer-experiments.cjs
           node tests/composer-continuity-regression.cjs
           node tests/composer-context-simulations.cjs --json
           node tests/composer-voicing-research.cjs
@@ -56,14 +41,12 @@ jobs:
           node tests/musician-journey-regression.cjs
           node tests/static-audit.cjs
           node tests/pwa-assets.cjs
-          node audit/repro-live-voicings.cjs
           node tests/live-generator-regression.cjs
           python3 live/build_amxd.py --check
-          node tests/live-host-diagnostic.cjs
           node tests/live-package-regression.cjs
       - name: Install browser runner
         run: |
-          npm install --no-save playwright@1.65.1
+          npm install --no-save playwright
           npx playwright install --with-deps chromium
       - name: Start local app server
         run: |
@@ -72,8 +55,5 @@ jobs:
       - name: Test browser on desktop and mobile
         run: |
           node tests/browser-smoke.cjs
-          node tests/contextual-composer-browser.cjs
-          node tests/piano-audio-render.cjs
           node tests/pwa-offline-smoke.cjs
-          node tests/pwa-update-regression.cjs
           node tests/responsive-layout.cjs
