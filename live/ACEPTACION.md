@@ -29,22 +29,21 @@ pero no determina cómo Live procesa el diccionario ni el historial de Undo.
 
 ## Evidencia necesaria para el adaptador de selección
 
-En una copia local de revisión, registra en la consola qué mensaje llega de
-`live.miditool.in` cada vez que se pulsa Aplicar. Si llega a
-`msg_dictionary(payload)`, añade temporalmente antes de `applyToClip()` la
-línea siguiente en `cinematico-generator.js` y vuelve a empaquetar esa copia:
+Genera el dispositivo de diagnóstico con
+`python3 live/build_amxd.py --diagnostic DIRECTORIO`. El archivo
+`Cinematico-Generator-Diagnostico.amxd` conserva la salida del generador
+y añade una línea `CINEMATICO_DIAGNOSTIC` por mensaje recibido. Ábrelo en
+un proyecto de prueba con notas sintéticas. El registro incluye el contenido
+del diccionario entregado por el host cuando está disponible.
 
-```js
-post(JSON.stringify(payload, null, 2) + "\\n");
-```
+Para cada caso anterior, adjunta la línea de la consola, el hash del archivo,
+las versiones de Windows, Live y Max, y el estado del editor MIDI antes y
+después de Aplicar y de un único Deshacer. Señala explícitamente si el clip
+era de 4/4 o 3/4. Anota el inicio y fin de la selección. Evita incluir
+progresiones privadas, nombres de proyectos y pistas de trabajo.
 
-Usa notas sintéticas y comparte una muestra por caso. Si el host llama a
-`dictionary(name)` o `bang()`, indica la ruta que observaste. En Max también
-puedes añadir un `print` en paralelo a la salida de `live.miditool.in` para
-identificar el mensaje. Conserva los nombres, unidades y valores originales de
-los campos de tiempo, compás, selección y límites del clip que entregue el
-host. Registra cuáles faltan. Anota el número de notas y sus posiciones después
-de Aplicar y después de una sola operación Deshacer, tanto con selección vacía
-como con notas existentes.
-
-Retira el registro temporal antes de generar un AMXD para revisión final.
+El dispositivo de diagnóstico permite comprobar qué campos, unidades y
+límites entrega la versión real de Live. El dispositivo de distribución
+conserva el comportamiento actual en 4/4 y se genera sin diagnóstico. La
+aceptación de la selección y la adaptación a otros compases quedan abiertas
+hasta disponer de esos mensajes y del resultado observado en el clip.

@@ -37,6 +37,26 @@ previos.
 
 Para compilar localmente en Android Studio: abre la carpeta `android/` como proyecto, usa JDK 17, instala Android SDK 35 y ejecuta `assembleDebug`. Copia previamente desde la raíz `index.html`, `engine.js`, `manifest.json`, `icon-192.png`, `icon-512.png` a `android/app/src/main/assets`, como hace el workflow.
 
+## Prueba de instalación y actualización
+
+Comprueba primero que los dos APK tienen el mismo identificador y certificado
+y que el segundo aumenta el código de versión. Con SDK 35 y Java en tu equipo,
+usa `python3 android/verify_upgrade.py base.apk nueva.apk --sdk SDK`.
+Añade `--serial SERIE --interactive` para instalar ambos en un teléfono de
+prueba conectado por ADB y comprobar versión, arranque, audio sin conexión y
+conservación del espacio seleccionado. El script comprueba el estado al
+principio y se detiene si la aplicación ya está instalada.
+
+Para repetir la prueba de marcha en un equipo sin ADB, instala el primer APK
+desde Descargas. Prueba Crear y el audio en modo avión, selecciona Estudio
+avanzado y cierra la app. Instala el segundo APK como actualización y confirma
+que conserva Estudio avanzado, que Crear funciona y que se reproduce audio
+en modo avión.
+
+Los binarios de un paquete de aceptación con identificador separado prueban
+el recorrido de actualización. La firma de distribución debe pasar las mismas
+pruebas con su propio par de candidatos antes de publicar.
+
 ## Alcance de esta versión
 
 - Misma experiencia web de Crear y Estudio avanzado, intenciones, ideas y explicaciones.
