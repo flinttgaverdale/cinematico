@@ -6,12 +6,21 @@ dependencies. The 'nagg' type and patcher amxdtype mark a Note Generator.
 This is independent of Max; runtime inside Ableton must still be tested.
 """
 import argparse
+from io import BytesIO
 from pathlib import Path
 import json
 import struct
+from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parent.parent
-PATH = ROOT / "downloads" / "Cinematico-Generator-Beta.amxd"
+DOWNLOADS = ROOT / "downloads"
+PATH = DOWNLOADS / "Cinematico-Generator-Beta-0.2.3.amxd"
+PREVIEW = DOWNLOADS / "Cinematico-Live-Preview-0.2.3.zip"
+CORE = ROOT / "live" / "cinematico-core.js"
+BRIDGE = b"""
+// Export the shared engine for the Max V8 module loader.
+if (typeof module !== "undefined" && module.exports) module.exports = globalThis.CinematicoEngine;
+"""
 P = struct.pack
 DIAGNOSTIC_NAME = "Cinematico-Generator-Diagnostico.amxd"
 HFS_TIME = 3860000000
@@ -68,7 +77,26 @@ function captureNamedHost(name){
 """
 
 
-def build(diagnostic=False):
+def core_source():
+    return (ROOT / "engine.js").read_bytes() + BRIDGE
+
+
+def preview_source(core):
+    prefix = "Cinematico-Live-Preview/"
+    replacements = {
+        prefix + "Cinematico-Generator.maxpat": (ROOT / "live" / "Cinematico-Generator.maxpat").read_bytes(),
+        prefix + "cinematico-generator.js": (ROOT / "live" / "cinematico-generator.js").read_bytes(),
+        prefix + "cinematico-core.js": core,
+    }
+    contents = BytesIO()
+    with ZipFile(DOWNLOADS / "Cinematico-Live-Preview.zip") as previous, ZipFile(contents, "w") as updated:
+        for entry in previous.infolist():
+            data = replacements.get(entry.filename)
+            updated.writestr(entry, previous.read(entry) if data is None else data)
+    return contents.getvalue()
+
+
+def build(core, diagnostic=False):
     main = (ROOT / "live" / "Cinematico-Generator.maxpat").read_bytes()
     patcher = json.loads(main)["patcher"]
     assert patcher["project"]["amxdtype"] == 1851877223, "Missing Note Generator type"
@@ -78,7 +106,7 @@ def build(diagnostic=False):
     sources = [
         ("JSON", DIAGNOSTIC_NAME if diagnostic else PATH.name, main, 17),
         ("TEXT", "cinematico-generator.js", generator, 0),
-        ("TEXT", "cinematico-core.js", (ROOT / "live" / "cinematico-core.js").read_bytes(), 0),
+        ("TEXT", "cinematico-core.js", core, 0),
     ]
     region = bytearray()
     entries = bytearray()
@@ -99,8 +127,11 @@ if __name__ == "__main__":
     mode.add_argument("--check", action="store_true")
     mode.add_argument("--diagnostic", type=Path, metavar="OUTPUT_DIR")
     args = parser.parse_args()
-    expected = build(diagnostic=args.diagnostic is not None)
+    core = core_source()
+    expected = build(core, diagnostic=args.diagnostic is not None)
     if args.check:
+        assert CORE.read_bytes() == core, "Committed Max core is not identical to the web engine plus bridge"
+        assert PREVIEW.read_bytes() == preview_source(core), "Preview ZIP differs from current sources"
         actual = PATH.read_bytes()
         assert actual == expected, "Committed AMXD is not identical to sources"
         assert actual[:12] == b"ampf\x04\0\0\0nagg"
@@ -115,5 +146,7 @@ if __name__ == "__main__":
         print(f"Created diagnostic {output} ({len(expected)} bytes)")
     else:
         PATH.parent.mkdir(parents=True, exist_ok=True)
+        CORE.write_bytes(core)
+        PREVIEW.write_bytes(preview_source(core))
         PATH.write_bytes(expected)
         print(f"Created {PATH} ({len(expected)} bytes)")

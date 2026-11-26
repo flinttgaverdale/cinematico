@@ -2,7 +2,7 @@
 const assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),cp=require('node:child_process');
 const root=path.join(__dirname,'..');
-const archive=path.join(root,'downloads/Cinematico-Live-Preview.zip');
+const archive=path.join(root,'downloads/Cinematico-Live-Preview-0.2.3.zip');
 assert.ok(fs.existsSync(archive),'Release zip must be committed');
 const size=fs.statSync(archive).size;
 assert.ok(size>150000&&size<400000,'Unexpected archive size '+size);

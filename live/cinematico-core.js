@@ -1251,8 +1251,8 @@ function harmonicTrajectories(chords,start=0){
    Same synthesized instrument, total time and per-voice envelope in both routes.
    Different chord counts imply different chord rates; this is not a blinded test. */
 function composerListeningPlan(chords,options={}){
- if(!Array.isArray(chords)||chords.length<2||chords.length>8)
-  return {status:"invalid",steps:[],warning:"Se necesitan entre 2 y 8 acordes para escuchar el ejemplo."};
+ if(!Array.isArray(chords)||chords.length<(options.fullPreview?1:2)||chords.length>(options.fullPreview?11:8))
+  return {status:"invalid",steps:[],warning:options.fullPreview?"Se necesitan entre 1 y 11 acordes para escuchar.":"Se necesitan entre 2 y 8 acordes para escuchar el ejemplo."};
  const equalChordDuration=options.equalChordDuration===true;
  // Two honest comparison controls: equal total phrase duration (default),
  // or an equal 2-second harmonic pulse per chord across routes.
@@ -1271,6 +1271,70 @@ function composerListeningPlan(chords,options={}){
   warning:equalChordDuration
    ?"Maqueta con 2 segundos por acorde: pulso armónico igual entre rutas, pero duración total distinta si cambia la cantidad de acordes. No se han simulado instrumentos ni fraseo real."
    :"Maqueta de cuatro voces sintetizadas: mismo sonido, volumen por voz y duración total. La cantidad de acordes cambia el ritmo armónico; no se han simulado instrumentos, melodías ni dinámica real."};
+}
+
+// Pianistic suggestions, not a model of the composer's actual performance.
+// All pitches are taken from the neutral realization; no extra harmony or instruments.
+const PIANO_GESTURES={
+ williams:{name:"Proyectar la voz superior y dar espacio a la llegada",shape:"arrival",spread:"top",pattern:"block",gate:.94,accent:"top"},
+ horner:{name:"Conservar las voces comunes y enlazar suavemente",shape:"even",spread:"none",pattern:"sustain",gate:.98,accent:"inner"},
+ herrmann:{name:"Destacar una célula interior sobre un bajo sostenido",shape:"even",spread:"bass",pattern:"inner",gate:.72,accent:"inner"},
+ elfman:{name:"Alternar ataques ligeros y registros contrastados",shape:"even",spread:"alternate",pattern:"broken",gate:.62,accent:"alternate"},
+ zimmer:{name:"Acumular actividad sobre el mismo apoyo",shape:"even",spread:"bass",pattern:"accumulate",gate:.90,accent:"bass"},
+ giacchino:{name:"Articular el recorrido y recuperar el gesto inicial",shape:"arrival",spread:"none",pattern:"broken",gate:.86,accent:"top"},
+ silvestri:{name:"Impulsar la llegada mediante subdivisión y acentos",shape:"impulse",spread:"top",pattern:"pulse",gate:.78,accent:"top"},
+ shore:{name:"Separar planos y sostener las notas comunes",shape:"even",spread:"bass",pattern:"sustain",gate:.98,accent:"top"},
+ morricone:{name:"Separar el bajo de una línea superior",shape:"even",spread:"bass",pattern:"independent",gate:.94,accent:"top"},
+ newman:{name:"Dejar espacio entre ataques y conservar resonancia",shape:"arrival",spread:"top",pattern:"sustain",gate:.98,accent:"soft"},
+ goransson:{name:"Repetir una célula con acentos desplazados",shape:"even",spread:"none",pattern:"syncopated",gate:.56,accent:"alternate"}
+};
+function composerPianoPerformance(chords,composerId,options={}){
+ const p=PIANO_GESTURES[composerId];
+ if(!p)return {status:"invalid",events:[],warning:"Selecciona una referencia musical."};
+ const neutral=composerListeningPlan(chords,{fullPreview:true,equalChordDuration:true});
+ if(neutral.status!=="ready")return {...neutral,events:[]};
+ const n=chords.length,totalSeconds=neutral.totalSeconds;
+ const raw=chords.map((_,i)=>p.shape==="arrival"?(i===n-1&&n>1?1.5:1):p.shape==="impulse"?(i===n-1?1.3:Math.max(.7,1.15-i*.1)):1);
+ const unit=totalSeconds/raw.reduce((a,b)=>a+b,0),events=[],steps=[];
+ let start=0;
+ for(let i=0;i<n;i++){
+  const duration=raw[i]*unit,notes=neutral.steps[i].pitches.slice();
+  if((p.spread==="bass"||p.spread==="alternate"&&i%2===0)&&notes[0]>=40)notes[0]-=12;
+  if((p.spread==="top"||p.spread==="alternate"&&i%2===1)&&notes[3]<=76)notes[3]+=12;
+  const step={chord:chords[i].label,startSeconds:start,durationSeconds:duration,pitches:notes};
+  steps.push(step);
+  const add=(v,offset,length,velocity=1)=>{
+   const time=start+offset*duration,d=Math.min(length*duration,start+duration-time);
+   if(d<.02)return;
+   const accent=p.accent==="top"?(v===3?1.12:.91):p.accent==="inner"?(v===1||v===2?1.08:.93):p.accent==="bass"?(v===0?1.08:.94):p.accent==="soft"?.78:p.accent==="alternate"?((v+i)%2===0?1.04:.86):1;
+   events.push({chordIndex:i,voice:v,pitch:notes[v],frequency:440*2**((notes[v]-69)/12),startSeconds:time,durationSeconds:d,velocity:Math.max(.38,Math.min(1.15,velocity*accent))});
+  };
+  for(let v=0;v<4;v++){
+   if(v===0){add(v,0,p.gate);continue;}
+   if(p.pattern==="pulse"||p.pattern==="syncopated"||p.pattern==="inner"&&v===2){
+    const offsets=p.pattern==="syncopated"?[0,.375,.75]:[0,.5];
+    offsets.forEach((o,j)=>add(v,o,Math.min(p.gate/offsets.length,.22),j===0?.84:.73));
+   }else if(p.pattern==="accumulate"){
+    const count=Math.min(4,1+Math.floor(i/Math.max(1,n-1)*3));
+    for(let j=0;j<count;j++)add(v,j/count,Math.min(p.gate/count,.9/count),.82);
+   }else if(p.pattern==="broken"||p.pattern==="independent"){
+    const offset=p.pattern==="independent"?(v===3?.12:(v-1)*.06):(v-1)*.12;
+    add(v,offset,Math.min(p.gate,1-offset-.015),.94);
+   }else add(v,0,p.gate);
+  }
+  start+=duration;
+ }
+ // Tie only exactly matching pitches in the same voice, with no change
+ // of pitch or bass. This models a piano key held, not sustain-pedal audio.
+ if(p.pattern==="sustain"){
+  for(let i=1;i<steps.length;i++)for(let v=0;v<4;v++){
+   const prev=events.findLast(e=>e.voice===v&&e.chordIndex<i&&Math.abs(e.startSeconds+e.durationSeconds-steps[i].startSeconds)<.12);
+   const next=events.find(e=>e.voice===v&&e.chordIndex===i);
+   if(prev&&next&&prev.pitch===next.pitch){prev.durationSeconds=next.startSeconds+next.durationSeconds-prev.startSeconds;events.splice(events.indexOf(next),1);}
+  }
+ }
+ return {status:"ready",steps,events:events.sort((a,b)=>a.startSeconds-b.startSeconds||a.voice-b.voice),totalSeconds,instrument:"piano",gesture:p.name,
+ warning:"Realización pianística original, no imitación de una interpretación ni partitura del compositor. Mismos acordes y duración total que la escucha neutra; cambian disposición y ataques."};
 }
 
 /* Evidence-informed composer exploration: non-destructive, original harmonic experiments. */
@@ -2669,8 +2733,526 @@ function analyze(tonic,emotion,composer,modeOverride,DATA){
  const mods=modulationIdeas(tonic,mode,composer,keyName,{...DATA,modeKey},progression,emotion);
  return {mode,modeKey,signatureMode,signatureModeKey,scale:scaleNames,scalePcs:pcs,triads,chords,progression,signature,mods,sharp,keyName};
 }
-root.CinematicoEngine={analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
+// Contextual continuation search. Weights are creative heuristics, not measured stylistic probabilities.
+const CONTINUATION_LENSES={
+ williams:{name:"Preparación tonal",w:[1.1,0.6,0.2,2.8,0.1,0.1,0.1,0.5]},
+ horner:{name:"Transformación triádica",w:[2.7,0.2,1.3,0.2,0,0,0.1,0.1]},
+ herrmann:{name:"Fricción interna",w:[0.9,3.3,1.2,-0.3,0,0,2.3,0]},
+ elfman:{name:"Vecindad cromática",w:[0.8,0.6,3.2,0.2,0,0,1.7,0]},
+ zimmer:{name:"Bajo estable",w:[0.6,0.5,0,0.1,3.1,0,0,0.5]},
+ giacchino:{name:"Color y dirección tonal",w:[0.7,0.1,0.2,2.3,0,2.1,0,0.5]},
+ silvestri:{name:"Contraste interválico",w:[0.2,0,0.8,1.7,0,0,0,3.1]},
+ shore:{name:"Identidad modal y relaciones de tercera",w:[1.2,0.55,1.25,0.1,0,0,0,0.9]},
+ morricone:{name:"Trayectoria del bajo",w:[0.7,0.2,0,0.3,0.5,0,0,0.3]},
+ newman:{name:"Continuidad y resonancia",w:[2.1,0.2,0,0,0.6,2.5,0,0]},
+ goransson:{name:"Permanencia y transformación",w:[0.7,0.8,0,0,1.0,0,0,0.2]}
+};
+// Symbolic expectation: pitch-class opportunities, not actual voice resolutions.
+// A dominant seventh can also be a color; only claim a plausible directed target.
+function continuationExpectation(from,to,centers=[]){
+ const target=mod(from.root+5),targetQuality=MAJOR_TONIC_TYPES.includes(to.type)||MINOR_TONIC_TYPES.includes(to.type);
+ const dominant=["7","9"].includes(from.type)&&from.notes.includes(mod(from.root+4))&&from.notes.includes(mod(from.root+10));
+ const targetCenter=centers.filter(c=>c.tonic===target);
+ const matches=to.root===target&&targetQuality;
+ const stable=targetQuality&&!["mMaj7"].includes(to.type);
+ const rootBass=to.bass===to.root;
+ const leading=mod(target-1),seventh=mod(from.root+10);
+ const possibleLeading=matches&&to.notes.includes(target),possibleSeventh=matches&&[mod(seventh-1),mod(seventh-2)].some(n=>to.notes.includes(n));
+ let kind="none";
+ if(dominant){
+  if(matches&&stable)kind="resolution";
+  else if(to.root===target&&["sus4","7sus4"].includes(to.type))kind="suspension";
+  else if(to.root===from.root)kind="prolongation";
+  else if(targetCenter.some(c=>c.mode==="menor natural"?to.root===mod(target+8)&&MAJOR_TONIC_TYPES.includes(to.type):to.root===mod(target+9)&&MINOR_TONIC_TYPES.includes(to.type)))kind="deceptive";
+  else kind="departure";
+ }
+ return {kind,target,rootBass,stable,possibleLeading,possibleSeventh,contextual:targetCenter.length>0,dominant};
+}
+function continuationCenters(context,chords){
+ const hs=context.tonal.candidates||[],best=hs[0];
+ if(!best||context.tonal.status==="insufficient")return [];
+ // Relative keys with comparable pitch coverage are kept unless strong
+ // cadential evidence distinguishes them. The ranking is not a probability.
+ const relative=h=>h.mode!==best.mode&&mod(h.tonic-best.tonic)===(best.mode==="mayor"?9:3);
+ return hs.filter(h=>best.score-h.score<.65||relative(h)&&best.score-h.score<=1.1&&h.coverage>=best.coverage-3&&!(best.cadences||[]).some(c=>c.kind==="V–I/i"&&c.index===chords.length-1)).slice(0,3);
+}
+// Four compositional tasks, not four mandatory temporal segments.
+// From chord symbols alone we can only observe harmonic events, not thematic
+// presentation, rhythmic acceleration, actual climax, or a formal cadence.
+const PHRASE_ARCH_PROFILES={
+ williams:[1.1,1.0,1.4,1.5],horner:[1.2,1.8,.5,.8],
+ herrmann:[1.2,1.5,1.1,.4],elfman:[.8,1.5,1.1,.8],
+ zimmer:[1.8,1.0,.4,.7],giacchino:[1.2,1.1,.8,1.3],
+ silvestri:[.8,1.1,1.4,1.3],shore:[1.3,1.6,.6,.9],
+ morricone:[1.5,1.1,.5,.8],newman:[1.6,1.3,.3,.5],
+ goransson:[1.8,1.0,.4,.5]
+};
+function harmonicPhraseEvidence(original,path,centers=[],endingPreference="auto"){
+ if(!original.length||!path.length)return null;
+ const sameHarmony=(a,b)=>a.root===b.root&&a.type===b.type;
+ const first=original[0],last=original.at(-1),combined=[last,...path];
+ const recalled=path.flatMap((c,i)=>original.some(o=>sameHarmony(o,c))?[i]:[]);
+ const transformed=path.flatMap((c,i)=>original.some(o=>o.root===c.root)&&!original.some(o=>sameHarmony(o,c))?[i]:[]);
+ const originalLinks=original.slice(1).map((b,i)=>({a:original[i],b}));
+ const recurrentLinks=combined.slice(1).flatMap((b,i)=>originalLinks.some(x=>sameHarmony(x.a,combined[i])&&sameHarmony(x.b,b))?[i]:[]);
+ const history=new Set(original.flatMap(c=>c.notes));
+ const links=combined.slice(1).map((b,i)=>{
+  const a=combined[i],retention=a.notes.filter(n=>b.notes.includes(n)).length/Math.max(a.notes.length,b.notes.length);
+  const newPitches=b.notes.filter(n=>!history.has(n)).length;
+  const motion=pitchClassMotionEstimate(a,b);
+  const expectation=continuationExpectation(a,b,centers);
+  const parallel=a.root===b.root&&a.type!==b.type&&["","m"].includes(a.type)&&["","m"].includes(b.type);
+  const triadic=["","m"].includes(a.type)&&["","m"].includes(b.type)&&a.type!==b.type?["P","L","R","S"].find(op=>{const t=neoTransform(a.root,a.type==="m"?"minor":"major",op);return t.target.root===b.root&&t.target.quality===(b.type==="m"?"minor":"major");}):null;
+  return {from:a.label,to:b.label,retention,newPitches,motion:motion.distance,expectation:expectation.kind,contextual:expectation.contextual,parallel,triadic:triadic||null,stableBass:a.bass===b.bass};
+ });
+ // A preparatory event must point to an actual succeeding chord. A late
+ // dominant is not itself proof of a climax or a measured tension curve.
+ const preparation=links.flatMap((l,i)=>{
+  if(l.contextual&&["resolution","deceptive","suspension"].includes(l.expectation))return [{index:i,from:l.from,to:l.to,kind:l.expectation}];
+  const a=combined[i],b=combined[i+1];
+  return a.type===""&&mod(a.root-b.root)===7&&centers.some(c=>c.tonic===b.root&&(c.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(b.type))?[{index:i,from:l.from,to:l.to,kind:"dominantTriad"}]:[];
+ });
+ const end=path.at(-1),before=path.length>1?path.at(-2):last;
+ const arrival=centers.some(c=>c.tonic===end.root&&(c.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(end.type));
+ const rootArrival=arrival&&end.root===end.bass&&end.type!=="mMaj7";
+ const finalLink=links.at(-1);
+ const arrivalKind=rootArrival&&finalLink.expectation==="resolution"?"dominant":rootArrival&&mod(before.root-end.root)===7&&DOMINANT_TYPES.includes(before.type)?"dominantTriad":rootArrival&&mod(before.root-end.root)===5&&(MAJOR_TONIC_TYPES.includes(before.type)||MINOR_TONIC_TYPES.includes(before.type))?"plagal":rootArrival?"return":arrival?"inverted":finalLink.expectation==="suspension"?"suspended":"open";
+ const firstRecalled=original.some(c=>sameHarmony(c,path[0]));
+ const sustainedLinks=links.filter(l=>l.stableBass).length;
+ const transformedLinks=links.filter(l=>l.triadic||l.parallel).length;
+ const recovery=links.length>1&&links[0].newPitches>0&&links.slice(1).some(l=>l.retention>=.5);
+ const firstReturn=sameHarmony(first,end);
+ const presentation=firstRecalled?"Recupera el núcleo de "+path[0].label+", presente en tu idea (el bajo puede variar).":"Parte del enlace "+last.label+" → "+path[0].label+".";
+ const development=path.length===1?"No es imprescindible desarrollar más armonías para probar este enlace.":transformedLinks?"Ensaya "+transformedLinks+" transformación(es) entre tríadas.":transformed.length?"Reinterpreta fundamentales ya escuchadas.":sustainedLinks?"Conserva el bajo en "+sustainedLinks+" enlace(s).":recurrentLinks.length?"Recupera un enlace anterior.":"Desarrolla mediante cambios de armonía y notas comunes.";
+ const culmination=preparation.length?"Posible preparación o desvío: "+preparation.at(-1).from+" → "+preparation.at(-1).to+". El punto culminante depende de la interpretación.":"El cifrado no localiza una culminación; puedes construirla con ritmo, registro o dinámica.";
+ const resolution=arrivalKind==="dominant"||arrivalKind==="dominantTriad"?"Posible llegada de dominante con bajo de tónica.":arrivalKind==="plagal"?"Llegada plagal con bajo de tónica.":arrivalKind==="return"?"Regreso a un centro candidato.":arrivalKind==="inverted"?"Regreso con bajo no conclusivo.":arrivalKind==="suspended"?"Llegada suspendida.":"El destino permite continuar; no se confirma cierre de frase.";
+ return {presentation,development,culmination,resolution,recalled,transformed,recurrentLinks,preparation,links,arrivalKind,firstReturn,sustainedLinks,transformedLinks,recovery,firstRecalled,endingPreference,scope:"Cuatro tareas compositivas opcionales; no son fases detectadas ni obligatorias. La culminación real y la forma requieren melodía, ritmo y dinámica."};
+}
+// Conservative symbolic structural reading. No time-span or Schenkerian
+// reduction is inferred from chord symbols alone. Preserve every input event.
+function harmonicStructureEvidence(original,path,centers=[],durations=null){
+ if(!Array.isArray(original)||!original.length||!Array.isArray(path)||!path.length)return null;
+ const all=[...original,...path],boundary=original.length;
+ const core=c=>{const i=c.notes.map(n=>mod(n-c.root));
+  // Do not collapse a functional dominant into an ordinary major triad.
+  if(["7","9","7sus4"].includes(c.type))return c.root+":dominant";
+  if(i.includes(7)&&i.includes(4)&&!i.includes(3))return c.root+":major";
+  if(i.includes(7)&&i.includes(3)&&!i.includes(4))return c.root+":minor";
+  return c.root+":"+c.type;
+ };
+ const signed=(a,b)=>mod(b-a+6)-6;
+ const groups=[];
+ for(let i=0;i<all.length;i++){
+  const ch=all[i],key=core(ch),g=groups.at(-1);
+  if(g&&g.key===key){g.end=i;g.labels.push(ch.label);}
+  else groups.push({start:i,end:i,key,labels:[ch.label]});
+ }
+ const spans=[];
+ for(let i=0;i<all.length-2;i++){
+  const a=all[i];
+  for(let j=i+2;j<=Math.min(i+4,all.length-1);j++){
+   const b=all[j],middle=all.slice(i+1,j);
+   if(core(a)!==core(b)||middle.every(c=>core(c)===core(a)))continue;
+   const commonBass=all.slice(i,j+1).every(c=>c.bass===a.bass);
+   const shared=middle.every(c=>c.notes.some(n=>a.notes.includes(n)));
+   if(commonBass&&shared)spans.push({start:i,end:j,kind:"neighborOverBass",anchor:a.label,labels:all.slice(i,j+1).map(c=>c.label)});
+   else if(shared)spans.push({start:i,end:j,kind:"return",anchor:a.label,labels:all.slice(i,j+1).map(c=>c.label)});
+  }
+ }
+ const bassSpans=[];
+ for(let i=0;i<all.length;){
+  let j=i;while(j+1<all.length&&all[j+1].bass===all[i].bass)j++;
+  if(j>i&&all.slice(i,j+1).some(c=>core(c)!==core(all[i])))bassSpans.push({start:i,end:j,pc:all[i].bass,labels:all.slice(i,j+1).map(c=>c.label)});
+  i=j+1;
+ }
+ const passingBass=[];
+ for(let i=1;i<all.length-1;i++){
+  const a=signed(all[i-1].bass,all[i].bass),b=signed(all[i].bass,all[i+1].bass);
+  if(a*b>0&&Math.abs(a)<=2&&Math.abs(b)<=2)passingBass.push({index:i,pcs:all.slice(i-1,i+2).map(c=>c.bass)});
+ }
+ const arrivals=[];
+ for(let i=1;i<all.length;i++){
+  const a=all[i-1],b=all[i];
+  if(mod(a.root-b.root)!==7||!DOMINANT_TYPES.includes(a.type)||!["","m","maj7","m7","add9","madd9","maj9","m9","6","m6","maj7#11"].includes(b.type))continue;
+  const global=centers.some(c=>c.tonic===b.root&&(c.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(b.type));
+  // A local dominant triad alone is weak evidence without an established center.
+  if(!global&&a.type==="")continue;
+  arrivals.push({index:i,from:a.label,to:b.label,kind:global?"candidateCenter":"localTarget",rootBass:b.bass===b.root,terminal:i===all.length-1});
+ }
+ const relevant=spans.filter(x=>x.end>=boundary),relevantBass=bassSpans.filter(x=>x.end>=boundary),relevantGroups=groups.filter(x=>x.end>=boundary&&x.end>x.start);
+ const terminal=arrivals.find(x=>x.terminal)||null;
+ const end=all.at(-1),centerEnd=centers.some(c=>c.tonic===end.root&&(c.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(end.type));
+ const openDominant=centers.some(c=>mod(c.tonic+7)===end.root&&DOMINANT_TYPES.includes(end.type));
+ const plagal=all.length>1&&centerEnd&&end.bass===end.root&&end.type!=="mMaj7"&&mod(all.at(-2).root-end.root)===5&&(MAJOR_TONIC_TYPES.includes(all.at(-2).type)||MINOR_TONIC_TYPES.includes(all.at(-2).type));
+ const closure=terminal?(terminal.rootBass?(terminal.kind==="candidateCenter"?"centerArrival":"localArrival"):"invertedArrival"):plagal?"plagalArrival":centerEnd?(end.bass===end.root&&end.type!=="mMaj7"?"centerReturn":"nonConclusiveBassOrColor"):openDominant?"dominantOpen":["sus4","7sus4","mMaj7","dim","dim7"].includes(end.type)?"unstableOpen":"undetermined";
+ const timed=Array.isArray(durations)&&durations.length===all.length&&durations.every(d=>Number.isFinite(d)&&d>0);
+ const rhythm=timed?{known:true,unit:"beats",originalMean:durations.slice(0,boundary).reduce((a,b)=>a+b,0)/boundary,continuationMean:durations.slice(boundary).reduce((a,b)=>a+b,0)/path.length}:{known:false};
+ const rhythmicSuggestion=closure==="centerArrival"||closure==="plagalArrival"?"Prueba alargar el último acorde respecto a la preparación.":relevantBass.length||relevantGroups.length?"Prueba mantener más tiempo el apoyo y variar la subdivisión, sin cambiar necesariamente de acorde.":"Compara un pulso armónico regular con una duración mayor del acorde que quieras destacar.";
+ rhythm.suggestion=rhythmicSuggestion;
+ return {boundary,groups,spans,bassSpans,passingBass,arrivals,closure,rhythm,relevant,relevantBass,relevantGroups,
+  scope:"Lectura estructural posible, no reducción demostrada. Sin duración, acentos y melodía no se identifica ornamentación ni cierre formal."};
+}
+// Harmonic gestures are symbolic chord relationships, not inferred leitmotifs.
+function harmonicMotifEvidence(original,path){
+ if(!original?.length||!path?.length)return null;
+ const key=c=>[c.type,mod(c.bass-c.root)].join(":");
+ const delta=(a,b)=>mod(b.root-a.root);
+ const matches=(a,b)=>a.length===b.length&&a.length>=2&&a.every((c,i)=>key(c)===key(b[i])&&delta(c,b[i])===delta(a[0],b[0]))&&a.some(c=>c.root!==a[0].root);
+ const gestures=[],seen=new Set();
+ const add=(kind,model,candidate,offset=0)=>{const k=[kind,model.join(" "),candidate.join(" "),offset].join("|");if(!seen.has(k)){seen.add(k);gestures.push({kind,model,candidate,offset});}};
+ const labels=a=>a.map(c=>c.label);
+ const joined=[original.at(-1),...path];
+ for(let n=2;n<=3;n++){
+  for(let i=0;i+n<=original.length;i++){
+   const a=original.slice(i,i+n);
+   for(let j=0;j+n<=joined.length;j++){
+    const b=joined.slice(j,j+n);
+    if(matches(a,b))add(delta(a[0],b[0])?"transposition":"recall",labels(a),labels(b),delta(a[0],b[0]));
+    if(n===3&&a.every((c,k)=>key(c)===key(b[k]))&&a.some(c=>c.root!==a[0].root)&&a.every((c,k)=>delta(a[0],c)===mod(-delta(b[0],b[k])))&&!matches(a,b))add("rootReflection",labels(a),labels(b));
+   }
+  }
+ }
+ // Insertion/removal of one internal chord is structural, not temporal augmentation.
+ for(let i=0;i+2<=original.length;i++)for(let j=0;j+3<=joined.length;j++){
+  const a=original.slice(i,i+2),b=joined.slice(j,j+3);
+  if(matches(a,[b[0],b[2]])&&b[1].root!==b[0].root&&b[1].root!==b[2].root)add("insertion",labels(a),labels(b),delta(a[0],b[0]));
+ }
+ for(let i=0;i+3<=original.length;i++)for(let j=0;j+2<=joined.length;j++){
+  const a=original.slice(i,i+3),b=joined.slice(j,j+2);
+  if(matches([a[0],a[2]],b)&&a[1].root!==a[0].root&&a[1].root!==a[2].root)add("omission",labels(a),labels(b),delta(a[0],b[0]));
+ }
+ const intervals=joined.slice(1).map((c,i)=>delta(joined[i],c));
+ const cycle=intervals.length>=2&&intervals[0]!==0&&intervals.every(x=>x===intervals[0])?{step:intervals[0],links:intervals.length,closed:joined[0].root===joined.at(-1).root,labels:labels(joined)}:null;
+ const mirrors=[];
+ for(let i=0;i+2<joined.length;i++)if(intervals[i]&&mod(intervals[i]+intervals[i+1])===0)mirrors.push({index:i,labels:labels(joined.slice(i,i+3))});
+ const parallelChanges=joined.slice(1).flatMap((b,i)=>{const a=joined[i];return a.root===b.root&&["","m"].includes(a.type)&&["","m"].includes(b.type)&&a.type!==b.type?[{from:a.label,to:b.label}]:[];});
+ return {gestures,cycle,mirrors,parallelChanges,scope:"Relaciones del cifrado; no demuestran identidad temática, simetría registral, cambio de modo global ni aumento/disminución rítmica."};
+}
+// Small explicit set of contextual candidates, all evaluated by the same search.
+function harmonicMotifSeeds(original,pool){
+ const out=[],seen=new Set();
+ const lookup=new Map(pool.map(c=>[[c.root,c.type,mod(c.bass-c.root)].join(":"),c]));
+ const lookupAt=(c,root)=>lookup.get([mod(root),c.type,mod(c.bass-c.root)].join(":"));
+ const add=path=>{if(path.length!==3||path.some(c=>!c))return;const k=path.map(c=>c.label).join("|");if(!seen.has(k)){seen.add(k);out.push(path);}};
+ for(let i=0;i+3<=original.length;i++){
+  const a=original.slice(i,i+3);if(new Set(a.map(c=>c.root)).size<2)continue;
+  for(let t=0;t<12;t++){
+   add(a.map(c=>lookupAt(c,c.root+t)));
+   add(a.map(c=>lookupAt(c,a[0].root+t-mod(c.root-a[0].root))));
+  }
+ }
+ // Continue a repeated non-zero root step only if the input already establishes it.
+ if(original.length>=3){
+  const a=original.at(-3),b=original.at(-2),c=original.at(-1),step=mod(b.root-a.root);
+  if(step&&step===mod(c.root-b.root)&&a.type===b.type&&b.type===c.type)add([1,2,3].map(i=>lookupAt(c,c.root+step*i)));
+ }
+ return out;
+}
+const MOTIF_WEIGHTS={
+ williams:[.6,.7,.1,.3,.3],horner:[1.3,.8,.7,.5,1.1],herrmann:[.9,1.4,1.0,.5,.7],
+ elfman:[.9,1.0,.6,1.0,.8],zimmer:[1.1,.2,.2,.5,.4],giacchino:[1.0,.7,.2,1.0,.6],
+ silvestri:[.8,1.1,1.0,.5,.5],shore:[1.1,.4,.4,.7,.45],morricone:[1.1,.3,.2,1.0,.4],
+ newman:[1.0,.2,.2,.9,.5],goransson:[1.1,.3,.7,.7,.3]
+};
+function motifPathScore(e,id,kind){
+ if(!e)return 0;const w=MOTIF_WEIGHTS[id];
+ const recall=e.gestures.some(g=>g.kind==="recall"||g.kind==="transposition");
+ const mirror=e.mirrors.length||e.gestures.some(g=>g.kind==="rootReflection");
+ const expanded=e.gestures.some(g=>g.kind==="insertion"||g.kind==="omission");
+ const score=w[0]*Number(recall)+w[1]*Number(Boolean(mirror))+w[2]*Number(Boolean(e.cycle))+w[3]*Number(expanded)+w[4]*Number(e.parallelChanges.length>0);
+ return Math.min(3,score*(kind==="transformation"?1.2:kind==="continuity"?.85:1));
+}
+// Targeted differentiation after paired audit. Shared musical solutions
+// remain legal; these are preferences, not exclusive composer signatures.
+// A modal anchor is a written root with support, not a confirmed tonic.
+const CHARACTERISTIC_MODAL_DEGREES={dorian:9,phrygian:1,lydian:6,mixolydian:10};
+function modalIdentityEvidence(original,path){
+ if(!original?.length||!path?.length)return null;
+ const pcs=ch=>[...new Set([...ch.notes,ch.bass])];
+ const quality=c=>c.notes.includes(mod(c.root+4))?"major":c.notes.includes(mod(c.root+3))?"minor":null;
+ const source=original.flatMap(pcs),anchorSet=new Set([original[0].root,original.at(-1).root,...original.filter(c=>original.filter(x=>x.root===c.root).length>=2).map(c=>c.root)]);
+ const candidates=[];
+ if(original.length>=3)for(const tonic of anchorSet){
+  const anchored=original.filter(c=>c.root===tonic);
+  for(const [mode,degree] of Object.entries(CHARACTERISTIC_MODAL_DEGREES)){
+   const expected=["lydian","mixolydian"].includes(mode)?"major":"minor";
+   if(!anchored.some(c=>quality(c)===expected))continue;
+   const scale=MODAL_INTERVALS[mode].map(n=>mod(n+tonic)),character=mod(tonic+degree);
+   if(!source.includes(character)||!source.every(n=>scale.includes(n)))continue;
+   const continuation=path.flatMap(pcs);
+   const compatible=continuation.every(n=>scale.includes(n));
+   candidates.push({tonic,mode,character,compatible,characterRetained:continuation.includes(character),returnToAnchor:path.at(-1).root===tonic&&quality(path.at(-1))===expected});
+  }
+ }
+ const joined=[original.at(-1),...path],mediants=[];
+ for(let i=1;i<joined.length;i++){
+  const a=joined[i-1],b=joined[i],interval=mod(b.root-a.root);
+  if([3,4,8,9].includes(interval)&&["","m"].includes(a.type)&&a.type===b.type){
+   mediants.push({from:a.label,to:b.label,common:a.notes.filter(n=>b.notes.includes(n)),motion:pitchClassMotionEstimate(a,b).distance});
+  }
+ }
+ return {candidates,mediants,scope:"Compatibilidad con colecciones y anclas escritas; no confirma tónica modal, modulación ni identidad temática."};
+}
+function internalChromaticEvidence(original,path){
+ const joined=[original.at(-1),...path],events=[];
+ for(let i=1;i<joined.length;i++){
+  const a=joined[i-1],b=joined[i],common=a.notes.filter(n=>b.notes.includes(n));
+  const added=b.notes.filter(n=>!a.notes.includes(n)),removed=a.notes.filter(n=>!b.notes.includes(n));
+  if(a.root===b.root&&a.bass===b.bass&&common.length>=2&&added.length===1&&removed.length===1&&[1,11].includes(mod(added[0]-removed[0])))events.push({from:a.label,to:b.label,kind:"chromaticSubstitution",common});
+  if(a.root===b.root&&a.bass===b.bass&&common.length>=3&&added.length===1&&removed.length===0&&b.type==="mMaj7")events.push({from:a.label,to:b.label,kind:"minorMajorSeventh",common});
+ }
+ return events;
+}
+// Optional, original layered exercise. Two separate triads, not a chord
+// symbol or a claim of perceptual polytonality. Preserve the chosen anchor.
+function composerLayerExercise(original,composerId){
+ if(composerId!=="herrmann"||!original?.length)return null;
+ const a=original.at(-1);
+ if(!["","m"].includes(a.type))return null;
+ const shift=1,lower=a.notes.slice(),upper=lower.map(n=>mod(n+shift));
+ const root=spell(a.root,true)+(a.type==="m"?"m":""),neighbor=spell(a.root+shift,true)+(a.type==="m"?"m":"");
+ return {lower:{label:root,notes:lower},upper:{label:neighbor,notes:upper},bass:a.bass,scope:"Ejercicio original: mantén la tríada inferior y prueba la superior un semitono arriba, en registro separado. No es un acorde añadido ni una transcripción; la separación perceptiva requiere escuchar las capas."};
+}
+function contextualStylePathScore(original,path,centers,id,kind){
+ const joined=[original.at(-1),...path];
+ const motif=harmonicMotifEvidence(original,path);
+ let score=0;
+ if(id==="williams"){
+  // Modal mixture and directed arrival: a borrowed minor iv, bVI or bVII
+  // relative to a major candidate, or a major IV in a minor candidate.
+  const mixture=path.some(c=>centers.some(h=>{const d=mod(c.root-h.tonic);return h.mode==="mayor"?(d===5&&c.type==="m"||[8,10].includes(d)&&MAJOR_TONIC_TYPES.includes(c.type)):(d===5&&MAJOR_TONIC_TYPES.includes(c.type));}));
+  if(mixture)score+=2.8;
+  if(kind==="contrast"&&mixture)score+=.7;
+ }else if(id==="giacchino"){
+  if(motif.gestures.some(g=>g.kind==="recall"||g.kind==="transposition"))score+=2.4;
+  for(let i=2;i<joined.length;i++){
+   const [a,b,c]=joined.slice(i-2,i+1);
+   if(centers.some(h=>h.tonic===c.root&&mod(a.root-c.root)===2&&mod(b.root-c.root)===7&&["m","m7","m9","dim","m7b5"].includes(a.type)&&DOMINANT_TYPES.includes(b.type)))score+=2.5;
+  }
+ }else if(id==="zimmer"){
+  if(joined.every(c=>c.bass===joined[0].bass)&&new Set(joined.map(c=>c.root)).size>1)score+=3;
+ }else if(id==="herrmann"){
+  const chrom=internalChromaticEvidence(original,path);
+  if(chrom.length)score+=1.6;
+  if(chrom.length>1)score-=1.4*(chrom.length-1);
+  if(motif.cycle&&[3,4,6,8,9].includes(motif.cycle.step))score+=1.3;
+ }else if(id==="shore"){
+  const modal=modalIdentityEvidence(original,path);
+  if(modal.candidates.some(c=>c.compatible&&c.characterRetained))score+=2.5;
+  if(modal.candidates.some(c=>c.compatible&&c.returnToAnchor))score+=1.2;
+  if(modal.mediants.some(m=>m.common.length&&m.motion<=3))score+=1.7;
+ }else if(id==="goransson"){
+  if(joined.some((c,i)=>i>0&&c.root===joined[i-1].root&&c.type===joined[i-1].type))score+=2;
+  if(motif.gestures.some(g=>g.kind==="recall"))score+=1.3;
+ }
+ return Math.min(4,score);
+}
+function structuralPathScore(e,composerId,kind,mood){
+ if(!e)return 0;
+ const staticStyle=["zimmer","morricone","newman","goransson","herrmann"].includes(composerId);
+ const tonalStyle=["williams","giacchino","silvestri"].includes(composerId);
+ const prolongation=e.relevant.some(x=>x.kind==="neighborOverBass")?1:0;
+ const held=e.relevantBass.length?1:0;
+ const variant=e.relevantGroups.length?1:0;
+ const local=e.arrivals.some(x=>!x.terminal&&x.kind==="localTarget"&&x.rootBass&&x.index>=e.boundary)?1:0;
+ let score=(staticStyle?1.3:.45)*prolongation+(staticStyle?1.0:.25)*held+(staticStyle?.55:.15)*variant;
+ if(kind==="transformation"&&e.relevant.some(x=>x.kind==="return"))score+=.7;
+ if(tonalStyle&&mood!=="delay")score+=.7*local;
+ return Math.min(3,score);
+}
+// Actual inner voices of a generated realization, not inferred user performance.
+function continuationInnerVoiceExample(original,path,composerId){
+ const all=[...original,...path],start=original.length-1;
+ const style="cinematic";
+ const result=voiceLead(all,style);
+ if(result.voicings.length!==all.length)return null;
+ const pitches=result.voicings.slice(start);
+ const voices=[1,2].map(v=>({name:v===1?"Tenor":"Alto",notes:pitches.map(p=>p[v]),steps:pitches.slice(1).map((p,i)=>p[v]-pitches[i][v])}));
+ return {style,voices,scope:"Ejemplo generado de disposición a cuatro voces; no describe las voces originales del usuario."};
+}
+function phraseArchScore(e,composerId,kind,mood){
+ const w=PHRASE_ARCH_PROFILES[composerId];
+ if(!e||!w)return 0;
+ // Bounded rewards across a whole path. No reward for a claimed climax.
+ const stableProfiles=["zimmer","newman","morricone","goransson"];
+ const p=Number(e.firstRecalled)+Math.min(1,e.recurrentLinks.length)*.6+(stableProfiles.includes(composerId)?Math.min(2,e.sustainedLinks)*.55:0);
+ const d=Math.min(2,e.transformedLinks+e.transformed.length*.5)+Number(e.recovery)*.6;
+ const c=Number(e.preparation.length>0);
+ const r=e.endingPreference==="open"||mood==="delay"?Number(["open","suspended","inverted"].includes(e.arrivalKind)):Number(["dominant","dominantTriad","plagal","return"].includes(e.arrivalKind))+.5*Number(e.firstReturn);
+ return Math.min(5,w[0]*p*(kind==="continuity"?1.2:.7)+w[1]*d*(kind==="transformation"?1.3:.8)+w[2]*c+w[3]*r);
+}
+function composerContinuations(chords,intent,composerId,options={}){
+ if(!Object.prototype.hasOwnProperty.call(CONTINUATION_LENSES,composerId))return emotionalContinuations(chords,intent);
+ const context=analyzeCompositionMaterial(chords);
+ if(!context)return [];
+ const lens=CONTINUATION_LENSES[composerId],last=chords.at(-1);
+ const origin=chords.map(c=>c.label),history=new Set(chords.flatMap(c=>[...c.notes,c.bass]));
+ const centers=continuationCenters(context,chords);
+ const initial=chords[0];
+ const priorRoots=new Set(chords.map(c=>c.root));
+ const emotional=emotionalContinuations(chords,intent);
+ const mood=emotionCreativeProfile(intent).creativeGesture;
+ const endingPreference=["open","closed"].includes(options.ending)?options.ending:"auto";
+ const sharp=/#|♯/.test(last.label)||(!/b|♭/.test(last.label)&&centers.some(c=>c.mode==="menor natural"&&[1,4,6,8,9,11].includes(c.tonic)));
+ const pool=[],seen=new Set();
+ const add=label=>{const p=parseUserProgression(label);if(!p.errors.length&&p.chords.length===1){const c=p.chords[0],key=[c.root,c.type,c.bass].join(":");if(!seen.has(key)){seen.add(key);pool.push(c);}}};
+ // Generate single chord candidates, then search contextual links, not preset suffixes.
+ for(let offset=0;offset<12;offset++){const r=mod(last.root+offset);for(const q of ["","m","7","maj7","m7","add9","madd9","sus4","mMaj7","dim"])add(spell(r,sharp)+q);}
+ for(const label of origin)add(label);
+ for(const p of emotional)for(const label of p.chords)add(label);
+ if(["zimmer","morricone","newman"].includes(composerId)){
+  const basses=[...new Set([last.bass,...chords.slice(-3).map(c=>c.bass),...last.notes])];
+  for(const c of pool.slice())if(["","m","add9","madd9","maj7"].includes(c.type))
+   for(const b of basses)if(b!==c.root&&(c.notes.includes(b)||b===last.bass&&composerId==="zimmer"))add(c.label+"/"+spell(b,sharp));
+ }
+ const common=(a,b)=>a.notes.filter(n=>b.notes.includes(n));
+ const dist=(a,b)=>Math.min(mod(a-b),mod(b-a));
+ const tension=c=>["7","dim","mMaj7","sus4"].includes(c.type);
+ const color=c=>["maj7","maj9","maj7#11","m7","m9","add9","madd9","6","m6"].includes(c.type);
+ const same=(a,b)=>a.root===b.root&&a.type===b.type&&a.bass===b.bass;
+ const linkCache=new Map();
+ const local=(a,b)=>{
+  const key=[a.root,a.type,a.bass,b.root,b.type,b.bass].join(":");
+  if(linkCache.has(key))return linkCache.get(key);
+  const shared=common(a,b).length,d=dist(a.root,b.root),bass=dist(a.bass,b.bass);
+  const motion=pitchClassMotionEstimate(a,b);
+  const retention=shared/Math.max(a.notes.length,b.notes.length);
+  const chrom=b.notes.filter(n=>!history.has(n)).length;
+  const features=[retention*3,Number(a.root===b.root&&a.type!==b.type),Number(d===1||d===3||d===4)*1.5+chrom*.35,
+   Number(mod(a.root-b.root)===7)*(a.type==="7"?2:1),Number(a.bass===b.bass),Number(color(b)),
+   Number(b.type==="mMaj7"||b.type==="dim"),Number(d===6||d===2)];
+  let score=features.reduce((sum,v,i)=>sum+v*lens.w[i],0);
+  score+=b.notes.filter(n=>history.has(n)).length/b.notes.length*.85;
+  // Avoid rewarding a fourth pitch simply for increasing note count.
+  score-=motion.distance*.16+motion.unmatched*.4;
+  if(color(b)&&!color(a))score-=.8;
+  if(color(b)&&color(a))score-=2;
+  if(color(b)&&composerId!=="newman")score-=.6;
+  if(b.type==="mMaj7"&&mood!=="delay"&&mood!=="darkening"&&mood!=="uncertainty")score-=.8;
+  if(priorRoots.has(b.root))score+=.4;
+  const expectation=continuationExpectation(a,b,centers);
+  if(expectation.dominant&&expectation.contextual){
+   if(expectation.kind==="resolution")score+=mood==="delay"?-.5:2.2;
+   else if(expectation.kind==="deceptive")score+=1;
+   else if(expectation.kind==="departure")score-=1.1;
+  }
+  if(b.type==="mMaj7"&&composerId!=="herrmann")score-=1.5;
+  if(b.type==="mMaj7"&&a.type==="mMaj7")score-=2.5;
+  if(composerId==="herrmann"&&a.root===b.root&&a.type!==b.type)score-=.8;
+  if(composerId==="horner"&&["","m"].includes(a.type)&&["","m"].includes(b.type)&&a.type!==b.type&&motion.distance<=2&&d>0)score+=2.5;
+  if(composerId==="morricone")score+=(bass===1||bass===2?2.4:0)+(b.bass!==b.root?1.4:0);
+  if(composerId==="goransson"&&same(a,b))score+=3;
+  if(composerId==="horner"){if(["","m"].includes(a.type)&&["","m"].includes(b.type)&&shared>=1)score+=4;else if(!["","m"].includes(b.type))score-=2;}
+  if(composerId==="shore"&&a.root===b.root&&((a.type==="m"&&b.type==="")||(a.type===""&&b.type==="m")))score+=.4;
+  if(composerId==="silvestri"&&d===2&&a.type===""&&b.type==="")score+=1.5;
+  if(same(a,b)&&!["zimmer","goransson","herrmann"].includes(composerId))score-=5;
+  if(b.bassKind==="independent"&&b.bass!==a.bass)score-=1.8;
+  if(mood==="continuity")score+=retention*1.35-chrom*.7;
+  if(mood==="contrast"||mood==="uncertainty")score+=Math.min(chrom,2)*.55;
+  if(mood==="darkening"&&MINOR_TONIC_TYPES.includes(b.type))score+=.8;
+  if(mood==="delay"&&tension(b))score+=.8;
+  if(mood==="opening"&&color(b))score+=.65;
+  if(mood==="expansion"&&d>=5&&d<=7)score+=.8;
+  if(mood==="opening"&&b.type==="mMaj7")score-=1.4;
+  const result={score,shared,retention,chrom,bass,d,motion:motion.distance,expectation};linkCache.set(key,result);return result;
+ };
+ const endFit=(a,b)=>{
+  const arrival=context.tonal.status!=="insufficient"&&centers.some(h=>h.tonic===b.root&&(h.mode==="menor natural"?MINOR_TONIC_TYPES:MAJOR_TONIC_TYPES).includes(b.type));
+  const rootArrival=arrival&&b.bass===b.root&&b.type!=="mMaj7";
+  const dominantLink=mod(a.root-b.root)===7&&DOMINANT_TYPES.includes(a.type)&&arrival;
+  const directed=dominantLink&&rootArrival;
+  const plagalLink=arrival&&mod(a.root-b.root)===5&&(MAJOR_TONIC_TYPES.includes(a.type)||MINOR_TONIC_TYPES.includes(a.type));
+  const plagal=plagalLink&&rootArrival;
+  const suspended=b.type==="sus4"||b.type==="7"||b.type==="dim"||b.type==="mMaj7";
+  return {arrival,directed,plagal,rootArrival,dominantLink,plagalLink,suspended,score:(mood==="arrival"?Number(directed)*3+Number(arrival):mood==="delay"?Number(suspended)*3-Number(arrival):mood==="opening"?Number(color(b))*2:mood==="continuity"?Number(color(b)):0)};
+ };
+ const used=new Set(),out=[];
+ for(const [kind,title] of [["continuity","Continuidad"],["transformation","Transformación"],["contrast","Contraste"]]){
+  const extend=(state,b,i)=>{const a=state.path.at(-1)||last;
+     const l=local(a,b);
+     let score=state.score+l.score;
+     if(kind==="continuity")score+=l.retention*3.6-l.chrom*1.0-l.motion*.24;
+     // Prefer recalling a material element over arbitrary novelty, especially at a return.
+     if(i===2&&b.root===initial.root&&centers.some(c=>c.tonic===b.root)&&mood!=="delay"&&endingPreference!=="open")score+=2.4;
+     if(i===0&&l.expectation.kind==="resolution"&&l.expectation.contextual&&mood!=="delay"&&kind==="continuity")score+=2.5;
+     if(i===0&&kind==="contrast"&&l.expectation.kind==="deceptive")score+=2.5;
+     if(kind==="transformation")score+=l.score*.25+(same(a,b)?-.6:0);
+     if(kind==="contrast")score+=(i===0?Math.min(l.chrom,2)*1.2+(l.d===6?1:0):l.retention*1.7-l.chrom*.7)-(l.shared===0?.8:0);
+     if(i===0&&out.some(p=>p.chords[0]===b.label))score-=4;
+     if(out.some(p=>p.chords[i]===b.label))score-=1.8;
+     if(i>0&&state.path.filter(c=>color(c)).length>=2&&color(b))score-=3;
+     if(i>0&&state.path.filter(c=>c.type==="mMaj7").length>=1&&b.type==="mMaj7")score-=3;
+     if(state.path.some(c=>same(c,b)))score-=3;
+     if(i>=1&&same(a,b)&&same(state.path[i-2]||last,a))score-=6;
+     if(i===0&&same(last,b)&&!["zimmer","goransson"].includes(composerId))score-=3;
+     if(i===2){const end=endFit(a,b);
+      if(endingPreference==="closed"&&centers.length&&!end.rootArrival)return null;
+      if(endingPreference==="open"&&end.arrival&&!end.suspended)return null;
+      score+=end.score;
+      if(endingPreference==="closed"){
+       score+=end.directed?10:end.plagal?6:end.rootArrival?4:1;
+       if(end.rootArrival&&["","m"].includes(b.type))score+=2.8;
+       if(end.rootArrival&&b.type==="maj7")score-=1;
+      }
+      if(endingPreference==="open")score+=end.suspended?4:1;
+      if(["williams","giacchino","silvestri"].includes(composerId)&&kind==="continuity"&&mood!=="delay"&&endingPreference!=="open")score+=end.directed?5:end.arrival?4:-2;
+      if(kind==="continuity"&&["williams","giacchino"].includes(composerId)&&centers.length&&i===2&&!end.arrival)score-=2;
+      if(kind==="continuity"&&mood!=="delay")score+=end.directed?3.5:end.arrival?1.8:0;
+      if(kind==="contrast")score+=end.arrival?1.0:end.suspended?0.5:0;
+      if(mood==="delay")score+=end.directed?-3:end.suspended?1.5:0;
+     }
+     return {path:[...state.path,b],score};
+  };
+  let beam=[{path:[],score:0}];
+  for(let i=0;i<3;i++){
+   const next=[];
+   for(const state of beam)for(const b of pool){const candidate=extend(state,b,i);if(candidate)next.push(candidate);}
+   next.sort((a,b)=>b.score-a.score);
+   beam=next.slice(0,18);
+  }
+  const keys=new Set(beam.map(x=>x.path.map(c=>c.label).join("|")));
+  for(const seed of harmonicMotifSeeds(chords,pool)){
+   const k=seed.map(c=>c.label).join("|");if(keys.has(k))continue;
+   let state={path:[],score:0};for(let i=0;i<seed.length&&state;i++)state=extend(state,seed[i],i);
+   if(state){beam.push(state);keys.add(k);}
+  }
+  // Re-rank a bounded set of complete paths using whole-phrase relationships.
+  beam=beam.map(state=>({...state,score:state.score+phraseArchScore(harmonicPhraseEvidence(chords,state.path,centers,endingPreference),composerId,kind,mood)+structuralPathScore(harmonicStructureEvidence(chords,state.path,centers),composerId,kind,mood)+motifPathScore(harmonicMotifEvidence(chords,state.path),composerId,kind)+contextualStylePathScore(chords,state.path,centers,composerId,kind)})).sort((a,b)=>b.score-a.score);
+  const selected=beam.find(s=>!used.has(s.path.map(c=>c.label).join("|")));
+  if(!selected)continue;
+  let p=selected.path;
+  // When a written seventh already points to a plausible tonic, do not
+  // bury its simplest resolution under three obligatory new harmonies.
+  // Other paths remain composer-specific developments of the same input.
+  if(kind==="continuity"&&endingPreference==="closed"&&mood!=="delay"&&["7","9"].includes(last.type)){
+   const target=centers.find(c=>c.tonic===mod(last.root+5));
+   const direct=target&&pool.find(c=>c.root===target.tonic&&c.bass===c.root&&c.type===(target.mode==="menor natural"?"m":""));
+   if(direct&&continuationExpectation(last,direct,centers).kind==="resolution")p=[direct];
+  }
+  const labels=p.map(c=>c.label);used.add(labels.join("|"));
+  const end=endFit(p.length>1?p.at(-2):last,p.at(-1));
+  const phrase=harmonicPhraseEvidence(chords,p,centers,endingPreference);
+  const structure=harmonicStructureEvidence(chords,p,centers);
+  const motif=harmonicMotifEvidence(chords,p);
+  const modalIdentity=modalIdentityEvidence(chords,p),internalChromatic=internalChromaticEvidence(chords,p);
+  const direction=end.directed||end.plagal?"resolver":end.suspended?"mantener tensión":"cambiar dirección";
+  const links=[last,...p].slice(1).map((c,i)=>{const a=i?p[i-1]:last;return {from:a.label,to:c.label,common:common(a,c),bassHeld:a.bass===c.bass,expectation:continuationExpectation(a,c,centers)};});
+  const facts=links.map(x=>x.from+" → "+x.to+": "+(x.common.length?x.common.map(n=>spell(n,sharp)).join(", ")+" en común":"sin notas comunes")+(x.bassHeld?", mismo bajo":"")).join("; ");
+  const memory=p.flatMap((c,i)=>chords.some(x=>x.root===c.root&&x.type===c.type)?[{index:i,label:c.label,kind:"recuperación"}]:priorRoots.has(c.root)?[{index:i,label:c.label,kind:"transformación de fundamental anterior"}]:[]);
+  const firstExpectation=links[0].expectation;
+  const expectationText=firstExpectation.kind==="resolution"?"El primer enlace satisface una posible dirección de la dominante anterior.":firstExpectation.kind==="deceptive"?"El primer enlace desvía la llegada esperada hacia una relativa.":firstExpectation.kind==="suspension"?"La llegada conserva una suspensión posible.":firstExpectation.kind==="prolongation"?"Se prolonga la región de la dominante.":"";
+  const interpretation=p.length===1?"Tu último acorde ya prepara esta llegada; no es necesario añadir más armonías.":composerId==="goransson"?"Prueba repetir una célula con distinta subdivisión o acentos, manteniendo las alturas; el cifrado no distingue esta energía.":composerId==="zimmer"?"Ensaya sostener el bajo cuando coincida y añadir o retirar capas lentamente, sin imponer más cambios de acorde.":composerId==="morricone"?"Escucha el recorrido del bajo por separado.":"Escucha el enlace y decide si la dirección encaja con tu frase.";
+  const ending=end.directed?"Posible llegada de dominante con bajo de tónica":end.plagal?"Posible llegada plagal con bajo de tónica":end.dominantLink||end.plagalLink?"Llegada armónica con bajo no conclusivo":end.suspended?"Llegada abierta o tensa":end.arrival?"Regreso a un centro candidato; cierre no confirmado":"Otro destino armónico; cierre no confirmado";
+  out.push({id:kind,title,device:lens.name,chords:labels,direction,gestureSummary:ending,arcSummary:ending,
+   variantDescription:lens.name+" · "+title,explanation:facts+". "+expectationText+" "+(memory.length?"Recuperas material anterior en "+memory.map(m=>m.label).join(", ")+". ":"")+interpretation+" Ejercicio original, no predicción de autoría. "+context.caveat,
+   evidence:{grade:"D",work:COMPOSER_CREATIVE_LENSES[composerId].work,source:COMPOSER_CREATIVE_LENSES[composerId].source},
+   original:origin.slice(),composerId,intent,ending,endingPreference,endingEvidence:{arrival:end.arrival,directed:end.directed,plagal:end.plagal,suspended:end.suspended,rootArrival:end.rootArrival,dominantLink:end.dominantLink},memory,phrase,structure,motif,modalIdentity,internalChromatic,layerExercise:kind==="contrast"?composerLayerExercise(chords,composerId):null,expectations:links.map(l=>l.expectation),candidateCenters:centers.map(c=>c.displayLabel),sharedNotes:links.map(x=>x.common.length),rootPath:p.map(c=>c.root)});
+ }
+ return out;
+}
+
+root.CinematicoEngine={composerPianoPerformance,modalIdentityEvidence,internalChromaticEvidence,composerLayerExercise,harmonicMotifEvidence,harmonicStructureEvidence,continuationInnerVoiceExample,harmonicPhraseEvidence,continuationExpectation,continuationCenters,composerContinuations,analyzeCompositionMaterial,contextualComposerExperiment,emotionCreativeProfile,emotionNeighborhood,EXPRESSION_NEIGHBORHOODS,EXPRESSION_BRIDGES,GEMS_EMOTION_DIMENSIONS,EMOTION_CREATIVE_PROFILES,suspensionGestureDiagnostics,contextualVoiceResolution,harmonicContextSummary,composerRouteComparison,minorDominantEvidence,cadenceEvidence,tonalHypotheses,composerEmotionPhraseStudy,composerEmotionExperiment,composerProfileAudit,tensionDestinations,harmonicContrastCharacter,contextualContrastDiagnostics,pitchClassMotionEstimate,compareHarmonicAlternatives,harmonicContinuityIdeas,gradualDevelopmentIdeas,harmonicResolutionDiagnostics,voiceMotionDiagnostics,threeVoiceCandidates,laboratoryVoices,sustainedToneAnalysis,adjacentVoiceMotion,progressionInsights,tritoneTriadRelations,triadicLayeringHypotheses,harmonicTrajectories,harmonicContinuations,emotionalContinuations,prepareContinuationForAnalysis,chordAlternatives,parseUserProgression,COMPOSER_TECHNIQUES,COMPOSER_CREATIVE_LENSES,composerCreativePaths,composerRouteInsights,composerListeningPlan,composerAssistance,neoTriad,neoTransform,tendencyResolution,voiceLead,voicingCandidates,transitionCost,PC,spell,spellDegree,spellScale,scale,diatonicChord,buildProfileProgression,modulationIdeas,analyze,extensionIntervals,romanFor,identifyType};
 })(typeof window!=="undefined"?window:globalThis);
 
-// Max V8/CommonJS bridge. Music logic is unchanged from web engine.js.
+// Export the shared engine for the Max V8 module loader.
 if (typeof module !== "undefined" && module.exports) module.exports = globalThis.CinematicoEngine;
