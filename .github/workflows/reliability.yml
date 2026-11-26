@@ -55,5 +55,6 @@ jobs:
       - name: Test browser on desktop and mobile
         run: |
           node tests/browser-smoke.cjs
+          node tests/piano-audio-render.cjs
           node tests/pwa-offline-smoke.cjs
           node tests/responsive-layout.cjs
