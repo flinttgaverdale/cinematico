@@ -2898,6 +2898,32 @@ function motifPathScore(e,id,kind){
  const score=w[0]*Number(recall)+w[1]*Number(Boolean(mirror))+w[2]*Number(Boolean(e.cycle))+w[3]*Number(expanded)+w[4]*Number(e.parallelChanges.length>0);
  return Math.min(3,score*(kind==="transformation"?1.2:kind==="continuity"?.85:1));
 }
+// Targeted differentiation after paired audit. Shared musical solutions
+// remain legal; these are preferences, not exclusive composer signatures.
+function contextualStylePathScore(original,path,centers,id,kind){
+ const joined=[original.at(-1),...path];
+ const motif=harmonicMotifEvidence(original,path);
+ let score=0;
+ if(id==="williams"){
+  // Modal mixture and directed arrival: a borrowed minor iv, bVI or bVII
+  // relative to a major candidate, or a major IV in a minor candidate.
+  const mixture=path.some(c=>centers.some(h=>{const d=mod(c.root-h.tonic);return h.mode==="mayor"?(d===5&&c.type==="m"||[8,10].includes(d)&&MAJOR_TONIC_TYPES.includes(c.type)):(d===5&&MAJOR_TONIC_TYPES.includes(c.type));}));
+  if(mixture)score+=2.8;
+  if(kind==="contrast"&&mixture)score+=.7;
+ }else if(id==="giacchino"){
+  if(motif.gestures.some(g=>g.kind==="recall"||g.kind==="transposition"))score+=2.4;
+  for(let i=2;i<joined.length;i++){
+   const [a,b,c]=joined.slice(i-2,i+1);
+   if(centers.some(h=>h.tonic===c.root&&mod(a.root-c.root)===2&&mod(b.root-c.root)===7&&["m","m7","m9","dim","m7b5"].includes(a.type)&&DOMINANT_TYPES.includes(b.type)))score+=2.5;
+  }
+ }else if(id==="zimmer"){
+  if(joined.every(c=>c.bass===joined[0].bass)&&new Set(joined.map(c=>c.root)).size>1)score+=3;
+ }else if(id==="goransson"){
+  if(joined.some((c,i)=>i>0&&c.root===joined[i-1].root&&c.type===joined[i-1].type))score+=2;
+  if(motif.gestures.some(g=>g.kind==="recall"))score+=1.3;
+ }
+ return Math.min(4,score);
+}
 function structuralPathScore(e,composerId,kind,mood){
  if(!e)return 0;
  const staticStyle=["zimmer","morricone","newman","goransson","herrmann"].includes(composerId);
@@ -3067,7 +3093,7 @@ function composerContinuations(chords,intent,composerId,options={}){
    if(state){beam.push(state);keys.add(k);}
   }
   // Re-rank a bounded set of complete paths using whole-phrase relationships.
-  beam=beam.map(state=>({...state,score:state.score+phraseArchScore(harmonicPhraseEvidence(chords,state.path,centers,endingPreference),composerId,kind,mood)+structuralPathScore(harmonicStructureEvidence(chords,state.path,centers),composerId,kind,mood)+motifPathScore(harmonicMotifEvidence(chords,state.path),composerId,kind)})).sort((a,b)=>b.score-a.score);
+  beam=beam.map(state=>({...state,score:state.score+phraseArchScore(harmonicPhraseEvidence(chords,state.path,centers,endingPreference),composerId,kind,mood)+structuralPathScore(harmonicStructureEvidence(chords,state.path,centers),composerId,kind,mood)+motifPathScore(harmonicMotifEvidence(chords,state.path),composerId,kind)+contextualStylePathScore(chords,state.path,centers,composerId,kind)})).sort((a,b)=>b.score-a.score);
   const selected=beam.find(s=>!used.has(s.path.map(c=>c.label).join("|")));
   if(!selected)continue;
   let p=selected.path;
@@ -3090,7 +3116,7 @@ function composerContinuations(chords,intent,composerId,options={}){
   const memory=p.flatMap((c,i)=>chords.some(x=>x.root===c.root&&x.type===c.type)?[{index:i,label:c.label,kind:"recuperación"}]:priorRoots.has(c.root)?[{index:i,label:c.label,kind:"transformación de fundamental anterior"}]:[]);
   const firstExpectation=links[0].expectation;
   const expectationText=firstExpectation.kind==="resolution"?"El primer enlace satisface una posible dirección de la dominante anterior.":firstExpectation.kind==="deceptive"?"El primer enlace desvía la llegada esperada hacia una relativa.":firstExpectation.kind==="suspension"?"La llegada conserva una suspensión posible.":firstExpectation.kind==="prolongation"?"Se prolonga la región de la dominante.":"";
-  const interpretation=p.length===1?"Tu último acorde ya prepara esta llegada; no es necesario añadir más armonías.":composerId==="goransson"?"Prueba variar el pulso o las capas sin deducirlos del cifrado.":composerId==="zimmer"?"Ensaya sostener el bajo cuando coincida y variar las capas.":composerId==="morricone"?"Escucha el recorrido del bajo por separado.":"Escucha el enlace y decide si la dirección encaja con tu frase.";
+  const interpretation=p.length===1?"Tu último acorde ya prepara esta llegada; no es necesario añadir más armonías.":composerId==="goransson"?"Prueba repetir una célula con distinta subdivisión o acentos, manteniendo las alturas; el cifrado no distingue esta energía.":composerId==="zimmer"?"Ensaya sostener el bajo cuando coincida y añadir o retirar capas lentamente, sin imponer más cambios de acorde.":composerId==="morricone"?"Escucha el recorrido del bajo por separado.":"Escucha el enlace y decide si la dirección encaja con tu frase.";
   const ending=end.directed?"Posible llegada de dominante con bajo de tónica":end.plagal?"Posible llegada plagal con bajo de tónica":end.dominantLink||end.plagalLink?"Llegada armónica con bajo no conclusivo":end.suspended?"Llegada abierta o tensa":end.arrival?"Regreso a un centro candidato; cierre no confirmado":"Otro destino armónico; cierre no confirmado";
   out.push({id:kind,title,device:lens.name,chords:labels,direction,gestureSummary:ending,arcSummary:ending,
    variantDescription:lens.name+" · "+title,explanation:facts+". "+expectationText+" "+(memory.length?"Recuperas material anterior en "+memory.map(m=>m.label).join(", ")+". ":"")+interpretation+" Ejercicio original, no predicción de autoría. "+context.caveat,
