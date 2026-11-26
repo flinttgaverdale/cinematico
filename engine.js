@@ -2724,7 +2724,7 @@ function composerContinuations(chords,intent,composerId,options={}){
  const emotional=emotionalContinuations(chords,intent);
  const mood=emotionCreativeProfile(intent).creativeGesture;
  const endingPreference=["open","closed"].includes(options.ending)?options.ending:"auto";
- const sharp=/#|♯/.test(last.label);
+ const sharp=/#|♯/.test(last.label)||(!/b|♭/.test(last.label)&&centers.some(c=>c.mode==="menor natural"&&[1,4,6,8,9,11].includes(c.tonic)));
  const pool=[],seen=new Set();
  const add=label=>{const p=parseUserProgression(label);if(!p.errors.length&&p.chords.length===1){const c=p.chords[0],key=[c.root,c.type,c.bass].join(":");if(!seen.has(key)){seen.add(key);pool.push(c);}}};
  // Generate single chord candidates, then search contextual links, not preset suffixes.
@@ -2759,6 +2759,7 @@ function composerContinuations(chords,intent,composerId,options={}){
   if(color(b)&&!color(a))score-=.8;
   if(color(b)&&color(a))score-=2;
   if(color(b)&&composerId!=="newman")score-=.6;
+  if(b.type==="mMaj7"&&mood!=="delay"&&mood!=="darkening"&&mood!=="uncertainty")score-=.8;
   if(priorRoots.has(b.root))score+=.4;
   const expectation=continuationExpectation(a,b,centers);
   if(expectation.dominant&&expectation.contextual){
@@ -2822,7 +2823,11 @@ function composerContinuations(chords,intent,composerId,options={}){
       if(endingPreference==="closed"&&centers.length&&!end.rootArrival)continue;
       if(endingPreference==="open"&&end.arrival&&!end.suspended)continue;
       score+=end.score;
-      if(endingPreference==="closed")score+=end.directed?10:end.plagal?6:end.rootArrival?4:1;
+      if(endingPreference==="closed"){
+       score+=end.directed?10:end.plagal?6:end.rootArrival?4:1;
+       if(end.rootArrival&&["","m"].includes(b.type))score+=2.8;
+       if(end.rootArrival&&b.type==="maj7")score-=1;
+      }
       if(endingPreference==="open")score+=end.suspended?4:1;
       if(["williams","giacchino","silvestri"].includes(composerId)&&kind==="continuity"&&mood!=="delay"&&endingPreference!=="open")score+=end.directed?5:end.arrival?4:-2;
       if(kind==="continuity"&&["williams","giacchino"].includes(composerId)&&centers.length&&i===2&&!end.arrival)score-=2;
@@ -2838,15 +2843,24 @@ function composerContinuations(chords,intent,composerId,options={}){
   }
   const selected=beam.find(s=>!used.has(s.path.map(c=>c.label).join("|")));
   if(!selected)continue;
-  const p=selected.path,labels=p.map(c=>c.label);used.add(labels.join("|"));
-  const end=endFit(p[1],p[2]);
+  let p=selected.path;
+  // When a written seventh already points to a plausible tonic, do not
+  // bury its simplest resolution under three obligatory new harmonies.
+  // Other paths remain composer-specific developments of the same input.
+  if(kind==="continuity"&&endingPreference==="closed"&&mood!=="delay"&&["7","9"].includes(last.type)){
+   const target=centers.find(c=>c.tonic===mod(last.root+5));
+   const direct=target&&pool.find(c=>c.root===target.tonic&&c.bass===c.root&&c.type===(target.mode==="menor natural"?"m":""));
+   if(direct&&continuationExpectation(last,direct,centers).kind==="resolution")p=[direct];
+  }
+  const labels=p.map(c=>c.label);used.add(labels.join("|"));
+  const end=endFit(p.length>1?p.at(-2):last,p.at(-1));
   const direction=end.directed||end.plagal?"resolver":end.suspended?"mantener tensión":"cambiar dirección";
   const links=[last,...p].slice(1).map((c,i)=>{const a=i?p[i-1]:last;return {from:a.label,to:c.label,common:common(a,c),bassHeld:a.bass===c.bass,expectation:continuationExpectation(a,c,centers)};});
   const facts=links.map(x=>x.from+" → "+x.to+": "+(x.common.length?x.common.map(n=>spell(n,sharp)).join(", ")+" en común":"sin notas comunes")+(x.bassHeld?", mismo bajo":"")).join("; ");
   const memory=p.flatMap((c,i)=>chords.some(x=>x.root===c.root&&x.type===c.type)?[{index:i,label:c.label,kind:"recuperación"}]:priorRoots.has(c.root)?[{index:i,label:c.label,kind:"transformación de fundamental anterior"}]:[]);
   const firstExpectation=links[0].expectation;
   const expectationText=firstExpectation.kind==="resolution"?"El primer enlace satisface una posible dirección de la dominante anterior.":firstExpectation.kind==="deceptive"?"El primer enlace desvía la llegada esperada hacia una relativa.":firstExpectation.kind==="suspension"?"La llegada conserva una suspensión posible.":firstExpectation.kind==="prolongation"?"Se prolonga la región de la dominante.":"";
-  const interpretation=composerId==="goransson"?"Prueba variar el pulso o las capas sin deducirlos del cifrado.":composerId==="zimmer"?"Ensaya sostener el bajo cuando coincida y variar las capas.":composerId==="morricone"?"Escucha el recorrido del bajo por separado.":"Escucha el enlace y decide si la dirección encaja con tu frase.";
+  const interpretation=p.length===1?"Tu último acorde ya prepara esta llegada; no es necesario añadir más armonías.":composerId==="goransson"?"Prueba variar el pulso o las capas sin deducirlos del cifrado.":composerId==="zimmer"?"Ensaya sostener el bajo cuando coincida y variar las capas.":composerId==="morricone"?"Escucha el recorrido del bajo por separado.":"Escucha el enlace y decide si la dirección encaja con tu frase.";
   const ending=end.directed?"Posible llegada de dominante con bajo de tónica":end.plagal?"Posible llegada plagal con bajo de tónica":end.dominantLink||end.plagalLink?"Llegada armónica con bajo no conclusivo":end.suspended?"Llegada abierta o tensa":end.arrival?"Regreso a un centro candidato; cierre no confirmado":"Otro destino armónico; cierre no confirmado";
   out.push({id:kind,title,device:lens.name,chords:labels,direction,gestureSummary:ending,arcSummary:ending,
    variantDescription:lens.name+" · "+title,explanation:facts+". "+expectationText+" "+(memory.length?"Recuperas material anterior en "+memory.map(m=>m.label).join(", ")+". ":"")+interpretation+" Ejercicio original, no predicción de autoría. "+context.caveat,
