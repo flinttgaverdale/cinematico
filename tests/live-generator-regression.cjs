@@ -53,6 +53,16 @@ for(const s of inputs)for(const mood of moods){
   count++;
  }
 }
+ctx.variant(99);
+ctx.msg_dictionary({notes:[]});
+assert.equal(generated.at(-1).notes.length,0,'Invalid path must block Apply');
+ctx.variant(1);
+ctx.mood('invalid');
+ctx.msg_dictionary({notes:[]});
+assert.equal(generated.at(-1).notes.length,0,'Invalid mood must block Apply');
+ctx.mood('esperanza');
+ctx.msg_dictionary({notes:[]});
+assert.ok(generated.at(-1).notes.length>0,'Valid controls must restore Apply');
 ctx.chords('H');const old=generated.length;ctx.dictionary('live');
 assert.equal(generated.length,old+1);
 assert.equal(generated.at(-1).notes.length,0,'Invalid chords must not touch a clip');
