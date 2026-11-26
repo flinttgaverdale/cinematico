@@ -2290,7 +2290,7 @@ const COMPOSER_PROCEDURES={
 };
 
 function contextualComposerExperiment(composerId,chords,intent){
- if(!Object.hasOwn(COMPOSER_PROCEDURES,composerId))return null;
+ if(!Object.prototype.hasOwnProperty.call(COMPOSER_PROCEDURES,composerId))return null;
  const context=analyzeCompositionMaterial(chords);
  if(!context)return null;
  const first=chords[0],last=chords.at(-1),profile=COMPOSER_CREATIVE_LENSES[composerId];
@@ -2298,7 +2298,8 @@ function contextualComposerExperiment(composerId,chords,intent){
  const contrasting=["asombro","contraste"].includes(intent);
  const delayed=["suspense","tension","inquietud","misterio"].includes(intent);
  const triad=ch=>ch.bassKind==="root"&&(ch.type===""||ch.type==="m");
- const triadIndex=chords.findLastIndex(triad);
+ const latest=predicate=>chords.reduce((index,ch,i)=>predicate(ch,i)?i:index,-1);
+ const triadIndex=latest(triad);
  const minorIndex=chords.findIndex(ch=>ch.bassKind==="root"&&ch.type==="m");
  const namedRoot=ch=>tonalCenterSpelling(ch.root,MINOR_TONIC_TYPES.includes(ch.type),[ch]);
  const link=context.links.reduce((best,item)=>!best||item.common.length>best.common.length?item:best,null);
@@ -2308,7 +2309,7 @@ function contextualComposerExperiment(composerId,chords,intent){
   return {before:[before,chords[index].label],after:[before,replacement]};
  };
  const render=(title,action,change,effect,comparison=null,requires=[])=>({
-  id,composerId,dimensions,intent:Object.hasOwn(EMOTION_CREATIVE_PROFILES,intent)?intent:null,
+  id,composerId,dimensions:dimensions.slice(),intent:Object.prototype.hasOwnProperty.call(EMOTION_CREATIVE_PROFILES,intent)?intent:null,
   title,action,change,effect,comparison,requires,changesOriginal:false,
   evidence:{grade:"D",work:profile.work,source:profile.source},context
  });
@@ -2327,7 +2328,7 @@ function contextualComposerExperiment(composerId,chords,intent){
     {before:[predecessor,last.label],after:[dominant,last.label]});
   }
   case "triadic-link":{
-   const index=chords.findLastIndex((ch,i)=>triad(ch)&&i<chords.length-1);
+   const index=latest((ch,i)=>triad(ch)&&i<chords.length-1);
    const anchor=index>=0?index:triadIndex;
    if(anchor<0)return render("Explora una conexión entre tríadas","Elige una tríada mayor o menor sencilla como punto de partida.",
     "Tus extensiones y bajos escritos se conservan.","P, L, R y S permiten ensayar enlaces de un movimiento muy pequeño.",null,["tríada de partida"]);
@@ -2412,7 +2413,7 @@ function contextualComposerExperiment(composerId,chords,intent){
     pair(triadIndex,alternative),["melodía para probar la identidad del motivo"]);
   }
   case "separate-bass":{
-   const index=chords.findLastIndex((ch,i)=>i>0&&ch.bassKind==="root"&&ch.notes.some(pc=>pc!==ch.root));
+   const index=latest((ch,i)=>i>0&&ch.bassKind==="root"&&ch.notes.some(pc=>pc!==ch.root));
    if(index<0)return render("Separa el gesto del bajo","Sobre "+first.label+", deja fijo el bajo escrito y mueve una voz superior.",
     "El bajo y el acorde original se conservan.","Escucha ambas líneas por separado antes de combinarlas.",null,["voces y registro"]);
    const ch=chords[index],prev=chords[index-1];
