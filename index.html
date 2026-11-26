@@ -1,525 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111310"><meta name="description" content="Estudio de exploración armónica cinematográfica"><title>Cinemático — Estudio de composición</title><meta name="cinematico-release" content="0.2.0-beta"><link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet"><style>
-:root{color-scheme:dark;--bg:#111310;--p:#191d18;--p2:#232820;--line:#394034;--txt:#f1f0e8;--muted:#a2aa98;--quiet:#778071;--gold:#d6a86b;--sage:#b2c09a;--r:17px}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 15% -15%,#303b2c 0,transparent 40%),var(--bg);color:var(--txt);font-family:"DM Sans",sans-serif}.top{height:76px;border-bottom:1px solid #fff1;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;gap:12px;align-items:center}.mark{width:34px;height:34px;border:1px solid #d6a86b99;border-radius:50%;display:grid;place-items:center;color:var(--gold);font:700 19px Manrope}.brand b{font:800 15px Manrope;letter-spacing:.15em}.brand small{display:block;color:var(--quiet);font-size:9px;letter-spacing:.16em;text-transform:uppercase;margin-top:3px}.top small,.kicker{font-size:10px;color:var(--quiet);letter-spacing:.16em;text-transform:uppercase}.hero{padding:38px 0 25px}.kicker{color:var(--gold);font-weight:700}.hero h1{font:600 clamp(30px,4vw,46px)/1.08 Manrope;letter-spacing:-.04em;margin:11px 0}.hero p{font-size:13px;line-height:1.7;color:var(--muted);max-width:650px;margin:0}.layout{display:grid;grid-template-columns:minmax(320px,.85fr) minmax(0,1.35fr);gap:17px;padding-bottom:48px}.panel{background:linear-gradient(145deg,#1c211b,#171a16);border:1px solid var(--line);border-radius:var(--r);box-shadow:0 18px 55px #0004}.head{padding:20px 21px 0;display:flex;justify-content:space-between;gap:10px;align-items:center}.head b{font:700 13px Manrope}.circlewrap{padding:8px 15px 0;display:grid;place-items:center}.circle{width:100%;max-width:400px}.node{cursor:pointer}.node circle{fill:#272e24;stroke:#46503f;stroke-width:1.2}.node text{fill:#e7e8df;text-anchor:middle;dominant-baseline:middle;font:600 14px "DM Sans"}.node.selected circle{fill:var(--gold);stroke:var(--gold)}.node.selected text{fill:#191a14}.core{fill:#171b16;stroke:#40483a}.corelabel{text-anchor:middle;fill:var(--gold);font:700 10px "DM Sans";letter-spacing:2px}.corekey{text-anchor:middle;fill:var(--txt);font:700 25px Manrope}.caption{text-align:center;color:var(--muted);font-size:11px;padding:0 0 18px}.caption strong{color:var(--gold)}.controls{padding:0 20px 20px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;color:var(--muted);font-size:9px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:7px}.field select{width:100%;background:var(--p2);color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:11px 10px;font-size:12px}.field.full{grid-column:1/-1}.note{font-size:10px;color:var(--quiet);margin-top:6px}.buttons{display:flex;gap:8px;align-items:center;margin-top:15px}.auto-update{font-size:9px;color:var(--quiet);line-height:1.5;flex:1}button{border:0;border-radius:10px;padding:11px 14px;font-weight:700;font-size:11px}.primary{background:var(--gold);color:#1b1a14;flex:1}.secondary{background:var(--p2);color:var(--txt);border:1px solid var(--line)}.results{display:flex;flex-direction:column;gap:15px}.heroresult{padding:23px;position:relative;overflow:hidden}.heroresult:after{content:"";position:absolute;width:200px;height:200px;border:1px solid #d6a86b22;border-radius:50%;right:-65px;top:-110px;box-shadow:0 0 0 25px #d6a86b08,0 0 0 50px #d6a86b05}.heroresult h2{font:600 clamp(25px,3vw,35px) Manrope;margin:10px 0 5px}.heroresult p{font-size:12px;color:var(--muted);line-height:1.6;margin:0}.scale{display:flex;flex-wrap:wrap;gap:6px;margin-top:19px}.pill{border:1px solid var(--line);background:#fff06;border-radius:8px;padding:8px 10px;font-size:11px;font-weight:600}.pill:first-child{color:var(--gold);border-color:#d6a86b88}.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}.card{padding:19px 20px;min-width:0}.card.full{grid-column:1/-1}.cardhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.cardhead b{font:700 13px Manrope}.cardhead span{font-size:9px;color:var(--quiet);letter-spacing:.12em;text-transform:uppercase}.chords{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.tile{border:1px solid var(--line);background:var(--p2);border-radius:10px;text-align:center;padding:10px 4px}.tile small{display:block;color:var(--quiet);font-size:9px;margin-bottom:6px}.tile strong{font:700 15px Manrope}.tile em{display:block;color:var(--muted);font-size:9px;font-style:normal;margin-top:5px}.progress{display:flex;align-items:center;flex-wrap:wrap;gap:7px}.chord{border:1px solid #515c47;background:#272e24;border-radius:9px;padding:9px 11px;text-align:center;min-width:56px}.chord strong{color:var(--sage);font:700 15px Manrope}.chord small{display:block;color:var(--muted);font-size:9px;margin-top:4px}.chord .tones{color:var(--txt);font-size:9px;line-height:1.5}.chord .bassline,.chord .common{color:var(--quiet);font-size:8px;line-height:1.4}.arrow{color:var(--quiet);font-size:11px}.insight{margin-top:12px;padding:11px 12px;border-left:2px solid var(--gold);background:#fff05;border-radius:0 8px 8px 0;color:var(--muted);font-size:11px;line-height:1.6}.copy{font-size:11px;color:var(--muted);line-height:1.7;margin:12px 0 0}.mods{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px}.mod{border:1px solid var(--line);background:#fff03;border-radius:10px;padding:11px}.mod b{display:block;font-size:11px}.mod strong{display:block;float:none;margin-top:5px;color:var(--gold);font:700 15px Manrope}.mod p{font-size:10px;color:var(--muted);line-height:1.5;margin:6px 0 0}.mod small{font-size:9px;color:var(--quiet)}.saved{padding:19px 20px}.savedrow{display:flex;justify-content:space-between;align-items:center;gap:10px}.savedlist{display:grid;gap:7px;margin-top:12px}.saveditem{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-radius:9px;background:var(--p2);font-size:11px}.saveditem span{color:var(--muted)}.empty{font-size:11px;color:var(--quiet);margin:12px 0 0}.foot{border-top:1px solid #fff1;padding:18px 0 25px;color:var(--quiet);font-size:9px;letter-spacing:.08em;display:flex;justify-content:space-between}.toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,15px);background:#e9e8dc;color:#1b1c16;border-radius:30px;padding:10px 16px;font-size:11px;font-weight:700;opacity:0;transition:.2s}.toast.show{opacity:1;transform:translate(-50%,0)}@media(max-width:850px){.layout{grid-template-columns:1fr}.circle{max-width:380px}}@media(max-width:560px){.top{height:65px}.top>small{display:none}.hero{padding:27px 2px 20px}.layout{gap:12px}.grid{grid-template-columns:1fr;gap:12px}.card.full{grid-column:auto}.fields{gap:9px}.field select{font-size:11px;padding:10px 6px}.head{padding:17px 16px 0}.controls{padding:0 16px 17px}.circlewrap{padding:5px 7px 0}.heroresult,.card,.saved{padding:17px}.mods{grid-template-columns:1fr}.chords{gap:5px}.tile strong{font-size:13px}.foot{font-size:8px;gap:8px}}@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
-
-/* Cinemático Studio — visual refinement v1 */
-:root{--bg:#10120f;--p:#171a16;--p2:#20251f;--line:#30372e;--txt:#f3f1e9;--muted:#aeb3a6;--quiet:#858d7e;--gold:#d8b47b;--sage:#c2cdb0;--r:14px}
-body{background:var(--bg);font-family:"DM Sans",sans-serif;letter-spacing:.005em}
-
-.top{height:68px;border-bottom-color:#ffffff12}
-.mark{width:31px;height:31px;font-size:17px}
-.brand b{letter-spacing:.19em;font-size:13px}
-.brand small{font-size:8px;letter-spacing:.19em}
-.hero{padding:46px 0 31px}
-.hero h1{font-size:clamp(32px,4.2vw,49px);letter-spacing:-.055em;line-height:1.04;margin:13px 0}
-.hero p{font-size:13px;max-width:590px;color:#aeb3a6}
-.layout{grid-template-columns:minmax(290px,.78fr) minmax(0,1.42fr);gap:14px}
-.panel{background:var(--p);border-color:#ffffff13;border-radius:14px;box-shadow:0 12px 36px #0002}
-.head{padding:18px 19px 0}
-.head b,.cardhead b{font-size:12px;letter-spacing:.015em}
-.controls{padding:0 19px 19px}
-.field label,.kicker,.top small{letter-spacing:.13em}
-.field select{background:#111510;border-color:#343b32;border-radius:8px;padding:11px 10px}
-.field select:focus{outline:1px solid var(--gold);border-color:var(--gold)}
-button{border-radius:8px;cursor:pointer;transition:background .18s,border-color .18s,transform .18s}
-button:active{transform:translateY(1px)}
-.primary{background:var(--gold);color:#171810}
-.primary:hover{background:#e5c795}
-.secondary{background:transparent;border-color:#424a3e}
-.secondary:hover{background:#ffffff0b;border-color:#68725f}
-.heroresult{padding:22px 23px}
-.heroresult:after{width:150px;height:150px;right:-65px;top:-100px;box-shadow:0 0 0 20px #d6a86b07,0 0 0 40px #d6a86b04}
-.heroresult h2{font-size:clamp(25px,2.7vw,33px);letter-spacing:-.04em}
-.scale{gap:5px;margin-top:16px}
-.pill{background:#ffffff06;border-color:#ffffff17;border-radius:7px;padding:7px 9px}
-.pill:first-child{background:#d8b47b12}
-.results{gap:12px}
-.grid{gap:12px}
-.card{padding:17px 18px}
-.cardhead{margin-bottom:12px}
-.cardhead span{font-size:8px;letter-spacing:.1em}
-.tile{background:#111510;border-color:#ffffff13;border-radius:8px;padding:10px 3px}
-.tile strong{font-size:14px}
-.progress{gap:6px}
-.chord{background:#20261e;border-color:#424b3c;border-radius:8px;padding:8px 10px}
-.chord strong{font-size:14px}
-.insight{background:#d8b47b0b;border-left-color:#d8b47b;border-radius:0 7px 7px 0;font-size:10px;line-height:1.65}
-.copy{font-size:10px}
-.mods{grid-template-columns:repeat(auto-fit,minmax(235px,1fr));gap:9px}
-.mod{position:relative;min-width:0;overflow:hidden;background:#111510;border:1px solid #ffffff15;border-radius:10px;padding:13px 13px 12px;transition:border-color .18s,background .18s}
-.mod:hover{border-color:#d8b47b66;background:#151a14}
-.mod .modtop{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
-.mod .mod-index{display:inline-grid;place-items:center;width:22px;height:22px;border:1px solid #ffffff20;border-radius:50%;font-size:9px;color:var(--quiet)}
-.mod .mod-type{font-size:8px;color:var(--quiet);letter-spacing:.12em;text-transform:uppercase}
-.mod b{font-size:10px;font-weight:600;color:#d9dccf;line-height:1.4}
-.mod .mod-route{display:grid;grid-template-columns:minmax(0,1fr) 25px minmax(0,1fr);align-items:center;gap:5px;margin:0 0 10px}
-.mod .mod-node{min-width:0;border:1px solid #ffffff15;background:#ffffff04;border-radius:8px;padding:8px 7px;text-align:center}
-.mod .mod-node small{display:block;font-size:8px;color:var(--quiet);margin-bottom:4px}
-.mod .mod-node strong{display:block;float:none;margin:0;color:var(--txt);font:700 15px Manrope;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mod .mod-node.target{border-color:#d8b47b55;background:#d8b47b0c}
-.mod .mod-node.target strong{color:var(--gold)}
-.mod .mod-arrow{text-align:center;color:var(--gold);font-size:15px}
-.mod .mod-feel{font-size:10px;color:var(--muted);line-height:1.5;margin:0 0 9px}
-.mod .mod-evidence{border-top:1px solid #ffffff12;padding-top:9px}
-.mod .mod-evidence small{display:block;font-size:8px;color:var(--quiet);line-height:1.5}
-.mod .mod-pivots{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin:7px 0}
-.mod .pivot{display:inline-flex;align-items:center;gap:4px;padding:4px 6px;border:1px solid #ffffff16;border-radius:5px;font-size:8px;color:#d7d9ce;background:#ffffff05}
-.mod .pivot em{font-style:normal;color:var(--gold)}
-.mod .mod-transition{font-size:9px;color:var(--muted);line-height:1.55;margin:7px 0 0}
-.mod .mod-status{display:inline-block;margin-top:9px;padding:4px 6px;border-radius:5px;background:#d8b47b0c;color:#d8b47b;font-size:8px;letter-spacing:.04em}
-.saved{padding:17px 18px}
-.saveditem{background:#111510;border:1px solid #ffffff0c}
-.foot{border-top-color:#ffffff12}
-@media(max-width:850px){.layout{grid-template-columns:1fr}.circle{max-width:350px}.hero{padding:34px 0 24px}}
-@media(max-width:560px){.top{height:61px}.hero{padding:29px 2px 21px}.hero h1{font-size:34px}.layout{gap:11px}.head{padding:16px 15px 0}.controls{padding:0 15px 16px}.heroresult,.card,.saved{padding:16px}.mods{grid-template-columns:1fr}.mod{padding:12px}.foot{font-size:8px}}
-
-
-/* DESIGN LAB / Instrumental workspace prototype. Isolated from public release. */
-:root{--bg:#171a19;--p:#252a27;--p2:#303631;--line:#454d46;--txt:#eceee8;--muted:#c0c7bd;--quiet:#a5aea3;--gold:#d2ad77;--sage:#b3c8b7;--r:7px}
-body{background:#171a19;background-image:linear-gradient(#ffffff03 1px,transparent 1px);background-size:100% 32px;font-size:14px}
-
-.top{height:58px;border-bottom:1px solid #606a603e}
-.brand .mark{border-radius:5px;background:#d2ad77;color:#1b211b;border:0;width:30px;height:30px;font-weight:800}
-.brand b{letter-spacing:.12em;font-size:14px}.brand small{font-size:10px;color:#b1b9ae}
-.top>small{color:#b6c0b6}
-.hero{padding:17px 0 15px;display:flex;gap:18px;align-items:center;justify-content:space-between;border-bottom:1px solid #465048;margin-bottom:12px}
-.hero .kicker{font-size:10px;white-space:nowrap}
-.hero h1{font:650 clamp(19px,2.1vw,28px)/1.18 Manrope;margin:0;letter-spacing:-.03em}
-.hero h1 br{display:none}
-.hero p{max-width:420px;font-size:12px;line-height:1.5;margin:0}
-.workspace-switch{background:#242a26;border:1px solid #4b554b;border-radius:6px;padding:10px 14px;margin-bottom:10px}
-.workspace-switch strong{font-size:13px}.workspace-switch p{font-size:12px}
-.workspace-tabs{border-radius:5px;background:#181d19}.workspace-tabs button{border-radius:3px;font-size:12px}
-.guide{border-radius:6px;background:#252a26;border:1px solid #4b5449;padding:10px 14px;margin-bottom:10px}
-.guide-head b{font-size:12px;color:var(--muted)}
-.layout{grid-template-columns:minmax(260px,.58fr) minmax(0,1.42fr);gap:10px}
-.panel{background:#252a27;border:1px solid #495148;border-radius:7px;box-shadow:none}
-.head{padding:14px 16px 0}.head b,.cardhead b{font-size:14px;letter-spacing:0}
-.circle{max-width:320px}.circlewrap{padding:0 12px}
-.controls{padding:0 16px 16px}
-.field label,.kicker,.top small{font-size:11px;letter-spacing:.07em;color:#b8c1b5}
-.field select,.vl-controls select,select,input{border-radius:4px!important;background:#1d221e!important;border:1px solid #626d61!important;color:#f0f1eb!important;font-size:13px!important;min-height:37px}
-.field select{padding:8px 9px}
-button,.secondary,.primary{border-radius:4px;font-size:12px;min-height:35px}
-button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid #e5c68d;outline-offset:2px}
-.results,.grid{gap:10px}
-.card,.heroresult{padding:15px 17px}
-.heroresult:after{display:none}
-.heroresult h2{font-size:29px}.heroresult p{font-size:13px}
-.cardhead{border-bottom:1px solid #4d574d;padding-bottom:10px;margin-bottom:12px}
-.cardhead span{font-size:10px;color:#b5c0b4;letter-spacing:.05em}
-.chord,.tile,.mod,.tech-card{border-radius:4px!important}
-.chord{background:#313b33;border-color:#5b6a5d;padding:10px}
-.chord strong{font-size:17px}.chord small,.chord .tones,.chord .common,.chord .bassline{font-size:11px}
-.tile{background:#202720}.tile strong{font-size:16px}.tile small,.tile em{font-size:11px}
-.insight{background:#d2ad7710;border-radius:0;padding:11px 12px;font-size:12px;line-height:1.6}
-.copy,.section-lead,.tech-caption{font-size:12px;line-height:1.6}
-.mod{background:#202722;border-radius:4px;padding:12px}
-.mod b,.mod p,.mod .mod-feel{font-size:12px}.mod small,.mod .mod-type,.mod .mod-evidence small{font-size:10px}
-.mod .mod-node{border-radius:3px}.mod .mod-node strong{font-size:17px}
-.help-details{border-radius:4px}
-.foot{font-size:10px}
-@media(min-width:1100px){.layout>section:first-child{align-self:start;position:sticky;top:10px;max-height:calc(100vh - 20px);overflow-y:auto;scrollbar-width:thin}}
-@media(max-width:950px){.layout{grid-template-columns:1fr}.layout>section:first-child{position:static;max-height:none}.circle{max-width:340px}}
-@media(max-width:650px){.hero{display:block;padding:15px 0}.hero h1{margin:7px 0;font-size:24px}.hero p{font-size:12px}.workspace-switch{flex-direction:column;align-items:stretch}.workspace-tabs{width:100%}.workspace-tabs button{flex:1}.panel{border-radius:5px}.card,.heroresult{padding:14px}.field label{font-size:11px}.chord{min-width:50px;padding:8px 6px}.chord strong{font-size:15px}}
-.reference-style-card{margin:12px 0 18px;padding:15px 16px;border:1px solid #b6a77955;border-radius:13px;background:linear-gradient(125deg,#292a20,#20251f)}.reference-style-card label{display:block;margin:7px 0 8px;font-weight:700;font-size:13px}.reference-style-card select{width:100%}.reference-style-kicker{color:var(--gold);font-size:10px;letter-spacing:.13em;font-weight:800}.reference-style-note{color:var(--muted);font-size:12px;line-height:1.5;margin:9px 0 0}.reference-controls{padding:12px 0 15px;margin:0 0 12px;border-bottom:1px solid var(--line)}.reference-controls .caption{margin:0 0 12px}.reference-controls .field+.field{margin-top:12px}.reference-controls .reference-style-note{margin-top:6px}.reference-language-panel{margin:18px 0 0;padding:16px;border:1px solid #b6a77955;border-radius:14px;background:linear-gradient(145deg,#25291f,#1b201b)}.reference-language-panel .cardhead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.reference-language-panel .progress{max-width:100%;overflow-wrap:anywhere}.reference-language-panel .reference-style-note strong{color:var(--txt)}.reference-flow{display:flex;flex-direction:column;gap:14px}.reference-flow>.panel{box-shadow:none}.reference-flow>.heroresult,.reference-flow>.card{padding:16px;border:1px solid var(--line);border-radius:13px}.reference-flow>.reference-controls{display:flex;flex-direction:column;gap:12px}.reference-flow .reference-language-panel{margin-top:0}.reference-flow .chords{grid-template-columns:repeat(auto-fit,minmax(100px,1fr))}.reference-flow .cardhead{flex-wrap:wrap}.tonal-reading{margin:16px 0;padding:16px;border:1px solid var(--line);border-radius:13px;background:var(--p2)}.tonal-reading strong{font-size:14px}.tonal-reading p{color:var(--muted);font-size:12px;line-height:1.5}.tonal-options{display:flex;flex-wrap:wrap;gap:8px}
-/* Ideas diferenciadas por compositor: legibles en móvil, sin reemplazar al autor. */
-.composer-explorations{margin-top:20px;padding-top:16px;border-top:1px solid #d6a86b33}
-.composer-ideas-heading{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.composer-ideas-heading strong{font:700 13px Manrope;color:var(--txt)}
-.composer-ideas-heading span{color:var(--quiet);font-size:10px}
-.composer-ideas-focus{color:var(--sage);font-size:12px;margin:9px 0 13px;line-height:1.5}
-.composer-path-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:10px}
-.composer-path-card{border:1px solid #d6a86b30;background:#11171299;padding:14px;min-width:0}
-.composer-path-number{font-size:11px;font-weight:700;color:var(--gold);margin-bottom:12px}
-.composer-path-progression{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
-.composer-path-chord{display:inline-flex;align-items:center;min-height:32px;padding:6px 9px;background:#313b33;border:1px solid #566050;border-radius:3px;color:var(--txt);font-weight:700;font-size:12px;white-space:nowrap}
-.composer-path-arrow{font-size:12px;color:var(--gold)}
-.composer-path-card p{font-size:11px;line-height:1.65;color:var(--muted);margin:12px 0 0}
-.composer-proof{margin-top:12px;padding:12px;border:1px solid #ffffff1a}
-.composer-proof summary{font-size:11px;color:var(--sage);font-weight:700;cursor:pointer}
-.composer-proof p{font-size:11px;line-height:1.65;color:var(--muted);margin:9px 0}
-.composer-proof a{font-size:11px;color:var(--gold);text-underline-offset:3px}
-
-/* Musically grounded contrast, with optional details instead of theory-heavy main cards. */
-.composer-path-arrow.composer-path-operator{font:800 11px Manrope;color:var(--bg);background:var(--gold);border-radius:4px;padding:4px 6px;min-width:23px;text-align:center}
-.composer-path-facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
-.composer-path-facts span{font-size:10px;line-height:1.45;padding:5px 7px;border:1px solid #8d9d7b35;color:var(--sage);background:#20291f}
-.composer-path-analysis{margin-top:13px;border-top:1px solid #ffffff1e;padding-top:11px}
-.composer-path-analysis summary{font-size:11px;color:var(--gold);font-weight:700;cursor:pointer}
-.composer-path-analysis ol{list-style-position:outside;padding-left:22px;margin:12px 0 0}
-.composer-path-analysis li{font-size:11px;line-height:1.5;color:var(--txt);padding:0 0 10px}
-.composer-path-analysis li strong{display:block;margin-bottom:4px}
-.composer-path-analysis li span{display:block;color:var(--muted)}
-.composer-path-analysis .composer-scope{color:var(--quiet);font-size:10px}
-.composer-path-contrast{font-size:11px;line-height:1.65;color:var(--muted);border-left:2px solid #d6a86b77;padding:7px 12px;margin:12px 0}
-.composer-path-contrast strong{color:var(--txt)}
-
-.composer-audio-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:13px}
-.composer-audio-button{border:1px solid #d6a86b77;color:var(--gold);background:#282b20;padding:8px 12px;font:700 11px Manrope;cursor:pointer;border-radius:4px;min-width:112px}
-.composer-audio-button:hover,.composer-audio-button:focus-visible{outline:1px solid var(--gold);background:#333525}
-.composer-audio-button[aria-pressed="true"]{background:#624d34;color:#fff1db}
-.composer-audio-actions span,.composer-listen-note{font-size:10px;line-height:1.6;color:var(--muted)}
-.composer-listen-note{margin:11px 0 2px}
-.composer-listen-status{font-size:10px;color:var(--sage);margin:4px 0;min-height:12px}
-.vl-style-note{color:var(--muted);font-size:11px;line-height:1.55;margin:0 0 12px}.vl-tone-note{color:var(--sage);font-size:11px;line-height:1.6;border-left:2px solid #d6a86b80;padding:7px 11px;margin:8px 0}
-</style><style>
-.vl-controls{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:14px 0}.vl-controls label{font-size:12px;color:var(--muted,#a7a89b)}.vl-controls select{max-width:190px;background:#202820;color:#e9e7db;border:1px solid #505848;border-radius:9px;padding:9px}
-.voiceleading{overflow-x:auto;padding:10px 0}.vl-chart{display:block;min-width:520px;width:100%;height:auto}.vl-legend{display:flex;gap:14px;flex-wrap:wrap;margin:8px 0;font-size:12px;color:var(--muted,#b4b4aa)}.vl-legend span:before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--voice-color);margin-right:6px}.vl-summary{font-size:12px;line-height:1.6;color:#d0d0c4}.vl-warning{font-size:12px;color:#b8b7a8}
-
-/* Guided visual hierarchy — professional, progressive disclosure */
-:root{--focus:#e1bb82}
-:focus-visible{outline:2px solid var(--focus)!important;outline-offset:3px}
-.guide{border:1px solid #d8b47b3d;background:linear-gradient(110deg,#26271e,#1b211b);border-radius:12px;padding:16px 18px;margin:0 0 14px}
-.guide-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.guide-head b{font:700 13px Manrope;color:#f3ebd9}
-.guide-head button{padding:7px 10px;font-size:11px}
-.guide-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
-.guide-step{display:flex;gap:9px;align-items:flex-start;color:var(--muted);font-size:11px;line-height:1.5}
-.guide-number{display:grid;place-items:center;flex:none;width:25px;height:25px;border:1px solid #d8b47b77;border-radius:50%;color:var(--gold);font:700 11px Manrope}
-.guide-step strong{display:block;color:var(--txt);font-size:11px;margin-bottom:2px}
-.guide[hidden],.guide-steps[hidden]{display:none!important}
-.help-details{margin-top:12px;border-top:1px solid #ffffff14;padding-top:10px}
-.help-details summary{cursor:pointer;color:var(--sage);font-size:11px;font-weight:700;list-style-position:inside}
-#userAnalysis > .help-details{margin-top:14px;padding:12px 14px;border:1px solid #ffffff1c;border-radius:12px;background:#ffffff03}
-#userAnalysis > .help-details > summary{font-size:13px;color:var(--txt);line-height:1.6}
-#userAnalysis > .help-details > .help-details{margin-top:8px;padding:10px 0 10px 8px;border-top:1px solid #ffffff12}
-#userAnalysis > .help-details > .help-details summary{font-size:12px;font-weight:600;line-height:1.6}
-#userAnalysis .help-details summary:focus-visible{outline:2px solid var(--sage);outline-offset:3px;border-radius:4px}
-@media(max-width:600px){#userAnalysis > .help-details{padding:11px 12px}#userAnalysis > .help-details > summary{font-size:12px}}
-.help-details p,.help-details li{font-size:11px;line-height:1.65;color:var(--muted)}
-.help-details ul{padding-left:20px;margin:9px 0}
-.cardhead{gap:12px}
-.cardhead span{text-align:right;line-height:1.4}
-.vl-controls{background:#ffffff04;border:1px solid #ffffff12;border-radius:10px;padding:12px;gap:8px 12px}
-.vl-controls label{font-size:11px;color:#d2d5c9;font-weight:600}
-.vl-controls select{min-height:39px;max-width:220px;border-color:#495347}
-.vl-controls button{min-height:39px}
-#neoResult{border:1px solid #ffffff13;border-radius:10px;background:#111510;padding:15px;margin-top:12px}
-#neoResult .progress{gap:13px;margin-bottom:13px}
-#neoResult .chord{padding:13px 18px;min-width:110px}
-#neoResult .chord strong{font-size:19px}
-#neoResult .chord small{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
-#neoResult .chord .pill{font-size:11px}
-#neoResult .vl-summary{border-top:1px solid #ffffff13;padding-top:12px}
-.section-lead{font-size:11px;line-height:1.7;color:var(--muted);margin:0 0 10px}
-@media(max-width:650px){.guide-steps{grid-template-columns:1fr}.guide{padding:14px}.vl-controls{display:grid;grid-template-columns:1fr 1fr}.vl-controls label{grid-column:span 1}.vl-controls select{width:100%;max-width:none}.vl-controls button{grid-column:span 1}.cardhead{align-items:flex-start}#neoResult .chord{min-width:90px;padding:10px}}
-
-/* Two-depth workspace: simple discovery, full analytical access */
-.workspace-switch{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#1a201a;border:1px solid #ffffff1c;border-radius:12px;padding:14px 17px;margin-bottom:13px}
-.workspace-switch strong{font:700 13px Manrope}.workspace-switch p{color:var(--muted);font-size:11px;line-height:1.5;margin:4px 0 0}
-.workspace-tabs{display:flex;gap:4px;background:#0e120e;padding:4px;border:1px solid #ffffff1b;border-radius:10px;flex-shrink:0}
-.workspace-tabs button{background:transparent;color:var(--muted);padding:10px 13px;border-radius:7px;font-size:11px;white-space:nowrap}
-.workspace-tabs button[aria-pressed="true"]{background:#d8b47b;color:#181b14}
-body[data-workspace="explore"] [data-advanced]{display:none!important}
-@media(max-width:650px){.workspace-switch{align-items:stretch;flex-direction:column}.workspace-tabs{width:100%}.workspace-tabs button{flex:1;padding:11px 7px}}
-
-.tech-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px}.tech-card{border:1px solid #ffffff20;background:#111510;border-radius:10px;padding:14px}.tech-card small{font-size:9px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase}.tech-card h3{font:700 14px Manrope;margin:7px 0}.tech-card p{font-size:11px;line-height:1.65;color:var(--muted)}.tech-card details{border-top:1px solid #ffffff18;margin-top:12px;padding-top:10px}.tech-card summary{font-size:11px;color:var(--sage);cursor:pointer;font-weight:700}.tech-card .observation{color:#e1decf}.tech-caption{font-size:11px;color:var(--muted);line-height:1.6;margin:-4px 0 13px}
-
-/* CINEMATICO DESIGN SYSTEM v2 — one canonical layer for Create / workspace tabs */
-:root{--studio-bg:#111713;--studio-panel:#252d27;--studio-raised:#303b32;--studio-edge:#526052;--studio-ink:#f1f0e8;--studio-muted:#c3cec2;--studio-gold:#d6b17b;--studio-chord:#3b4c3e;--studio-next:#695239;--studio-radius:6px}
-.workspace-switch{background:var(--studio-panel);border:1px solid var(--studio-edge);border-radius:var(--studio-radius);padding:12px 15px;display:flex;align-items:center;gap:18px}
-.workspace-switch>div:first-child{flex:1;min-width:0}
-.workspace-switch strong{font-size:14px;color:var(--studio-ink)}
-.workspace-switch p{font-size:13px;line-height:1.5;color:var(--studio-muted);margin:5px 0 0}
-.workspace-tabs{display:flex;gap:4px;padding:4px;background:var(--studio-bg);border:1px solid #3e4c40;border-radius:var(--studio-radius)}
-.workspace-tabs button{min-height:44px;padding:10px 17px;border:0;border-radius:4px;font-size:14px;font-weight:700;white-space:nowrap;background:transparent;color:var(--studio-muted);cursor:pointer}
-.workspace-tabs button[aria-pressed="true"]{background:var(--studio-gold);color:#1a211b}
-.workspace-tabs button:focus-visible,.simple-create button:focus-visible,.simple-create select:focus-visible,.simple-create input:focus-visible{outline:3px solid #f1ce94;outline-offset:3px}
-body[data-workspace="explore"] main.layout,body[data-workspace="explore"] #studioGuide{display:none!important}
-body[data-workspace="advanced"] .simple-create{display:none!important}
-.simple-create{max-width:1060px;margin:15px auto 36px;background:var(--studio-panel);border:1px solid var(--studio-edge);border-radius:var(--studio-radius);padding:clamp(20px,3vw,36px)}
-.simple-intro h2{font:650 clamp(27px,3vw,34px)/1.2 Manrope,sans-serif;color:var(--studio-ink);letter-spacing:-.025em;margin:9px 0 11px}
-.simple-intro p{max-width:660px;font-size:14px;line-height:1.65;color:var(--studio-muted);margin:0}
-.simple-fields{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:22px;margin-top:26px}
-.simple-fields label{display:block;color:var(--studio-ink);font-size:14px;font-weight:700;margin-bottom:10px}
-.simple-fields input,.simple-fields select{width:100%;min-height:52px!important;font-size:17px!important;line-height:1.3;padding:12px 14px!important;border-radius:5px!important}
-.simple-fields p{color:var(--studio-muted);font-size:13px;line-height:1.5;margin:9px 0 0}
-.simple-actions{display:flex;flex-wrap:wrap;gap:10px;margin:23px 0 16px}
-.simple-actions button{min-height:46px;padding:11px 18px;font-size:14px;font-weight:700}
-.simple-feedback{font-size:13px;color:var(--studio-muted);line-height:1.6;margin:12px 0}
-.simple-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
-.simple-path{min-width:0;background:#1b241e;border:1px solid #536254;border-radius:var(--studio-radius);padding:19px;display:flex;flex-direction:column;gap:10px}
-.simple-path h3{font-size:17px;line-height:1.3;color:var(--studio-ink);margin:0;font-weight:750}
-.simple-path p{color:var(--studio-muted);font-size:14px;line-height:1.55;margin:0}
-.simple-chips{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:6px 0}
-.simple-chips span{display:inline-flex;align-items:center;justify-content:center;min-width:48px;min-height:40px;background:var(--studio-chord);color:#f3f5ee;border:1px solid #617663;border-radius:4px;padding:7px 10px;font:750 18px/1.2 Manrope,sans-serif;letter-spacing:-.025em}
-.simple-chips span.new{background:var(--studio-next);color:#f9e1b9;border-color:#a48a62}
-.simple-path details{border-top:1px solid #4a5b4b;padding-top:12px;margin-top:auto;font-size:13px;line-height:1.55;color:var(--studio-muted)}
-.simple-path summary{cursor:pointer;color:#efc992;font-size:14px;font-weight:650}
-.simple-path details p{margin-top:10px}
-.simple-path button{width:100%;min-height:43px;font-size:13px;margin-top:7px}
-@media(max-width:850px){.simple-results{grid-template-columns:1fr 1fr}.workspace-switch{flex-wrap:wrap}.workspace-tabs{width:100%}.workspace-tabs button{flex:1}}
-@media(max-width:650px){.simple-fields,.simple-results{grid-template-columns:1fr}.simple-create{margin:10px 0 25px;padding:20px}.simple-actions button{width:100%}.workspace-tabs button{font-size:13px;padding:10px 8px}.simple-chips span{font-size:17px}}
-
-/* Emotion-specific harmonic paths */
-.simple-path-heading{display:flex;flex-direction:column;gap:7px}.simple-variant{font-size:11px;letter-spacing:.12em;font-weight:800;color:var(--studio-gold)}.simple-device{color:#e9d0a9!important;font-weight:650}.simple-chips .simple-arrow{min-width:auto;min-height:auto;background:transparent;border:0;color:var(--studio-gold);font-size:20px;padding:0 4px}.simple-path .simple-chips{margin:10px 0 14px}.simple-path details{margin-top:auto}
-
-/* Create-first: one compositional decision, then three restrained alternatives. */
-body[data-workspace="explore"] .hero{max-width:1080px;margin:0 auto 14px}
-body[data-workspace="explore"] .simple-create{max-width:1060px}
-.simple-fields{display:block;max-width:720px;margin-top:24px}
-.simple-fields input{font:650 clamp(19px,2.8vw,25px)/1.2 Manrope,sans-serif!important;letter-spacing:.012em}
-.simple-intention{margin-top:27px}
-.simple-section-title{font:700 15px/1.45 Manrope,sans-serif;color:var(--studio-ink);margin:0 0 13px}
-.simple-intent-pills{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;max-width:780px}
-.simple-intent-pills button{min-height:48px;border:1px solid #68766b;background:#202a23;border-radius:6px;color:#e1e7df;font:700 14px/1.25 Manrope,sans-serif;padding:11px 10px;cursor:pointer;transition:background .15s,border-color .15s}
-.simple-intent-pills button[aria-pressed="true"]{color:#1a211a;background:var(--studio-gold);border-color:#e5c391}
-.simple-intent-help{font-size:12px;line-height:1.55;color:var(--studio-muted);max-width:680px;margin:11px 0 0;min-height:19px}
-.simple-intent-pills button:focus-visible,.simple-deep-link:focus-visible,.simple-nuances summary:focus-visible{outline:3px solid #f1ce94;outline-offset:3px}
-.simple-nuances{margin-top:14px;max-width:660px;color:var(--studio-muted);font-size:13px}
-.simple-nuances summary{cursor:pointer;width:max-content;max-width:100%;padding:6px 2px;color:#d5d9ce;font-weight:650}
-.simple-nuance-content{padding:14px 0 2px;max-width:420px}
-.simple-nuance-content label{display:block;font-size:13px;font-weight:700;color:var(--studio-ink);margin-bottom:8px}
-.simple-nuance-content select{width:100%;min-height:44px;font-size:15px}
-.simple-nuance-content .simple-reference-label{margin-top:16px}
-.simple-nuance-content p{font-size:12px;color:var(--studio-muted);line-height:1.5}
-.simple-actions{margin-top:20px;margin-bottom:8px}
-.simple-actions .primary{min-width:230px}
-.simple-feedback:empty{display:none}
-.simple-results-intro{grid-column:1/-1;padding:2px 0 5px}
-.simple-results-intro h3{font:700 17px/1.4 Manrope,sans-serif;margin:3px 0 9px;color:var(--studio-ink)}
-.simple-results-intro p{font-size:13px;line-height:1.5;color:var(--studio-muted);margin:0 0 12px}
-.simple-start-chips{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
-.simple-start-chips span{padding:8px 12px;border:1px solid #617663;background:var(--studio-chord);color:#f3f5ee;border-radius:5px;font:700 16px/1.2 Manrope,sans-serif}
-.simple-start-chips .simple-start-label{background:transparent;border:0;padding-left:0;font:700 12px/1.4 "DM Sans",sans-serif;color:var(--studio-muted)}
-.simple-path .simple-chips{margin:4px 0 10px;gap:8px}
-.simple-path .simple-chips span.new{min-width:54px}
-.simple-path .simple-direction{font-size:13px;color:#e9d0a9;font-weight:600}
-.simple-path .simple-variant{font-size:10px}
-.simple-path details summary{color:#d8dcbf}
-.simple-depth-note{font-size:13px;line-height:1.55;margin:21px 0 0;color:var(--studio-muted)}
-.simple-deep-link{border:0!important;background:transparent!important;color:#f3ca91!important;font:700 13px/1.5 "DM Sans",sans-serif!important;padding:3px 4px!important;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
-@media(max-width:650px){.simple-intent-pills{grid-template-columns:repeat(2,minmax(0,1fr))}.simple-intent-pills button{min-height:48px}.simple-start-chips span{font-size:15px}}
-
-
-/* Progressive disclosure: composition first, three focused studio areas. */
-.advanced-navigation{display:none;max-width:1080px;margin:2px auto 16px;padding:16px 0 5px}
-body[data-workspace="advanced"] .advanced-navigation{display:block}
-.advanced-navigation h2{margin:7px 0 5px;font:700 clamp(20px,2.8vw,26px)/1.24 Manrope,sans-serif}
-.advanced-navigation p{margin:0 0 16px;font-size:13px;line-height:1.6;color:var(--studio-muted)}
-.advanced-tabs{display:flex;align-items:stretch;gap:7px;flex-wrap:wrap}
-.advanced-tabs button{flex:1;min-width:145px;min-height:46px;background:#242e27;border:1px solid #56675a;border-radius:6px;color:#e5e9e1;padding:10px 14px;font:700 14px/1.3 Manrope,sans-serif;cursor:pointer}
-.advanced-tabs button[aria-pressed="true"]{background:var(--studio-gold);border-color:#e7c793;color:#1a211b}
-.advanced-tabs button{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;text-align:left;min-height:70px}
-.advanced-tabs button small{display:block;font:500 11px/1.4 "DM Sans",sans-serif;color:var(--studio-muted)}
-.advanced-tabs button[aria-pressed="true"] small{color:#283325}
-body[data-workspace="advanced"][data-study="home"] main.layout{display:none!important}
-.advanced-tabs button:focus-visible,.study-inspect summary:focus-visible,.study-tool summary:focus-visible{outline:3px solid #f1ce94;outline-offset:3px}
-body[data-workspace="advanced"] main.layout{display:block;max-width:1080px;margin:0 auto 42px}
-body[data-workspace="advanced"] .layout .reference-flow{max-width:none;width:100%;margin:0}
-body[data-workspace="advanced"] .layout .results{width:100%}
-body[data-workspace="advanced"] .results .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:13px}
-body[data-workspace="advanced"] [data-study-panel]{display:none!important}
-body[data-workspace="advanced"][data-study="chords"] [data-study-panel="chords"],
-body[data-workspace="advanced"][data-study="inspire"] [data-study-panel="inspire"],
-body[data-workspace="advanced"][data-study="tools"] [data-study-panel="tools"]{display:block!important}
-.study-inspect,.study-tool{border:1px solid #506052;border-radius:7px;background:#212922;margin:12px 0}
-.study-inspect>summary,.study-tool>summary{padding:15px 17px;font:700 14px/1.5 Manrope,sans-serif;color:#e8eddf;cursor:pointer}
-.study-inspect>summary::marker,.study-tool>summary::marker{color:var(--studio-gold)}
-.study-inspect[open]>summary,.study-tool[open]>summary{border-bottom:1px solid #506052}
-.study-inspect>div{padding:15px}
-.study-inspect #labVoicesPanel{margin:0;border:0;padding:0;background:transparent}
-.study-tool>article{border:0;background:transparent;box-shadow:none;margin:0;padding:18px}
-.study-tool .cardhead{margin:0 0 13px}
-body[data-study="chords"] .results{margin-top:0}
-body[data-study="inspire"] .reference-flow{margin-bottom:15px}
-@media(max-width:650px){.advanced-tabs{gap:5px}.advanced-tabs button{min-width:0;flex:1;padding:11px 7px;font-size:12px;min-height:86px}.advanced-tabs button small{font-size:10px;line-height:1.3}.advanced-navigation{padding:8px 0}.study-tool>article{padding:12px}}
-
-
-.simple-listen-status{margin:7px 0 0;font-size:12px;line-height:1.55;color:var(--studio-muted)}
-.simple-listen-status:empty{display:none}
-.simple-play-button{border-color:#b89e77!important;color:#e6c89c!important;background:#263027!important}
-.simple-play-button[aria-pressed="true"]{background:#554733!important;color:#ffe1ad!important}
-
-
-/* RESPONSIVE SPACING · 2026-11-25
-   One consistent outer gutter in desktop browser, mobile browser and PWA.
-   Respect display cutouts; keep nested controls inside the card width. */
-:root{--page-gutter:clamp(24px,4.8vw,64px);--content-maximum:1320px}
-.shell{
-  width:100%;
-  max-width:var(--content-maximum);
-  margin-inline:auto;
-  padding-top:env(safe-area-inset-top,0px);
-  padding-bottom:env(safe-area-inset-bottom,0px);
-  padding-left:calc(var(--page-gutter) + env(safe-area-inset-left,0px));
-  padding-right:calc(var(--page-gutter) + env(safe-area-inset-right,0px));
-}
-.shell > *, .hero, .workspace-switch, .simple-create, .advanced-navigation,
-.layout, .layout > *, .results, .simple-results, .simple-path{min-width:0}
-.top{gap:18px}
-.top .brand{min-width:0}
-.simple-create{padding:clamp(24px,3.1vw,36px)}
-.simple-intent-pills button{white-space:normal;overflow-wrap:break-word}
-.simple-path, .tech-card, .study-inspect, .study-tool{overflow-wrap:break-word}
-.top .mark{flex-shrink:0}
-.simple-actions .primary{min-width:0;max-width:100%;white-space:normal}
-.tech-grid,.mods{grid-template-columns:repeat(auto-fit,minmax(min(210px,100%),1fr))}
-.voiceleading{max-width:100%;min-width:0}
-.voiceleading-hint{display:none;margin:8px 0 0}
-.voiceleading:focus-visible,.circle .node:focus-visible{outline:2px solid var(--sage);outline-offset:2px}
-@media(max-width:950px){
-  .simple-create{padding:clamp(22px,3.8vw,30px)}
-  .advanced-navigation{max-width:100%}
-}
-@media(max-width:650px){
-  .top{min-height:64px;height:auto;padding-block:10px}
-  .top > small{display:none}
-  .hero{padding:22px 0 19px;margin-bottom:16px}
-  .hero h1{font-size:clamp(25px,6.5vw,31px);line-height:1.17;margin:9px 0}
-  .hero p{font-size:14px;line-height:1.6}
-  .workspace-switch{padding:15px;gap:13px;margin-bottom:16px}
-  .workspace-tabs{width:100%;min-width:0}
-  .workspace-tabs button{flex:1 1 0;min-width:0;white-space:normal;padding:12px 8px}
-  .simple-create{margin:12px auto 29px;padding:clamp(15px,4vw,22px);border-radius:9px}
-  .simple-intro h2{font-size:clamp(25px,6.3vw,31px);line-height:1.22}
-  .simple-intro p{font-size:14px;line-height:1.65}
-  .simple-fields{margin-top:22px}
-  .simple-intention{margin-top:25px}
-  .simple-intent-pills{gap:10px}
-  .simple-intent-pills button{min-height:52px;padding:12px 9px}
-  .simple-results{gap:14px}
-  .simple-path{padding:15px;gap:12px}
-  .simple-path p{line-height:1.6}
-  .simple-path button{min-height:44px}
-  .advanced-navigation{padding:17px 0 5px;margin-bottom:19px}
-  .advanced-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-  .advanced-tabs button:last-child{grid-column:1/-1}
-  .advanced-tabs button{min-height:64px;padding:11px 9px;font-size:13px}
-  .study-inspect > summary,.study-tool > summary{padding:15px}
-  .study-inspect > div,.study-tool > article{padding:16px}
-  .card,.heroresult,.saved,.reference-flow > .heroresult,.reference-flow > .card{padding:18px}
-  .guide{padding:16px}
-  .layout{gap:14px}
-  .simple-nuance-content select{max-width:100%}
-  /* The advanced chord editor must not force two min-content-width buttons beyond 320px. */
-  .vl-controls{grid-template-columns:repeat(2,minmax(0,1fr));min-width:0}
-  .vl-controls > input,.vl-controls > select,.vl-controls > button{min-width:0;max-width:100%}
-  .vl-controls > button{min-height:44px;white-space:normal;overflow-wrap:anywhere;line-height:1.3}
-  #userChords{grid-column:1/-1;width:100%}
-  .field select,.vl-controls select,.vl-controls input,.simple-nuance-content select{font-size:16px;min-height:44px}
-  .field,.tech-card,.tile,.chord{min-width:0;overflow-wrap:anywhere}
-  .chords{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .foot{flex-wrap:wrap}
-  .guide-head button,.help-details > summary{min-height:44px}
-  .help-details > summary{display:list-item;padding-block:10px}
-  .voiceleading-hint{display:block}
-}
-@media(max-width:360px){
-  :root{--page-gutter:20px}
-  .advanced-tabs{grid-template-columns:minmax(0,1fr)}
-  .workspace-tabs button{font-size:12px}
-  .simple-intent-pills{gap:8px}
-  .simple-intent-pills button{font-size:13px;padding-inline:6px}
-  .study-inspect > div,.study-tool > article{padding:12px}
-}
-
-
-/* Consolidated visual polish — keep existing workflows, no new features. */
-:root{
- --bg:#181b1c;--p:#222627;--p2:#2b3031;--line:#414849;
- --txt:#f0f1ed;--muted:#c2c8c5;--quiet:#a0aaa5;--gold:#d9b785;--sage:#a9c2b4;
- --studio-bg:var(--bg);--studio-panel:var(--p);--studio-raised:var(--p2);
- --studio-edge:var(--line);--studio-ink:var(--txt);--studio-muted:var(--muted);
- --studio-gold:var(--gold);--studio-chord:#303b38;--studio-next:#3e352a;--studio-radius:8px;
- --r:8px
-}
-body{background:var(--bg);background-image:none;font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:14px;letter-spacing:0}
-button,input,select{font-family:inherit}
-.top,.hero,.workspace-switch,.simple-create,.advanced-navigation,body[data-workspace="advanced"] main.layout{max-width:1080px;margin-inline:auto}
-.top{border-color:var(--line);height:60px}
-.hero{border:0;display:block;padding:22px 0 14px}
-.hero .kicker{display:none}
-.hero h1{font:650 clamp(23px,3vw,34px)/1.18 "Manrope",system-ui,sans-serif;letter-spacing:-.035em;margin:0 0 6px}
-.hero p{font-size:13px;max-width:660px;line-height:1.55}
-.workspace-switch{background:transparent;border:0;padding:0;margin-bottom:18px;gap:14px}
-.workspace-switch>div:first-child{display:none}
-.workspace-tabs{width:100%;padding:3px;background:var(--p);border-color:var(--line);gap:3px}
-.workspace-tabs button{flex:1 1 0;min-width:0;font-size:14px;font-weight:600;min-height:44px}
-.workspace-tabs button[aria-pressed="true"]{background:var(--p2);color:var(--gold);box-shadow:inset 0 -2px var(--gold)}
-.simple-create{max-width:1080px;margin:0 auto 32px;padding:clamp(18px,3vw,32px);border-color:var(--line)}
-.simple-intro h2{font:650 clamp(22px,2.7vw,29px)/1.2 "Manrope",system-ui,sans-serif;margin:0 0 6px;letter-spacing:-.025em}
-.simple-intro p{font-size:14px;line-height:1.55}
-.simple-fields{max-width:none;margin-top:21px}
-.simple-fields label,.simple-reference-label,.simple-section-title{font-size:14px;font-weight:650;letter-spacing:0;margin:0 0 8px}
-.simple-fields input{background:#171a1b!important;border-color:#596362!important;border-radius:6px!important;min-height:50px!important;font-size:22px!important}
-.simple-intention{margin-top:21px}
-.simple-intent-pills{max-width:none;gap:8px}
-.simple-intent-pills button{background:var(--p2);border-color:var(--line);color:var(--txt);font-size:13px;min-height:46px}
-.simple-intent-pills button[aria-pressed="true"]{background:#453a2b;border-color:var(--gold);color:#f3dbb7}
-.simple-nuances{max-width:none;margin-top:8px}
-.simple-nuances summary{min-height:40px;display:list-item;width:auto;padding:10px 0;color:var(--muted)}
-.simple-nuance-content{max-width:none;padding-top:4px}
-.simple-reference-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px;align-items:start}
-.simple-reference-fields>div{min-width:0}
-.simple-reference-fields label{display:block;color:var(--txt)}
-.simple-reference-fields select,.simple-nuance-content select{width:100%;min-height:44px;font-size:15px!important;background:#1a1e1f!important;border-color:#56605e!important;border-radius:6px!important}
-.simple-actions{margin:19px 0 8px}
-.simple-actions .primary{flex:0 1 auto;min-height:46px;padding-inline:22px;font-size:14px}
-.simple-feedback{font-size:13px;line-height:1.55}
-.simple-results{gap:12px;align-items:start}
-.simple-results-intro{border-top:1px solid var(--line);padding-top:17px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.simple-results-intro h3{flex:1 0 100%;margin:0;font-size:17px}
-.simple-results-intro .simple-start-chips{flex:1 1 auto}
-.simple-results-intro .simple-play-button{min-height:44px}
-.simple-start-chips{gap:6px}
-.simple-start-chips span{background:var(--studio-chord);border-color:#52625d;font-size:15px}
-.simple-path{background:#1c2021;border-color:var(--line);padding:16px;gap:9px;box-shadow:none;align-self:stretch}
-.simple-path-heading{gap:3px}
-.simple-path .simple-variant{font-size:11px;letter-spacing:.04em;color:var(--quiet)}
-.simple-path h3{font-size:17px;line-height:1.25;font-weight:650}
-.simple-path .simple-direction{font-size:13px;color:var(--muted);font-weight:500;min-height:2.9em}
-.simple-path .simple-chips{gap:5px;margin:4px 0 8px;align-content:flex-start;min-height:40px}
-.simple-path .simple-chips span.new{min-width:0;min-height:37px;padding:7px 9px;font-size:17px;background:var(--studio-next);border-color:#8c7558;color:#f1d8b2;max-width:100%;overflow-wrap:anywhere}
-.simple-chips .simple-arrow{font-size:13px;padding:0 1px;color:var(--quiet)}
-.simple-path details{margin-top:0;padding-top:6px;border-top:1px solid var(--line);min-width:0}
-.simple-path>details{margin-bottom:auto}
-.simple-path details details{margin-top:10px;padding:6px 0 0}
-.simple-path summary{min-height:40px;padding:10px 0;font-size:13px;line-height:1.4;color:var(--sage);list-style-position:inside}
-.simple-path details p{font-size:13px;line-height:1.6;margin:7px 0;color:var(--muted)}
-.simple-path .simple-source{font-size:12px}
-.simple-source a,.simple-path a{color:var(--gold);text-underline-offset:3px;overflow-wrap:anywhere}
-.simple-audio-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
-.simple-path button{margin:0;min-height:44px;white-space:normal;overflow-wrap:anywhere;font-size:12px;font-weight:600;padding:8px 5px}
-.simple-play-button{background:var(--p2)!important;border-color:#58635e!important;color:var(--txt)!important}
-.simple-play-button[aria-pressed="true"]{background:#59452f!important;color:#ffdfb0!important;border-color:var(--gold)!important}
-.simple-path [data-open-advanced]{background:transparent;color:var(--muted);border-color:var(--line)}
-.simple-path [data-open-advanced]:disabled{opacity:.5}
-.simple-depth-note{border-top:1px solid var(--line);padding-top:14px;margin-top:19px;font-size:13px}
-.simple-listen-status{font-size:13px}
-.panel,.study-inspect,.study-tool,.reference-language-panel,.reference-flow>.card,.reference-flow>.heroresult,.guide,.tech-card,.composer-path-card,.reference-style-card{background:var(--p);border-color:var(--line);box-shadow:none;border-radius:8px}
-.reference-style-card,.reference-language-panel,.guide{background-image:none}
-.cardhead{border-color:var(--line)}
-.cardhead b,.head b{font-size:14px;font-weight:650}
-.copy,.insight,.section-lead,.help-details p,.help-details li,.composer-path-card p,.tech-card p,.mod p{font-size:13px;line-height:1.6}
-.help-details summary,.composer-path-analysis summary,.tech-card summary{font-size:13px}
-.advanced-tabs button{background:var(--p2);border-color:var(--line);border-radius:6px}
-.advanced-tabs button[aria-pressed="true"]{background:#453a2b;border-color:var(--gold);color:#f3dbb7}
-.advanced-tabs button[aria-pressed="true"] small{color:#e4cba6}
-@media(max-width:950px){.simple-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:650px){
- .hero{padding:16px 0 10px;margin-bottom:7px}
- .hero h1{font-size:25px}
- .hero p{font-size:13px}
- .workspace-switch{padding:0;margin-bottom:12px}
- .simple-create{padding:15px;margin-top:0}
- .simple-intro h2{font-size:23px}
- .simple-fields{margin-top:18px}
- .simple-fields input,.simple-reference-fields select,.simple-nuance-content select{font-size:16px!important}
- .simple-fields input{font-size:21px!important}
- .simple-intention{margin-top:19px}
- .simple-reference-fields{grid-template-columns:minmax(0,1fr);gap:11px}
- .simple-intent-pills button{min-height:48px}
- .simple-actions .primary{width:100%;flex:1}
- .simple-results{grid-template-columns:minmax(0,1fr)}
- .simple-path{padding:13px}
- .simple-path .simple-direction{min-height:0}
- .simple-path summary{min-height:44px}
- .simple-nuances summary{min-height:44px}
- .simple-results-intro .simple-play-button{flex:0 0 auto}
- .simple-path .simple-chips span.new{font-size:16px}
-}
-</style></head><body><div class="shell"><header class="top"><div class="brand"><div class="mark">C</div><div><b>CINEMÁTICO</b><small>Estudio de composición</small></div></div><small>Exploración armónica · herramienta creativa</small></header><section class="hero"><div class="kicker">CINEMÁTICO / INSTRUMENTO ARMÓNICO</div><h1>Una idea. Nuevos caminos.</h1><p>Escribe tus acordes y descubre otras direcciones posibles. Tu música sigue siendo tuya.</p></section><nav class="workspace-switch" aria-label="Modo de trabajo"><div><strong id="workspaceTitle">Crear</strong><p id="workspaceDesc">Tus acordes, nuevas posibilidades. Sin necesidad de teoría musical.</p></div><div class="workspace-tabs" role="group" aria-label="Nivel de herramientas"><button id="workspaceExplore" type="button" aria-pressed="true">Crear</button><button id="workspaceAdvanced" type="button" aria-pressed="false">Estudio avanzado</button></div></nav><aside class="guide" id="studioGuide" aria-label="Guía de inicio"><div class="guide-head"><b>Guía rápida · Tres pasos para empezar</b><button class="secondary" id="guideToggle" type="button" aria-expanded="false" aria-controls="guideSteps">Mostrar guía</button></div><div class="guide-steps" id="guideSteps" hidden><div class="guide-step"><span class="guide-number">1</span><div><strong>Elige el centro tonal</strong>Pulsa una nota del círculo de quintas.</div></div><div class="guide-step"><span class="guide-number">2</span><div><strong>Define la intención</strong>Selecciona emoción, compositor y, si quieres, un modo.</div></div><div class="guide-step"><span class="guide-number">3</span><div><strong>Explora y profundiza</strong>Consulta acordes y voces. Abre las ayudas de cada herramienta cuando las necesites.</div></div></div></aside><section class="simple-create" aria-label="Crear con tus acordes"><div class="simple-intro"><h2>Desarrolla tu idea</h2><p>Escribe tus acordes, elige una intención y compara tres caminos.</p></div><div class="simple-fields"><div><label for="simpleChords">Tu progresión</label><input id="simpleChords" type="text" value="" placeholder="Am F C G" autocomplete="off" aria-describedby="simpleChordsHelp"><p id="simpleChordsHelp">Escribe los acordes separados por espacios. Ejemplo: Am F C G.</p></div></div>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#171A1C"><meta name="description" content="Estudio de exploración armónica cinematográfica"><title>Cinemático — Estudio de composición</title><meta name="cinematico-release" content="0.2.0-beta"><link rel="manifest" href="manifest.json"><link rel="icon" type="image/png" sizes="192x192" href="icon-192.png"><link rel="stylesheet" href="studio.css"></head><body><div class="shell"><header class="top"><div class="brand"><div class="mark">C</div><div><b>CINEMÁTICO</b><small>Estudio de composición</small></div></div><small>Exploración armónica · herramienta creativa</small></header><main><section class="hero"><div class="kicker">CINEMÁTICO / INSTRUMENTO ARMÓNICO</div><h1>Una idea. Nuevos caminos.</h1><p>Escribe tus acordes y descubre otras direcciones posibles. Tu música sigue siendo tuya.</p></section><nav class="workspace-switch" aria-label="Modo de trabajo"><div><strong id="workspaceTitle">Crear</strong><p id="workspaceDesc">Tus acordes, nuevas posibilidades. Sin necesidad de teoría musical.</p></div><div class="workspace-tabs" role="group" aria-label="Nivel de herramientas"><button id="workspaceExplore" type="button" aria-pressed="true">Crear</button><button id="workspaceAdvanced" type="button" aria-pressed="false">Estudio avanzado</button></div></nav><aside class="guide" id="studioGuide" aria-label="Guía de inicio"><div class="guide-head"><b>Guía rápida · Tres pasos para empezar</b><button class="secondary" id="guideToggle" type="button" aria-expanded="false" aria-controls="guideSteps">Mostrar guía</button></div><div class="guide-steps" id="guideSteps" hidden><div class="guide-step"><span class="guide-number">1</span><div><strong>Elige el centro tonal</strong>Pulsa una nota del círculo de quintas.</div></div><div class="guide-step"><span class="guide-number">2</span><div><strong>Define la intención</strong>Selecciona emoción, compositor y, si quieres, un modo.</div></div><div class="guide-step"><span class="guide-number">3</span><div><strong>Explora y profundiza</strong>Consulta acordes y voces. Abre las ayudas de cada herramienta cuando las necesites.</div></div></div></aside><section class="simple-create" aria-label="Crear con tus acordes"><div class="simple-intro"><h2>Desarrolla tu idea</h2></div><div class="simple-fields"><div><label for="simpleChords">Tu progresión</label><input id="simpleChords" type="text" value="" placeholder="Am F C G" autocomplete="off" aria-describedby="simpleChordsHelp"><p id="simpleChordsHelp">Escribe los acordes separados por espacios. Ejemplo: Am F C G.</p></div></div>
 <div class="simple-intention"><p class="simple-section-title" id="simpleIntentTitle">¿Qué dirección quieres explorar?</p><div class="simple-intent-pills" role="group" aria-labelledby="simpleIntentTitle">
 <button type="button" data-quick-intent="esperanza" aria-pressed="true" aria-describedby="simpleIntentHelp">Apertura / esperanza</button>
 <button type="button" data-quick-intent="suspense" aria-pressed="false" aria-describedby="simpleIntentHelp">Mantener tensión</button>
@@ -532,11 +11,11 @@ button,input,select{font-family:inherit}
  <span class="kicker">ESTUDIO · SI QUIERES IR MÁS ALLÁ</span>
  <h2>¿Qué quieres explorar?</h2>
  <p>Selecciona un área para empezar. Ninguna progresión se abre automáticamente.</p>
- <nav class="advanced-tabs" role="group" aria-label="Área de estudio">
+ <nav class="advanced-tabs" aria-label="Área de estudio">
  <button type="button" data-study-open="chords" aria-pressed="false">Mis acordes<small>Analizar tu progresión</small></button>
  <button type="button" data-study-open="inspire" aria-pressed="false">Inspiración<small>Tonalidad y compositores</small></button>
  <button type="button" data-study-open="tools" aria-pressed="false">Herramientas<small>Voces y transformaciones</small></button>
- </nav></section><main class="layout"><section class="panel reference-flow" data-study-panel="inspire"><div class="head"><b>Círculo de quintas</b><span class="kicker">Selecciona una tónica</span></div><div class="circlewrap"><svg id="circle" class="circle" viewBox="0 0 420 420" role="group" aria-label="Círculo de quintas interactivo"></svg></div><div class="reference-controls"><div class="caption">Referencia · <strong id="keyCaption">C</strong></div><div class="field"><label for="quickKey">Tonalidad de referencia</label><select id="quickKey" aria-label="Seleccionar tonalidad"></select></div><div class="field"><label for="emotion">Intención emocional</label><select id="emotion"></select></div><div class="field full"><label for="mode">Modo musical</label><select id="mode"><option value="">Sugerido por la emoción</option></select><div class="note" id="modeNote"></div></div><div class="field"><label for="composer">Lenguaje de referencia</label><select id="composer" aria-describedby="composerContextNote"></select><p class="reference-style-note" id="composerContextNote">Estilo elegido para explorar posibilidades; no se deduce de tus acordes.</p></div><div class="buttons"><span class="auto-update" role="status">Actualización automática · cambia cualquier selección</span><button class="secondary" id="reset" aria-label="Restablecer">↺</button></div></div><article class="panel heroresult"><div class="kicker" id="eyebrow">CONTEXTO DE REFERENCIA · TONALIDAD · MODO</div><h2 id="title">Do · Mayor</h2><p class="tech-caption" id="referenceScopeNote">Ejemplo construido con la tonalidad, el modo y el lenguaje que has seleccionado. No es un análisis automático de tus acordes.</p><p id="description"></p><div class="scale" id="scale"></div></article><article class="panel card"><div class="cardhead"><b>Acordes del modo</b><span>Armonía diatónica</span></div><div class="chords" id="chords"></div><div class="insight" id="chordNote"></div></article><article class="panel card"><div class="cardhead"><b>Idea emocional</b><span id="emotionName"></span></div><div class="progress" id="emotionProgress"></div><div class="insight" id="emotionNote"></div></article><article class="reference-language-panel"><div class="cardhead"><b>Ideas del lenguaje de referencia</b><span id="composerName"></span></div><p class="reference-style-note">Giros creados desde la tonalidad, el modo y el compositor seleccionados arriba. <strong>No son continuaciones de tu progresión.</strong></p><div class="field" style="margin:10px 0 14px"><label for="composerHere">Compositor de referencia</label><select id="composerHere" aria-label="Elegir compositor desde lenguaje de referencia"></select></div><div class="progress" id="signature"></div><div class="insight" id="signatureNote"></div><p class="copy" id="devices"></p><div class="composer-explorations" id="composerExplorations" aria-live="polite"></div></article></section><section class="results"><div class="grid"><details class="study-tool" data-study-panel="tools"><summary>Escuchar cómo se mueven las voces</summary><article class="panel card full"><div class="cardhead"><b>Conducción de voces</b><span>Cuatro voces · realización sugerida</span></div><div class="vl-controls"><label for="vlStyle">Carácter contrapuntístico</label><select id="vlStyle" aria-label="Estilo de conducción de voces"><option value="cinematic">Cinematográfica</option><option value="classical">Clásica</option><option value="minimal">Minimalista</option></select><label for="vlSource">Material</label><select id="vlSource"><option value="emotion">Idea emocional</option><option value="signature">Referencia del compositor</option></select></div><p class="vl-style-note" id="vlStyleNote" aria-live="polite"></p><div class="vl-controls"><label for="vlChord">Acorde</label><select id="vlChord"></select><label for="vlVoice">Voz</label><select id="vlVoice"><option value="0">Bajo</option><option value="1">Tenor</option><option value="2">Alto</option><option value="3">Soprano</option></select><label for="vlPitch">Nota</label><select id="vlPitch"></select><button class="secondary" id="vlLock" type="button">Fijar nota</button><button class="secondary" id="vlClear" type="button">Liberar todas</button></div><div id="vlLocks" class="vl-summary"></div><p class="vl-summary voiceleading-hint" id="voiceLeadingHint">Desplaza el gráfico horizontalmente si no caben todas las voces.</p><div id="voiceLeading" class="voiceleading" role="region" aria-label="Gráfico de conducción de voces" aria-describedby="voiceLeadingHint" tabindex="0" aria-live="polite"></div><details class="help-details"><summary>Cómo leer y editar la conducción de voces</summary><ul><li>Las cuatro líneas representan bajo, tenor, alto y soprano; cada punto es una nota.</li><li>Elige acorde y voz, selecciona la altura y pulsa «Fijar nota» para conservarla al recalcular.</li><li>«Liberar todas» elimina las restricciones de este material. El resultado es una propuesta, no una regla de orquestación.</li></ul></details></article></details><details class="study-tool" data-study-panel="tools"><summary>Explorar cambios de acordes por notas comunes</summary><article class="panel card full"><div class="cardhead"><b>Transformaciones cromáticas</b><span>Neo-riemannianas · tríadas</span></div><p class="section-lead">Cambia de acorde conservando dos notas. Elige una tríada y una operación; verás qué nota se mueve y cuánto.</p><div class="vl-controls"><label for="neoRoot">Fundamental</label><select id="neoRoot"></select><label for="neoQuality">Calidad</label><select id="neoQuality"><option value="major">Mayor</option><option value="minor">Menor</option></select><label for="neoOperation">Transformación</label><select id="neoOperation"><option value="P">P · Paralela</option><option value="L">L · Leittonwechsel</option><option value="R">R · Relativa</option><option value="S">S · SLIDE</option></select></div><div id="neoResult" aria-live="polite"></div><details class="help-details"><summary>Entender P, L, R y S con ejemplos</summary><ul><li><strong>P · Paralela:</strong> Do mayor → Do menor. La tercera Mi baja a Mi♭.</li><li><strong>L · Leittonwechsel:</strong> Do mayor → Mi menor. Do baja a Si.</li><li><strong>R · Relativa:</strong> Do mayor → La menor. Sol sube a La.</li><li><strong>S · SLIDE:</strong> Do mayor → Do♯ menor. Mi queda fijo; Do y Sol suben un semitono.</li></ul><p>Son transformaciones de tríadas mayores y menores, no reglas obligatorias para cualquier progresión.</p></details></article></details><article class="panel card full" data-study-panel="chords"><div class="cardhead"><b>Tu progresión · ideas para continuar</b><span>Tus acordes, tus decisiones</span></div><p class="section-lead">Escribe tus acordes. Compara alternativas sin cambiar tu idea. Si quieres, abre después el análisis o la conducción de voces.</p><label for="userChords">Tus acordes (hasta 8)</label><div class="vl-controls"><input id="userChords" type="text" placeholder="Cm Abmaj7 Fm7 G7" aria-describedby="userChordsHelp"><button class="secondary" id="userAnalyze" type="button">Analizar mi progresión</button><button class="secondary" id="userClear" type="button">Volver al ejemplo</button></div><p id="userChordsHelp" class="tech-caption">Admite tríadas, séptimas, novenas, sextas, sus2/sus4, 7sus4, madd9 y maj7#11. Ejemplos: Cmadd9, G(sus4) G (resolución escrita con dos acordes), C/Bb (bajo independiente), G7/B (inversión). Hasta ocho acordes; usa letras A–G y # o b.</p><div id="userFeedback" class="insight" role="status" aria-live="polite"></div><div id="userProgress" class="progress"></div><details class="study-inspect" id="studyVoicesDetails"><summary>Ver conducción de voces de tu progresión</summary><div class="tech-card" id="labVoicesPanel"><h3>Conducción de voces · tu progresión</h3><p class="tech-caption">Realización orientativa en registros concretos; no altera tus acordes.</p><div class="vl-controls"><label for="labVoiceCount">Plantilla</label><select id="labVoiceCount"><option value="4">Cuatro voces SATB</option><option value="3">Tres voces</option></select><label for="labVoiceStyle">Criterio</label><select id="labVoiceStyle"><option value="cinematic">Cinematográfico</option><option value="classical">Clásico</option><option value="sustained">Notas comunes y continuidad</option><option value="contrary">Movimiento contrario al bajo</option></select></div><details id="labLockDetails" style="margin:12px 0"><summary>Fijar una nota de tu melodía o bajo (opcional)</summary><p class="tech-caption">Selecciona acorde, voz y altura. La realización respetará esa nota mientras sea compatible.</p><div class="vl-controls"><label for="labLockChord">Acorde</label><select id="labLockChord"></select><label for="labLockVoice">Voz</label><select id="labLockVoice"><option value="3">Melodía · soprano</option><option value="0">Bajo</option></select><label for="labLockPitch">Nota</label><select id="labLockPitch"></select><button type="button" class="secondary" id="labLockApply">Fijar</button><button type="button" class="secondary" id="labLockReset">Liberar todas</button></div><p class="tech-caption" id="labLockStatus">Sin notas fijadas</p></details><div id="labVoiceOutput" aria-live="polite"></div></div></details><details class="study-inspect" id="studyTonalDetails"><summary>Explorar tonalidades posibles</summary><div class="tonal-reading" id="userTonalReading" role="status" aria-live="polite"></div></details><details class="study-inspect" id="studyAnalysisDetails"><summary>Comprender cómo se relacionan tus acordes</summary><div id="userAnalysis"></div></details><details class="study-inspect" id="studyProcedureDetails" hidden><summary>Explorar la referencia sobre tus acordes</summary><div id="studyProcedure"></div></details><div id="userAlternatives"></div></article><article class="panel card full" data-study-panel="inspire"><div class="cardhead"><b>Recursos para avanzar tu idea</b><span>Asistencia · No modifica tu música</span></div><p class="tech-caption" id="techIntro">Explora técnicas asociadas al lenguaje seleccionado. Son opciones para experimentar, no instrucciones ni imitaciones literales.</p><div class="tech-grid" id="techCards"></div><details class="help-details"><summary>¿Cómo se usan estas sugerencias?</summary><p>Parte de una idea tuya y compara cada recurso con tu intención musical. Las observaciones se basan por ahora en la progresión mostrada, no en un clip MIDI propio. Nada se aplica automáticamente.</p></details></article><details class="study-tool" data-study-panel="tools"><summary>Explorar otros centros tonales</summary><article class="panel card full"><div class="cardhead"><b>Posibles destinos armónicos</b><span>Ideas para desarrollar</span></div><div class="mods" id="mods"></div><div class="insight">Se muestran seis rutas priorizadas por la intención emocional, los acordes de la progresión y la relación entre los campos armónicos; el compositor aporta solo un ajuste de orden. La napolitana aparece aparte como color, no como modulación. Ninguna ruta confirma por sí sola un cambio de tonalidad: busca un pivote funcional y confirma el nuevo centro con una cadencia.</div></article></details></div></section></main><footer class="foot"><span>CINEMÁTICO · APOYO A LA COMPOSICIÓN</span><span>La música la decides tú.</span></footer></div><div class="toast" id="toast" role="status"></div>
+ </nav></section><div class="layout"><section class="panel reference-flow" data-study-panel="inspire"><div class="head"><b>Círculo de quintas</b><span class="kicker">Selecciona una tónica</span></div><div class="circlewrap"><svg id="circle" class="circle" viewBox="0 0 420 420" role="group" aria-label="Círculo de quintas interactivo"></svg></div><div class="reference-controls"><div class="caption">Referencia · <strong id="keyCaption">C</strong></div><div class="field"><label for="quickKey">Tonalidad de referencia</label><select id="quickKey" aria-label="Seleccionar tonalidad"></select></div><div class="field"><label for="emotion">Intención emocional</label><select id="emotion"></select></div><div class="field full"><label for="mode">Modo musical</label><select id="mode"><option value="">Sugerido por la emoción</option></select><div class="note" id="modeNote"></div></div><div class="field"><label for="composer">Lenguaje de referencia</label><select id="composer" aria-describedby="composerContextNote"></select><p class="reference-style-note" id="composerContextNote">Estilo elegido para explorar posibilidades; no se deduce de tus acordes.</p></div><div class="buttons"><span class="auto-update" role="status">Actualización automática · cambia cualquier selección</span><button class="secondary" id="reset" aria-label="Restablecer">↺</button></div></div><article class="panel heroresult"><div class="kicker" id="eyebrow">CONTEXTO DE REFERENCIA · TONALIDAD · MODO</div><h2 id="title">Do · Mayor</h2><p class="tech-caption" id="referenceScopeNote">Ejemplo construido con la tonalidad, el modo y el lenguaje que has seleccionado. No es un análisis automático de tus acordes.</p><p id="description"></p><div class="scale" id="scale"></div></article><article class="panel card"><div class="cardhead"><b>Acordes del modo</b><span>Armonía diatónica</span></div><div class="chords" id="chords"></div><div class="insight" id="chordNote"></div></article><article class="panel card"><div class="cardhead"><b>Idea emocional</b><span id="emotionName"></span></div><div class="progress" id="emotionProgress"></div><div class="insight" id="emotionNote"></div></article><article class="reference-language-panel"><div class="cardhead"><b>Ideas del lenguaje de referencia</b><span id="composerName"></span></div><p class="reference-style-note">Giros creados desde la tonalidad, el modo y el compositor seleccionados arriba. <strong>No son continuaciones de tu progresión.</strong></p><div class="field" style="margin:10px 0 14px"><label for="composerHere">Compositor de referencia</label><select id="composerHere" aria-label="Elegir compositor desde lenguaje de referencia"></select></div><div class="progress" id="signature"></div><div class="insight" id="signatureNote"></div><p class="copy" id="devices"></p><div class="composer-explorations" id="composerExplorations" aria-live="polite"></div></article></section><section class="results"><div class="grid"><details class="study-tool" data-study-panel="tools"><summary>Escuchar cómo se mueven las voces</summary><article class="panel card full"><div class="cardhead"><b>Conducción de voces</b><span>Cuatro voces · realización sugerida</span></div><div class="vl-controls"><label for="vlStyle">Carácter contrapuntístico</label><select id="vlStyle" aria-label="Estilo de conducción de voces"><option value="cinematic">Cinematográfica</option><option value="classical">Clásica</option><option value="minimal">Minimalista</option></select><label for="vlSource">Material</label><select id="vlSource"><option value="emotion">Idea emocional</option><option value="signature">Referencia del compositor</option></select></div><p class="vl-style-note" id="vlStyleNote" aria-live="polite"></p><div class="vl-controls"><label for="vlChord">Acorde</label><select id="vlChord"></select><label for="vlVoice">Voz</label><select id="vlVoice"><option value="0">Bajo</option><option value="1">Tenor</option><option value="2">Alto</option><option value="3">Soprano</option></select><label for="vlPitch">Nota</label><select id="vlPitch"></select><button class="secondary" id="vlLock" type="button">Fijar nota</button><button class="secondary" id="vlClear" type="button">Liberar todas</button></div><div id="vlLocks" class="vl-summary"></div><p class="vl-summary voiceleading-hint" id="voiceLeadingHint">Desplaza el gráfico horizontalmente si no caben todas las voces.</p><div id="voiceLeading" class="voiceleading" role="region" aria-label="Gráfico de conducción de voces" aria-describedby="voiceLeadingHint" tabindex="0" aria-live="polite"></div><details class="help-details"><summary>Cómo leer y editar la conducción de voces</summary><ul><li>Las cuatro líneas representan bajo, tenor, alto y soprano; cada punto es una nota.</li><li>Elige acorde y voz, selecciona la altura y pulsa «Fijar nota» para conservarla al recalcular.</li><li>«Liberar todas» elimina las restricciones de este material. El resultado es una propuesta, no una regla de orquestación.</li></ul></details></article></details><details class="study-tool" data-study-panel="tools"><summary>Explorar cambios de acordes por notas comunes</summary><article class="panel card full"><div class="cardhead"><b>Transformaciones cromáticas</b><span>Neo-riemannianas · tríadas</span></div><p class="section-lead">Cambia de acorde conservando dos notas. Elige una tríada y una operación; verás qué nota se mueve y cuánto.</p><div class="vl-controls"><label for="neoRoot">Fundamental</label><select id="neoRoot"></select><label for="neoQuality">Calidad</label><select id="neoQuality"><option value="major">Mayor</option><option value="minor">Menor</option></select><label for="neoOperation">Transformación</label><select id="neoOperation"><option value="P">P · Paralela</option><option value="L">L · Leittonwechsel</option><option value="R">R · Relativa</option><option value="S">S · SLIDE</option></select></div><div id="neoResult" aria-live="polite"></div><details class="help-details"><summary>Entender P, L, R y S con ejemplos</summary><ul><li><strong>P · Paralela:</strong> Do mayor → Do menor. La tercera Mi baja a Mi♭.</li><li><strong>L · Leittonwechsel:</strong> Do mayor → Mi menor. Do baja a Si.</li><li><strong>R · Relativa:</strong> Do mayor → La menor. Sol sube a La.</li><li><strong>S · SLIDE:</strong> Do mayor → Do♯ menor. Mi queda fijo; Do y Sol suben un semitono.</li></ul><p>Son transformaciones de tríadas mayores y menores, no reglas obligatorias para cualquier progresión.</p></details></article></details><article class="panel card full" data-study-panel="chords"><div class="cardhead"><b>Tu progresión · ideas para continuar</b><span>Tus acordes, tus decisiones</span></div><p class="section-lead">Escribe tus acordes. Compara alternativas sin cambiar tu idea. Si quieres, abre después el análisis o la conducción de voces.</p><label for="userChords">Tus acordes (hasta 8)</label><div class="vl-controls"><input id="userChords" type="text" placeholder="Cm Abmaj7 Fm7 G7" aria-describedby="userChordsHelp"><button class="secondary" id="userAnalyze" type="button">Analizar mi progresión</button><button class="secondary" id="userClear" type="button">Volver al ejemplo</button></div><p id="userChordsHelp" class="tech-caption">Admite tríadas, séptimas, novenas, sextas, sus2/sus4, 7sus4, madd9 y maj7#11. Ejemplos: Cmadd9, G(sus4) G (resolución escrita con dos acordes), C/Bb (bajo independiente), G7/B (inversión). Hasta ocho acordes; usa letras A–G y # o b.</p><div id="userFeedback" class="insight" role="status" aria-live="polite"></div><div id="userProgress" class="progress"></div><details class="study-inspect" id="studyVoicesDetails"><summary>Ver conducción de voces de tu progresión</summary><div class="tech-card" id="labVoicesPanel"><h3>Conducción de voces · tu progresión</h3><p class="tech-caption">Realización orientativa en registros concretos; no altera tus acordes.</p><div class="vl-controls"><label for="labVoiceCount">Plantilla</label><select id="labVoiceCount"><option value="4">Cuatro voces SATB</option><option value="3">Tres voces</option></select><label for="labVoiceStyle">Criterio</label><select id="labVoiceStyle"><option value="cinematic">Cinematográfico</option><option value="classical">Clásico</option><option value="sustained">Notas comunes y continuidad</option><option value="contrary">Movimiento contrario al bajo</option></select></div><details id="labLockDetails" style="margin:12px 0"><summary>Fijar una nota de tu melodía o bajo (opcional)</summary><p class="tech-caption">Selecciona acorde, voz y altura. La realización respetará esa nota mientras sea compatible.</p><div class="vl-controls"><label for="labLockChord">Acorde</label><select id="labLockChord"></select><label for="labLockVoice">Voz</label><select id="labLockVoice"><option value="3">Melodía · soprano</option><option value="0">Bajo</option></select><label for="labLockPitch">Nota</label><select id="labLockPitch"></select><button type="button" class="secondary" id="labLockApply">Fijar</button><button type="button" class="secondary" id="labLockReset">Liberar todas</button></div><p class="tech-caption" id="labLockStatus">Sin notas fijadas</p></details><div id="labVoiceOutput" aria-live="polite"></div></div></details><details class="study-inspect" id="studyTonalDetails"><summary>Explorar tonalidades posibles</summary><div class="tonal-reading" id="userTonalReading" role="status" aria-live="polite"></div></details><details class="study-inspect" id="studyAnalysisDetails"><summary>Comprender cómo se relacionan tus acordes</summary><div id="userAnalysis"></div></details><details class="study-inspect" id="studyProcedureDetails" hidden><summary>Explorar la referencia sobre tus acordes</summary><div id="studyProcedure"></div></details><div id="userAlternatives"></div></article><article class="panel card full" data-study-panel="inspire"><div class="cardhead"><b>Recursos para avanzar tu idea</b><span>Asistencia · No modifica tu música</span></div><p class="tech-caption" id="techIntro">Explora técnicas asociadas al lenguaje seleccionado. Son opciones para experimentar, no instrucciones ni imitaciones literales.</p><div class="tech-grid" id="techCards"></div><details class="help-details"><summary>¿Cómo se usan estas sugerencias?</summary><p>Parte de una idea tuya y compara cada recurso con tu intención musical. Las observaciones se basan por ahora en la progresión mostrada, no en un clip MIDI propio. Nada se aplica automáticamente.</p></details></article><details class="study-tool" data-study-panel="tools"><summary>Explorar otros centros tonales</summary><article class="panel card full"><div class="cardhead"><b>Posibles destinos armónicos</b><span>Ideas para desarrollar</span></div><div class="mods" id="mods"></div><div class="insight">Se muestran seis rutas priorizadas por la intención emocional, los acordes de la progresión y la relación entre los campos armónicos; el compositor aporta solo un ajuste de orden. La napolitana aparece aparte como color, no como modulación. Ninguna ruta confirma por sí sola un cambio de tonalidad: busca un pivote funcional y confirma el nuevo centro con una cadencia.</div></article></details></div></section></div></main><footer class="foot"><span>CINEMÁTICO · APOYO A LA COMPOSICIÓN</span><span>La música la decides tú.</span></footer></div><div class="toast" id="toast" role="status"></div>
 <script src="engine.js"></script><script>
 const NOTE_SHARP=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 const NOTE_FLAT =["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
@@ -855,7 +334,7 @@ function stopComposerPreview(){
  if(session.timer)clearTimeout(session.timer);
  session.context.close().catch(()=>{});
  document.querySelectorAll("[data-composer-preview]").forEach(button=>{
-  button.textContent="▶ Escuchar";button.setAttribute("aria-pressed","false");
+  button.textContent="▸ Escuchar";button.setAttribute("aria-pressed","false");
  });
 }
 // Shared offline piano-like voice: struck, slightly inharmonic partials
@@ -965,8 +444,8 @@ function renderComposerExplorations(){
   const link=i?route.insights.transitions[i-1]:null;
   const connector=link
    ?'<span class="composer-path-arrow'+(link.operator?' composer-path-operator':'')+
-     '" aria-label="'+esc(link.operator?link.operator+" "+link.operatorName:"Siguiente acorde")+
-     '" title="'+esc(link.explanation)+'">'+esc(link.operator||"→")+'</span>'
+     '" '+(link.operator?'role="img" aria-label="'+esc(link.operator+" "+link.operatorName)+'"':'aria-hidden="true"')+
+     ' title="'+esc(link.explanation)+'">'+esc(link.operator||"→")+'</span>'
    :'';
   return connector+'<span class="composer-path-chord" title="'+esc(ch.roman)+'">'+esc(ch.label)+'</span>';
  }).join("");
@@ -990,9 +469,9 @@ function renderComposerExplorations(){
   '<label class="composer-listen-note"><input type="checkbox" id="composerEqualChordDuration" '+(composerEqualChordDuration?"checked":"")+' /> Mismo pulso por acorde (2 s), en lugar de igual duración total</label>'+ 
   '<div class="composer-path-grid">'+study.paths.map((route,i)=>
    '<article class="composer-path-card"><div class="composer-path-number">0'+(i+1)+' · '+esc(route.name)+'</div>'+
-   '<div class="composer-path-progression" aria-label="'+esc(route.chords.map(c=>c.label).join(" a "))+'">'+chordRoute(route)+'</div>'+
+   '<div class="composer-path-progression" role="group" aria-label="'+esc(route.chords.map(c=>c.label).join(" a "))+'">'+chordRoute(route)+'</div>'+
    '<p>'+esc(route.intention)+'</p>'+compactInsights(route)+
-   '<div class="composer-audio-actions"><button type="button" class="composer-audio-button" data-composer-preview="'+i+'" aria-pressed="false" aria-label="Escuchar maqueta armónica '+(i+1)+'">▶ Escuchar</button><span>Piano sintetizado · '+esc(composerEqualChordDuration?(route.chords.length*2)+' s':'8 s')+'</span></div>'+
+   '<div class="composer-audio-actions"><button type="button" class="composer-audio-button" data-composer-preview="'+i+'" aria-pressed="false" aria-label="Escuchar maqueta armónica '+(i+1)+'">▸ Escuchar</button><span>Piano sintetizado · '+esc(composerEqualChordDuration?(route.chords.length*2)+' s':'8 s')+'</span></div>'+
    analysis(route)+'</article>').join("")+'</div>'+
   '<p class="composer-path-contrast"><strong>Para elegir:</strong> '+esc(contrast)+'</p>'+
   '<p class="composer-listen-note">Comparación A/B orientativa: mismo timbre de piano sintetizado. Puedes fijar duración total (8 s) o tiempo por acorde (2 s); el segundo modo cambia la duración de cada ruta. Sin MIDI ni orquestación.</p>'+
@@ -1072,7 +551,7 @@ function stopSimplePreview(){
  const session=simplePreviewSession;simplePreviewSession=null;
  if(session.timer)clearTimeout(session.timer);
  session.context.close().catch(()=>{});
- document.querySelectorAll("[data-simple-preview]").forEach(btn=>{btn.textContent=btn.dataset.listenLabel||"▶ Escuchar";btn.setAttribute("aria-pressed","false");});
+ document.querySelectorAll("[data-simple-preview]").forEach(btn=>{btn.textContent=btn.dataset.listenLabel||"▸ Escuchar";btn.setAttribute("aria-pressed","false");});
 }
 function playSimplePreview(index,original,paths){
  if(simplePreviewSession?.index===index){stopSimplePreview();$("simpleListenStatus").textContent="Escucha detenida.";return;}
@@ -1104,7 +583,7 @@ function playSimplePreview(index,original,paths){
   simplePreviewSession={index,context,timer:null};
   document.querySelectorAll("[data-simple-preview]").forEach(btn=>{
    const playing=Number(btn.dataset.simplePreview)===index;
-   btn.textContent=playing?"■ Detener":(btn.dataset.listenLabel||"▶ Escuchar");
+   btn.textContent=playing?"■ Detener":(btn.dataset.listenLabel||"▸ Escuchar");
    btn.setAttribute("aria-pressed",String(playing));
   });
   status.textContent=choice.composerPerformance?choice.listenAs+" · mismo piano, realización expresiva orientativa.":choice.preview?choice.listenAs+" · mismo timbre de piano sintetizado y pulso armónico.":
@@ -1142,7 +621,7 @@ function experimentCard(experiment,listening){
  const audition=(side,labels)=>{
   const index=listening.length;
   listening.push({preview:labels,listenAs:"Escuchando "+side});
-  const text="▶ "+side;
+  const text="▸ "+side;
   return '<button class="secondary simple-play-button" type="button" data-simple-preview="'+index+'" data-listen-label="'+esc(text)+'" aria-pressed="false">'+esc(text)+'</button>';
  };
  return '<article class="simple-path" data-composer-experiment="'+esc(experiment.id)+'">'+
@@ -1205,7 +684,7 @@ function simpleExplore(){
  const paths=CinematicoEngine.composerContinuations(userMaterial,mood,reference,{ending:$("simpleEnding").value});
  const listening=[];
  const original=p.chords.map(c=>c.label);
- const audition=(label,preview,composerPerformance=null)=>{const i=listening.length;listening.push({preview,fullPreview:true,composerPerformance,listenAs:"Escuchando "+label});return '<button class="secondary simple-play-button" type="button" data-simple-preview="'+i+'" data-listen-label="'+esc("▶ "+label)+'" aria-pressed="false">'+esc("▶ "+label)+'</button>';};
+ const audition=(label,preview,composerPerformance=null)=>{const i=listening.length;listening.push({preview,fullPreview:true,composerPerformance,listenAs:"Escuchando "+label});return '<button class="secondary simple-play-button" type="button" data-simple-preview="'+i+'" data-listen-label="'+esc("▸ "+label)+'" aria-pressed="false">'+esc("▸ "+label)+'</button>';};
  const chosenDirection={resolver:"Posible regreso al centro","mantener tensión":"Una llegada que queda abierta",tonicizar:"Otra región tonal posible","cambiar dirección":"Un cambio de color armónico"};
  const cardTitles=["Primera posibilidad","Un recorrido distinto","Una tercera vía"];
  $("simpleFeedback").textContent=paths.length?"Estas opciones son sugerencias, no cambios en tu progresión.":"No hemos encontrado caminos diferentes para estos acordes. Prueba otro matiz.";
@@ -1213,11 +692,11 @@ function simpleExplore(){
  if(paths.some(q=>!canAnalyze(q)))$("simpleFeedback").textContent="Puedes escuchar todos los caminos. El estudio avanzado admite hasta ocho acordes en total.";
  if(!paths.length)return;
  out.innerHTML='<div class="simple-results-intro"><h3>'+ (reference&&COMPOSERS[reference]?"Tres caminos · "+esc(COMPOSERS[reference].name):"Tres caminos para explorar")+
-  '</h3><div class="simple-start-chips" aria-label="Tu progresión original"><span class="simple-start-label">TU IDEA</span>'+
+  '</h3><div class="simple-start-chips" role="group" aria-label="Tu progresión original"><span class="simple-start-label">TU IDEA</span>'+
   userMaterial.map(c=>'<span>'+esc(c.label)+'</span>').join('')+'</div>'+audition('Original',original)+'</div>'+
   paths.map((q,i)=>'<article class="simple-path"><div class="simple-path-heading"><span class="simple-variant">CAMINO '+(i+1)+
    '</span><h3>'+esc(q.composerId?q.title:cardTitles[i])+'</h3></div><p class="simple-direction">'+esc(q.arcSummary||q.gestureSummary||chosenDirection[q.direction]||"Explorar una alternativa")+
-   '</p><div class="simple-chips" aria-label="Acordes sugeridos">'+q.chords.map(c=>'<span class="new" title="Acorde propuesto">'+esc(c)+'</span>').join('<span class="simple-arrow" aria-hidden="true">→</span>')+
+   '</p><div class="simple-chips" role="group" aria-label="Acordes sugeridos">'+q.chords.map(c=>'<span class="new" title="Acorde propuesto">'+esc(c)+'</span>').join('<span class="simple-arrow" aria-hidden="true">→</span>')+
    '</div><details><summary>¿Por qué esta opción?</summary><p>'+esc(q.variantDescription||"")+'</p><p>Gesto armónico: '+esc(q.gestureSummary||"")+
    '</p><p>'+esc(q.explanation)+'</p>'+(q.evidence?'<p class="simple-source">Ejercicio original · <a href="'+esc(q.evidence.source)+'" target="_blank" rel="noopener noreferrer">'+esc(q.evidence.work)+'</a></p>':'')+(q.candidateCenters?.length?'<p>Centros de referencia posibles: '+esc(q.candidateCenters.join(' / '))+'.</p>':'')+(q.phrase?'<details><summary>Desarrollo de la frase</summary><p><strong>Presentación:</strong> '+esc(q.phrase.presentation)+'</p><p><strong>Desarrollo:</strong> '+esc(q.phrase.development)+'</p><p><strong>Culminación:</strong> '+esc(q.phrase.culmination)+'</p><p><strong>Resolución:</strong> '+esc(q.phrase.resolution)+'</p><p>'+esc(q.phrase.scope)+'</p></details>':'') +harmonicGestureDetails(q)+structuralDetails(q,i)+(q.composerId?'<p>Escucha alternativa: mismos acordes y mismo piano, con distribución, ritmo y articulación orientados por la referencia.</p>'+audition('Piano interpretado',[...original,...q.chords],q.composerId):'')+'<p>La melodía, el ritmo y la interpretación también cuentan.</p></details>'+
    '<div class="simple-audio-row">'+audition('Continuación',q.chords)+audition('Todo',[...original,...q.chords])+'</div>'+
@@ -1287,5 +766,5 @@ $("workspaceAdvanced").onclick=()=>{if(document.body.dataset.workspace==="explor
 let openingWorkspace="explore";
 try{if(localStorage.getItem("cinematico-workspace-v2")==="advanced")openingWorkspace="advanced";}catch{}
 setWorkspace(openingWorkspace);
-$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=61",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
+$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=62",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
 </script></body></html>

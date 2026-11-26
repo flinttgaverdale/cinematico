@@ -42,6 +42,28 @@ async function overflow(page,where){
    await check(page,'.simple-create',20,width,'Create');
    await check(page,'.workspace-switch',20,width,'Workspace switch');
    await check(page,'#simpleChords',width<=430?35:20,width,'Progression input');
+   const form=await page.locator('#simpleChords').evaluate(el=>{
+    const style=getComputedStyle(el);
+    return {font:style.fontFamily,weight:style.fontWeight,height:el.offsetHeight};
+   });
+   assert.match(form.font,/^Inter\b/,'The progression keeps the chord typeface');
+   assert.equal(form.weight,'600');
+   assert.ok(form.height>=44,'Progression input reaches 44px');
+   const nuances=page.locator('#simpleNuances > summary');
+   await nuances.focus();
+   await page.keyboard.press('Enter');
+   assert.ok(await page.locator('#simpleMood').isVisible(),'The disclosure opens with Enter');
+   await page.keyboard.press('Tab');
+   assert.equal(await page.evaluate(()=>document.activeElement.id),'simpleMood','The select follows its summary in keyboard order');
+   const focusedSelect=await page.locator('#simpleMood').evaluate(el=>({
+    outline:getComputedStyle(el).outlineWidth,
+    height:el.offsetHeight,
+   }));
+   assert.equal(focusedSelect.outline,'2px','The focused select has an outline');
+   assert.ok(focusedSelect.height>=44,'Nuance select reaches 44px');
+   await nuances.focus();
+   await page.keyboard.press('Space');
+   assert.ok(!(await page.locator('#simpleMood').isVisible()),'Space closes the disclosure');
    await overflow(page,'Create '+width);
    await page.locator('#simpleChords').fill('Am F C G');
    await page.locator('#simpleExplore').click();
@@ -66,6 +88,21 @@ async function overflow(page,where){
    await overflow(page,'Advanced home '+width);
    for(const mode of ['chords','inspire','tools']){
      await page.locator('[data-study-open="'+mode+'"]').click();
+     if(mode==='chords'&&width<=430){
+       await page.locator('#studyVoicesDetails > summary').click();
+       for(const selector of ['#labVoiceCount','#labVoiceStyle']){
+         const select=page.locator(selector);
+         assert.ok((await select.boundingBox()).height>=44,'Voice select reaches 44px');
+         assert.ok(await select.evaluate(el=>{
+           const style=getComputedStyle(el);
+           const context=document.createElement('canvas').getContext('2d');
+           context.font=style.font;
+           const label=context.measureText(el.selectedOptions[0].text).width;
+           const available=el.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight)-14;
+           return label<=available;
+         }),selector+' selected label fits next to the native arrow');
+       }
+     }
      if(mode==='inspire'){
        const wheel=page.locator('#circle [data-key]');
        for(const [index,key] of [[1,'Enter'],[2,'Space']]){
@@ -73,6 +110,7 @@ async function overflow(page,where){
          const name=await note.getAttribute('data-key');
          await note.focus();
          await page.keyboard.press(key);
+         assert.equal(await note.locator('circle').evaluate(el=>getComputedStyle(el).outlineWidth),'2px','The focused note has its own ring');
          assert.equal(await page.evaluate(()=>document.activeElement.getAttribute('data-key')),name,'Wheel activation retains keyboard focus');
          assert.equal(await note.getAttribute('aria-pressed'),'true');
          await page.keyboard.press('Tab');

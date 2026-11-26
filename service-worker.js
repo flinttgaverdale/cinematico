@@ -1,7 +1,19 @@
 // Service Worker — Cinemático Studio
 // Cada publicación del shell debe incrementar CACHE y el registro en index.html.
-const CACHE = "cinematico-studio-v61";
-const ASSETS = ["./", "./index.html", "./engine.js", "./manifest.json", "./icon-192.png", "./icon-512.png"];
+const CACHE = "cinematico-studio-v62";
+const ASSETS = [
+  "./", "./index.html", "./engine.js", "./studio.css", "./manifest.json",
+  "./icon-192.png", "./icon-512.png",
+  "./assets/fonts/manrope-latin-wght-normal.woff2",
+  "./assets/fonts/manrope-latin-ext-wght-normal.woff2",
+  "./assets/fonts/manrope-OFL.txt",
+  "./assets/fonts/inter-latin-wght-normal.woff2",
+  "./assets/fonts/inter-latin-ext-wght-normal.woff2",
+  "./assets/fonts/inter-OFL.txt",
+  "./assets/fonts/ibm-plex-mono-latin-400-normal.woff2",
+  "./assets/fonts/ibm-plex-mono-latin-ext-400-normal.woff2",
+  "./assets/fonts/ibm-plex-mono-OFL.txt",
+];
 const SHELL = new Map(ASSETS.map(path => {
   const url = new URL(path, self.registration.scope);
   return [url.pathname, url.href];

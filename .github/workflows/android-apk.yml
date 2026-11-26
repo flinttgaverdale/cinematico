@@ -7,6 +7,8 @@ on:
       - 'android/**'
       - 'index.html'
       - 'engine.js'
+      - 'studio.css'
+      - 'assets/fonts/**'
       - 'manifest.json'
       - 'icon-*.png'
       - '.github/workflows/android-apk.yml'
@@ -38,18 +40,10 @@ jobs:
           gradle-version: '8.9'
       - name: Bundle the current offline website
         run: |
-          mkdir -p android/app/src/main/assets
-          cp index.html engine.js manifest.json icon-192.png icon-512.png android/app/src/main/assets/
-          python3 - <<'PY'
-          from pathlib import Path
-          p=Path('android/app/src/main/assets/index.html')
-          content=p.read_text(encoding='utf-8')
-          content=content.replace('<link rel="preconnect" href="https://fonts.googleapis.com">','')
-          content=content.replace('<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">','')
-          p.write_text(content, encoding='utf-8')
-          assert 'src="engine.js"' in content
-          assert 'fonts.googleapis.com' not in content
-          PY
+          bundle=android/app/src/main/assets
+          mkdir -p "$bundle/assets"
+          cp index.html engine.js studio.css manifest.json icon-192.png icon-512.png "$bundle/"
+          cp -R assets/fonts "$bundle/assets/"
       - name: Build PR validation APK
         if: github.event_name == 'pull_request'
         run: gradle --project-dir android :app:assembleDebug --no-daemon
@@ -101,14 +95,16 @@ jobs:
           import os
           from pathlib import Path
           from zipfile import ZipFile
-          bundle = Path('android/app/src/main/assets')
           path = os.environ.get('APK_PATH', os.environ['DEBUG_APK'])
+          files = [Path(name) for name in (
+              'index.html', 'engine.js', 'studio.css', 'manifest.json', 'icon-192.png', 'icon-512.png',
+          )]
+          files.extend(Path('assets/fonts').iterdir())
           with ZipFile(path) as apk:
               assert apk.testzip() is None
               assert 'classes.dex' in apk.namelist()
-              for name in ('index.html', 'engine.js', 'manifest.json', 'icon-192.png', 'icon-512.png'):
-                  assert apk.read('assets/' + name) == (bundle / name).read_bytes(), name
-              assert b'fonts.googleapis.com' not in apk.read('assets/index.html')
+              for file in files:
+                  assert apk.read('assets/' + file.as_posix()) == file.read_bytes(), file
           PY
       - uses: actions/upload-artifact@v4
         if: github.event_name == 'workflow_dispatch'

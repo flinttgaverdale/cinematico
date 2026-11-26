@@ -22,6 +22,15 @@ const BASE=process.env.CINEMATICO_TEST_URL||'http://127.0.0.1:4173/';
   await ctx.setOffline(true);
   await page.reload({waitUntil:'domcontentloaded'});
   assert.ok(await page.locator('#simpleChords').isVisible(),'Offline install must render Create');
+  const typography=await page.evaluate(async()=>{
+   const loaded=await Promise.all([
+    document.fonts.load('650 24px Manrope','Cinemático'),
+    document.fonts.load('600 16px Inter','Am F C G'),
+    document.fonts.load('400 12px "IBM Plex Mono"','semitonos'),
+   ]);
+   return loaded.map(faces=>faces.map(face=>face.status));
+  });
+  assert.deepEqual(typography,[['loaded'],['loaded'],['loaded']],'All three local font families must load offline');
   await page.locator('#simpleChords').fill('Am F C G');
   await page.locator('#simpleExplore').click();
   assert.equal(await page.locator('.simple-path').count(),3,'Offline engine must still create three paths');
@@ -37,6 +46,6 @@ const BASE=process.env.CINEMATICO_TEST_URL||'http://127.0.0.1:4173/';
   assert.ok(await page.locator('#circle').isVisible(),'Offline reference wheel should render');
   assert.deepEqual(failures,[],'No errors during offline navigation');
   await ctx.close();
-  console.log('PASS Android-size PWA offline: registered SW, precached HTML+engine, 3 proposals, piano playback and reference navigation');
+  console.log('PASS Android-size PWA offline: cached HTML, engine and fonts, 3 proposals, piano playback and reference navigation');
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exit(1)});

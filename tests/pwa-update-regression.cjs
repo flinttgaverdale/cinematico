@@ -12,11 +12,16 @@ const assets = new Map([
   ['/', ['index.html', 'text/html']],
   ['/index.html', ['index.html', 'text/html']],
   ['/engine.js', ['engine.js', 'text/javascript']],
+  ['/studio.css', ['studio.css', 'text/css']],
   ['/manifest.json', ['manifest.json', 'application/manifest+json']],
   ['/icon-192.png', ['icon-192.png', 'image/png']],
   ['/icon-512.png', ['icon-512.png', 'image/png']],
   ['/service-worker.js', ['service-worker.js', 'text/javascript']],
 ]);
+for (const font of fs.readdirSync(path.join(root, 'assets/fonts'))) {
+  const file = 'assets/fonts/' + font;
+  assets.set('/' + file, [file, font.endsWith('.woff2') ? 'font/woff2' : 'text/plain']);
+}
 const updatedCache = 'cinematico-studio-audit-update';
 let update = false;
 let broken = false;

@@ -39,7 +39,7 @@ metadatos y checksum en una versión nueva asociada al commit indicado en
 `build-info.json`. Usa un tag distinto por versión y conserva los activos
 previos.
 
-Para compilar localmente en Android Studio: abre la carpeta `android/` como proyecto, usa JDK 17, instala Android SDK 35 y ejecuta `assembleDebug`. Copia previamente desde la raíz `index.html`, `engine.js`, `manifest.json`, `icon-192.png`, `icon-512.png` a `android/app/src/main/assets`, como hace el workflow.
+En Android Studio, abre `android/`, usa JDK 17 e instala Android SDK 35. Antes de ejecutar `assembleDebug`, copia `index.html`, `engine.js`, `studio.css`, `manifest.json`, `icon-192.png` e `icon-512.png` a `android/app/src/main/assets/`. Copia también `assets/fonts/` a `android/app/src/main/assets/assets/fonts/` para incluir las fuentes y sus licencias en el paquete local.
 
 ## Prueba de instalación y actualización
 

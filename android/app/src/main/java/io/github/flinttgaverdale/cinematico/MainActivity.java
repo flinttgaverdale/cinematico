@@ -27,7 +27,7 @@ public final class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         webView = new WebView(this);
-        webView.setBackgroundColor(0xFF111310);
+        webView.setBackgroundColor(0xFF171A1C);
         setContentView(webView);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

@@ -49,8 +49,23 @@ for(const size of [192,512]){
  assert.ok(sw.includes('./'+src),'PWA should cache installed icon '+src);
 }
 assert.ok(html.includes('href="icon-192.png"'));
+assert.ok(html.includes('href="studio.css"'));
+assert.ok(sw.includes('"./studio.css"'),'PWA must cache the stylesheet');
+const css=fs.readFileSync(path.join(root,'studio.css'),'utf8');
+for(const family of ['manrope','inter','ibm-plex-mono']){
+ const weight=family==='ibm-plex-mono'?'400':'wght';
+ for(const subset of ['latin','latin-ext']){
+  const src='assets/fonts/'+family+'-'+subset+'-'+weight+'-normal.woff2';
+  assert.ok(css.includes('url(./'+src+')'),'Stylesheet must use '+src);
+  assert.equal(fs.readFileSync(path.join(root,src)).subarray(0,4).toString(),'wOF2',src);
+  assert.ok(sw.includes('"./'+src+'"'),'PWA must cache '+src);
+ }
+ const license='assets/fonts/'+family+'-OFL.txt';
+ assert.match(fs.readFileSync(path.join(root,license),'utf8'),/SIL OPEN FONT LICENSE/i);
+ assert.ok(sw.includes('"./'+license+'"'),'PWA must cache '+license);
+}
 const workerVersion=sw.match(/cinematico-studio-v(\d+)/)?.[1];
 const registrationVersion=html.match(/service-worker\.js\?v=(\d+)/)?.[1];
 assert.ok(workerVersion,'Cache must declare a version');
 assert.equal(registrationVersion,workerVersion,'Registration and shell cache versions must match');
-console.log('PASS PWA assets: PNG signature, chunks, CRC, decompress, visible mark, 192/512 manifest and offline caching');
+console.log('PASS PWA assets: PNGs, manifest, local styles, WOFF2 fonts, OFL licenses and offline caching');
