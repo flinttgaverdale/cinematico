@@ -123,4 +123,27 @@ assert.equal(E.composerLayerExercise(parse('Am F C G'),'shore'),null);
 assert.deepEqual(E.composerContinuations(p,'esperanza',''),E.emotionalContinuations(p,'esperanza'));
 assert.equal(E.composerListeningPlan(E.parseUserProgression('Am').chords,{fullPreview:true,equalChordDuration:true}).status,'ready');
 assert.equal(E.composerListeningPlan([...E.parseUserProgression('C G Am F Dm Em F G').chords,...E.parseUserProgression('Am F G').chords],{fullPreview:true,equalChordDuration:true}).status,'ready');
+// The interpreted piano is an optional realization of the same harmony.
+let pianoCases=0;
+for(const raw of ['Am F C G','Dm7 G7 Cmaj7','Cmaj7#11 E/Bb Bm7b5','F#dim7','Dm G Dm C','C Cadd9 F/C C','Am Dm E7','C G Am F Dm Em F G']){
+ const chords=parse(raw),neutral=E.composerListeningPlan(chords,{fullPreview:true,equalChordDuration:true}),fingerprints=new Set();
+ for(const id of ids){
+  const plan=E.composerPianoPerformance(chords,id);assert.equal(plan.status,'ready');
+  assert.equal(plan.instrument,'piano');assert.equal(plan.totalSeconds,neutral.totalSeconds);
+  assert.equal(plan.steps.length,chords.length);
+  for(const [i,step] of plan.steps.entries()){
+   assert.equal(step.pitches[0]%12,chords[i].bass);
+   assert.deepEqual(step.pitches.map(p=>p%12),neutral.steps[i].pitches.map(p=>p%12));
+  }
+  for(const e of plan.events){
+   assert.ok(Number.isFinite(e.frequency)&&e.startSeconds>=0&&e.durationSeconds>0&&e.startSeconds+e.durationSeconds<=plan.totalSeconds+1e-8);
+   assert.ok(e.pitch>=21&&e.pitch<=108);
+   for(const step of plan.steps)if(e.startSeconds<step.startSeconds+step.durationSeconds-1e-8&&e.startSeconds+e.durationSeconds>step.startSeconds+1e-8)assert.equal(e.pitch,step.pitches[e.voice]);
+  }
+  fingerprints.add(JSON.stringify(plan.events.map(e=>[e.pitch,e.startSeconds,e.durationSeconds,e.velocity])));
+  pianoCases++;
+ }
+ assert.equal(fingerprints.size,11);
+}
+console.log('PASS '+pianoCases+' single-piano interpretations with preserved harmonic pitch classes');
 console.log('PASS '+count+' composer-continuation cases, original intact, 11 distinct profiles in 12 transpositions, open and arrival targets');
