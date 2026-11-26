@@ -729,6 +729,41 @@ function stopComposerPreview(){
   button.textContent="▶ Escuchar";button.setAttribute("aria-pressed","false");
  });
 }
+// Shared offline piano-like voice: struck, slightly inharmonic partials
+// with register-dependent decay. Identical timbre and level for every route.
+function playPianoTone(context,destination,hz,at,held){
+ const min=0.00001,release=0.18,attack=0.006;
+ const end=at+held+release;
+ const register=Math.log2(hz/261.6256);
+ const brightness=Math.max(0.55,Math.min(1.15,1-register*0.09));
+ const stretch=0.00022*Math.pow(hz/261.6256,0.35);
+ const partials=[[1,1,1.65],[2,0.46,0.98],[3,0.24,0.60],[4,0.13,0.36],[5,0.075,0.23],[6,0.045,0.14]];
+ for(const [n,weight,decay] of partials){
+  const frequency=hz*n*Math.sqrt((1+stretch*n*n)/(1+stretch));
+  if(frequency>=context.sampleRate*0.45)continue;
+  const osc=context.createOscillator(),amp=context.createGain();
+  const peak=0.12*weight*Math.pow(brightness,n-1);
+  const tau=decay*Math.max(0.50,Math.min(1.7,Math.pow(2,-register*0.23)));
+  const keyUp=at+held;
+  const keyUpLevel=Math.max(min,peak*Math.exp(-Math.max(0,held-attack)/tau));
+  osc.type="sine";osc.frequency.value=frequency;
+  amp.gain.setValueAtTime(min,at);
+  amp.gain.exponentialRampToValueAtTime(peak,at+attack);
+  amp.gain.exponentialRampToValueAtTime(keyUpLevel,keyUp);
+  amp.gain.exponentialRampToValueAtTime(min,end);
+  osc.connect(amp);amp.connect(destination);
+  osc.start(at);osc.stop(end+0.01);
+ }
+}
+function createPianoMaster(context){
+ const master=context.createGain();
+ master.gain.value=0.36;
+ const compressor=context.createDynamicsCompressor();
+ compressor.threshold.value=-14;compressor.knee.value=15;
+ compressor.ratio.value=2;compressor.attack.value=0.008;compressor.release.value=0.15;
+ master.connect(compressor);compressor.connect(context.destination);
+ return master;
+}
 function playComposerPreview(index){
  if(composerPreviewSession?.index===index){stopComposerPreview();return;}
  stopComposerPreview();
@@ -743,23 +778,13 @@ function playComposerPreview(index){
  let context;
  try{
   context=new AudioConstructor();
-  const master=context.createGain();
-  master.gain.value=0.15;master.connect(context.destination);
+  const master=createPianoMaster(context);
   const start=context.currentTime+0.08;
   for(const step of plan.steps){
    const attackStart=start+step.startSeconds;
    const duration=Math.max(0.2,step.durationSeconds-0.08);
    for(const hz of step.frequencies){
-    const gain=context.createGain();
-    // Identical muted, non-orchestral tone across all routes; gentle attack/release.
-    gain.gain.setValueAtTime(0.0001,attackStart);
-    gain.gain.linearRampToValueAtTime(0.09,attackStart+0.06);
-    gain.gain.setValueAtTime(0.09,attackStart+duration-0.14);
-    gain.gain.linearRampToValueAtTime(0.0001,attackStart+duration);
-    gain.connect(master);
-    const osc=context.createOscillator();
-    osc.type="triangle";osc.frequency.value=hz;osc.connect(gain);
-    osc.start(attackStart);osc.stop(attackStart+duration+0.01);
+    playPianoTone(context,master,hz,attackStart,duration);
    }
   }
   composerPreviewSession={context,index,timer:null};
@@ -833,10 +858,10 @@ function renderComposerExplorations(){
    '<article class="composer-path-card"><div class="composer-path-number">0'+(i+1)+' · '+esc(route.name)+'</div>'+
    '<div class="composer-path-progression" aria-label="'+esc(route.chords.map(c=>c.label).join(" a "))+'">'+chordRoute(route)+'</div>'+
    '<p>'+esc(route.intention)+'</p>'+compactInsights(route)+
-   '<div class="composer-audio-actions"><button type="button" class="composer-audio-button" data-composer-preview="'+i+'" aria-pressed="false" aria-label="Escuchar maqueta armónica '+(i+1)+'">▶ Escuchar</button><span>Maqueta neutra · '+esc(composerEqualChordDuration?(route.chords.length*2)+' s':'8 s')+'</span></div>'+
+   '<div class="composer-audio-actions"><button type="button" class="composer-audio-button" data-composer-preview="'+i+'" aria-pressed="false" aria-label="Escuchar maqueta armónica '+(i+1)+'">▶ Escuchar</button><span>Piano sintetizado · '+esc(composerEqualChordDuration?(route.chords.length*2)+' s':'8 s')+'</span></div>'+
    analysis(route)+'</article>').join("")+'</div>'+
   '<p class="composer-path-contrast"><strong>Para elegir:</strong> '+esc(contrast)+'</p>'+
-  '<p class="composer-listen-note">Comparación A/B orientativa: sonido sintetizado idéntico. Puedes fijar duración total (8 s) o tiempo por acorde (2 s); el segundo modo cambia la duración de cada ruta. Sin MIDI ni orquestación.</p>'+
+  '<p class="composer-listen-note">Comparación A/B orientativa: mismo timbre de piano sintetizado. Puedes fijar duración total (8 s) o tiempo por acorde (2 s); el segundo modo cambia la duración de cada ruta. Sin MIDI ni orquestación.</p>'+
   '<details class="composer-proof"><summary>Fundamento y límites de estas ideas</summary>'+
   '<p>'+esc(study.work)+' · '+esc(study.evidence.includes("A")?"Análisis con ejemplos notados o reducción musical publicada":study.evidence.includes("B")?"Análisis contextual y testimonios documentados":"Testimonio sobre el proceso creativo")+
   ' (nivel '+study.evidence+'). '+esc(study.limit)+'</p>'+
@@ -933,21 +958,13 @@ function playSimplePreview(index,original,paths){
  try{
   context=new AudioConstructor();
   context.resume?.().catch(()=>{});
-  const master=context.createGain();
-  master.gain.value=0.13;master.connect(context.destination);
+  const master=createPianoMaster(context);
   const start=context.currentTime+0.08;
   for(const step of plan.steps){
    const at=start+step.startSeconds;
    const length=Math.max(0.2,step.durationSeconds-0.08);
    for(const hz of step.frequencies){
-    const gain=context.createGain();
-    gain.gain.setValueAtTime(0.0001,at);
-    gain.gain.linearRampToValueAtTime(0.08,at+0.06);
-    gain.gain.setValueAtTime(0.08,at+length-0.14);
-    gain.gain.linearRampToValueAtTime(0.0001,at+length);
-    gain.connect(master);
-    const osc=context.createOscillator();osc.type="triangle";osc.frequency.value=hz;osc.connect(gain);
-    osc.start(at);osc.stop(at+length+0.01);
+    playPianoTone(context,master,hz,at,length);
    }
   }
   simplePreviewSession={index,context,timer:null};
@@ -956,10 +973,10 @@ function playSimplePreview(index,original,paths){
    btn.textContent=playing?"■ Detener":(btn.dataset.listenLabel||"▶ Escuchar");
    btn.setAttribute("aria-pressed",String(playing));
   });
-  status.textContent="Escuchando camino "+(index+1)+". Maqueta neutra: los últimos "+Math.min(2,original.length)+" acordes tuyos y los tres nuevos; dos segundos por acorde, sin melodía ni orquestación.";
-  if(choice.preview)status.textContent=choice.listenAs+" · mismos timbre y pulso armónico. Maqueta de cuatro voces.";
+  status.textContent=choice.preview?choice.listenAs+" · mismos timbre de piano sintetizado y pulso armónico.":
+   "Escuchando camino "+(index+1)+". Maqueta de piano sintetizado: los últimos "+Math.min(2,original.length)+" acordes tuyos y los tres nuevos; dos segundos por acorde, sin melodía ni orquestación.";
   const playing=simplePreviewSession;
-  playing.timer=setTimeout(()=>{if(simplePreviewSession===playing){stopSimplePreview();status.textContent="Escucha finalizada.";}} ,Math.ceil(plan.totalSeconds*1000)+180);
+  playing.timer=setTimeout(()=>{if(simplePreviewSession===playing){stopSimplePreview();status.textContent="Escucha finalizada.";}} ,Math.ceil(plan.totalSeconds*1000)+300);
  }catch(error){
   if(context)context.close().catch(()=>{});
   simplePreviewSession=null;status.textContent="No se pudo iniciar la escucha en este dispositivo.";
@@ -1089,5 +1106,5 @@ $("workspaceAdvanced").onclick=()=>{if(document.body.dataset.workspace==="explor
 let openingWorkspace="explore";
 try{if(localStorage.getItem("cinematico-workspace-v2")==="advanced")openingWorkspace="advanced";}catch{}
 setWorkspace(openingWorkspace);
-$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=50",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
+$("guideToggle").onclick=()=>{const steps=$("guideSteps"),hidden=!steps.hidden;steps.hidden=hidden;$("guideToggle").textContent=hidden?"Mostrar guía":"Ocultar guía";$("guideToggle").setAttribute("aria-expanded",String(!hidden));};for(let pc=0;pc<12;pc++)$("neoRoot").add(new Option(CinematicoEngine.spell(pc),String(pc)));$("neoRoot").value="0";$("neoRoot").onchange=renderNeo;$("neoQuality").onchange=renderNeo;$("neoOperation").onchange=renderNeo;$("vlStyle").onchange=()=>render();$("vlSource").onchange=()=>render();$("vlChord").onchange=()=>render();$("vlVoice").onchange=()=>render();$("vlLock").onclick=()=>{const src=$("vlSource").value,i=Number($("vlChord").value),v=Number($("vlVoice").value),n=Number($("vlPitch").value);if(!Number.isInteger(n))return;voiceLocks[src][i]??={};voiceLocks[src][i][v]=n;render();};$("vlClear").onclick=()=>{voiceLocks[$("vlSource").value]={};render();};$("emotion").onchange=e=>{S.emotion=e.target.value;render();};$("composer").onchange=$("composerHere").onchange=e=>{S.composer=e.target.value;render();};$("mode").onchange=e=>{S.mode=e.target.value;render();};$("reset").onclick=()=>{Object.assign(S,{key:0,keyName:"C",emotion:"alegria",composer:"giacchino",mode:""});$("emotion").value=S.emotion;$("composer").value=S.composer;$("mode").value="";draw();render();toast("Selección restablecida");};$("emotion").value=S.emotion;$("composer").value=S.composer;draw();render();if("serviceWorker"in navigator)addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js?v=51",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{}));
 </script></body></html>
