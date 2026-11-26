@@ -14,6 +14,7 @@ const intents=Object.keys(E.EMOTION_CREATIVE_PROFILES);
 const example=parse('Am F C G');
 const sample=profiles.map(id=>E.contextualComposerExperiment(id,example,'esperanza'));
 assert.equal(new Set(sample.map(trial=>trial.id)).size,11);
+assert.equal(new Set(sample.flatMap(trial=>Array.from(trial.dimensions))).size,14);
 const concrete=sample.filter(trial=>trial.comparison);
 assert.equal(new Set(concrete.map(trial=>trial.comparison.after.join(' '))).size,concrete.length);
 const find=id=>sample.find(trial=>trial.composerId===id);
