@@ -1,8 +1,8 @@
 // Service Worker — Cinemático Studio
 // Cada publicación del shell debe incrementar CACHE y el registro en index.html.
-const CACHE = "cinematico-studio-v71";
+const CACHE = "cinematico-studio-v74";
 const ASSETS = [
-  "./", "./index.html", "./engine.js", "./studio.css", "./manifest.json",
+  "./", "./index.html", "./actualizar.html", "./engine.js", "./studio.css", "./manifest.json",
   "./icon-192.png", "./icon-512.png",
   "./assets/fonts/manrope-latin-wght-normal.woff2",
   "./assets/fonts/manrope-latin-ext-wght-normal.woff2",
