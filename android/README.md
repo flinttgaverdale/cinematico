@@ -8,13 +8,13 @@ sintetizado dentro del APK. Requiere Android 8.0 o posterior.
 Descarga el APK y ábrelo desde Archivos o Descargas. Aparecerá como
 **Cinemático Beta 0.2**. El identificador de esta edición termina en
 `.beta02` y permite instalarla junto a la beta 0.1 y la PWA. La beta 0.1
-conserva su enlace y sus datos. [APK actual](../downloads/Cinematico-Android-Beta-0.2.3.apk) · [Beta 0.2 anterior](../downloads/Cinematico-Android-Beta-0.2.apk) · [Beta 0.1](https://github.com/flinttgaverdale/cinematico/releases/tag/android-beta-0.1)
+conserva su enlace y sus datos. [APK actual](https://github.com/flinttgaverdale/cinematico/releases/download/beta-0.2.3/Cinematico-Android-Beta-0.2.3.apk) · [Beta 0.2 anterior](https://github.com/flinttgaverdale/cinematico/releases/download/beta-0.2/Cinematico-Android-Beta-0.2.apk) · [Beta 0.1](https://github.com/flinttgaverdale/cinematico/releases/tag/android-beta-0.1)
 
 La actualización usa el código de versión **3** y conserva el certificado de la beta anterior. Antes
 de distribuir una actualización de esta edición, aumenta su código de
 versión y firma con esa misma clave. Se verificaron la firma, el contenido
 y un par de APK de códigos 2 y 3. La instalación y el audio en un teléfono
-físico quedan pendientes. [Identidad y huellas](../downloads/Cinematico-Beta-0.2.3-build-info.json)
+físico quedan pendientes. [Identidad y huellas](https://github.com/flinttgaverdale/cinematico/releases/download/beta-0.2.3/Cinematico-Beta-0.2.3-build-info.json)
 
 ## Cómo se genera
 

@@ -4,7 +4,7 @@ Versión 0.2.0-beta.3. El dispositivo se distribuye como un archivo AMXD.
 Para registrar la aceptación del candidato, usa la [guía de prueba en Live](ACEPTACION.md).
 
 ## Cómo instalar
-1. Descarga [Cinematico-Generator-Beta-0.2.3.amxd](../downloads/Cinematico-Generator-Beta-0.2.3.amxd).
+1. Descarga [Cinematico-Generator-Beta-0.2.3.amxd](https://github.com/flinttgaverdale/cinematico/releases/download/beta-0.2.3/Cinematico-Generator-Beta-0.2.3.amxd).
 2. Abre Ableton Live 12 Suite y crea una pista MIDI con instrumento y un clip vacío de **3 compases en 4/4**.
 3. Entra en el editor del clip > pestaña **Generar**. Ubica el archivo `.amxd` desde **Lugares** en el navegador (si hace falta añade la carpeta a Lugares) y selecciónalo como herramienta de Generar. Alternativamente guarda el archivo en **Librería del usuario / MIDI Tools / Max Generators**.
 4. En la interfaz compacta, escribe acordes como `Am F C G`, pulsa **Actualizar**, elige intención, camino 1–3, y pulsa **Ver camino**.

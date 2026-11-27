@@ -6,11 +6,11 @@ El Estudio avanzado abre directamente el selector de áreas. Las ayudas se consu
 
 ## Descargas
 
-- [APK firmado para Android 8.0 o posterior](../downloads/Cinematico-Android-Beta-0.2.3.apk)
-- [AMXD para Ableton Live 12 Suite](../downloads/Cinematico-Generator-Beta-0.2.3.amxd)
-- [ZIP con las fuentes de Max for Live](../downloads/Cinematico-Live-Preview-0.2.3.zip)
-- [ZIP de la versión web](../downloads/Cinematico-Web-0.2.3.zip)
-- [Sumas SHA-256](../downloads/SHA256SUMS-Cinematico-0.2.3.txt) y [procedencia](../downloads/Cinematico-Beta-0.2.3-build-info.json)
+- [APK firmado para Android 8.0 o posterior](https://github.com/flinttgaverdale/cinematico/releases/download/beta-0.2.3/Cinematico-Android-Beta-0.2.3.apk)
+- [AMXD para Ableton Live 12 Suite](https://github.com/flinttgaverdale/cinematico/releases/download/beta-0.2.3/Cinematico-Generator-Beta-0.2.3.amxd)
+- [ZIP con las fuentes de Max for Live](https://github.com/flinttgaverdale/cinematico/releases/download/beta-0.2.3/Cinematico-Live-Preview-0.2.3.zip)
+- [ZIP de la versión web](https://github.com/flinttgaverdale/cinematico/releases/download/beta-0.2.3/Cinematico-Web-0.2.3.zip)
+- [Sumas SHA-256](https://github.com/flinttgaverdale/cinematico/releases/download/beta-0.2.3/SHA256SUMS-Cinematico-0.2.3.txt) y [procedencia](https://github.com/flinttgaverdale/cinematico/releases/download/beta-0.2.3/Cinematico-Beta-0.2.3-build-info.json)
 
 ## Comprobaciones
 
