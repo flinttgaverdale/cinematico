@@ -20,6 +20,10 @@ const base=process.env.CINEMATICO_TEST_URL||'http://127.0.0.1:4173/';
      return Math.sqrt(samples.reduce((energy,value)=>energy+value*value,0)/samples.length);
     }
     const isolated=await render(rate,(context,master)=>playPianoTone(context,master,261.6256,.08,.6));
+    const stopped=await render(rate,(context,master)=>{
+     playPianoTone(context,master,261.6256,.08,.8);
+     fadePianoMaster(master,.30);
+    });
     const sequences=['Am F C G','Am F Cmaj9 G','Cmaj7#11 C/Bb F/A G7/B'];
     const mixes=[];
     for(const labels of sequences){
@@ -34,7 +38,19 @@ const base=process.env.CINEMATICO_TEST_URL||'http://127.0.0.1:4173/';
      for(const sample of pcm)peak=Math.max(peak,Math.abs(sample));
      mixes.push({peak,rms:rms(pcm,.08,plan.totalSeconds),seconds:plan.totalSeconds});
     }
-    return {mixes,
+    const source=CinematicoEngine.parseUserProgression('Am F C G Em C Am').chords;
+    const interpreted=[];
+    for(const id of Object.keys(CinematicoEngine.COMPOSER_CREATIVE_LENSES)){
+     const plan=CinematicoEngine.composerPianoPerformance(source,id);
+     if(plan.status!=='ready'||plan.instrument!=='piano')throw Error(id);
+     const pcm=await render(Math.ceil(rate*(plan.totalSeconds+.4)),(context,master)=>{
+      for(const e of plan.events)playPianoTone(context,master,e.frequency,.08+e.startSeconds,e.durationSeconds,e.velocity);
+     });
+     let peak=0;
+     for(const value of pcm)peak=Math.max(peak,Math.abs(value));
+     interpreted.push({id,peak,seconds:plan.totalSeconds,silence:rms(pcm,14.34,14.4)});
+    }
+    return {mixes,interpreted,stopBefore:rms(stopped,.24,.29),stopDuring:rms(stopped,.32,.34),stopAfter:rms(stopped,.38,.42),
      preAttack:rms(isolated,0,.06),attack:rms(isolated,.10,.20),
      decay:rms(isolated,.5,.65),release:rms(isolated,.70,.78),silence:rms(isolated,.95,1)};
    },rate);
@@ -42,6 +58,14 @@ const base=process.env.CINEMATICO_TEST_URL||'http://127.0.0.1:4173/';
    assert.ok(measured.attack>0.005);
    assert.ok(measured.attack>measured.decay&&measured.decay>measured.release);
    assert.ok(measured.release>1e-5&&measured.silence<1e-5);
+   assert.ok(measured.stopBefore>measured.stopDuring&&measured.stopDuring>1e-5);
+   assert.ok(measured.stopAfter<1e-5,'A deliberate stop reaches silence after its audio ramp');
+   assert.equal(measured.interpreted.length,11);
+   for(const {id,peak,seconds,silence} of measured.interpreted){
+    assert.ok(Number.isFinite(peak)&&peak>.03&&peak<.95,id+' interpreted peak');
+    assert.equal(seconds,14,id+' matched phrase length');
+    assert.ok(silence<1e-5,id+' release fits in the render');
+   }
    for(const mix of measured.mixes){
     assert.equal(mix.seconds,8);
     assert.ok(Number.isFinite(mix.peak)&&mix.peak>.03&&mix.peak<.95,'Polyphony should be audible and avoid clipping');
@@ -50,7 +74,7 @@ const base=process.env.CINEMATICO_TEST_URL||'http://127.0.0.1:4173/';
    const levelChange=20*Math.log10(measured.mixes[1].rms/measured.mixes[0].rms);
    assert.ok(Math.abs(levelChange)<6,'Similar sequences should have comparable signal levels');
    console.log('PASS offline piano render '+rate+' Hz · peak '+
-    measured.mixes.map(mix=>mix.peak.toFixed(3)).join(', ')+' · envelope and matched A/B timing');
+    measured.mixes.map(mix=>mix.peak.toFixed(3)).join(', ')+' · envelope, smooth stop and 11 interpreted renders');
   }
  }finally{await browser.close();}
 })().catch(error=>{console.error(error);process.exitCode=1;});
