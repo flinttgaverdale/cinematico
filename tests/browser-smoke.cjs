@@ -238,6 +238,8 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       const neoDetail=page.locator('.study-tool').filter({has:page.locator('#neoOperation')});
       await neoDetail.locator('summary').first().click();
       await page.locator('#neoOperation').selectOption('S');
+      assert.deepEqual(await page.locator('#neoResult .neo-common').allTextContents(),['E','E'],
+        'SLIDE highlights the tone actually shared by both triads');
       assert.ok((await page.locator('#neoResult').innerText()).includes('SLIDE'),
         'SLIDE must render two voice movements without a browser exception');
       assert.deepEqual(errors, [], 'Browser errors: ' + errors.join('; '));

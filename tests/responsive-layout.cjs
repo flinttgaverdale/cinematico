@@ -54,6 +54,19 @@ async function overflow(page,where){
    assert.equal(form.weight,'600');
    assert.ok(form.size>=24*fontScale,'Chord input uses a large size that follows the text scale');
    assert.ok(form.height>=44,'Progression input reaches 44px');
+   const brokenIntentWords=await page.locator('.simple-intent-pills button span').evaluateAll(labels=>labels.flatMap(label=>{
+    const wordRange=document.createRange();
+    const source=label.firstChild;
+    const button=label.closest('button').getBoundingClientRect();
+    return [...source.textContent.matchAll(/\p{L}+/gu)].flatMap(match=>{
+     wordRange.setStart(source,match.index);
+     wordRange.setEnd(source,match.index+match[0].length);
+     const boxes=[...wordRange.getClientRects()];
+     const clipped=boxes.some(box=>box.left<button.left||box.right>button.right);
+     return boxes.length===1&&!clipped?[]:[match[0]];
+    });
+   }));
+   assert.deepEqual(brokenIntentWords,[],'Intent labels stay readable without word splitting');
    const nuances=page.locator('#simpleNuances > summary');
    await nuances.focus();
    await page.keyboard.press('Enter');
