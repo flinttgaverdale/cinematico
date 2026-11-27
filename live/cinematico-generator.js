@@ -17,7 +17,7 @@ function getProposals(){
   var parsed=normalized();
   if(parsed.errors.length)return {ok:false,error:parsed.errors.join("; "),paths:[]};
   if(!parsed.chords.length)return {ok:false,error:"Escribe al menos un acorde.",paths:[]};
-  var paths=Engine.emotionalContinuations(parsed.chords,intent);
+  var paths=Engine.composerContinuations(parsed.chords,intent);
   if(paths.length!==3)return {ok:false,error:"No hay tres alternativas válidas.",paths:[]};
   return {ok:true,paths:paths};
 }
