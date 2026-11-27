@@ -25,17 +25,21 @@ assert.equal(patch.patcher.project.amxdtype,1851877223,'Must be a MIDI Note Gene
 assert.equal(patch.patcher.devicewidth,350,'The device must fit the Live clip-tool sidebar');
 for(const box of patch.patcher.boxes.map(x=>x.box).filter(x=>x.presentation)){
  assert.ok(box.presentation_rect[0]+box.presentation_rect[2]<=350,'Clipped control '+box.id);
+ assert.ok(box.presentation_rect[1]+box.presentation_rect[3]<=patch.patcher.openrect[3],'Clipped vertically '+box.id);
 }
 const E=ctx.require('cinematico-core.js');
-const inputs=['Am F C G','Cm Ab Eb Bb','C F G7','Am F Dm','C G Am F','C'];
+const inputs=['Am F C G','Cm Ab Eb Bb','C F G7','Am F Dm','C G Am F','C',
+ 'Cmaj7#11 F#m/C# DmMaj7 G7/B','C/Bb F/A G7 C','F#dim7'];
 const moods=Object.keys(E.EMOTION_CREATIVE_PROFILES);
 let count=0;
 for(const s of inputs)for(const mood of moods){
+ const beforePreview=generated.length;
  ctx.chords(...s.split(' '));ctx.mood(mood);
- const options=E.emotionalContinuations(E.parseUserProgression(s).chords,mood);
+ const options=E.composerContinuations(E.parseUserProgression(s).chords,mood);
  for(let variant=1;variant<=3;variant++){
   ctx.variant(variant);
   const from=generated.length;ctx.msg_dictionary({notes:[],clip:{}});
+  assert.equal(from,beforePreview+variant-1,'The controls publish no MIDI before Apply');
   assert.equal(generated.length,from+1);
   const notes=generated.at(-1).notes;
   const selected=options[variant-1].chords;
@@ -50,6 +54,7 @@ for(const s of inputs)for(const mood of moods){
   }
   assert.ok(notes.every(x=>Number.isInteger(x.pitch)&&x.pitch>=0&&x.pitch<=127&&x.duration===3.75&&x.velocity===90));
   assert.ok(notes.every(x=>x.probability===1));
+  assert.ok(notes.every(x=>x.start_time+x.duration<=x.start_time+4&&x.start_time+x.duration<=12));
   count++;
  }
 }

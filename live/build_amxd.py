@@ -14,8 +14,8 @@ from zipfile import ZipFile
 
 ROOT = Path(__file__).resolve().parent.parent
 DOWNLOADS = ROOT / "downloads"
-PATH = DOWNLOADS / "Cinematico-Generator-Beta-0.2.3.amxd"
-PREVIEW = DOWNLOADS / "Cinematico-Live-Preview-0.2.3.zip"
+PATH = DOWNLOADS / "Cinematico-Generator-Beta-0.2.4.amxd"
+PREVIEW = DOWNLOADS / "Cinematico-Live-Preview-0.2.4.zip"
 CORE = ROOT / "live" / "cinematico-core.js"
 BRIDGE = b"""
 // Export the shared engine for the Max V8 module loader.
@@ -87,6 +87,8 @@ def preview_source(core):
         prefix + "Cinematico-Generator.maxpat": (ROOT / "live" / "Cinematico-Generator.maxpat").read_bytes(),
         prefix + "cinematico-generator.js": (ROOT / "live" / "cinematico-generator.js").read_bytes(),
         prefix + "cinematico-core.js": core,
+        prefix + "INSTRUCCIONES.md": (ROOT / "live" / "INSTALACION-0.2.4.md").read_bytes(),
+        prefix + "LEEME-PRIMERO.txt": b"Cinematico Studio 0.2.0-beta.4\nLee INSTRUCCIONES.md. Instala el AMXD adjunto como MIDI Generator.\n",
     }
     contents = BytesIO()
     with ZipFile(DOWNLOADS / "Cinematico-Live-Preview.zip") as previous, ZipFile(contents, "w") as updated:

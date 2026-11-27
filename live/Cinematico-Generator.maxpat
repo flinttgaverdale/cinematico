@@ -79,13 +79,13 @@
             325,
             27
           ],
-          "text": "CINEMÁTICO  /  GENERADOR ARMÓNICO",
-          "fontsize": 14,
+          "text": "CINEMÁTICO  /  GENERADOR MIDI",
+          "fontsize": 15,
           "fontface": 1,
           "textcolor": [
-            0.86,
-            0.69,
-            0.42,
+            0.925,
+            0.933,
+            0.918,
             1
           ],
           "presentation": 1,
@@ -107,12 +107,12 @@
             325,
             20
           ],
-          "text": "Tres ideas; elige una y pulsa Aplicar en Live",
+          "text": "Compara caminos y elige cuál llevar al clip.",
           "fontsize": 10,
           "textcolor": [
-            0.72,
-            0.75,
-            0.7,
+            0.733,
+            0.769,
+            0.745,
             1
           ],
           "presentation": 1,
@@ -143,6 +143,12 @@
             63,
             325,
             17
+          ],
+          "textcolor": [
+            0.733,
+            0.769,
+            0.745,
+            1
           ]
         }
       },
@@ -168,6 +174,18 @@
             83,
             323,
             36
+          ],
+          "bgcolor": [
+            0.063,
+            0.075,
+            0.075,
+            1
+          ],
+          "textcolor": [
+            0.925,
+            0.933,
+            0.918,
+            1
           ]
         }
       },
@@ -189,6 +207,18 @@
             126,
             111,
             26
+          ],
+          "bgcolor": [
+            1,
+            0.639,
+            0.38,
+            1
+          ],
+          "textcolor": [
+            0.063,
+            0.075,
+            0.075,
+            1
           ]
         }
       },
@@ -211,6 +241,12 @@
             158,
             185,
             18
+          ],
+          "textcolor": [
+            0.733,
+            0.769,
+            0.745,
+            1
           ]
         }
       },
@@ -270,6 +306,12 @@
             158,
             102,
             18
+          ],
+          "textcolor": [
+            0.733,
+            0.769,
+            0.745,
+            1
           ]
         }
       },
@@ -313,6 +355,18 @@
             215,
             102,
             25
+          ],
+          "bgcolor": [
+            0.165,
+            0.188,
+            0.2,
+            1
+          ],
+          "textcolor": [
+            0.925,
+            0.933,
+            0.918,
+            1
           ]
         }
       },
@@ -334,6 +388,18 @@
             245,
             323,
             37
+          ],
+          "bgcolor": [
+            0.063,
+            0.075,
+            0.075,
+            1
+          ],
+          "textcolor": [
+            0.561,
+            0.686,
+            0.667,
+            1
           ]
         }
       },
@@ -347,12 +413,12 @@
             323,
             29
           ],
-          "text": "APLICAR en Live inserta 3 acordes (3 compases 4/4). Prueba primero en un clip vacío.",
+          "text": "Aplicar añade tres acordes en 4/4. Prueba en un clip vacío.",
           "fontsize": 10,
           "textcolor": [
-            0.8,
-            0.72,
-            0.54,
+            0.733,
+            0.769,
+            0.745,
             1
           ],
           "presentation": 1,
@@ -770,6 +836,12 @@
       }
     ],
     "dependency_cache": [],
-    "autosave": 0
+    "autosave": 0,
+    "bgcolor": [
+      0.09,
+      0.102,
+      0.11,
+      1
+    ]
   }
 }
