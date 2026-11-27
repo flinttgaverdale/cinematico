@@ -1,0 +1,68 @@
+name: Publish verified Cinematico beta downloads
+
+on:
+  push:
+    branches: [maintenance/publicar-descargas-beta-0.2.3]
+    paths: [.github/workflows/publicar-descargas-beta.yml]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - tag: beta-0.2
+            title: Cinemático Studio 0.2.0-beta
+            sums: SHA256SUMS-beta-0.2.txt
+            provenance: Cinematico-Beta-0.2-build-info.json
+          - tag: beta-0.2.3
+            title: Cinemático Studio 0.2.0-beta.3
+            sums: SHA256SUMS-Cinematico-0.2.3.txt
+            provenance: Cinematico-Beta-0.2.3-build-info.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/tags/${{ matrix.tag }}
+          persist-credentials: false
+      - name: Upload beta, verify every release asset, then publish
+        working-directory: downloads
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ matrix.tag }}
+          RELEASE_TITLE: ${{ matrix.title }}
+          CHECKSUM_FILE: ${{ matrix.sums }}
+          PROVENANCE_FILE: ${{ matrix.provenance }}
+        run: |
+          set -euo pipefail
+          sha256sum --check --strict "$CHECKSUM_FILE"
+          mapfile -t binaries < <(awk '{print $2}' "$CHECKSUM_FILE")
+          files=("${binaries[@]}" "$CHECKSUM_FILE" "$PROVENANCE_FILE")
+          working=$(mktemp -d)
+          cat > "$working/notes.md" <<'NOTES'
+          Descargas verificadas de Cinemático Studio para Android y Ableton Live 12 Suite.
+
+          Se incluye el manifiesto con las sumas SHA-256 y la procedencia de la compilación. Quedan pendientes las pruebas en un teléfono Android físico y dentro de Ableton Live 12.
+
+          [Abrir Cinemático Studio en GitHub Pages](https://flinttgaverdale.github.io/cinematico/)
+          NOTES
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease --latest=false \
+              --title "$RELEASE_TITLE" --notes-file "$working/notes.md" "${files[@]}"
+          fi
+          gh release download "$RELEASE_TAG" --dir "$working/verified" --pattern '*'
+          for file in "${files[@]}"; do
+            cmp "$file" "$working/verified/$file"
+          done
+          (cd "$working/verified" && sha256sum --check --strict "$CHECKSUM_FILE")
+          gh release view "$RELEASE_TAG" --json isDraft,isPrerelease \
+            --jq '.isPrerelease' | grep -qx true
+          if gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft' | grep -qx true; then
+            gh release edit "$RELEASE_TAG" --draft=false --prerelease --latest=false
+          fi
+          gh release view "$RELEASE_TAG" --json url,isDraft,isPrerelease,assets
