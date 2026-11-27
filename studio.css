@@ -389,17 +389,28 @@ body:not([data-study="inspire"]) [data-study-panel="inspire"],
 body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
 .advanced-navigation, .layout, .grid, .results, .reference-flow, .panel { min-width: 0; }
 .advanced-navigation h2 { margin-block-end: var(--space-3); }
-.advanced-tabs { display: grid; gap: var(--space-2); margin-block-end: var(--space-4); }
+.advanced-tabs { display: grid; gap: 1px; margin-block-end: var(--space-4); background: var(--line); border: 1px solid var(--line); }
 .advanced-tabs button {
-  border-color: var(--line);
+  border: 1px solid transparent;
+  border-inline-start: 3px solid transparent;
+  border-radius: 0;
   text-align: start;
   background: var(--p);
   padding: var(--space-3);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: center;
 }
+.advanced-tabs .module-index { font: 400 1rem/1 var(--technical-font); color: var(--muted); }
+.advanced-tabs .module-title { min-width: 0; }
+.advanced-tabs button[aria-pressed="true"] { border-color: transparent; border-inline-start-color: var(--signal); background: var(--p2); color: var(--txt); }
+.advanced-tabs button[aria-pressed="true"] .module-index { color: var(--signal); }
 .advanced-tabs small { display: block; margin-block-start: var(--space-1); color: var(--muted); }
 .panel, .study-tool {
   background: var(--p);
   border-radius: var(--radius);
+  border-block-start: 1px solid var(--edge);
 }
 .layout .card, .heroresult, .reference-language-panel {
   padding: var(--space-4);
@@ -416,7 +427,8 @@ body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
 .head b, .cardhead b, .composer-ideas-heading strong {
   font: 700 1.1875rem/1.25 var(--title-font);
 }
-.cardhead span, .kicker, .composer-ideas-heading span { color: var(--muted); font-size: var(--metadata); }
+.cardhead span, .kicker, .composer-ideas-heading span { color: var(--muted); font: 400 var(--metadata)/1.5 var(--technical-font); }
+.cardhead { border-block-end: 1px solid var(--line); padding-block-end: var(--space-2); }
 .heroresult h2 { margin-block: var(--space-1) var(--space-2); }
 .section-lead, .tech-caption, .reference-style-note, .copy, .note,
 .composer-proof p, .composer-path-analysis li span, .composer-scope,
@@ -441,7 +453,8 @@ body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
 .reference-controls { display: grid; gap: var(--space-3); padding: var(--space-4); }
 .reference-controls .buttons { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
 .caption, .auto-update { color: var(--muted); font-size: var(--metadata); }
-.caption strong { color: var(--gold); }
+.caption strong { color: var(--txt); font: 600 1.375rem/1.3 var(--ui-font); }
+.reference-controls > .caption { border-block-start: 1px solid var(--line); padding-block-start: var(--space-2); }
 #reset { flex: none; min-width: var(--tap); font-size: 1.375rem; }
 
 /* SVG fifths wheel and harmonic progressions */
@@ -471,12 +484,13 @@ body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
 .tile, .chord {
   min-width: 0;
   padding: var(--space-2) var(--space-3);
+  background: var(--display);
   border-block-start: 1px solid var(--line);
 }
 .tile strong, .chord strong {
   display: block;
-  color: var(--gold);
-  font: 600 clamp(1.125rem, 1rem + .5vw, 1.5rem)/1.25 var(--ui-font);
+  color: var(--txt);
+  font: 600 clamp(1.375rem, 1.1rem + .8vw, 1.75rem)/1.25 var(--ui-font);
 }
 .tile small, .tile em, .chord small { display: block; color: var(--muted); font-style: normal; }
 .tile small, .chord .tones, .inner-voice-example, .vl-summary,
@@ -488,7 +502,8 @@ body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
 .chord .tones { color: var(--txt); }
 .pill, .pivot { display: inline-block; background: var(--p2); padding: var(--space-1) var(--space-2); border-radius: .25rem; }
 #userProgress { margin-block: var(--space-4); }
-#userProgress button { text-align: start; font-size: 1.125rem; }
+#userProgress button { text-align: start; font-size: 1.375rem; background: var(--display); border-color: var(--line); }
+#userProgress button[aria-pressed="true"] { color: var(--txt); border-color: var(--signal); }
 
 /* Laboratory, voice tracks and chord transformations */
 .vl-controls {
@@ -506,7 +521,8 @@ body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
   overflow-x: auto;
   padding: var(--space-3);
   border-radius: var(--radius);
-  background: var(--bg);
+  background: var(--display);
+  border: 1px solid var(--line);
 }
 .voiceleading-hint { margin-block: var(--space-2); color: var(--muted); font: 400 .875rem/1.5 var(--ui-font); }
 .vl-chart {
@@ -517,19 +533,19 @@ body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
   block-size: auto;
   margin-inline: auto;
 }
-.vl-register { stroke: var(--line); }
-.vl-column { stroke: var(--line); stroke-dasharray: 2 5; }
+.vl-register { stroke: var(--line); stroke-width: 1; }
+.vl-column { stroke: var(--edge); stroke-dasharray: 1 5; stroke-width: 1; }
 .vl-voice-0 { --voice-color: #b6b9b2; }
 .vl-voice-1 { --voice-color: #b1a0d2; }
 .vl-voice-2 { --voice-color: var(--sage); }
 .vl-voice-3 { --voice-color: var(--gold); }
 .vl-track { fill: none; stroke: var(--voice-color); stroke-width: 1.8; }
-.vl-mark { fill: var(--voice-color); }
+.vl-mark { fill: var(--voice-color); stroke: var(--display); stroke-width: .65; }
 .vl-chart g text { fill: var(--voice-color); }
-.vl-chart text { font: 400 13px var(--technical-font); paint-order: stroke; stroke: var(--bg); stroke-width: 2px; }
+.vl-chart text { font: 400 13px var(--technical-font); paint-order: stroke; stroke: var(--display); stroke-width: 2px; }
 .vl-chart text[text-anchor="middle"] { fill: var(--txt); font: 600 16px var(--ui-font); }
 .vl-legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-3); color: var(--muted); font-size: var(--metadata); }
-.vl-legend span { display: inline-flex; align-items: center; gap: var(--space-1); }
+.vl-legend span { display: inline-flex; align-items: center; gap: var(--space-1); padding-block-end: var(--space-1); border-block-end: 1px solid var(--voice-color); }
 .vl-legend svg { width: .85rem; height: .85rem; flex: none; }
 .vl-summary, .vl-warning, .vl-tone-note { margin-block: var(--space-2); }
 .vl-tone-note { padding-inline-start: var(--space-2); border-inline-start: 2px solid var(--sage); color: var(--muted); }
@@ -546,7 +562,7 @@ body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
 .tech-card small { color: var(--gold); }
 .tech-card p { color: var(--muted); }
 #labVoiceOutput .tech-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr)); gap: var(--space-2); }
-#labVoiceOutput .tech-card { border-block-start: 1px solid var(--edge); background: var(--bg); }
+#labVoiceOutput .tech-card { border-block-start: 1px solid var(--edge); background: var(--display); }
 #labVoiceOutput .tech-card small { display: block; margin-block-end: var(--space-2); font: 600 1.375rem/1.25 var(--ui-font); }
 #labVoiceOutput .tech-card p { display: flex; justify-content: space-between; gap: var(--space-2); font-size: .875rem; }
 #labVoiceOutput .tech-card strong { color: var(--txt); }
@@ -554,10 +570,11 @@ body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
 .tonal-reading, .observation, .composer-path-contrast { color: var(--muted); }
 .modtop, .mod-route, .mod-pivots { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .modtop { color: var(--sage); font-size: var(--metadata); margin-block-end: var(--space-2); }
-.mod-index { display: none; }
+.mod-index { font: 400 var(--metadata)/1 var(--technical-font); padding: .3rem; border: 1px solid var(--edge); color: var(--muted); }
 .mod-route, .mod p, .mod-evidence, .mod-status { margin-block-start: var(--space-2); }
 .mod-node small, .mod-node strong, .mod-status { display: block; }
-.mod-node strong { color: var(--gold); font-size: 1.125rem; }
+.mod-node strong { color: var(--txt); font-size: 1.375rem; }
+.mod-node.target strong { color: var(--gold); }
 .mod-status, .mod-feel { color: var(--muted); font-size: var(--metadata); }
 #neoResult { padding-block: var(--space-3); border-block-start: 1px solid var(--edge); }
 .neo-route {
@@ -566,13 +583,16 @@ body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
   align-items: start;
   column-gap: var(--space-2);
   max-inline-size: 24rem;
+  background: var(--display);
+  padding: var(--space-2);
+  border-block: 1px solid var(--line);
 }
 .neo-route .chord { border: 0; padding: var(--space-1) 0; }
-.neo-route .chord strong { color: var(--gold); font-size: var(--chord-size); }
+.neo-route .chord strong { color: var(--txt); font-size: var(--chord-size); }
 .neo-route .chord small { display: flex; flex-wrap: wrap; gap: var(--space-1); margin-block-start: var(--space-1); }
 .neo-route .pill { background: var(--bg); border: 1px solid transparent; padding-inline: var(--space-1); }
-.neo-route .neo-common { border-color: var(--sage); color: var(--sage); }
-.neo-link { color: var(--sage); font: 400 var(--metadata)/2 var(--technical-font); text-align: center; padding-block-start: var(--space-1); }
+.neo-route .neo-common { border-color: var(--sage); background: var(--sage); color: var(--display); }
+.neo-link { color: var(--sage); font: 400 1.125rem/1.6 var(--technical-font); text-align: center; padding-block-start: var(--space-1); }
 .neo-link::after { content: ""; display: block; margin-block-start: var(--space-1); border-block-start: 1px solid currentColor; }
 
 /* Reference excerpts and controls */
@@ -580,7 +600,7 @@ body:not([data-study="tools"]) [data-study-panel="tools"] { display: none; }
 .composer-ideas-focus, .composer-listen-status { color: var(--sage); }
 .composer-path-grid, .composer-path-facts, .composer-audio-actions { margin-block-start: var(--space-3); }
 .composer-path-card { min-width: 0; border-block-start: 1px solid var(--line); padding-block-start: var(--space-3); }
-.composer-path-number { margin-block-end: var(--space-2); color: var(--muted); font: 400 var(--metadata)/1.35 var(--technical-font); }
+.composer-path-number { margin-block-end: var(--space-2); color: var(--sage); font: 400 var(--metadata)/1.35 var(--technical-font); }
 .composer-path-operator { color: var(--gold); font-family: var(--technical-font); }
 .composer-path-facts, .composer-audio-actions { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .composer-path-facts span, .composer-audio-actions span, .composer-listen-note {
