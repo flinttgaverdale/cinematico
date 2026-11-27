@@ -18,7 +18,7 @@ for(const size of [192,512]){
  assert.ok(fs.existsSync(full),src+' missing');
  const data=fs.readFileSync(full);
  assert.equal(data.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
- let i=8,meta=null,rawIDAT=[],palette=false;
+ let i=8,meta=null,rawIDAT=[];
  while(i<data.length){
   const len=data.readUInt32BE(i),tag=data.subarray(i+4,i+8).toString('ascii');
   const bytes=data.subarray(i+8,i+8+len);
@@ -26,25 +26,24 @@ for(const size of [192,512]){
   const expected=data.readUInt32BE(i+8+len);
   assert.equal(crc32(data.subarray(i+4,i+8+len)),expected,tag+' CRC');
   if(tag==='IHDR')meta={width:bytes.readUInt32BE(0),height:bytes.readUInt32BE(4),bitDepth:bytes[8],colorType:bytes[9]};
-  if(tag==='PLTE')palette=true;
   if(tag==='IDAT')rawIDAT.push(bytes);
   i+=12+len;
   if(tag==='IEND')break;
  }
- assert.deepEqual(meta,{width:size,height:size,bitDepth:2,colorType:3});
- assert.ok(palette&&rawIDAT.length);
+ assert.deepEqual(meta,{width:size,height:size,bitDepth:8,colorType:2});
+ assert.ok(rawIDAT.length);
  const decoded=zlib.inflateSync(Buffer.concat(rawIDAT));
- const stride=1+Math.ceil(size/4);
+ const stride=1+size*3;
  assert.equal(decoded.length,size*stride);
  let nonZero=0;
  for(let y=0;y<size;y++){
   assert.equal(decoded[y*stride],0,'Scanline uses filter 0');
   for(let x=0;x<size;x++){
-   const c=(decoded[y*stride+1+(x>>2)]>>(6-(x&3)*2))&3;
-   nonZero+=c>0?1:0;
+   const offset=y*stride+1+x*3;
+   nonZero+=decoded[offset]!==23||decoded[offset+1]!==26||decoded[offset+2]!==28?1:0;
   }
  }
- assert.ok(nonZero>size*size*0.005&&nonZero<size*size*0.3,'Gold mark should be visible but not cover the background');
+ assert.ok(nonZero>size*size*.15&&nonZero<size*size*.3,'The symbol fits within the central maskable area');
  assert.ok(manifest.icons.some(icon=>icon.src===src&&icon.sizes===size+'x'+size&&icon.type==='image/png'));
  assert.ok(sw.includes('./'+src),'PWA should cache installed icon '+src);
 }

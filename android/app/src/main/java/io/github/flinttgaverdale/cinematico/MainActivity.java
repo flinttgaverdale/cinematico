@@ -33,13 +33,14 @@ public final class MainActivity extends Activity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             webView.setOnApplyWindowInsetsListener((view, insets) -> {
                 android.graphics.Insets edge = insets.getInsets(
-                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout() | WindowInsets.Type.ime());
                 view.setPadding(edge.left, edge.top, edge.right, edge.bottom);
                 return WindowInsets.CONSUMED;
             });
         }
 
         final WebSettings settings = webView.getSettings();
+        settings.setUseWideViewPort(true);
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
         settings.setAllowFileAccess(false);

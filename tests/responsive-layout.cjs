@@ -31,12 +31,16 @@ async function overflow(page,where){
  const browser=await chromium.launch({headless:true});
  try{
   const viewports=[320,360,375,390,412,430,768,1024,1440,1920].map(width=>({width,height:850}));
-  viewports.push({width:844,height:390},{width:400,height:340});
-  for(const {width,height} of viewports){
-   const page=await browser.newPage({viewport:{width,height},deviceScaleFactor:width<=430?2:1});
+  viewports.push({width:844,height:390},{width:400,height:340},{width:390,height:844,fontScale:1.25});
+  for(const {width,height,fontScale=1} of viewports){
+   const deviceScaleFactor=width<=430?(width===320||width===412?2:3):1;
+   const page=await browser.newPage({viewport:{width,height},deviceScaleFactor});
    const errors=[];
    page.on('pageerror',e=>errors.push(e.message));
    await page.goto(BASE,{waitUntil:'domcontentloaded'});
+   if(fontScale!==1)await page.evaluate(scale=>{
+    document.documentElement.style.fontSize=(scale*100)+'%';
+   },fontScale);
    const gutter=await page.locator('.shell').evaluate(el=>parseFloat(getComputedStyle(el).paddingLeft));
    assert.ok(gutter>=20,'Outer gutter must never collapse below 20px: '+width+' => '+gutter);
    await check(page,'.simple-create',20,width,'Create');
@@ -44,10 +48,11 @@ async function overflow(page,where){
    await check(page,'#simpleChords',width<=430?35:20,width,'Progression input');
    const form=await page.locator('#simpleChords').evaluate(el=>{
     const style=getComputedStyle(el);
-    return {font:style.fontFamily,weight:style.fontWeight,height:el.offsetHeight};
+    return {font:style.fontFamily,weight:style.fontWeight,size:parseFloat(style.fontSize),height:el.offsetHeight};
    });
    assert.match(form.font,/^Inter\b/,'The progression keeps the chord typeface');
    assert.equal(form.weight,'600');
+   assert.ok(form.size>=24*fontScale,'Chord input uses a large size that follows the text scale');
    assert.ok(form.height>=44,'Progression input reaches 44px');
    const nuances=page.locator('#simpleNuances > summary');
    await nuances.focus();
@@ -111,11 +116,20 @@ async function overflow(page,where){
          const name=await note.getAttribute('data-key');
          await note.focus();
          await page.keyboard.press(key);
-         assert.equal(await note.locator('circle').evaluate(el=>getComputedStyle(el).outlineWidth),'2px','The focused note has its own ring');
+         assert.equal(await note.locator('.node-disc').evaluate(el=>getComputedStyle(el).outlineWidth),'2px','The focused note has its own ring');
          assert.equal(await page.evaluate(()=>document.activeElement.getAttribute('data-key')),name,'Wheel activation retains keyboard focus');
          assert.equal(await note.getAttribute('aria-pressed'),'true');
          await page.keyboard.press('Tab');
          assert.equal(await page.evaluate(()=>document.activeElement.getAttribute('data-key')),await wheel.nth(index+1).getAttribute('data-key'));
+       }
+       if(width<=430){
+         const note=wheel.first();
+         const target=note.locator('.node-hit');
+         await target.scrollIntoViewIfNeeded();
+         const hitBox=await target.boundingBox();
+         assert.ok(hitBox.width>=44&&hitBox.height>=44,'Wheel note touch target reaches 44px');
+         await page.mouse.click(hitBox.x+hitBox.width/2,hitBox.y+2);
+         assert.equal(await note.getAttribute('aria-pressed'),'true','The area beyond the visible disc selects the note');
        }
      }
      if(mode==='tools'){
@@ -135,7 +149,7 @@ async function overflow(page,where){
    }
    assert.deepEqual(errors,[],'Runtime errors at '+width+': '+errors.join('; '));
    await page.close();
-   console.log('PASS responsive viewport',width+'×'+height,'· gutters, keyboard, controls and expanded panels');
+   console.log('PASS responsive viewport',width+'×'+height,'DPR '+deviceScaleFactor,'text ×'+fontScale);
   }
  }finally{await browser.close();}
 })().catch(e=>{console.error(e);process.exitCode=1;});
