@@ -7,6 +7,8 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 
 const root = path.join(__dirname, '..');
+const release = fs.readFileSync(path.join(root, 'index.html'), 'utf8').match(/name="cinematico-release" content="([^"]+)"/)?.[1];
+assert.ok(release, 'The shell must declare its release version');
 const scope = "/cinematico/";
 const assets = new Map([
   ['/', ['index.html', 'text/html']],
@@ -150,13 +152,13 @@ async function main() {
     assert.equal(await other.locator('meta[name="test-version"]').getAttribute('content'), 'next-1');
     await other.goto(new URL('preview/', url).href);
     await other.waitForURL(updatePage);
+    await context.setOffline(true);
     await other.getByRole('button', {name:'Actualizar y abrir'}).click();
     await other.waitForURL(url);
     assert.equal(await other.locator('meta[name="test-version"]').getAttribute('content'), 'next-2');
     assert.equal(await other.evaluate(() => window.testEngineVersion), 'next-2');
-    assert.match(await other.locator('footer').innerText(), /0\.2\.0-beta\.3/);
+    assert.ok((await other.locator('footer').innerText()).includes(release),'The running shell shows its declared version');
     assert.equal(await updated.locator('#simpleChords').inputValue(), 'Am F C G', 'Another tab retains its progression');
-    await context.setOffline(true);
     await other.reload({waitUntil:'domcontentloaded'});
     assert.equal(await other.locator('meta[name="test-version"]').getAttribute('content'), 'next-2');
     assert.equal(await other.evaluate(() => window.testEngineVersion), 'next-2');
