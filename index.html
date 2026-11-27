@@ -339,8 +339,7 @@ function stopComposerPreview(){
  if(!composerPreviewSession)return;
  const session=composerPreviewSession;
  composerPreviewSession=null;
- if(session.timer)clearTimeout(session.timer);
- session.context.close().catch(()=>{});
+ closePianoSession(session);
  document.querySelectorAll("[data-composer-preview]").forEach(button=>{
   button.textContent="Escuchar";button.setAttribute("aria-pressed","false");
   button.setAttribute("aria-label","Escuchar maqueta armónica "+(Number(button.dataset.composerPreview)+1));
@@ -386,6 +385,18 @@ function createPianoMaster(context){
  master.connect(compressor);compressor.connect(context.destination);
  return master;
 }
+function fadePianoMaster(master,at){
+ master.gain.setValueAtTime(master.gain.value,at);
+ master.gain.linearRampToValueAtTime(0,at+.04);
+}
+function closePianoSession({context,master,timer}){
+ clearTimeout(timer);
+ const close=()=>context.close().catch(()=>{});
+ if(context.state==="running"){
+  fadePianoMaster(master,context.currentTime);
+  setTimeout(close,65);
+ }else close();
+}
 function playComposerPreview(index){
  if(composerPreviewSession?.index===index){stopComposerPreview();return;}
  stopComposerPreview();
@@ -409,7 +420,7 @@ function playComposerPreview(index){
     playPianoTone(context,master,hz,attackStart,duration);
    }
   }
-  composerPreviewSession={context,index,timer:null};
+  composerPreviewSession={context,master,index,timer:null};
   const button=document.querySelector('[data-composer-preview="'+index+'"]');
   if(button){button.textContent="Detener";button.setAttribute("aria-pressed","true");button.setAttribute("aria-label","Detener maqueta armónica "+(index+1));}
   if(feedback)feedback.textContent="Escuchando camino "+(index+1)+".";
@@ -420,7 +431,8 @@ function playComposerPreview(index){
    if(feedback)feedback.textContent="Maqueta finalizada; puedes comparar con la otra ruta.";
   },(plan.totalSeconds+0.4)*1000);
   context.resume().catch(()=>{
-   if(composerPreviewSession===session)stopComposerPreview();
+   if(composerPreviewSession!==session)return;
+   stopComposerPreview();
    if(feedback)feedback.textContent="No se ha podido iniciar el audio.";
   });
  }catch(error){
@@ -562,8 +574,7 @@ function simpleOpenAdvanced(area="home"){stopSimplePreview();const input=$("simp
 function stopSimplePreview(){
  if(!simplePreviewSession)return;
  const session=simplePreviewSession;simplePreviewSession=null;
- if(session.timer)clearTimeout(session.timer);
- session.context.close().catch(()=>{});
+ closePianoSession(session);
  document.querySelectorAll("[data-simple-preview]").forEach(btn=>{btn.textContent=btn.dataset.listenLabel||"Escuchar";btn.setAttribute("aria-pressed","false");});
 }
 function playSimplePreview(index,original,paths){
@@ -583,7 +594,6 @@ function playSimplePreview(index,original,paths){
  let context;
  try{
   context=new AudioConstructor();
-  context.resume?.().catch(()=>{});
   const master=createPianoMaster(context);
   const start=context.currentTime+0.08;
   if(choice.composerPerformance){
@@ -593,16 +603,21 @@ function playSimplePreview(index,original,paths){
    const length=Math.max(0.2,step.durationSeconds-0.08);
    for(const hz of step.frequencies)playPianoTone(context,master,hz,at,length);
   }
-  simplePreviewSession={index,context,timer:null};
+  simplePreviewSession={index,context,master,timer:null};
   document.querySelectorAll("[data-simple-preview]").forEach(btn=>{
    const playing=Number(btn.dataset.simplePreview)===index;
    btn.textContent=playing?"Detener":(btn.dataset.listenLabel||"Escuchar");
    btn.setAttribute("aria-pressed",String(playing));
   });
-  status.textContent=choice.composerPerformance?choice.listenAs+" · mismo piano, realización expresiva orientativa.":choice.preview?choice.listenAs+" · mismo timbre de piano sintetizado y pulso armónico.":
+  status.textContent=choice.composerPerformance?choice.listenAs+" · mismo piano, realización expresiva orientativa.":choice.preview?choice.listenAs+" · escucha neutra, mismo piano sintetizado y pulso armónico.":
    "Escuchando camino "+(index+1)+". Maqueta de piano sintetizado: los últimos "+Math.min(2,original.length)+" acordes tuyos y los tres nuevos; dos segundos por acorde, sin melodía ni orquestación.";
   const playing=simplePreviewSession;
   playing.timer=setTimeout(()=>{if(simplePreviewSession===playing){stopSimplePreview();status.textContent="Escucha finalizada.";}} ,Math.ceil(plan.totalSeconds*1000)+400);
+  context.resume().catch(()=>{
+   if(simplePreviewSession!==playing)return;
+   stopSimplePreview();
+   status.textContent="No se pudo iniciar la escucha en este dispositivo.";
+  });
  }catch(error){
   if(context)context.close().catch(()=>{});
   simplePreviewSession=null;status.textContent="No se pudo iniciar la escucha en este dispositivo.";

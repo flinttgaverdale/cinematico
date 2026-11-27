@@ -61,6 +61,16 @@ const base=process.env.CINEMATICO_TEST_URL||'http://127.0.0.1:4173/';
    await page.locator('#workspaceAdvanced').click();
    await page.locator('[data-study-open="chords"]').click();
    assert.match(await page.locator('#studyProcedure').textContent(),/Da más espacio a la llegada/);
+   await page.locator('#workspaceExplore').click();
+   await page.locator('#simpleExplore').click();
+   await page.evaluate(()=>{
+    window.AudioContext=class extends window.AudioContext {
+     resume(){return Promise.reject(new Error('Audio denied'));}
+    };
+   });
+   await page.getByRole('button',{name:'Original',exact:true}).click();
+   await page.waitForFunction(()=>document.querySelector('#simpleListenStatus').textContent.includes('No se pudo iniciar'));
+   assert.equal(await page.getByRole('button',{name:'Original',exact:true}).getAttribute('aria-pressed'),'false');
    assert.deepEqual(errors,[]);
    console.log('PASS contextual composer UI '+width+' px: optional lens, real Web Audio A/B, unchanged input and advanced evidence');
    await page.close();
