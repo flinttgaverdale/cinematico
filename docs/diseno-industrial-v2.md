@@ -8,3 +8,9 @@ Base: `design/identidad-cinematico`. Rama independiente, no desplegada. La inten
 - Contrastes nominales calculados: naranja sobre fondo de pantalla 9.48:1, texto claro sobre pantalla 15.99:1. Estos valores no sustituyen auditoría completa. Comprobación básica de llaves CSS y coherencia de versión: correcta.
 
 Pendiente: ejecutar Chromium y regresión completa, capturas reales a 320/390/430 px y DPR 2–3, texto 125 %, contraste de todas las combinaciones y foco, Android WebView y aprobación artística. No se ha generado APK ni se ha publicado en Pages. Si otra rama utiliza v68, ajustar el número de caché al integrar. No fusionar hasta validar.
+
+## Segunda iteración: estudio avanzado
+
+Se extiende la identidad industrial a los tres módulos de estudio: navegación 01/02/03 con número no leído por tecnologías de asistencia, selección con borde naranja, retícula continua; cifrado de acordes en marfil sobre display oscuro; guías de voces más definidas y leyenda con color y forma; transformación cromática con notas comunes destacadas en salvia; numeración de destinos tonales ya calculada por el motor. Se mantienen los controles y sus identificadores. Caché del candidato v69.
+
+Comprobaciones de esta iteración: sintaxis del JavaScript inline y service worker correcta, paridad del motor web/Max y SHA de motor original correctos, módulos 01, 02, 03. La prueba simbólica SLIDE de C mayor conserva E y produce Dbm. No se ha ejecutado Chromium ni un WebView en esta iteración; las pruebas de navegador, las capturas reales, la geometría táctil y la aprobación visual permanecen pendientes. Sin publicación ni APK nuevo.
