@@ -49,6 +49,7 @@ jobs:
           node tests/score-grounded-regression.cjs
           node tests/score-microanalysis-phase1.cjs
           node tests/harmonic-context-composer-comparison.cjs
+          node tests/industrial-profile-holdout.cjs --summary
           node tests/continuation-diversity.cjs
           node tests/continuation-meaningful-diversity.cjs
           node tests/emotion-evidence-regression.cjs
