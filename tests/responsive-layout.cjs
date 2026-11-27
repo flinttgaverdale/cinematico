@@ -31,7 +31,8 @@ async function overflow(page,where){
  const browser=await chromium.launch({headless:true});
  try{
   const viewports=[320,360,375,390,412,430,768,1024,1440,1920].map(width=>({width,height:850}));
-  viewports.push({width:844,height:390},{width:400,height:340},{width:390,height:844,fontScale:1.25});
+  viewports.push({width:844,height:390},{width:400,height:340},{width:390,height:844,fontScale:1.25},
+   {width:320,height:780,fontScale:1.5},{width:430,height:932,fontScale:1.5});
   for(const {width,height,fontScale=1} of viewports){
    const deviceScaleFactor=width<=430?(width===320||width===412?2:3):1;
    const page=await browser.newPage({viewport:{width,height},deviceScaleFactor});
@@ -43,7 +44,7 @@ async function overflow(page,where){
    },fontScale);
    await page.evaluate(()=>document.fonts.ready);
    const gutter=await page.locator('.shell').evaluate(el=>parseFloat(getComputedStyle(el).paddingLeft));
-   const expectedGutter=Math.max(16,Math.min(width*.046,40));
+   const expectedGutter=Math.max(20,Math.min(width*.062,40));
    assert.ok(Math.abs(gutter-expectedGutter)<=1,'Fluid outer gutter: '+width+' => '+gutter);
    await check(page,'.simple-create',gutter,width,'Create');
    await check(page,'.workspace-switch',gutter,width,'Workspace switch');
@@ -82,7 +83,7 @@ async function overflow(page,where){
     height:el.offsetHeight,
    }));
    assert.equal(focusedSelect.outline,'2px','The focused select has an outline');
-   assert.ok(focusedSelect.height>=44,'Nuance select reaches 44px');
+   assert.ok(focusedSelect.height>=48,'Nuance select reaches 48px');
    await nuances.focus();
    await page.keyboard.press('Space');
    assert.ok(!(await page.locator('#simpleMood').isVisible()),'Space closes the disclosure');
@@ -108,6 +109,9 @@ async function overflow(page,where){
    // Dense harmonic notation: preserve each complete symbol in the DOM and
    // ensure that the incoming arrow and chord stay on one flex row.
    await page.locator('#simpleChords').fill('Cmaj7#11 F#m/C# DmMaj7 G7/B');
+   if(width<=430)assert.ok(await page.locator('#simpleChords').evaluate(el=>
+    el.localName==='textarea'&&el.scrollWidth<=el.clientWidth+1&&el.scrollHeight<=el.clientHeight+1),
+   'The full long progression remains in the editor without horizontal scrolling');
    await page.locator('#simpleExplore').click();
    assert.equal(await page.locator('.simple-path').count(),3);
    assert.equal(await page.locator('.simple-start-chips .original-chord').count(),4);
@@ -130,9 +134,11 @@ async function overflow(page,where){
      await page.locator('[data-study-open="'+mode+'"]').click();
      if(mode==='chords'&&width<=430){
        await page.locator('#studyVoicesDetails > summary').click();
-       for(const selector of ['#labVoiceCount','#labVoiceStyle']){
+       await page.locator('#labLockDetails > summary').click();
+       await page.locator('#labVoiceStyle').selectOption('sustained');
+       for(const selector of ['#labVoiceCount','#labVoiceStyle','#labLockVoice']){
          const select=page.locator(selector);
-         assert.ok((await select.boundingBox()).height>=44,'Voice select reaches 44px');
+         assert.ok((await select.boundingBox()).height>=48,'Voice select reaches 48px');
          assert.ok(await select.evaluate(el=>{
            const style=getComputedStyle(el);
            const context=document.createElement('canvas').getContext('2d');
@@ -166,7 +172,7 @@ async function overflow(page,where){
          const target=note.locator('.node-hit');
          await target.scrollIntoViewIfNeeded();
          const hitBox=await target.boundingBox();
-         assert.ok(hitBox.width>=44&&hitBox.height>=44,'Wheel note touch target reaches 44px');
+         assert.ok(hitBox.width>=48&&hitBox.height>=48,'Wheel note touch target reaches 48px');
          await page.mouse.click(hitBox.x+hitBox.width/2,hitBox.y+2);
          assert.equal(await note.getAttribute('aria-pressed'),'true','The area beyond the visible disc selects the note');
        }
@@ -177,7 +183,7 @@ async function overflow(page,where){
        assert.ok(await chart.isVisible());
        if(width<=430){
          const help=page.locator('[data-study-panel="tools"] .help-details > summary:visible').first();
-         assert.ok((await help.boundingBox()).height>=44,'Contextual help reaches 44px on mobile');
+         assert.ok((await help.boundingBox()).height>=48,'Contextual help reaches 48px on mobile');
          await chart.focus();
          await page.keyboard.press('ArrowRight');
          await page.waitForFunction(()=>document.querySelector('#voiceLeading').scrollLeft>0);
