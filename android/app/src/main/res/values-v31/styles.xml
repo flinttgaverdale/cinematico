@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CinematicoTheme" parent="CinematicoBaseTheme">
+        <item name="android:windowSplashScreenBackground">#171A1C</item>
+    </style>
+</resources>
