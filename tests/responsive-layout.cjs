@@ -41,11 +41,13 @@ async function overflow(page,where){
    if(fontScale!==1)await page.evaluate(scale=>{
     document.documentElement.style.fontSize=(scale*100)+'%';
    },fontScale);
+   await page.evaluate(()=>document.fonts.ready);
    const gutter=await page.locator('.shell').evaluate(el=>parseFloat(getComputedStyle(el).paddingLeft));
-   assert.ok(gutter>=20,'Outer gutter must never collapse below 20px: '+width+' => '+gutter);
-   await check(page,'.simple-create',20,width,'Create');
-   await check(page,'.workspace-switch',20,width,'Workspace switch');
-   await check(page,'#simpleChords',width<=430?35:20,width,'Progression input');
+   const expectedGutter=Math.max(16,Math.min(width*.046,40));
+   assert.ok(Math.abs(gutter-expectedGutter)<=1,'Fluid outer gutter: '+width+' => '+gutter);
+   await check(page,'.simple-create',gutter,width,'Create');
+   await check(page,'.workspace-switch',gutter,width,'Workspace switch');
+   await check(page,'#simpleChords',gutter,width,'Progression input');
    const form=await page.locator('#simpleChords').evaluate(el=>{
     const style=getComputedStyle(el);
     return {font:style.fontFamily,weight:style.fontWeight,size:parseFloat(style.fontSize),height:el.offsetHeight};
@@ -53,7 +55,9 @@ async function overflow(page,where){
    assert.match(form.font,/^Inter\b/,'The progression keeps the chord typeface');
    assert.equal(form.weight,'600');
    assert.ok(form.size>=24*fontScale,'Chord input uses a large size that follows the text scale');
-   assert.ok(form.height>=44,'Progression input reaches 44px');
+   assert.ok(form.height>=72,'Progression display reaches 72px');
+   for(const button of await page.locator('.simple-intent-pills button').all()) assert.ok((await button.boundingBox()).height>=60,'Intent target reaches 60px');
+   assert.ok((await page.locator('#simpleExplore').boundingBox()).height>=56,'Primary action reaches 56px');
    const brokenIntentWords=await page.locator('.simple-intent-pills button span').evaluateAll(labels=>labels.flatMap(label=>{
     const wordRange=document.createRange();
     const source=label.firstChild;
@@ -86,23 +90,40 @@ async function overflow(page,where){
    await page.locator('#simpleChords').fill('Am F C G');
    await page.locator('#simpleExplore').click();
    assert.equal(await page.locator('.simple-path').count(),3,'Three musical routes still appear');
-   await check(page,'.simple-path',20,width,'Route cards');
+   await check(page,'.simple-path',gutter,width,'Route cards');
    await overflow(page,'Suggestions '+width);
    await page.locator('#simpleReference').selectOption('horner');
    assert.ok(await page.locator('#simpleEnding').isVisible(),'Conditional phrase direction visible');
    await page.locator('#simpleExplore').click();
    assert.equal(await page.locator('.simple-path').count(),3);
-   await check(page,'#simpleReference',20,width,'Composer selection');
+   await check(page,'#simpleReference',gutter,width,'Composer selection');
    for(const card of await page.locator('.simple-path').all()){
     const action=card.locator('.simple-audio-row');
     assert.ok(await action.isVisible());
-    if(width<=430)for(const button of await action.locator('button').all())assert.ok((await button.boundingBox()).height>=44,'Audio touch target');
+    if(width<=430)for(const button of await action.locator('button').all())assert.ok((await button.boundingBox()).height>=48,'Audio touch target');
    }
    await page.locator('.simple-path').first().locator(':scope > details > summary').click();
    await overflow(page,'Expanded composer result '+width);
 
+   // Dense harmonic notation: preserve each complete symbol in the DOM and
+   // ensure that the incoming arrow and chord stay on one flex row.
+   await page.locator('#simpleChords').fill('Cmaj7#11 F#m/C# DmMaj7 G7/B');
+   await page.locator('#simpleExplore').click();
+   assert.equal(await page.locator('.simple-path').count(),3);
+   assert.equal(await page.locator('.simple-start-chips .original-chord').count(),4);
+   const badSteps=await page.locator('.chord-step').evaluateAll(steps=>steps.filter(step=>{
+    const r=step.getBoundingClientRect(),arrow=step.querySelector('.simple-arrow'),chord=step.querySelector('.new,.original-chord');
+    if(!chord)return true;
+    const c=chord.getBoundingClientRect();
+    if(c.left<r.left-1||c.right>r.right+1)return true;
+    if(!arrow)return false;
+    const a=arrow.getBoundingClientRect();
+    return a.right>c.left+1||a.bottom<c.top||a.top>c.bottom;
+   }).map(step=>step.textContent));
+   assert.deepEqual(badSteps,[],'Arrow and complete chord remain grouped');
+   await overflow(page,'Dense chord notation '+width);
    await page.locator('#workspaceAdvanced').click();
-   await check(page,'.advanced-navigation',20,width,'Advanced choice');
+   await check(page,'.advanced-navigation',gutter,width,'Advanced choice');
    assert.equal(await page.locator('#studioGuide').count(),0,'Advanced study should start with the area chooser');
    await overflow(page,'Advanced home '+width);
    for(const mode of ['chords','inspire','tools']){
@@ -124,6 +145,11 @@ async function overflow(page,where){
      }
      if(mode==='inspire'){
        const wheel=page.locator('#circle [data-key]');
+       const separated=await page.locator('#circle').evaluate(svg=>{
+        const label=svg.querySelector('.corelabel').getBBox(), key=svg.querySelector('.corekey').getBBox();
+        return label.y+label.height<=key.y+1;
+       });
+       assert.ok(separated,'Wheel tonic and label do not overlap');
        for(const [index,key] of [[1,'Enter'],[2,'Space']]){
          const note=wheel.nth(index);
          const name=await note.getAttribute('data-key');
