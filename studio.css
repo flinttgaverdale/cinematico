@@ -598,3 +598,40 @@ label.composer-listen-note { display: flex; align-items: center; gap: var(--spac
   .node[aria-pressed="true"] text { fill: HighlightText; }
   .node:focus-visible .node-disc { outline-color: CanvasText; }
 }
+
+
+/* Semantic accents — Create only. Keep Studio Compact geometry and the advanced workspace unchanged. */
+.simple-create {
+  --intent-accent: #d9af7b;
+  --intent-surface: #393127;
+  --reference-accent: #b3a3d2;
+  --proposal-accent: #a1c3b4;
+}
+.simple-create .simple-section-title,
+.simple-create .simple-nuance-content label { color: var(--intent-accent); }
+.simple-create .simple-intent-pills button {
+  background: var(--p2);
+  border-color: transparent;
+}
+.simple-create .simple-intent-pills button[aria-pressed="true"] {
+  background: var(--intent-surface);
+  color: var(--intent-accent);
+  border-block-end-color: var(--intent-accent);
+}
+.simple-create .simple-intent-pills button[aria-pressed="true"] svg {
+  color: var(--intent-accent);
+}
+.simple-create #simpleNuances > summary { color: var(--intent-accent); }
+.simple-create label[for="simpleReference"] { color: var(--reference-accent); }
+.simple-create .simple-results-intro h3 { color: var(--proposal-accent); }
+.simple-create .simple-path h3 { color: var(--proposal-accent); }
+.simple-create .simple-play-button::before { background: var(--proposal-accent); }
+.simple-create .simple-play-button[aria-pressed="true"] {
+  color: var(--proposal-accent);
+}
+@media (forced-colors: active) {
+  .simple-create .simple-intent-pills button[aria-pressed="true"] {
+    border-block-end-color: Highlight;
+  }
+  .simple-create .simple-play-button::before { background: ButtonText; }
+}
