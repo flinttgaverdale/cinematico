@@ -166,6 +166,20 @@ async function overflow(page,where){
    await overflow(page,'Advanced home '+width);
    for(const mode of ['chords','inspire','tools']){
      await page.locator('[data-study-open="'+mode+'"]').click();
+     const accents={chords:'rgb(161, 195, 180)',inspire:'rgb(179, 163, 210)',tools:'rgb(217, 175, 123)'};
+     assert.equal(await color('[data-study-open="'+mode+'"]'),accents[mode],'Selected study tab uses its semantic accent');
+     if(mode==='chords'){
+       assert.equal(await color('[data-study-panel="chords"] .cardhead b'),accents.chords,'Own progression uses sage');
+       assert.equal(await color('#studyVoicesDetails > summary'),accents.chords,'Voice study uses sage');
+     }
+     if(mode==='inspire'){
+       assert.equal(await color('label[for="quickKey"]'),accents.chords,'Tonality uses sage');
+       assert.equal(await color('label[for="emotion"]'),accents.tools,'Intention uses amber');
+       assert.equal(await color('label[for="composer"]'),accents.inspire,'Composer uses lavender');
+     }
+     if(mode==='tools'){
+       assert.equal(await color('.study-tool[data-concept="emotion"] > summary'),accents.tools,'Chromatic transformation uses amber');
+     }
      if(mode==='chords'&&width<=430){
        await page.locator('#studyVoicesDetails > summary').click();
        await page.locator('#labLockDetails > summary').click();
