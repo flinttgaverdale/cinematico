@@ -162,6 +162,9 @@ async function overflow(page,where){
    await overflow(page,'Dense chord notation '+width);
    await page.locator('#workspaceAdvanced').click();
    await check(page,'.advanced-navigation',gutter,width,'Advanced choice');
+   assert.equal(await color('[data-study-open="chords"] .module-title'),'rgb(163, 185, 206)','Analysis uses blue');
+   assert.equal(await color('[data-study-open="inspire"] .module-title'),'rgb(179, 163, 210)','Inspiration uses lavender');
+
    assert.equal(await page.locator('#studioGuide').count(),0,'Advanced study should start with the area chooser');
    await overflow(page,'Advanced home '+width);
    for(const mode of ['chords','inspire','tools']){
@@ -183,7 +186,14 @@ async function overflow(page,where){
          }),selector+' selected label fits next to the native arrow');
        }
      }
+     if(mode==='chords'){
+       assert.equal(await color('label[for="userChords"]'),'rgb(163, 185, 206)','Own material uses analysis blue');
+     }
      if(mode==='inspire'){
+       assert.equal(await color('label[for="emotion"]'),'rgb(217, 175, 123)','Advanced intention uses amber');
+       assert.equal(await color('label[for="composer"]'),'rgb(179, 163, 210)','Advanced reference uses lavender');
+       assert.equal(await color('article[data-study-panel="inspire"] > .cardhead b'),'rgb(161, 195, 180)','Creative resources use sage');
+
        const wheel=page.locator('#circle [data-key]');
        const separated=await page.locator('#circle').evaluate(svg=>{
         const label=svg.querySelector('.corelabel').getBBox(), key=svg.querySelector('.corekey').getBBox();
