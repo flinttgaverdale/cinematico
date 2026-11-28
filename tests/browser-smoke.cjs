@@ -24,7 +24,7 @@ const BASE = process.env.CINEMATICO_TEST_URL || 'http://127.0.0.1:4173/';
       assert.equal(await page.locator('[data-quick-intent="esperanza"]').getAttribute('aria-pressed'), 'true');
       assert.equal((await page.locator('[data-quick-intent="esperanza"]').innerText()).trim(),'Esperanza','Initial action must convey a musical intention rather than opening a file');
       assert.equal(await page.locator('[data-quick-intent="esperanza"]').getAttribute('aria-label'),'Esperanza / apertura musical','Accessible name conveys the same intention');
-      assert.ok((await page.locator('#simpleIntentHelp').innerText()).includes('no una orden para abrir algo'),'A short explanation must be available without opening help');
+      assert.ok((await page.locator('#simpleIntentHelp').innerText()).includes('luz y apertura armónica'),'A short explanation must be available without opening help');
       await page.locator('[data-quick-intent="suspense"]').click();
       assert.ok((await page.locator('#simpleIntentHelp').innerText()).includes('Aplaza'),'Short meaning updates with the selected intention');
       await page.locator('[data-quick-intent="esperanza"]').click();
