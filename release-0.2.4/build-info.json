@@ -1,0 +1,37 @@
+{
+  "version": "0.2.0-beta.4",
+  "status": "prerelease",
+  "sourceCommit": "8387e1dd94e2e9db3b0cc67f37361705484c51a9",
+  "webCache": "cinematico-studio-v75",
+  "engineSha256": "34a2df478cdfacbe7ece0327d2b4e4aff4a509859998be1d20454440b321507c",
+  "android": {
+    "applicationId": "io.github.flinttgaverdale.cinematico.beta02",
+    "versionCode": 4,
+    "certificateSha256": "e0e4962de0056ee7a4044bf38eae136720a3961fe77a694fecc4765af8345289",
+    "updatedFromVersionCode": 3,
+    "environment": "AOSP API 35, package manager"
+  },
+  "assets": {
+    "Cinematico-Android-Beta-0.2.4.apk": {
+      "sha256": "4c8cb5a7ace8c3546ff88f218cc51456cd8cf6305a183e328e8d507ba594ce78",
+      "bytes": 1225103
+    },
+    "Cinematico-Generator-Beta-0.2.4.amxd": {
+      "sha256": "5a0ad887f5bb9d2a1d6ab99b93c29ede251c01fcf5cdc589cb803eee6d372e53",
+      "bytes": 234399
+    },
+    "Cinematico-Live-Preview-0.2.4.zip": {
+      "sha256": "1b204eb682c2de6164e3d17585e39c60e1fb58329fdbde0e2c89f4834567f4b8",
+      "bytes": 237208
+    },
+    "Cinematico-Web-0.2.4.zip": {
+      "sha256": "6d9eb8628d3ad435b52e529bdf25e010b2db4bff824752ae0752ed4672c8894c",
+      "bytes": 315956
+    }
+  },
+  "validation": {
+    "web": "34 technical checks and 6 Chromium suites; offline installation and update",
+    "android": "signed update from versionCode 3 to 4 on AOSP API 35; physical WebView acceptance pending",
+    "maxForLive": "AMXD format and 405 MIDI simulations; Ableton Live 12 Suite host acceptance pending"
+  }
+}

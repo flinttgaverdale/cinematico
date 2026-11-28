@@ -1,0 +1,54 @@
+name: Publish Cinematico beta 0.2.4
+
+on:
+  push:
+    branches: [maintenance/publicar-descargas-beta-0.2.4]
+    paths: [.github/workflows/publicar-descargas-beta-0.2.4.yml]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cinematico-beta-0.2.4-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'flinttgaverdale/cinematico'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify the source, upload and verify every release asset
+        working-directory: release-0.2.4
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: beta-0.2.4
+        run: |
+          set -euo pipefail
+          source=$(jq -er .sourceCommit build-info.json)
+          test "$source" = 8387e1dd94e2e9db3b0cc67f37361705484c51a9
+          tag_target=$(git ls-remote origin "refs/tags/${RELEASE_TAG}^{}" | cut -f1)
+          test "$tag_target" = "$source"
+          sha256sum --check --strict SHA256SUMS.txt
+          mapfile -t binaries < <(awk '{print $2}' SHA256SUMS.txt)
+          test "${#binaries[@]}" = 4
+          files=("${binaries[@]}" SHA256SUMS.txt build-info.json)
+          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release create "$RELEASE_TAG" --verify-tag --draft --prerelease --latest=false \
+              --title 'Cinemático Studio 0.2.0-beta.4' --notes-file NOTAS.md "${files[@]}"
+          fi
+          working=$(mktemp -d)
+          gh release download "$RELEASE_TAG" --dir "$working" --pattern '*'
+          for file in "${files[@]}"; do
+            cmp "$file" "$working/$file"
+          done
+          (cd "$working" && sha256sum --check --strict SHA256SUMS.txt)
+          gh release view "$RELEASE_TAG" --json isPrerelease --jq '.isPrerelease' | grep -qx true
+          if gh release view "$RELEASE_TAG" --json isDraft --jq '.isDraft' | grep -qx true; then
+            gh release edit "$RELEASE_TAG" --draft=false --prerelease --latest=false
+          fi
+          gh release view "$RELEASE_TAG" --json url,isDraft,isPrerelease,assets

@@ -1,0 +1,4 @@
+4c8cb5a7ace8c3546ff88f218cc51456cd8cf6305a183e328e8d507ba594ce78  Cinematico-Android-Beta-0.2.4.apk
+5a0ad887f5bb9d2a1d6ab99b93c29ede251c01fcf5cdc589cb803eee6d372e53  Cinematico-Generator-Beta-0.2.4.amxd
+1b204eb682c2de6164e3d17585e39c60e1fb58329fdbde0e2c89f4834567f4b8  Cinematico-Live-Preview-0.2.4.zip
+6d9eb8628d3ad435b52e529bdf25e010b2db4bff824752ae0752ed4672c8894c  Cinematico-Web-0.2.4.zip
