@@ -635,3 +635,38 @@ label.composer-listen-note { display: flex; align-items: center; gap: var(--spac
   }
   .simple-create .simple-play-button::before { background: ButtonText; }
 }
+
+/* Advanced semantic accents: only labels, headings and selected indicators.
+   Keep geometry, reading text, chord notation and voice graph colors intact. */
+body[data-workspace="advanced"] {
+  --advanced-intent: #d9af7b;
+  --advanced-reference: #b3a3d2;
+  --advanced-proposal: #a1c3b4;
+  --advanced-analysis: #a3b9ce;
+}
+.advanced-tabs [data-study-open="chords"] { --module-accent: var(--advanced-analysis); }
+.advanced-tabs [data-study-open="inspire"] { --module-accent: var(--advanced-reference); }
+.advanced-tabs [data-study-open="tools"] { --module-accent: var(--advanced-analysis); }
+body[data-workspace="advanced"] .advanced-tabs button .module-title { color: var(--module-accent); }
+body[data-workspace="advanced"] .advanced-tabs button[aria-pressed="true"] { border-block-end-color: var(--module-accent); }
+
+body[data-workspace="advanced"] :is(label[for="emotion"], .card:has(#emotionProgress) > .cardhead b, #emotionName) {
+  color: var(--advanced-intent);
+}
+body[data-workspace="advanced"] :is(label[for="composer"], label[for="composerHere"], .reference-language-panel > .cardhead b, #composerName, #studyProcedureDetails > summary) {
+  color: var(--advanced-reference);
+}
+body[data-workspace="advanced"] :is(.reference-flow > .head b, label[for="quickKey"], label[for="mode"], #keyCaption, #eyebrow, .card:has(#chords) > .cardhead b, label[for="userChords"], article[data-study-panel="chords"] > .cardhead b, #studyVoicesDetails > summary, #studyTonalDetails > summary, #studyAnalysisDetails > summary, #labVoicesPanel > h3, .study-tool > summary, .study-tool .cardhead b, #userAnalysis > h3) {
+  color: var(--advanced-analysis);
+}
+body[data-workspace="advanced"] :is(#userAlternatives > h3, #userAlternatives .tech-card h3, article[data-study-panel="inspire"] > .cardhead b, .study-tool:has(#mods) > summary, .card:has(#mods) > .cardhead b) {
+  color: var(--advanced-proposal);
+}
+body[data-workspace="advanced"] #userProgress button[aria-pressed="true"] { border-color: var(--advanced-analysis); }
+body[data-workspace="advanced"] .node[aria-pressed="true"] :is(.node-disc,.fifths-tick) { stroke: var(--advanced-analysis); }
+@media (forced-colors: active) {
+  body[data-workspace="advanced"] .advanced-tabs button .module-title { color: ButtonText; }
+  body[data-workspace="advanced"] .advanced-tabs button[aria-pressed="true"] { border-block-end-color: Highlight; }
+  body[data-workspace="advanced"] #userProgress button[aria-pressed="true"] { border-color: Highlight; }
+  body[data-workspace="advanced"] .node[aria-pressed="true"] :is(.node-disc,.fifths-tick) { stroke: Highlight; }
+}
