@@ -63,6 +63,11 @@ async function overflow(page,where){
    assert.ok(brand.size>=18*fontScale-1&&brand.size<=21*fontScale+1&&brand.weight<=600,'Light compact wordmark');
    assert.ok((await page.locator('.top').boundingBox()).height<=52*fontScale+2,'Compact header');
    assert.equal(await page.locator('#simpleExplore').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(235, 236, 233)','Ivory main action');
+   const color=selector=>page.locator(selector).first().evaluate(el=>getComputedStyle(el).color);
+   assert.equal(await color('#simpleIntentTitle'),'rgb(217, 175, 123)','Intention uses amber');
+   assert.equal(await color('.simple-intent-pills button[aria-pressed="true"]'),'rgb(217, 175, 123)','Selected intention uses amber');
+   assert.equal(await color('label[for="simpleReference"]'),'rgb(179, 163, 210)','Reference uses lavender');
+
    for(const button of await page.locator('.simple-intent-pills button').all()) assert.ok((await button.boundingBox()).height>=48,'Intent target reaches 48px');
    assert.ok((await page.locator('#simpleExplore').boundingBox()).height>=48,'Primary action reaches 48px');
    const brokenIntentWords=await page.locator('.simple-intent-pills button span').evaluateAll(labels=>labels.flatMap(label=>{
@@ -97,6 +102,7 @@ async function overflow(page,where){
    await page.locator('#simpleChords').fill('Am F C G');
    await page.locator('#simpleExplore').click();
    assert.equal(await page.locator('.simple-path').count(),3,'Three musical routes still appear');
+   assert.equal(await color('.simple-results-intro h3'),'rgb(161, 195, 180)','Proposals use sage');
    await check(page,'.simple-path',gutter,width,'Route cards');
    await overflow(page,'Suggestions '+width);
    await page.locator('#simpleReference').selectOption('horner');
