@@ -106,6 +106,25 @@ async function overflow(page,where){
    await check(page,'#simpleReference',gutter,width,'Composer selection');
    assert.ok(await page.locator('.simple-path').first().locator('.simple-chips').evaluate(el=>getComputedStyle(el).backgroundColor==='rgba(0, 0, 0, 0)'),'Proposals are flat, not boxed');
    assert.ok(!(await page.locator('.route-index').first().isVisible()),'Decorative route number is absent visually');
+   if(width===390||width===412){
+     if(fontScale===1&&height>=800){
+       const density=await page.locator('.simple-path').evaluateAll(rows=>{
+         const rects=rows.map(row=>row.getBoundingClientRect());
+         return {firstTop:Math.round(rects[0].top+scrollY),totalHeight:Math.round(rects.at(-1).bottom-rects[0].top),rows:rects.map(r=>Math.round(r.height))};
+       });
+       console.log('COMPACT DENSITY',width,JSON.stringify(density));
+       assert.ok(density.firstTop<=680,'First proposal starts within 680 CSS px of document top');
+       assert.ok(density.totalHeight<=420,'Three compact proposals fit in 420 CSS px');
+     }
+   }
+   for(const card of await page.locator('.simple-path').all()){
+     for(const selector of [':scope > details > summary','[data-open-advanced]']){
+       const control=card.locator(selector);
+       assert.ok((await control.boundingBox()).height>=48,'Analysis and explanation controls preserve touch height');
+     }
+   }
+   await page.mouse.move(0,0);
+   await page.evaluate(()=>{document.activeElement?.blur();scrollTo(0,0)});
    await capture(page,`${width}x${height}-text${fontScale}-crear`);
    for(const card of await page.locator('.simple-path').all()){
     const action=card.locator('.simple-audio-row');
@@ -193,12 +212,24 @@ async function overflow(page,where){
        if(width<=430){
          const help=page.locator('[data-study-panel="tools"] .help-details > summary:visible').first();
          assert.ok((await help.boundingBox()).height>=48,'Contextual help reaches 48px on mobile');
-         await chart.focus();
-         await page.keyboard.press('ArrowRight');
-         await page.waitForFunction(()=>document.querySelector('#voiceLeading').scrollLeft>0);
+         const legend=page.locator('#voiceLeading .vl-legend');
+         const summary=page.locator('#voiceLeading .vl-summary');
+         const leftBefore=(await legend.boundingBox()).x;
+         const summaryBefore=(await summary.boundingBox()).x;
+         const needsScroll=await chart.evaluate(el=>el.scrollWidth>el.clientWidth+1);
+         if(needsScroll){
+           await chart.focus();
+           await page.keyboard.press('ArrowRight');
+           await page.waitForFunction(()=>document.querySelector('#voiceLeading .vl-scroll').scrollLeft>0);
+         }
+         assert.equal((await legend.boundingBox()).x,leftBefore,'Legend stays stationary while graph scrolls');
+         assert.equal((await summary.boundingBox()).x,summaryBefore,'Explanations stay stationary while graph scrolls');
+         await chart.evaluate(el=>{el.scrollLeft=0;el.blur()});
        }
      }
      await overflow(page,'Advanced '+mode+' '+width);
+     await page.mouse.move(0,0);
+     await page.evaluate(()=>{document.activeElement?.blur();scrollTo(0,0)});
      await capture(page,`${width}x${height}-text${fontScale}-${mode}`);
      await page.locator('#workspaceAdvanced').click();
    }
