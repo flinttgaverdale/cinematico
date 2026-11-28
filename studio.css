@@ -247,7 +247,7 @@ details > p { margin-block: var(--space-2); }
   font: 400 var(--metadata)/1.35 var(--technical-font);
   margin-inline-end: var(--space-1);
 }
-.simple-path { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: center; align-content: start; gap: 0 var(--space-2); min-width: 0; border-block-start: 1px solid var(--line); padding-block: var(--space-2); }
+.simple-path { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,auto); align-items: center; align-content: start; gap: 0 var(--space-2); min-width: 0; border-block-start: 1px solid var(--line); padding-block: var(--space-2); }
 .simple-path-heading { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--space-2); }
 .simple-path h3 { font-size: .875rem; font-weight: 500; color: var(--muted); min-inline-size: 0; }
 
@@ -259,8 +259,7 @@ details > p { margin-block: var(--space-2); }
 .simple-chips { grid-column: 1 / -1; padding: var(--space-1) 0; background: transparent; column-gap: clamp(.3rem, 1.2vw, .65rem); }
 .simple-chips .new { overflow-wrap: anywhere; min-inline-size: 0; color: var(--txt); font-size: var(--chord-size); font-variant-numeric: lining-nums; letter-spacing: -.025em; }
 .simple-arrow, .arrow, .composer-path-arrow { color: var(--muted); }
-.simple-path[data-route-type="contrast"] .simple-arrow { flex: none; inline-size: .875rem; block-size: .55rem; fill: none; stroke: var(--muted); stroke-width: 1.2; }
-.simple-arrow { flex: none; inline-size: clamp(.875rem, 3.8vw, 1.35rem); block-size: .65rem; fill: none; stroke: currentColor; stroke-width: 1.4; }
+.simple-arrow { flex: none; inline-size: .875rem; block-size: .55rem; fill: none; stroke: currentColor; stroke-width: 1.2; }
 .simple-start-chips .simple-arrow { inline-size: .95rem; }
 .simple-audio-row { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--space-1); margin-block-start: 0; }
 .simple-play-button, .composer-audio-button { display: inline-flex; justify-content: center; align-items: center; gap: var(--space-1); border-color: transparent; background: transparent; color: var(--txt); font-size: .8125rem; min-width: var(--tap); padding-inline: var(--space-2); }
