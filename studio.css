@@ -600,8 +600,8 @@ label.composer-listen-note { display: flex; align-items: center; gap: var(--spac
 }
 
 
-/* Semantic accents — Create only. Keep Studio Compact geometry and the advanced workspace unchanged. */
-.simple-create {
+/* Semantic accents — shared palette; no layout changes. */
+.simple-create, body[data-workspace="advanced"] {
   --intent-accent: #d9af7b;
   --intent-surface: #393127;
   --reference-accent: #b3a3d2;
@@ -634,4 +634,39 @@ label.composer-listen-note { display: flex; align-items: center; gap: var(--spac
     border-block-end-color: Highlight;
   }
   .simple-create .simple-play-button::before { background: ButtonText; }
+}
+
+/* Advanced: identify concepts using the same palette as Create. */
+body[data-workspace="advanced"] .advanced-tabs [data-study-open="chords"] { --study-accent: var(--proposal-accent); --study-surface: #26332e; }
+body[data-workspace="advanced"] .advanced-tabs [data-study-open="inspire"] { --study-accent: var(--reference-accent); --study-surface: #302b3a; }
+body[data-workspace="advanced"] .advanced-tabs [data-study-open="tools"] { --study-accent: var(--intent-accent); --study-surface: var(--intent-surface); }
+body[data-workspace="advanced"] .advanced-tabs button { color: var(--study-accent); }
+body[data-workspace="advanced"] .advanced-tabs button[aria-pressed="true"] {
+  background: var(--study-surface);
+  border-block-end-color: var(--study-accent);
+  color: var(--study-accent);
+}
+body[data-workspace="advanced"] [data-concept="harmony"] { --concept-accent: var(--proposal-accent); }
+body[data-workspace="advanced"] [data-concept="emotion"] { --concept-accent: var(--intent-accent); }
+body[data-workspace="advanced"] [data-concept="reference"] { --concept-accent: var(--reference-accent); }
+body[data-workspace="advanced"] [data-concept="harmony"] > :is(b,summary,h3),
+body[data-workspace="advanced"] [data-concept="emotion"] > :is(b,summary,h3),
+body[data-workspace="advanced"] [data-concept="reference"] > :is(b,summary,h3),
+body[data-workspace="advanced"] label[data-concept] { color: var(--concept-accent); }
+body[data-workspace="advanced"] :is(#keyCaption,#title,#userAlternatives > h3,#userAnalysis > h3) { color: var(--proposal-accent); }
+body[data-workspace="advanced"] .reference-flow .corekey { fill: var(--proposal-accent); }
+body[data-workspace="advanced"] .circle .node[aria-pressed="true"] .node-disc { stroke: var(--proposal-accent); fill: #26332e; }
+body[data-workspace="advanced"] .circle .node[aria-pressed="true"] .fifths-tick { stroke: var(--proposal-accent); }
+body[data-workspace="advanced"] #userProgress button[aria-pressed="true"] { border-color: var(--proposal-accent); background: #26332e; }
+body[data-workspace="advanced"] :is(.composer-ideas-heading strong,.composer-ideas-focus,.composer-path-operator) { color: var(--reference-accent); }
+body[data-workspace="advanced"] :is(.composer-path-number,.mod-node.target strong,.neo-link) { color: var(--proposal-accent); }
+body[data-workspace="advanced"] .mod[data-kind="color"] .mod-arrow { color: var(--intent-accent); }
+body[data-workspace="advanced"] .neo-route .neo-common { background: var(--proposal-accent); color: var(--bg); border-color: var(--proposal-accent); }
+body[data-workspace="advanced"] .composer-audio-button[aria-pressed="true"] { color: var(--proposal-accent); }
+@media (forced-colors: active) {
+  body[data-workspace="advanced"] .advanced-tabs button[aria-pressed="true"],
+  body[data-workspace="advanced"] #userProgress button[aria-pressed="true"] { border-block-end-color: Highlight; }
+  body[data-workspace="advanced"] .circle .node[aria-pressed="true"] .node-disc { fill: Highlight; stroke: Highlight; }
+  body[data-workspace="advanced"] .circle .node[aria-pressed="true"] text { fill: HighlightText; }
+  body[data-workspace="advanced"] .circle .node[aria-pressed="true"] .fifths-tick { stroke: Highlight; }
 }
