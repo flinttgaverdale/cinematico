@@ -3,7 +3,8 @@ const assert=require('node:assert/strict');const fs=require('node:fs');const pat
 assert.ok(html.includes('let openingWorkspace="explore"'),'New users land in Create');
 assert.ok(html.includes('setStudyTab("home")'),'Advanced study opens with a neutral area chooser');
 assert.ok(html.includes('id="simpleIntentHelp"'),'Quick intentions should explain their musical role without extra panels');
-assert.ok(html.includes('Apertura / esperanza'),'The first quick intention must not read like an Open button');
+const hope=html.match(/<button\b[^>]*data-quick-intent="esperanza"[^>]*>[\s\S]*?<\/button>/)?.[0]||'';
+assert.ok(hope.includes('<span>Esperanza</span>')&&hope.includes('aria-label="Esperanza / apertura musical"'),'The first quick intention must explicitly name a musical emotion rather than opening a file');
 assert.ok(html.includes('simpleOpenAdvanced("chords")'),'Only explicitly analyzed suggestions navigate to the progression');
 assert.ok(!html.includes('$("userChords").focus()'),'Do not automatically focus the progression input');
 assert.ok(!html.includes('id="save"')&&!html.includes('id="savedList"'),'Notebook UI should not distract composition');

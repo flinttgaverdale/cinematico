@@ -4,6 +4,8 @@
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
 const BASE=process.env.CINEMATICO_TEST_URL||'http://127.0.0.1:4173/';
+const screenshots=process.env.CINEMATICO_SCREENSHOTS;
+async function capture(page,filename){if(screenshots){require('node:fs').mkdirSync(screenshots,{recursive:true});await page.screenshot({path:require('node:path').join(screenshots,filename+'.png'),fullPage:true,animations:'disabled'});}}
 
 async function check(page,selector,minimum,viewport,label){
  const info=await page.locator(selector).first().evaluate(el=>{
@@ -54,11 +56,15 @@ async function overflow(page,where){
     return {font:style.fontFamily,weight:style.fontWeight,size:parseFloat(style.fontSize),height:el.offsetHeight};
    });
    assert.match(form.font,/^Inter\b/,'The progression keeps the chord typeface');
-   assert.equal(form.weight,'600');
-   assert.ok(form.size>=24*fontScale,'Chord input uses a large size that follows the text scale');
-   assert.ok(form.height>=72,'Progression display reaches 72px');
-   for(const button of await page.locator('.simple-intent-pills button').all()) assert.ok((await button.boundingBox()).height>=60,'Intent target reaches 60px');
-   assert.ok((await page.locator('#simpleExplore').boundingBox()).height>=56,'Primary action reaches 56px');
+   assert.equal(form.weight,'500');
+   assert.ok(form.size>=21*fontScale-1&&form.size<=24*fontScale+1,'Compact chord typography respects text enlargement');
+   assert.ok(form.height>=48,'Progression display retains 48px target');
+   const brand=await page.locator('.brand h1').evaluate(el=>({size:parseFloat(getComputedStyle(el).fontSize),weight:Number(getComputedStyle(el).fontWeight)}));
+   assert.ok(brand.size>=18*fontScale-1&&brand.size<=21*fontScale+1&&brand.weight<=600,'Light compact wordmark');
+   assert.ok((await page.locator('.top').boundingBox()).height<=52*fontScale+2,'Compact header');
+   assert.equal(await page.locator('#simpleExplore').evaluate(el=>getComputedStyle(el).backgroundColor),'rgb(235, 236, 233)','Ivory main action');
+   for(const button of await page.locator('.simple-intent-pills button').all()) assert.ok((await button.boundingBox()).height>=48,'Intent target reaches 48px');
+   assert.ok((await page.locator('#simpleExplore').boundingBox()).height>=48,'Primary action reaches 48px');
    const brokenIntentWords=await page.locator('.simple-intent-pills button span').evaluateAll(labels=>labels.flatMap(label=>{
     const wordRange=document.createRange();
     const source=label.firstChild;
@@ -98,6 +104,28 @@ async function overflow(page,where){
    await page.locator('#simpleExplore').click();
    assert.equal(await page.locator('.simple-path').count(),3);
    await check(page,'#simpleReference',gutter,width,'Composer selection');
+   assert.ok(await page.locator('.simple-path').first().locator('.simple-chips').evaluate(el=>getComputedStyle(el).backgroundColor==='rgba(0, 0, 0, 0)'),'Proposals are flat, not boxed');
+   assert.ok(!(await page.locator('.route-index').first().isVisible()),'Decorative route number is absent visually');
+   if(width===390||width===412){
+     if(fontScale===1&&height>=800){
+       const density=await page.locator('.simple-path').evaluateAll(rows=>{
+         const rects=rows.map(row=>row.getBoundingClientRect());
+         return {firstTop:Math.round(rects[0].top+scrollY),totalHeight:Math.round(rects.at(-1).bottom-rects[0].top),rows:rects.map(r=>Math.round(r.height))};
+       });
+       console.log('COMPACT DENSITY',width,JSON.stringify(density));
+       assert.ok(density.firstTop<=680,'First proposal starts within 680 CSS px of document top');
+       assert.ok(density.totalHeight<=420,'Three compact proposals fit in 420 CSS px');
+     }
+   }
+   for(const card of await page.locator('.simple-path').all()){
+     for(const selector of [':scope > details > summary','[data-open-advanced]']){
+       const control=card.locator(selector);
+       assert.ok((await control.boundingBox()).height>=48,'Analysis and explanation controls preserve touch height');
+     }
+   }
+   await page.mouse.move(0,0);
+   await page.evaluate(()=>{document.activeElement?.blur();scrollTo(0,0)});
+   await capture(page,`${width}x${height}-text${fontScale}-crear`);
    for(const card of await page.locator('.simple-path').all()){
     const action=card.locator('.simple-audio-row');
     assert.ok(await action.isVisible());
@@ -184,12 +212,25 @@ async function overflow(page,where){
        if(width<=430){
          const help=page.locator('[data-study-panel="tools"] .help-details > summary:visible').first();
          assert.ok((await help.boundingBox()).height>=48,'Contextual help reaches 48px on mobile');
-         await chart.focus();
-         await page.keyboard.press('ArrowRight');
-         await page.waitForFunction(()=>document.querySelector('#voiceLeading').scrollLeft>0);
+         const legend=page.locator('#voiceLeading .vl-legend');
+         const summary=page.locator('#voiceLeading .vl-summary');
+         const leftBefore=(await legend.boundingBox()).x;
+         const summaryBefore=(await summary.boundingBox()).x;
+         const needsScroll=await chart.evaluate(el=>el.scrollWidth>el.clientWidth+1);
+         if(needsScroll){
+           await chart.focus();
+           await page.keyboard.press('ArrowRight');
+           await page.waitForFunction(()=>document.querySelector('#voiceLeading .vl-scroll').scrollLeft>0);
+         }
+         assert.equal((await legend.boundingBox()).x,leftBefore,'Legend stays stationary while graph scrolls');
+         assert.equal((await summary.boundingBox()).x,summaryBefore,'Explanations stay stationary while graph scrolls');
+         await chart.evaluate(el=>{el.scrollLeft=0;el.blur()});
        }
      }
      await overflow(page,'Advanced '+mode+' '+width);
+     await page.mouse.move(0,0);
+     await page.evaluate(()=>{document.activeElement?.blur();scrollTo(0,0)});
+     await capture(page,`${width}x${height}-text${fontScale}-${mode}`);
      await page.locator('#workspaceAdvanced').click();
    }
    assert.deepEqual(errors,[],'Runtime errors at '+width+': '+errors.join('; '));

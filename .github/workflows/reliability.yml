@@ -78,4 +78,12 @@ jobs:
           node tests/piano-audio-render.cjs
           node tests/pwa-offline-smoke.cjs
           node tests/pwa-update-regression.cjs
-          node tests/responsive-layout.cjs
+          CINEMATICO_SCREENSHOTS=artifacts/studio-compact node tests/responsive-layout.cjs
+      - name: Store browser captures for visual review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: studio-responsive-captures
+          path: artifacts/studio-compact/
+          if-no-files-found: warn
+          retention-days: 7
