@@ -217,7 +217,7 @@ details > p { margin-block: var(--space-2); }
 .simple-reference-fields { display: grid; gap: 0; border-block-start: 1px solid var(--line); container-type: inline-size; }
 .simple-reference-fields > div { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); align-items: center; gap: var(--space-2); border-block-end: 1px solid var(--line); }
 .simple-reference-fields label { margin: 0; }
-.simple-reference-fields select { border-color: transparent; background: transparent; text-align: end; padding-inline: var(--space-1); }
+.simple-reference-fields select { border-color: transparent; background: transparent; text-align: end; padding-inline: var(--space-1); min-inline-size: 0; }
 .simple-actions { margin-block-start: var(--space-3); }
 .simple-actions button { inline-size: 100%; min-block-size: var(--action-height); text-align: center; padding-inline: var(--space-3); }
 .simple-feedback, .simple-listen-status { margin-block-start: var(--space-3); }
@@ -516,14 +516,14 @@ label.composer-listen-note { display: flex; align-items: center; gap: var(--spac
 }
 @media (max-width: 430px) {
   select { padding-inline: var(--space-2); }
-  .simple-intent-pills button { gap: .3125rem; padding-inline: .375rem; }
+  .simple-intent-pills button { gap: .25rem; padding-inline: .125rem; }
   .simple-intent-pills svg { inline-size: 1rem; block-size: 1rem; }
 }
 @container (max-width: 19rem) {
   .simple-reference-fields > div { grid-template-columns: minmax(0,1fr); gap: 0; }
   .simple-reference-fields select { text-align: start; }
 }
-@container (max-width: 17rem) {
+@container (max-width: 21rem) {
   .simple-intent-pills button { grid-column: span 2; }
 }
 @media (max-width: 360px) {
